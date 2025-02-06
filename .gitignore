@@ -1,0 +1,10 @@
+
+# sst
+.sst
+.idea
+node_modules
+sc
+tmp
+dist
+package-lock.json
+bun.lock

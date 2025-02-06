@@ -1,0 +1,66 @@
+<div id="header-container" hx-swap-oob="true"
+     class="flex flex-row gap-2 justify-start text-center items-center">
+
+  <div class="flex flex-row gap-2"
+       x-data="{
+   total: null,
+   query: null
+  }">
+    <div id="rates-counters" hidden="hidden"></div>
+
+    <span x-show="total">{main.title.rates}: <span x-text="total"></span></span>
+    <span x-show="query">{main.title.items}: <span x-text="query"></span></span>
+  </div>
+
+  <div data-change-element="rates-updater"
+       data-change-event="update-rates">
+
+    <div hx-get="/rates/currencyPicker.html"
+         hx-trigger="load"
+         hx-swap="outerHTML">
+    </div>
+  </div>
+
+  <label>
+    <input
+        class="w-fit inline-flex items-center justify-between gap-2 whitespace-nowrap border-outline bg-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark border rounded-radius"
+        type="date"
+        name="date_input"
+        placeholder="YYYY-MM-DD"
+        x-on:change="sendEvent('rates-updater', 'update-rates')"
+    />
+  </label>
+
+  <label class="relative flex w-20 flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+         class="absolute pointer-events-none right-2 top-2 size-5">
+      <path fill-rule="evenodd"
+            d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+            clip-rule="evenodd"/>
+    </svg>
+    <select name="sort_order"
+            x-on:change="sendEvent('rates-updater', 'update-rates')"
+            class="w-full appearance-none rounded-radius border border-outline bg-surface-alt px-4 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+      <option>DESC</option>
+      <option>ASC</option>
+    </select>
+  </label>
+
+  <div id="rates-updater"
+       hidden="hidden"
+       hx-get="/api/rates/search"
+       hx-include="[name='date_input'],[name='currency_input'],[name='sort_order']"
+       hx-trigger="load, update-rates delay:300ms"
+       hx-target="#rates-table"
+       hx-swap="innerHTML"
+       hx-sync="this:replace"
+       hx-indicator=".htmx-indicator">
+  </div>
+</div>
+
+<div id="container" hx-swap-oob="true">
+  <div id="rates-table">
+
+  </div>
+
+</div>

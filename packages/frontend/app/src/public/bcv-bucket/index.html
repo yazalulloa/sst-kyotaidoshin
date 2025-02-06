@@ -1,0 +1,23 @@
+<div id="header-container" hx-swap-oob="true">
+  <div class="flex flex-row gap-2"
+       x-data="{
+   total: null,
+   query: null
+  }">
+    <div id="bcv-files-counters" hidden="hidden"></div>
+    <span x-show="total">{main.title.files}: <span x-text="total"></span></span>
+  </div>
+</div>
+
+<div id="container" hx-swap-oob="true">
+  <ul class="flex flex-col gap-2">
+    <li hidden="hidden"
+         hx-get="/api/bcv-bucket/search"
+         hx-trigger="load"
+         hx-swap="outerHTML"
+         hx-sync="this:replace"
+         hx-indicator=".htmx-indicator">
+    </li>
+  </ul>
+
+</div>

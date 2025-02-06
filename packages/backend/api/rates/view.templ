@@ -1,0 +1,68 @@
+package rates
+
+import (
+	"fmt"
+	"kyotaidoshin/api"
+	"strings"
+)
+
+templ Init() {
+	@api.Base() {
+		<ul
+			hx-get={ _SEARCH }
+			hx-trigger="load"
+			hx-indicator=".htmx-indicator"
+			hx-swap="innerHTML"
+		></ul>
+	}
+}
+
+templ Search(res RateTableResponse) {
+	for _, item := range res.Results {
+		<li
+			id={ item.CardId }
+			class="p-1 grid grid-cols-[3fr_1fr_1fr_1fr_3fr_1fr] items-center fade-me-in fade-me-out"
+		>
+			<span>{ fmt.Sprint(*item.Item.ID) }</span>
+			<div class="flex flex-row justify-center gap-2">
+				<svg data-src={ fmt.Sprintf("/assets/images/flags/%s.svg", strings.ToLower(item.Item.FromCurrency)) } data-cache="21600" class="h-6 w-8"></svg>
+				<div class="w-8">{ item.Item.FromCurrency }</div>
+			</div>
+			<span class="text-end">{ fmt.Sprint(item.Item.Rate) }</span>
+			<span>{ item.DateOfRate }</span>
+			<span
+				data-date={ fmt.Sprint(item.DateOfFile) }
+				x-init="
+					$el.innerHTML = new Date(parseInt($el.getAttribute('data-date')))
+                                      //.toLocaleDateString()
+                                     .toLocaleString()
+                                     "
+			></span>
+			@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{"hx-include": "[name='currency_input'],[name='date_input']"})
+		</li>
+	}
+	if res.NextPageUrl != "" {
+		@api.NextPageLi(res.NextPageUrl, templ.Attributes{})
+	}
+	@CountersView(res.Counters)
+}
+
+templ CountersView(counters Counters) {
+	<div
+		id="rates-counters"
+		hidden="hidden"
+		hx-swap-oob="true"
+		data-total-count={ fmt.Sprint(counters.TotalCount) }
+		if counters.QueryCount != nil {
+			data-query-count={ fmt.Sprint(*counters.QueryCount) }
+		}
+		x-init="
+	total = $el.getAttribute('data-total-count');
+	query = $el.getAttribute('data-query-count');
+	"
+	></div>
+}
+
+templ Currencies(init string) {
+	<div x-init={ init }></div>
+}
