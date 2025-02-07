@@ -16,11 +16,10 @@ type Rates struct {
 	FromCurrency string
 	ToCurrency   string
 	Rate         float64
-	DateOfRate   time.Time
 	Source       string
+	DateOfRate   time.Time
 	DateOfFile   time.Time
 	CreatedAt    *time.Time
-	Hash         *int64
 	Etag         *string
 	LastModified *string
 }

@@ -10,3 +10,12 @@ func GetBcvBucket() (string, error) {
 
 	return bucketName.(string), nil
 }
+
+func GetParsingLambda() (string, error) {
+	lambdaName, err := resource.Get("BcvFileParser", "name")
+	if err != nil {
+		return "", err
+	}
+
+	return lambdaName.(string), nil
+}

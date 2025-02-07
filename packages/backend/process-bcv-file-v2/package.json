@@ -1,0 +1,20 @@
+{
+  "name": "process-bcv-file-v2",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-lambda": "^3.743.0",
+    "@aws-sdk/client-s3": "^3.743.0",
+    "@aws-sdk/client-sqs": "^3.743.0",
+    "@types/aws-lambda": "^8.10.147",
+    "sst": "^3.7.15",
+    "uuid": "^11.0.5",
+    "xlsx": "^0.18.5"
+  }
+}

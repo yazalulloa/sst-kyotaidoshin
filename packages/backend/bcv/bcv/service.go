@@ -43,7 +43,7 @@ type FileInfo struct {
 	EtagWorks bool   `json:"etagWorks"`
 }
 
-func Check() error {
+func Check(ctx context.Context) error {
 
 	//s3List, err := s3Client.ListObjectsV2(context.Background(), &s3.ListObjectsV2Input{Bucket: aws.String(bucketName)})
 	//if err != nil {
@@ -66,7 +66,7 @@ func Check() error {
 		return err
 	}
 
-	s3Client, err := GetS3Client()
+	s3Client, err := GetS3Client(ctx)
 	if err != nil {
 		return err
 	}

@@ -6,7 +6,7 @@ import (
 )
 
 type RateQuery struct {
-	LastId     int32
+	LastId     int64
 	Limit      int
 	DateOfRate *time.Time
 	Currencies []string

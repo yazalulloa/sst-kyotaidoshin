@@ -1,4 +1,4 @@
-<div id="header-container" hx-swap-oob="true">
+<div id="header-container" hx-swap-oob="true" class="flex flex-row gap-2 items-center text-center">
   <div class="flex flex-row gap-2"
        x-data="{
    total: null,
@@ -7,16 +7,27 @@
     <div id="bcv-files-counters" hidden="hidden"></div>
     <span x-show="total">{main.title.files}: <span x-text="total"></span></span>
   </div>
+
+  <button hx-get="/api/bcv-bucket/process-all"
+          hx-trigger="mousedown"
+          hx-swap="none"
+          hx-disabled-elt="this"
+          hx-indicator=".htmx-indicator"
+          type="button"
+          class="w-fit inline-flex items-center justify-between gap-2 whitespace-nowrap border-outline bg-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark border rounded-radius">
+    main.action.bcv.files.process.all
+  </button>
+
 </div>
 
 <div id="container" hx-swap-oob="true">
   <ul class="flex flex-col gap-2">
     <li hidden="hidden"
-         hx-get="/api/bcv-bucket/search"
-         hx-trigger="load"
-         hx-swap="outerHTML"
-         hx-sync="this:replace"
-         hx-indicator=".htmx-indicator">
+        hx-get="/api/bcv-bucket/search"
+        hx-trigger="load"
+        hx-swap="outerHTML"
+        hx-sync="this:replace"
+        hx-indicator=".htmx-indicator">
     </li>
   </ul>
 

@@ -26,7 +26,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	currencies := query["currency_input"]
 	rateQuery := RateQuery{
-		LastId:     int32(api.GetQueryParamAsInt(r, "next_page")),
+		LastId:     api.GetQueryParamAsInt(r, "next_page"),
 		Limit:      31,
 		DateOfRate: api.GetQueryParamAsDate(r, "date_input"),
 		Currencies: currencies,

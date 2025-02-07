@@ -20,7 +20,6 @@ export default $config({
     // const domain = new sst.Secret("Domain");
 
 
-
     const queue = new sst.aws.Queue("BcvQueue", {
       //not supported for S3 notificationsm
       fifo: false,
@@ -35,10 +34,27 @@ export default $config({
     // const efs = new sst.aws.Efs("MyEfs", {
     //   vpc: vpc
     // });
-    const processBcvFileFunction = new sst.aws.Function("ProcessBcvFileFunction", {
+
+
+    // const processRatesQueue = new sst.aws.Queue("ProcessRatesQueue", {
+    //   //not supported for S3 notificationsm
+    //   fifo: true,
+    // });
+    //
+    // const processRatesFunction = new sst.aws.Function("ProcessRates", {
+    //   link: [secretTursoUrl, processRatesQueue],
+    //   runtime: "go",
+    //   handler: "packages/backend/process-rates/",
+    // });
+    //
+    //
+    // processRatesQueue.subscribe(processRatesFunction.arn)
+
+    const processBcvFileFunction = new sst.aws.Function("ProcessBcvFile", {
       link: [secretTursoUrl, bucket, queue],
       runtime: "go",
       handler: "packages/backend/process-bcv-file/",
+
       // volume: {
       //   efs: efs,
       //   path: "/mnt/efs"
@@ -76,7 +92,7 @@ export default $config({
           // },
           name: "ProcessFileSubscriber",
           queue: queue,
-          events: ["s3:ObjectCreated:*"],
+          events: ["s3:ObjectCreated:Put", "s3:ObjectCreated:Post"],
         },
       ],
     });
@@ -85,7 +101,8 @@ export default $config({
       url: true,
       link: [bucket, bcvUrl, bcvFileStartPath],
       runtime: "go",
-      handler: "packages/backend/bcv/"
+      handler: "packages/backend/bcv/",
+      timeout: "90 seconds",
     });
 
     new sst.aws.Cron("bcv-cron", {

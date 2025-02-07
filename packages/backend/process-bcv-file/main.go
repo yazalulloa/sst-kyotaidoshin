@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"log"
 	"process-bcv-file/file"
+	"strings"
 )
 
 func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
@@ -23,11 +23,18 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 		}
 
 		for _, s3Record := range s3Event.Records {
-			fmt.Printf("[%s - %s] Bucket = %s, Key = %s \n", s3Record.EventSource, s3Record.EventTime, s3Record.S3.Bucket.Name, s3Record.S3.Object.Key)
+			log.Printf("S3 Event %s", s3Record.EventName)
+
+			if strings.Contains(s3Record.EventName, "ObjectCreated:Copy") {
+				log.Printf("Skipping %s", s3Record.S3.Object.Key)
+				continue
+			}
+
 			err := file.ParseFile(ctx, s3Record.S3.Bucket.Name, s3Record.S3.Object.Key)
 			if err != nil {
 				return err
 			}
+			log.Printf("S3 Event Processed %s", s3Record.S3.Object.Key)
 		}
 	}
 
@@ -35,7 +42,7 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 }
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	log.SetFlags(log.LstdFlags | log.Llongfile)
 	// Make the handler available for Remote Procedure Call by AWS Lambda
 	lambda.Start(handler)
 }

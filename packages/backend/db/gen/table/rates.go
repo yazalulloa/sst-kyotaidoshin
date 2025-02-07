@@ -21,11 +21,10 @@ type ratesTable struct {
 	FromCurrency sqlite.ColumnString
 	ToCurrency   sqlite.ColumnString
 	Rate         sqlite.ColumnFloat
-	DateOfRate   sqlite.ColumnDate
 	Source       sqlite.ColumnString
-	DateOfFile   sqlite.ColumnTimestamp
+	DateOfRate   sqlite.ColumnDate
+	DateOfFile   sqlite.ColumnDate
 	CreatedAt    sqlite.ColumnTimestamp
-	Hash         sqlite.ColumnInteger
 	Etag         sqlite.ColumnString
 	LastModified sqlite.ColumnString
 
@@ -72,15 +71,14 @@ func newRatesTableImpl(schemaName, tableName, alias string) ratesTable {
 		FromCurrencyColumn = sqlite.StringColumn("from_currency")
 		ToCurrencyColumn   = sqlite.StringColumn("to_currency")
 		RateColumn         = sqlite.FloatColumn("rate")
-		DateOfRateColumn   = sqlite.DateColumn("date_of_rate")
 		SourceColumn       = sqlite.StringColumn("source")
-		DateOfFileColumn   = sqlite.TimestampColumn("date_of_file")
+		DateOfRateColumn   = sqlite.DateColumn("date_of_rate")
+		DateOfFileColumn   = sqlite.DateColumn("date_of_file")
 		CreatedAtColumn    = sqlite.TimestampColumn("created_at")
-		HashColumn         = sqlite.IntegerColumn("hash")
 		EtagColumn         = sqlite.StringColumn("etag")
 		LastModifiedColumn = sqlite.StringColumn("last_modified")
-		allColumns         = sqlite.ColumnList{IDColumn, FromCurrencyColumn, ToCurrencyColumn, RateColumn, DateOfRateColumn, SourceColumn, DateOfFileColumn, CreatedAtColumn, HashColumn, EtagColumn, LastModifiedColumn}
-		mutableColumns     = sqlite.ColumnList{FromCurrencyColumn, ToCurrencyColumn, RateColumn, DateOfRateColumn, SourceColumn, DateOfFileColumn, CreatedAtColumn, HashColumn, EtagColumn, LastModifiedColumn}
+		allColumns         = sqlite.ColumnList{IDColumn, FromCurrencyColumn, ToCurrencyColumn, RateColumn, SourceColumn, DateOfRateColumn, DateOfFileColumn, CreatedAtColumn, EtagColumn, LastModifiedColumn}
+		mutableColumns     = sqlite.ColumnList{FromCurrencyColumn, ToCurrencyColumn, RateColumn, SourceColumn, DateOfRateColumn, DateOfFileColumn, CreatedAtColumn, EtagColumn, LastModifiedColumn}
 	)
 
 	return ratesTable{
@@ -91,11 +89,10 @@ func newRatesTableImpl(schemaName, tableName, alias string) ratesTable {
 		FromCurrency: FromCurrencyColumn,
 		ToCurrency:   ToCurrencyColumn,
 		Rate:         RateColumn,
-		DateOfRate:   DateOfRateColumn,
 		Source:       SourceColumn,
+		DateOfRate:   DateOfRateColumn,
 		DateOfFile:   DateOfFileColumn,
 		CreatedAt:    CreatedAtColumn,
-		Hash:         HashColumn,
 		Etag:         EtagColumn,
 		LastModified: LastModifiedColumn,
 

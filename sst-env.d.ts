@@ -18,7 +18,7 @@ declare module "sst" {
       "type": "sst.aws.Queue"
       "url": string
     }
-    "ProcessBcvFileFunction": {
+    "ProcessBcvFile": {
       "name": string
       "type": "sst.aws.Function"
     }

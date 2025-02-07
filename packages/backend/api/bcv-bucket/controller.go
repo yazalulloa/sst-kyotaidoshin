@@ -2,8 +2,11 @@ package bcv_bucket
 
 import (
 	"bcv/bcv"
+	"context"
+	"fmt"
 	"github.com/a-h/templ"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/google/uuid"
@@ -28,6 +31,7 @@ func Routes(server *mux.Router) {
 	server.HandleFunc(_SEARCH, search).Methods("GET")
 	server.HandleFunc(_PATH+"/{id}", bcvBucketDelete).Methods("DELETE")
 	server.HandleFunc(_PATH+"/process/{id}", process).Methods("POST")
+	server.HandleFunc(_PATH+"/process-all", processAll).Methods("GET")
 }
 
 func search(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +41,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s3Client, err := bcv.GetS3Client()
+	s3Client, err := bcv.GetS3Client(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -143,7 +147,7 @@ func bcvBucketDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s3Client, err := bcv.GetS3Client()
+	s3Client, err := bcv.GetS3Client(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -195,6 +199,94 @@ func process(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Handling PROCESS %s", str)
 
 	err = file.ParseFile(r.Context(), bucketName, str)
+	//err = invokeParsingFunction(r.Context(), bucketName, str)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Error(w, "", http.StatusNoContent)
+
+}
+
+func invokeParsingFunction(ctx context.Context, bucket string, key string) error {
+	lambdaName, err := bcv.GetParsingLambda()
+	if err != nil {
+		return err
+	}
+	lambdaClient, err := bcv.GetLambdaClient(ctx)
+	if err != nil {
+		return err
+	}
+
+	invokeOutput, err := lambdaClient.Invoke(ctx, &lambda.InvokeInput{
+		FunctionName:   aws.String(lambdaName),
+		Payload:        []byte(fmt.Sprintf(`{"bucket": "%s", "key": "%s"}`, bucket, key)),
+		InvocationType: "RequestResponse",
+	})
+
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Invoked %d %s", invokeOutput.StatusCode, string(invokeOutput.Payload))
+
+	return nil
+}
+
+func processAll(w http.ResponseWriter, r *http.Request) {
+	bucketName, err := bcv.GetBcvBucket()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	s3Client, err := bcv.GetS3Client(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	s3List, err := s3Client.ListObjectsV2(r.Context(), &s3.ListObjectsV2Input{Bucket: aws.String(bucketName)})
+	if err != nil {
+		log.Printf("Error getting objects from bucket %s: %s", bucketName, err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var wg sync.WaitGroup
+	var once sync.Once
+	handleErr := func(e error) {
+		if e != nil {
+			once.Do(func() {
+				err = e
+			})
+		}
+	}
+
+	wg.Add(len(s3List.Contents))
+
+	for _, item := range s3List.Contents {
+
+		//err := invokeParsingFunction(r.Context(), bucketName, *item.Key)
+		//if err != nil {
+		//	http.Error(w, err.Error(), http.StatusInternalServerError)
+		//	return
+		//}
+		go func(item types.Object) {
+			defer wg.Done()
+
+			err := file.ParseFile(r.Context(), bucketName, *item.Key)
+			if err != nil {
+				handleErr(err)
+				return
+			}
+
+		}(item)
+	}
+
+	wg.Wait()
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

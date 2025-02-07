@@ -20,13 +20,15 @@ import (
 	"unicode"
 )
 
-func ParseFile(ctx context.Context, bucket, key string) error {
-	client, err := bcv.GetS3Client()
+func fileParse(ctx context.Context, bucket, key string) error {
+	client, err := bcv.GetS3Client(ctx)
 	if err != nil {
 		return err
 	}
 
 	objKey := strings.ReplaceAll(key, "%3D", "=")
+
+	log.Printf("Processing %s\n", objKey)
 
 	output, err := client.GetObject(ctx, &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
@@ -50,7 +52,7 @@ func ParseFile(ctx context.Context, bucket, key string) error {
 		return fmt.Errorf("error reading response body: %w", err)
 	}
 
-	ratesInserted, err := Parse(data)
+	result, err := Parse(objKey, data)
 	if err != nil {
 		return err
 	}
@@ -65,7 +67,7 @@ func ParseFile(ctx context.Context, bucket, key string) error {
 		MetadataDirective: types.MetadataDirectiveReplace,
 	})
 
-	log.Printf("Processed %s %s rates %d", key, objKey, ratesInserted)
+	log.Printf("Processed %s rates parsed: %d inserted: %d", objKey, result.Parsed, result.Inserted)
 
 	if err != nil {
 		return fmt.Errorf("error copying object: %w", err)
@@ -74,96 +76,183 @@ func ParseFile(ctx context.Context, bucket, key string) error {
 	return nil
 }
 
-func Parse(data []byte) (int64, error) {
+func ParseFile(ctx context.Context, bucket, key string) error {
+
+	err := fileParse(ctx, bucket, key)
+
+	if err != nil {
+		log.Printf("Error parsing file: %s %v\n", key, err)
+	}
+
+	return err
+}
+
+type ParsingError struct {
+	BucketKey string
+	SheetName string
+	RowIndex  int
+	CellIndex int
+	Value     any
+	Err       error
+}
+
+func (e ParsingError) err(err error) ParsingError {
+	e.Err = err
+	return e
+}
+
+func (e ParsingError) Error() string {
+	return fmt.Sprintf("error parsing bucket %s sheet %s row %d cell %d value [%v]: %v", e.BucketKey, e.SheetName, e.RowIndex, e.CellIndex, e.Value, e.Err)
+}
+
+type Result struct {
+	Inserted int64
+	Parsed   int64
+}
+
+func Parse(bucketKey string, data []byte) (*Result, error) {
+	parsingError := ParsingError{
+		BucketKey: bucketKey,
+	}
+
 	reader := bytes.NewReader(data)
 
-	var inserted int64 = 0
+	result := Result{}
 	workbook, err := xls.OpenReader(reader)
 
 	if err != nil {
-		return 0, fmt.Errorf("error opening workbook: %w", err)
+		return nil, fmt.Errorf("error opening workbook: %w", err)
 	}
 
 	for sheetIndex, sheet := range workbook.GetSheets() {
-
-		log.Printf("Sheet %d %s", sheetIndex, sheet.GetName())
-
-		var dateOfFile time.Time
+		parsingError.SheetName = sheet.GetName()
+		var dateOfFile *time.Time
 		var dateOfRate time.Time
 		var rateArray []model.Rates
 		for rowIndex, row := range sheet.GetRows() {
+			parsingError.RowIndex = rowIndex
 
 			if rowIndex == 0 {
 
 				col6, err := row.GetCol(6)
+				parsingError.CellIndex = 6
 				if err != nil {
-					return 0, err
+					nE := parsingError.err(err)
+					log.Printf("Error %s", nE.Error())
+					return nil, nE
 				}
 
-				split := strings.Split(col6.GetString(), " ")
-				dateSplit := strings.Split(split[0], "/")
-				day, err := strconv.Atoi(dateSplit[0])
-				if err != nil {
-					return 0, err
-				}
-				month, err := strconv.Atoi(dateSplit[1])
-				if err != nil {
-					return 0, err
+				cellValue := col6.GetString()
+				parsingError.Value = cellValue
+				split := strings.Split(cellValue, " ")
+
+				if len(split) == 3 {
+					dateSplit := strings.Split(split[0], "/")
+					day, err := strconv.Atoi(dateSplit[0])
+					if err != nil {
+						return nil, parsingError.err(err)
+					}
+					month, err := strconv.Atoi(dateSplit[1])
+					if err != nil {
+						return nil, parsingError.err(err)
+					}
+
+					year, err := strconv.Atoi(dateSplit[2])
+					if err != nil {
+						return nil, parsingError.err(err)
+					}
+
+					timeSplit := strings.Split(split[1], ":")
+					hour, err := strconv.Atoi(timeSplit[0])
+					if err != nil {
+						return nil, parsingError.err(err)
+					}
+
+					if len(split) > 2 && split[2] == "PM" {
+						hour += 12
+					}
+
+					minute, err := strconv.Atoi(timeSplit[1])
+					if err != nil {
+						parsingError.Value = timeSplit[1]
+						return nil, parsingError.err(err)
+					}
+					location, err := time.LoadLocation("America/Caracas")
+					if err != nil {
+						return nil, err
+					}
+
+					temp := time.Date(year, time.Month(month), day, hour, minute, 0, 0, location)
+					dateOfFile = &temp
 				}
 
-				year, err := strconv.Atoi(dateSplit[2])
-				if err != nil {
-					return 0, err
-				}
-
-				timeSplit := strings.Split(split[1], ":")
-				hour, err := strconv.Atoi(timeSplit[0])
-				if err != nil {
-					return 0, err
-				}
-
-				if len(split) > 2 && split[2] == "PM" {
-					hour += 12
-				}
-
-				minute, err := strconv.Atoi(timeSplit[1])
-				if err != nil {
-					return 0, err
-				}
-				location, err := time.LoadLocation("America/Caracas")
-				if err != nil {
-					return 0, err
-				}
-
-				dateOfFile = time.Date(year, time.Month(month), day, hour, minute, 0, 0, location)
 			}
 
 			if rowIndex == 4 {
+
+				if dateOfFile == nil {
+					col1, err := row.GetCol(1)
+					parsingError.CellIndex = 1
+					if err != nil {
+						return nil, parsingError.err(err)
+					}
+
+					cellValue1 := col1.GetString()
+					parsingError.Value = cellValue1
+
+					date := strings.TrimSpace(cellValue1[strings.Index(cellValue1, ":")+1:])
+					split := strings.Split(date, "/")
+					day, err := strconv.Atoi(split[0])
+					if err != nil {
+						return nil, parsingError.err(err)
+					}
+
+					month, err := strconv.Atoi(split[1])
+					if err != nil {
+						return nil, parsingError.err(err)
+					}
+
+					year, err := strconv.Atoi(split[2])
+					if err != nil {
+						return nil, parsingError.err(err)
+					}
+
+					location, err := time.LoadLocation("America/Caracas")
+					if err != nil {
+						return nil, parsingError.err(err)
+					}
+
+					temp := time.Date(year, time.Month(month), day, 0, 0, 0, 0, location)
+					dateOfFile = &temp
+				}
+
 				col3, err := row.GetCol(3)
+				parsingError.CellIndex = 3
 				if err != nil {
-					return 0, err
+					return nil, parsingError.err(err)
 				}
 
 				cellValue3 := col3.GetString()
+				parsingError.Value = cellValue3
 
 				date := strings.TrimSpace(cellValue3[strings.Index(cellValue3, ":")+1:])
 				split := strings.Split(date, "/")
 				day, err := strconv.Atoi(split[0])
 				if err != nil {
-					return 0, err
+					return nil, parsingError.err(err)
 				}
 				month, err := strconv.Atoi(split[1])
 				if err != nil {
-					return 0, err
+					return nil, parsingError.err(err)
 				}
 
 				year, err := strconv.Atoi(split[2])
 				if err != nil {
-					return 0, err
+					return nil, parsingError.err(err)
 				}
 				location, err := time.LoadLocation("America/Caracas")
 				if err != nil {
-					return 0, err
+					return nil, parsingError.err(err)
 				}
 
 				dateOfRate = time.Date(year, time.Month(month), day, 0, 0, 0, 0, location)
@@ -171,9 +260,15 @@ func Parse(data []byte) (int64, error) {
 
 			if rowIndex > 9 {
 
+				if dateOfFile == nil {
+					log.Printf("Error dateOfFile is nil")
+					continue
+				}
+
 				col1, err := row.GetCol(1)
+				parsingError.CellIndex = 1
 				if err != nil {
-					return 0, err
+					return nil, parsingError.err(err)
 				}
 
 				currency := col1.GetString()
@@ -183,20 +278,24 @@ func Parse(data []byte) (int64, error) {
 				}
 
 				col6, err := row.GetCol(6)
+				parsingError.CellIndex = 6
 				if err != nil {
-					return 0, err
+					return nil, parsingError.err(err)
 				}
 
-				rate := strings.ReplaceAll(col6.GetString(), ",", "")
+				cell6Value := col6.GetString()
+				parsingError.Value = cell6Value
+				rate := strings.ReplaceAll(cell6Value, ",", "")
 				rateF, err := strconv.ParseFloat(rate, 64)
 				if err != nil {
-					return 0, err
+					return nil, parsingError.err(err)
 				}
 
-				str := dateOfRate.Format("20250101") + api.ToASCII(currency) + api.PadLeft(strconv.Itoa(sheetIndex), 4)
+				str := strings.ReplaceAll(dateOfRate.Format(time.DateOnly), "-", "") + api.ToASCII(currency) + api.PadLeft(strconv.Itoa(sheetIndex), 4)
 				id, err := strconv.ParseInt(str, 10, 64)
 				if err != nil {
-					return 0, err
+					parsingError.Value = str
+					return nil, parsingError.err(err)
 				}
 
 				modelRates := model.Rates{
@@ -206,7 +305,7 @@ func Parse(data []byte) (int64, error) {
 					Rate:         rateF,
 					DateOfRate:   dateOfRate,
 					Source:       "BCV",
-					DateOfFile:   dateOfFile,
+					DateOfFile:   *dateOfFile,
 					//Hash:         &receiver.Hash,
 					//Etag:         receiver.etag,
 					//LastModified: receiver.lastModified,
@@ -218,33 +317,43 @@ func Parse(data []byte) (int64, error) {
 		}
 
 		//log.Printf("Sheet: %s rates: %d %s %s", sheet.GetName(), len(rateArray), dateOfRate, dateOfFile)
+		result.Parsed += int64(len(rateArray))
 		ratesInserted, err := processRates(&rateArray)
+		parsingError.Value = ""
 		if err != nil {
-			return 0, err
+			return nil, parsingError.err(err)
 		}
 
-		inserted += ratesInserted
+		result.Parsed += ratesInserted
 	}
 
-	return inserted, nil
+	return &result, nil
 }
 
 func processRates(rateArray *[]model.Rates) (int64, error) {
-	ratesToInsert, err := rates.CheckRateInsert(rateArray)
+
+	rowsAffected, err := rates.Insert(*rateArray)
 	if err != nil {
 		return 0, err
 	}
 
-	if len(ratesToInsert) > 0 {
-		rowsAffected, err := rates.Insert(ratesToInsert)
-		if err != nil {
-			return 0, err
-		}
+	return rowsAffected, nil
 
-		return rowsAffected, nil
-	}
-
-	return 0, nil
+	//ratesToInsert, err := rates.CheckRateInsert(rateArray)
+	//if err != nil {
+	//	return 0, err
+	//}
+	//
+	//if len(ratesToInsert) > 0 {
+	//	rowsAffected, err := rates.Insert(ratesToInsert)
+	//	if err != nil {
+	//		return 0, err
+	//	}
+	//
+	//	return rowsAffected, nil
+	//}
+	//
+	//return 0, nil
 }
 
 func toASCII(str string) string {

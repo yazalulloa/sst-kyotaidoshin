@@ -35,7 +35,7 @@ func GetRates(rateQuery RateQuery) ([]model.Rates, error) {
 	condition, _ := queryCondition(&rateQuery)
 
 	if rateQuery.LastId > 0 {
-		condition = condition.AND(Rates.ID.LT(sqlite.Int32(rateQuery.LastId)))
+		condition = condition.AND(Rates.ID.LT(sqlite.Int64(rateQuery.LastId)))
 	}
 
 	stmt := Rates.SELECT(Rates.AllColumns).FROM(Rates).WHERE(condition).LIMIT(int64(rateQuery.Limit))
@@ -134,10 +134,12 @@ func checkRateExist(rate model.Rates) (bool, error) {
 
 func Insert(rates []model.Rates) (int64, error) {
 
-	stmt := Rates.INSERT(Rates.ID, Rates.FromCurrency, Rates.ToCurrency, Rates.Rate, Rates.DateOfRate, Rates.Source, Rates.DateOfFile, Rates.Hash, Rates.Etag, Rates.LastModified)
+	stmt := Rates.INSERT(Rates.ID, Rates.FromCurrency, Rates.ToCurrency, Rates.Rate, Rates.DateOfRate, Rates.Source,
+		Rates.DateOfFile, Rates.Etag, Rates.LastModified).
+		ON_CONFLICT().DO_NOTHING()
 	//.MODELS(rates)
 	for _, rate := range rates {
-		stmt = stmt.VALUES(rate.ID, rate.FromCurrency, rate.ToCurrency, rate.Rate, rate.DateOfRate.Format(time.DateOnly), rate.Source, rate.DateOfFile, rate.Hash, rate.Etag, rate.LastModified)
+		stmt = stmt.VALUES(rate.ID, rate.FromCurrency, rate.ToCurrency, rate.Rate, rate.DateOfRate.Format(time.DateOnly), rate.Source, rate.DateOfFile, rate.Etag, rate.LastModified)
 	}
 
 	res, err := stmt.Exec(db.GetDB().DB)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bcv/bcv"
+	"context"
 	"encoding/json"
 	"github.com/aws/aws-lambda-go/lambda"
 	"log"
@@ -13,7 +14,7 @@ func bcvTask() (string, error) {
 	timestamp := time.Now().UnixMilli()
 
 	if true {
-		err := bcv.Check()
+		err := bcv.Check(context.Background())
 		if err != nil {
 			return "", err
 		}
