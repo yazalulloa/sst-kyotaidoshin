@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-func getRateTableResponse(rateQuery RateQuery) (RateTableResponse, error) {
-	var rateTableResponse RateTableResponse
+func getRateTableResponse(rateQuery RateQuery) (TableResponse, error) {
+	var rateTableResponse TableResponse
 	var oErr error
 	var wg sync.WaitGroup
 	wg.Add(3)

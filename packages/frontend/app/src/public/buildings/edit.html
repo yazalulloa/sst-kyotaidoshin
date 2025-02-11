@@ -1,0 +1,18 @@
+<div id="header-container" hx-swap-oob="true">
+  <div x-data="{
+   url: '/buildings/index.html'
+  }">
+    <div hx-get="/partials/backBtn.html"
+         hx-trigger="load"
+         hx-swap="outerHTML"></div>
+  </div>
+</div>
+
+<div id="container" hx-swap-oob="true">
+
+  <div hx-get="/buildings/form.html"
+       hx-trigger="load"
+       hx-swap="outerHTML">
+  </div>
+
+</div>

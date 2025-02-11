@@ -1,0 +1,126 @@
+package buildings
+
+import (
+	"fmt"
+	"kyotaidoshin/api"
+)
+
+templ Search(res TableResponse) {
+	for _, item := range res.Results {
+		<li
+			id={ item.CardId }
+			class="fade-me-in fade-me-out grid grid-cols-[7fr_1fr] gap-4 text-center items-center rounded-radius border border-outline bg-surface-alt dark:border-outline-dark dark:bg-surface-dark-alt"
+		>
+			<div class="flex flex-row flex-wrap gap-4 justify-around text-center items-center">
+				<div class="flex flex-col gap-2">
+					<span>{ fmt.Sprint(item.Item.ID) }</span>
+					<span>{ fmt.Sprint(item.Item.Name) }</span>
+					<span>{ fmt.Sprint(item.Item.Rif) }</span>
+				</div>
+				<div class="flex flex-col gap-2">
+					<span>
+						<span x-text="$t('main-buildings-main-currency')"></span>:
+						<span>{ fmt.Sprint(item.Item.MainCurrency) }</span>
+					</span>
+					<span>
+						<span x-text="$t('main-buildings-debt-currency')"></span>:
+						<span>{ fmt.Sprint(item.Item.DebtCurrency) }</span>
+					</span>
+					<span>
+						<span x-text="$t('main-buildings-show-currencies-amount-pay')"></span>:
+						<span>{ fmt.Sprint(item.Item.CurrenciesToShowAmountToPay) }</span>
+					</span>
+				</div>
+				if item.Item.FixedPay && item.Item.FixedPayAmount != nil {
+					<span>
+						<span x-text="$t('main-buildings-fixed-pay')"></span>:
+						<span>{ fmt.Sprint(*item.Item.FixedPayAmount) }</span>
+					</span>
+				}
+				if item.Item.RoundUpPayments {
+					<span
+						class="rounded-radius w-fit border border-success bg-success px-2 py-1 text-xs font-medium text-on-success dark:border-success dark:bg-success dark:text-on-success"
+						x-text="$t('main-buildings-round-up-payments')"
+					></span>
+				} else {
+					<span
+						class="rounded-radius w-fit border border-danger bg-danger px-2 py-1 text-xs font-medium text-on-danger dark:border-danger dark:bg-danger dark:text-on-danger"
+						x-text="$t('main-buildings-round-up-payments')"
+					></span>
+				}
+				<span>
+					<span x-text="$t('main-buildings-email-config')"></span>:
+					<span>{ fmt.Sprint(item.Item.EmailConfig) }</span>
+				</span>
+				<span
+					data-date={ fmt.Sprint(item.CreatedAt) }
+					x-init="
+      					$el.innerHTML = new Date(parseInt($el.getAttribute('data-date')))
+                                            //.toLocaleDateString()
+                                           .toLocaleString()
+                                           "
+				></span>
+			</div>
+			<div class="flex flex-row flex-wrap gap-2 justify-center items-center">
+				<button
+					@click="localStorage.setItem('resource', $el.getAttribute('data-resource'))"
+					type="button"
+					class="whitespace-nowrap bg-transparent rounded-full border border-secondary p-1 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-secondary-dark dark:text-secondary-dark dark:focus-visible:outline-secondary-dark"
+					hx-get="/buildings/edit.html"
+					hx-disabled-elt="this"
+					hx-indicator=".htmx-indicator"
+					hx-swap="none"
+					hx-trigger="mousedown"
+					data-resource={ item.Key }
+					hx-on::before-request="localStorage.setItem('resource', this.getAttribute('data-resource'))"
+				>
+					<svg data-src="/assets/images/edit_icon.svg" data-cache="21600" class="h-6 w-6"></svg>
+				</button>
+				@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
+			</div>
+		</li>
+	}
+}
+
+templ FormView(dto FormDto) {
+	@api.CSRF()
+	<div x-init={ fmt.Sprintf("open = true; currencies = %s", dto.currencies) }></div>
+	if dto.key != nil {
+		<input type="hidden" name="key" value={ *dto.key }/>
+	}
+	if dto.building != nil {
+		<div
+			hidden="hidden"
+			data-building-name={ dto.building.Name }
+			data-building-rif={ dto.building.Rif }
+			data-building-main-currency={ dto.building.MainCurrency }
+			data-building-debt-currency={ dto.building.DebtCurrency }
+			data-building-currencies-to-show-amount-to-pay={ dto.currenciesToShowAmountToPay }
+			data-building-fixed-pay={ fmt.Sprint(dto.building.FixedPay) }
+			if dto.building.FixedPayAmount != nil {
+				data-building-fixed-pay-amount={ fmt.Sprint(*dto.building.FixedPayAmount) }
+			} else {
+				data-building-fixed-pay-amount="0"
+			}
+			data-building-round-up-payments={ fmt.Sprint(dto.building.RoundUpPayments) }
+			data-building-email-config={ dto.building.EmailConfig }
+			x-init="
+	isEdit = true;
+	name = $el.getAttribute('data-building-name');
+  rif = $el.getAttribute('data-building-rif');
+  mainCurrency = $el.getAttribute('data-building-main-currency');
+  debtCurrency = $el.getAttribute('data-building-debt-currency');
+  currenciesToShowAmountToPay = $el.getAttribute('data-building-currencies-to-show-amount-to-pay');
+  fixedPay = $el.getAttribute('data-building-fixed-pay');
+  fixedPayAmount = $el.getAttribute('data-building-fixed-pay-amount');
+  roundUpPayments = $el.getAttribute('data-building-round-up-payments');
+  emailConfig = $el.getAttribute('data-building-email-config');
+	"
+		></div>
+	}
+	<div id="emailConfigSelect" hx-swap-oob="innerHTML">
+		for _,emailConfig := range dto.emailConfigs {
+			<option value={ emailConfig.key }>{ emailConfig.id } { emailConfig.email }</option>
+		}
+	</div>
+}

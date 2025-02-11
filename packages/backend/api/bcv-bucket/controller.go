@@ -205,7 +205,7 @@ func process(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Error(w, "", http.StatusNoContent)
+	w.WriteHeader(http.StatusNoContent)
 
 }
 
@@ -292,8 +292,7 @@ func processAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Error(w, "", http.StatusNoContent)
-
+	w.WriteHeader(http.StatusNoContent)
 }
 
 type S3File struct {

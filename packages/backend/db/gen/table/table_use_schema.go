@@ -11,5 +11,8 @@ package table
 // this method only once at the beginning of the program.
 func UseSchema(schema string) {
 	Apartments = Apartments.FromSchema(schema)
+	Buildings = Buildings.FromSchema(schema)
+	ExtraCharges = ExtraCharges.FromSchema(schema)
 	Rates = Rates.FromSchema(schema)
+	ReserveFunds = ReserveFunds.FromSchema(schema)
 }

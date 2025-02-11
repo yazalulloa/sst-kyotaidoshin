@@ -1,0 +1,307 @@
+<div class="w-full flex flex-col gap-4 items-center justify-center"
+     x-data="{
+    open: false,
+currencies: [],
+  }"
+x-show="open">
+  <form
+      id="buildings-form"
+      class="flex flex-col gap-4 justify-center"
+      hx-put="/api/buildings"
+      hx-disabled-elt="this, #buildings-form * > input:not([disabled]), #buildings-form * > button:not([disabled]), #buildings-form * > select:not([disabled])"
+      hx-indicator=".htmx-indicator"
+      hx-target="#building-form-error"
+      hx-swap="innerHTML"
+      x-data="{
+    isEdit: false,
+    id: '',
+    name: '',
+    rif: '',
+    mainCurrency: '',
+    debtCurrency: '',
+    fixedPay: false,
+    fixedPayAmount: 0,
+    roundUpPayments: false,
+    emailConfig: '',
+    currenciesToShowAmountToPay: [],
+
+    idErr: '',
+    nameErr: '',
+    rifErr: '',
+    fixedPayAmountErr: '',
+    }">
+
+    <div hx-get="/api/buildings/formData"
+         hx-vals='js:{id: localStorage.getItem("resource")}'
+         hx-trigger="load"
+         hx-swap="outerHTML">
+    </div>
+
+    <div id="building-form-error" hidden="hidden"></div>
+
+    <div class="flex w-full  flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+      <label for="buildingIdInput"
+             x-bind:class="idErr !== '' ? 'text-danger' : ''"
+             class="flex w-fit items-center gap-1 pl-0.5 text-sm">
+        <svg x-show="idErr !== ''" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" aria-hidden="true"
+             fill="currentColor"
+             class="w-4 h-4">
+          <path
+              d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z"></path>
+        </svg>
+        main.buildings.id
+      </label>
+      <input
+          id="buildingIdInput"
+          type="text"
+          maxlength="20"
+          class="w-full rounded-radius border bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+          name="id"
+          x-model="id"
+          x-bind:class="idErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
+          @input="$el.value = $el.value.replace(/[^\p{Letter}\p{Mark}\p{Number}]+/gu, '')"
+          x-init="limitInputToMaxLength($el)"
+          required
+      />
+      <small x-model="idErr"
+             x-bind:class="idErr !== '' ? 'text-danger' : ''"
+             class="text-start pl-0.5">
+      </small>
+    </div>
+
+    <div class="flex w-full  flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+      <label for="buildingNameInput"
+             x-bind:class="nameErr !== '' ? 'text-danger' : ''"
+             class="flex w-fit items-center gap-1 pl-0.5 text-sm">
+        <svg x-show="nameErr !== ''" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" aria-hidden="true"
+             fill="currentColor"
+             class="w-4 h-4">
+          <path
+              d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z"></path>
+        </svg>
+        main.buildings.name
+      </label>
+      <input
+          id="buildingNameInput"
+          type="text"
+          class="w-full rounded-radius border bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+          name="name"
+          maxlength="100"
+          x-model="name"
+          x-bind:class="nameErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
+          x-init="limitInputToMaxLength($el)"
+          required
+      />
+      <small x-model="nameErr"
+             x-bind:class="nameErr !== '' ? 'text-danger' : ''"
+             class="text-start pl-0.5">
+      </small>
+    </div>
+
+    <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+      <label for="buildingRifInput"
+             x-bind:class="rifErr !== '' ? 'text-danger' : ''"
+             class="flex w-fit items-center gap-1 pl-0.5 text-sm">
+        <svg x-show="rifErr !== ''" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" aria-hidden="true"
+             fill="currentColor"
+             class="w-4 h-4">
+          <path
+              d="M5.28 4.22a.75.75 0 0 0-1.06 1.06L6.94 8l-2.72 2.72a.75.75 0 1 0 1.06 1.06L8 9.06l2.72 2.72a.75.75 0 1 0 1.06-1.06L9.06 8l2.72-2.72a.75.75 0 0 0-1.06-1.06L8 6.94 5.28 4.22Z"></path>
+        </svg>
+        main.buildings.rif
+      </label>
+      <input
+          id="buildingRifInput"
+          type="text"
+          maxlength="20"
+          class="w-full rounded-radius border bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+          name="rif"
+          x-model="rif"
+          x-bind:class="rifErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
+          x-init="limitInputToMaxLength($el)"
+          required
+      />
+      <small x-model="rifErr"
+             x-bind:class="rifErr !== '' ? 'text-danger' : ''"
+             class="text-start pl-0.5">
+      </small>
+    </div>
+
+    <div class="flex flex-row gap-4 justify-between">
+      <div class="relative flex w-fit  flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+        <label for="mainCurrency" class="w-fit pl-0.5 text-sm">
+          main.buildings.main.currency
+        </label>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+             class="absolute pointer-events-none right-4 top-8 size-5">
+          <path fill-rule="evenodd"
+                d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                clip-rule="evenodd"/>
+        </svg>
+        <select id="mainCurrency"
+                name="mainCurrency"
+                x-model="mainCurrency"
+                class="w-full appearance-none rounded-radius border border-outline bg-surface-alt px-4 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+          <template x-for="value in currencies">
+            <option x-bind:value="value" x-text="value"></option>
+          </template>
+        </select>
+        <small></small>
+      </div>
+
+      <div class="relative flex w-fit flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+        <label for="debtCurrency" class="w-fit pl-0.5 text-sm">
+          main.buildings.debt.currency
+        </label>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+             class="absolute pointer-events-none right-4 top-8 size-5">
+          <path fill-rule="evenodd"
+                d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                clip-rule="evenodd"/>
+        </svg>
+        <select id="debtCurrency"
+                name="debtCurrency"
+                x-model="debtCurrency"
+                class="w-full appearance-none rounded-radius border border-outline bg-surface-alt px-4 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+          <template x-for="value in currencies">
+            <option x-bind:value="value" x-text="value"></option>
+          </template>
+        </select>
+        <small></small>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-2 justify-center items-center">
+      <span class="bold font-medium">main.buildings.currencies.show.pay</span>
+      <div class="flex flex-row gap-4">
+        <template x-for="value in currencies">
+          <label x-bind:for="value"
+                 class="flex items-center gap-2 text-sm font-medium text-on-surface dark:text-on-surface-dark has-checked:text-on-surface-strong dark:has-checked:text-on-surface-dark-strong has-disabled:cursor-not-allowed has-disabled:opacity-75">
+            <div class="relative flex items-center">
+              <input x-bind:id="value"
+                     x-bind:value="value"
+                     x-bind:checked="currenciesToShowAmountToPay.includes(value)"
+                     @click="currenciesToShowAmountToPay.includes(value) ? currenciesToShowAmountToPay = currenciesToShowAmountToPay.filter(v => v !== value) : currenciesToShowAmountToPay.push(value)"
+                     type="checkbox"
+                     name="currenciesToShowAmountToPay"
+                     class="before:content[''] peer relative size-4 appearance-none overflow-hidden rounded-sm border border-outline bg-surface-alt before:absolute before:inset-0 checked:border-primary checked:before:bg-primary focus:outline-2 focus:outline-offset-2 focus:outline-outline-strong checked:focus:outline-primary active:outline-offset-0 disabled:cursor-not-allowed dark:border-outline-dark dark:bg-surface-dark-alt dark:checked:border-primary-dark dark:checked:before:bg-primary-dark dark:focus:outline-outline-dark-strong dark:checked:focus:outline-primary-dark"
+              />
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor"
+                   fill="none" stroke-width="4"
+                   class="pointer-events-none invisible absolute left-1/2 top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 text-on-primary peer-checked:visible dark:text-on-primary-dark">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+              </svg>
+            </div>
+            <span x-text="value"></span>
+          </label>
+        </template>
+      </div>
+
+    </div>
+
+    <label for="roundUpPayments"
+           class="flex items-center gap-2 text-sm font-medium text-on-surface dark:text-on-surface-dark has-checked:text-on-surface-strong dark:has-checked:text-on-surface-dark-strong has-disabled:cursor-not-allowed has-disabled:opacity-75">
+      <div class="relative flex items-center">
+        <input id="roundUpPayments"
+               type="checkbox"
+               name="roundUpPayments"
+               x-model="roundUpPayments"
+               value="true"
+               class="before:content[''] peer relative size-4 appearance-none overflow-hidden rounded-sm border border-outline bg-surface-alt before:absolute before:inset-0 checked:border-primary checked:before:bg-primary focus:outline-2 focus:outline-offset-2 focus:outline-outline-strong checked:focus:outline-primary active:outline-offset-0 disabled:cursor-not-allowed dark:border-outline-dark dark:bg-surface-dark-alt dark:checked:border-primary-dark dark:checked:before:bg-primary-dark dark:focus:outline-outline-dark-strong dark:checked:focus:outline-primary-dark"/>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor"
+             fill="none" stroke-width="4"
+             class="pointer-events-none invisible absolute left-1/2 top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 text-on-primary peer-checked:visible dark:text-on-primary-dark">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+        </svg>
+      </div>
+      <span>main.buildings.round.up.payments</span>
+    </label>
+
+    <div class="flex flex-row gap-2">
+      <label for="fixedPay"
+             class="flex items-center gap-2 text-sm font-medium text-on-surface dark:text-on-surface-dark has-checked:text-on-surface-strong dark:has-checked:text-on-surface-dark-strong has-disabled:cursor-not-allowed has-disabled:opacity-75">
+        <div class="relative flex items-center">
+          <input id="fixedPay"
+                 type="checkbox"
+                 name="fixedPay"
+                 x-model="fixedPay"
+                 value="true"
+                 class="before:content[''] peer relative size-4 appearance-none overflow-hidden rounded-sm border border-outline bg-surface-alt before:absolute before:inset-0 checked:border-primary checked:before:bg-primary focus:outline-2 focus:outline-offset-2 focus:outline-outline-strong checked:focus:outline-primary active:outline-offset-0 disabled:cursor-not-allowed dark:border-outline-dark dark:bg-surface-dark-alt dark:checked:border-primary-dark dark:checked:before:bg-primary-dark dark:focus:outline-outline-dark-strong dark:checked:focus:outline-primary-dark"
+          />
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor"
+               fill="none" stroke-width="4"
+               class="pointer-events-none invisible absolute left-1/2 top-1/2 size-3 -translate-x-1/2 -translate-y-1/2 text-on-primary peer-checked:visible dark:text-on-primary-dark">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+          </svg>
+        </div>
+        <span>main.buildings.fixed.payment</span>
+      </label>
+
+      <div class="flex w-full flex-col gap-4 text-on-surface dark:text-on-surface-dark">
+        <label for="buildingFixedPayAmount"
+               x-bind:class="fixedPayAmountErr !== '' ? 'text-danger' : ''"
+               class="flex w-fit items-center gap-1 pl-0.5 text-sm">
+        </label>
+        <input
+            id="buildingFixedPayAmount"
+            type="number"
+            min="0"
+            maxlength="10"
+            step=".01"
+            x-init="limitInputToMaxLength($el)"
+            class="w-full rounded-radius border bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+            name="fixedPayAmount"
+            x-model="fixedPayAmount"
+            x-bind:class="fixedPayAmountErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
+            x-bind:disabled="!fixedPay"
+        />
+        <small x-model="fixedPayAmountErr"
+               x-bind:class="fixedPayAmountErr !== '' ? 'text-danger' : ''"
+               class="text-start pl-0.5">
+        </small>
+      </div>
+    </div>
+
+    <div class="relative flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+      <label for="emailConfigSelect" class="w-fit pl-0.5 text-sm">
+        main.buildings.email.configs
+      </label>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+           class="absolute pointer-events-none right-4 top-8 size-5">
+        <path fill-rule="evenodd"
+              d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+              clip-rule="evenodd"/>
+      </svg>
+      <select id="emailConfigSelect" name="emailConfig"
+              x-model="emailConfig"
+              class="w-full appearance-none rounded-radius border border-outline bg-surface-alt px-4 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+        <option value="mac">Mac</option>
+        <option value="windows">Windows</option>
+        <option value="linux">Linux</option>
+      </select>
+    </div>
+
+
+    <div class="flex flex-row gap-2 justify-start">
+      <button
+          x-effect="
+                  let v = !(id?.trim()?.length > 0 && name?.trim()?.length > 0 && rif?.trim()?.length > 0);
+                  $el.disabled=v;
+                  "
+
+          class="whitespace-nowrap rounded-radius bg-primary border border-primary px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark">
+        main.action.submit
+      </button>
+      <button type="button"
+              hx-get="/buildings/index.html"
+              hx-disabled-elt="this"
+              hx-indicator=".htmx-indicator"
+              hx-swap="none"
+              todo-hx-push-url="true"
+              hx-trigger="click"
+              class="whitespace-nowrap rounded-radius bg-surface-alt border border-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface-strong transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface-alt active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark-alt">
+        main.action.cancel
+      </button>
+    </div>
+  </form>
+</div>

@@ -17,7 +17,7 @@ templ Init() {
 	}
 }
 
-templ Search(res RateTableResponse) {
+templ Search(res TableResponse) {
 	for _, item := range res.Results {
 		<li
 			id={ item.CardId }

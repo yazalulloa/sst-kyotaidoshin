@@ -1,0 +1,18 @@
+{
+  "en": {
+    "main-buildings-main-currency": "Main Currency",
+    "main-buildings-debt-currency": "Debt Currency",
+    "main-buildings-show-currencies-amount-pay": "Show Currencies Amount for Payment",
+    "main-buildings-fixed-pay": "Fixed Pay",
+    "main-buildings-email-config": "Email Configuration",
+    "main-buildings-round-up-payments": "Round Up Payments"
+  },
+  "es": {
+    "main-buildings-main-currency": "Moneda Principal",
+    "main-buildings-debt-currency": "Moneda de Deuda",
+    "main-buildings-show-currencies-amount-pay": "Mostrar Monto en Monedas de Pago",
+    "main-buildings-fixed-pay": "Monto Fijo",
+    "main-buildings-email-config": "Configuración de Email",
+    "main-buildings-round-up-payments": "Redondear Pagos"
+  }
+}

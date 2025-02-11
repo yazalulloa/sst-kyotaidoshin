@@ -78,6 +78,18 @@ progress {
   vertical-align: baseline;
 }
 
+/* Hide input arrows for Chrome, Safari and Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hide input arrows for Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
 @theme {
   /* Fonts */
   --font-title: 'Poppins', sans-serif;
@@ -682,4 +694,17 @@ progress {
     --radius-radius: var(--radius-none);
   }
 
+}
+
+
+select option {
+  color: var(--color-on-surface);
+  background: var(--color-surface-alt);
+}
+
+@media (prefers-color-scheme: dark) {
+  select option {
+    color: var(--color-on-surface-dark);
+    background: var(--color-surface-dark-alt);
+  }
 }

@@ -30,7 +30,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 		Limit:      31,
 		DateOfRate: api.GetQueryParamAsDate(r, "date_input"),
 		Currencies: currencies,
-		SortOrder:  api.GetQueryParamAsString(r, "sort_order"),
+		SortOrder:  api.GetQueryParamAsSortOrderType(r, "sort_order"),
 	}
 
 	response, err := getRateTableResponse(rateQuery)
@@ -119,7 +119,7 @@ func deleteRate(w http.ResponseWriter, r *http.Request) {
 	rateQuery := RateQuery{
 		DateOfRate: api.GetQueryParamAsDate(r, "date_input"),
 		Currencies: currencies,
-		SortOrder:  api.GetQueryParamAsString(r, "sort_order"),
+		SortOrder:  api.GetQueryParamAsSortOrderType(r, "sort_order"),
 	}
 
 	counters, err := deleteRateReturnCounters(str, rateQuery)

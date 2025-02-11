@@ -2,6 +2,7 @@ package rates
 
 import (
 	"db/gen/model"
+	"kyotaidoshin/util"
 	"time"
 )
 
@@ -10,18 +11,18 @@ type RateQuery struct {
 	Limit      int
 	DateOfRate *time.Time
 	Currencies []string
-	SortOrder  string
+	SortOrder  util.SortOrderType
 }
 
-type RateTableResponse struct {
+type TableResponse struct {
 	Counters    Counters
 	NextPageUrl string
 	Results     []Item
 }
 
 type Counters struct {
-	TotalCount int
-	QueryCount *int
+	TotalCount int64
+	QueryCount *int64
 }
 
 type Item struct {

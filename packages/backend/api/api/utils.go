@@ -7,6 +7,7 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
+	"kyotaidoshin/util"
 	"log"
 	"net/http"
 	"strconv"
@@ -77,7 +78,22 @@ func GetQueryParamAsDate(r *http.Request, paramName string) *time.Time {
 }
 
 func GetQueryParamAsString(r *http.Request, paramName string) string {
-	return r.URL.Query().Get(paramName)
+	return strings.TrimSpace(r.URL.Query().Get(paramName))
+}
+
+func GetQueryParamAsSortOrderType(r *http.Request, paramName string) util.SortOrderType {
+	param := r.URL.Query().Get(paramName)
+	if param == "" {
+		return util.SortOrderTypeDESC
+	}
+
+	param = strings.ToUpper(param)
+
+	if param == "ASC" {
+		return util.SortOrderTypeASC
+	}
+
+	return util.SortOrderTypeDESC
 }
 
 func CrsfHeaders(ctx context.Context) string {

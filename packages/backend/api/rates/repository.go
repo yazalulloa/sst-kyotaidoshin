@@ -55,20 +55,18 @@ func GetRates(rateQuery RateQuery) ([]model.Rates, error) {
 	return rates, nil
 }
 
-var countStmt = Rates.SELECT(sqlite.COUNT(Rates.ID).AS("Count")).FROM(Rates)
-
-func GetTotalCount() (int, error) {
+func GetTotalCount() (int64, error) {
 	var dest struct {
-		Count int
+		Count int64
 	}
-	err := countStmt.Query(db.GetDB().DB, &dest)
+	err := Rates.SELECT(sqlite.COUNT(Rates.ID).AS("Count")).FROM(Rates).Query(db.GetDB().DB, &dest)
 	if err != nil {
 		return 0, err
 	}
 	return dest.Count, nil
 }
 
-func getQueryCount(rateQuery RateQuery) (*int, error) {
+func getQueryCount(rateQuery RateQuery) (*int64, error) {
 	condition, justTrue := queryCondition(&rateQuery)
 	if justTrue {
 		return nil, nil
@@ -76,7 +74,7 @@ func getQueryCount(rateQuery RateQuery) (*int, error) {
 
 	stmt := Rates.SELECT(sqlite.COUNT(Rates.ID).AS("Count")).FROM(Rates).WHERE(condition)
 	var dest struct {
-		Count int
+		Count int64
 	}
 	err := stmt.Query(db.GetDB().DB, &dest)
 	if err != nil {
