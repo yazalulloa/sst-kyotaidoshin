@@ -50,18 +50,13 @@ window.limitInputToMaxLength = function (input) {
   }
 }
 
-let locale = 'en';
-let messages = await fetch('/assets/messages.json')
-.then(response => {
-  if (!response.ok) {
-    throw new Error("HTTP error " + response.status);
-  }
-  return response.json();
-})
+
+
+import messages from './messages.json?raw'
 
 document.addEventListener('alpine-i18n:ready', function () {
-  // ... scroll to Usage to see where locale and messages came from
-  window.AlpineI18n.create(locale, messages);
+  let locale = 'en';
+  window.AlpineI18n.create(locale, JSON.parse(messages));
 });
 
 window.Alpine = Alpine
