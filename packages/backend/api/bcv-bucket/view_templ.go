@@ -108,7 +108,7 @@ func Search(res TableResponse) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"grid grid-cols-6 gap-4 items-center text-center fade-me-in fade-me-out\"><a href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" class=\"grid grid-cols-[4fr_1fr_3fr_3fr_2fr_1fr] gap-4 items-center text-center fade-me-in fade-me-out\"><a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
