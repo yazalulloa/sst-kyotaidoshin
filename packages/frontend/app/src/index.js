@@ -13,7 +13,7 @@ import htmx from "htmx.org";
 htmx.config.selfRequestsOnly = false;
 
 
-if false {
+if (false) {
   SVGLoader.destroyCache();
 }
 
