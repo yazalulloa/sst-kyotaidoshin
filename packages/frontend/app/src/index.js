@@ -12,8 +12,10 @@ import htmx from "htmx.org";
 // htmx.logAll();
 htmx.config.selfRequestsOnly = false;
 
-// todo env
-SVGLoader.destroyCache();
+
+if false {
+  SVGLoader.destroyCache();
+}
 
 // console.log('htmx', htmx.config);
 

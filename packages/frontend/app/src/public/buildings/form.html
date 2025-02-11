@@ -34,12 +34,13 @@ x-show="open">
     <div hx-get="/api/buildings/formData"
          hx-vals='js:{id: localStorage.getItem("resource")}'
          hx-trigger="load"
+         hx-target="this"
          hx-swap="outerHTML">
     </div>
 
     <div id="building-form-error" hidden="hidden"></div>
 
-    <div class="flex w-full  flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+    <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
       <label for="buildingIdInput"
              x-bind:class="idErr !== '' ? 'text-danger' : ''"
              class="flex w-fit items-center gap-1 pl-0.5 text-sm">
@@ -61,6 +62,7 @@ x-show="open">
           x-bind:class="idErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
           @input="$el.value = $el.value.replace(/[^\p{Letter}\p{Mark}\p{Number}]+/gu, '')"
           x-init="limitInputToMaxLength($el)"
+          x-bind:disabled="isEdit"
           required
       />
       <small x-model="idErr"
@@ -284,8 +286,9 @@ x-show="open">
 
     <div class="flex flex-row gap-2 justify-start">
       <button
+
           x-effect="
-                  let v = !(id?.trim()?.length > 0 && name?.trim()?.length > 0 && rif?.trim()?.length > 0);
+                  let v = !(id?.trim()?.length > 0 && name?.trim()?.length > 0 && rif?.trim()?.length > 0 && (fixedPay ? fixedPayAmount > 0 : true));
                   $el.disabled=v;
                   "
 

@@ -83,26 +83,40 @@ func buildingPut(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	validate := validator.New(validator.WithRequiredStructEnabled())
+
+	isUpdate := request.Key != nil
+	log.Printf("Is update: %v", isUpdate)
+	if isUpdate {
+		err := api.Decode(*request.Key, &request.Id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
 
 	err = validate.Struct(request)
 	if err != nil {
 		// Validation failed, handle the error
 		errors := err.(validator.ValidationErrors)
+		for _, valErr := range errors {
+			log.Printf("Validation error: %v", valErr)
+		}
 		http.Error(w, fmt.Sprintf("Validation error: %s", errors), http.StatusBadRequest)
 		return
 	}
 
-	exists, err := idExists(request.Id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	if !isUpdate {
+		exists, err := idExists(request.Id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-	if exists {
-		http.Error(w, "Id already exists", http.StatusBadRequest)
-		return
+		if exists {
+			http.Error(w, "Id already exists", http.StatusBadRequest)
+			return
+		}
 	}
 
 	currencies := make(map[string]bool)
@@ -133,63 +147,19 @@ func buildingPut(w http.ResponseWriter, r *http.Request) {
 		FixedPay:                    request.FixedPay,
 		FixedPayAmount:              fixedPayAmount,
 		RoundUpPayments:             request.RoundUpPayments,
+		EmailConfig:                 request.EmailConfig,
 	}
 
-	err = insert(building)
+	if isUpdate {
+		err = update(building)
+	} else {
+		err = insert(building)
+	}
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
-	//err := r.ParseForm()
-	//if err != nil {
-	//	log.Printf("Error parsing form: %v", err)
-	//	http.Error(w, err.Error(), http.StatusInternalServerError)
-	//	return
-	//}
-	//
-	//id := r.Form["id"]
-	//name := r.Form["name"]
-	//validate := func() error {
-	//
-	//}
-	//
-	//if len(id) > idMaxLen {
-	//	http.Error(w, "Id too long", http.StatusBadRequest)
-	//	return
-	//}
-	//
-	//if len(name) > nameMaxLen {
-	//	http.Error(w, "Name too long", http.StatusBadRequest)
-	//	return
-	//}
-	//
-	//rif := r.Form["rif"]
-	//if len(rif) > rifMaxLen {
-	//	http.Error(w, "Rif too long", http.StatusBadRequest)
-	//	return
-	//}
-	//
-	//mainCurrency := r.Form["main_currency"]
-	//mainCurrency := r.FormValue("main_currency")
-	//debtCurrency := r.FormValue("debt_currency")
-	//currenciesToShowAmountToPay := r.Form["currenciesToShowAmountToPay"]
-	////currenciesToShowAmountToPay := r.FormValue("currenciesToShowAmountToPay")
-	//roundUpPayments := r.FormValue("roundUpPayments")
-	//fixedPay := r.FormValue("fixedPay")
-	//fixedPayAmount := r.FormValue("fixedPayAmount")
-	//emailConfig := r.FormValue("emailConfig")
-	//
-	//log.Printf("Id is %v", id)
-	//log.Printf("Name is %v", name)
-	//log.Printf("Rif is %v", rif)
-	//log.Printf("MainCurrency is %v", mainCurrency)
-	//log.Printf("DebtCurrency is %v", debtCurrency)
-	//log.Printf("CurrenciesToShowAmountToPay is %v", currenciesToShowAmountToPay)
-	//log.Printf("RoundUpPayments is %v", roundUpPayments)
-	//log.Printf("FixedPay is %v", fixedPay)
-	//log.Printf("FixedPayAmount is %v", fixedPayAmount)
-	//log.Printf("EmailConfig is %v", emailConfig)
 
 	http.Error(w, "NotImplemented", http.StatusNotImplemented)
 }
@@ -204,7 +174,8 @@ const currencyMaxLen = 3
 const fixedPayAmountMaxLen = 18
 
 type FormRequest struct {
-	Id                          string   `form:"id" validate:"required,min=3,max=20,alphanumunicode"`
+	Key                         *string  `form:"Key"`
+	Id                          string   `form:"id" validate:"required_if=Key nil,min=3,max=20,alphanumunicode"`
 	Name                        string   `form:"name" validate:"required,min=3,max=100"`
 	Rif                         string   `form:"rif" validate:"required,min=7,max=20"`
 	MainCurrency                string   `form:"mainCurrency" validate:"required,oneof=USD VED"`

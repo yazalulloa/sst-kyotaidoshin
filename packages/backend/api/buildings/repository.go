@@ -82,6 +82,18 @@ func insert(building model.Buildings) error {
 	return err
 }
 
+func update(building model.Buildings) error {
+
+	stmt := Buildings.UPDATE(
+		Buildings.Name, Buildings.Rif, Buildings.MainCurrency, Buildings.DebtCurrency, Buildings.CurrenciesToShowAmountToPay, Buildings.FixedPay, Buildings.FixedPayAmount, Buildings.RoundUpPayments, Buildings.EmailConfig).
+		WHERE(Buildings.ID.EQ(sqlite.String(building.ID))).
+		SET(building.Name, building.Rif, building.MainCurrency, building.DebtCurrency, building.CurrenciesToShowAmountToPay, building.FixedPay, building.FixedPayAmount, building.RoundUpPayments, building.EmailConfig)
+
+	_, err := stmt.Exec(db.GetDB().DB)
+	return err
+
+}
+
 func selectById(id string) (*model.Buildings, error) {
 	stmt := Buildings.SELECT(Buildings.AllColumns).FROM(Buildings).WHERE(Buildings.ID.EQ(sqlite.String(id)))
 	var dest model.Buildings

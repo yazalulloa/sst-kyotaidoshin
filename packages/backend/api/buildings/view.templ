@@ -91,6 +91,7 @@ templ FormView(dto FormDto) {
 	if dto.building != nil {
 		<div
 			hidden="hidden"
+			data-building-id={ fmt.Sprint(dto.building.ID) }
 			data-building-name={ dto.building.Name }
 			data-building-rif={ dto.building.Rif }
 			data-building-main-currency={ dto.building.MainCurrency }
@@ -106,15 +107,17 @@ templ FormView(dto FormDto) {
 			data-building-email-config={ dto.building.EmailConfig }
 			x-init="
 	isEdit = true;
+	id = $el.getAttribute('data-building-id');
 	name = $el.getAttribute('data-building-name');
   rif = $el.getAttribute('data-building-rif');
   mainCurrency = $el.getAttribute('data-building-main-currency');
   debtCurrency = $el.getAttribute('data-building-debt-currency');
   currenciesToShowAmountToPay = $el.getAttribute('data-building-currencies-to-show-amount-to-pay');
-  fixedPay = $el.getAttribute('data-building-fixed-pay');
+  fixedPay = 'true' === $el.getAttribute('data-building-fixed-pay');
   fixedPayAmount = $el.getAttribute('data-building-fixed-pay-amount');
-  roundUpPayments = $el.getAttribute('data-building-round-up-payments');
+  roundUpPayments = 'true' === $el.getAttribute('data-building-round-up-payments');
   emailConfig = $el.getAttribute('data-building-email-config');
+
 	"
 		></div>
 	}
