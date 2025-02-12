@@ -9,16 +9,15 @@ import (
 	"time"
 )
 
-func bcvTask() (string, error) {
+func handler(ctx context.Context, event interface{}) (string, error) {
 
 	timestamp := time.Now().UnixMilli()
 
 	if true {
-		err := bcv.Check(context.Background())
+		err := bcv.Check(ctx)
 		if err != nil {
 			return "", err
 		}
-
 		return "OK", nil
 	}
 
@@ -38,5 +37,5 @@ func bcvTask() (string, error) {
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	lambda.Start(bcvTask)
+	lambda.Start(handler)
 }

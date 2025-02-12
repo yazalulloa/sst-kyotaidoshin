@@ -7,6 +7,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/cespare/xxhash"
 	"github.com/sst/sst/v3/sdk/golang/resource"
 	"io"
@@ -18,6 +19,8 @@ import (
 	"sync"
 	"time"
 )
+
+const MetadataProcessedKey = "processed"
 
 var (
 	netTransport = &http.Transport{
@@ -45,22 +48,6 @@ type FileInfo struct {
 
 func Check(ctx context.Context) error {
 
-	//s3List, err := s3Client.ListObjectsV2(context.Background(), &s3.ListObjectsV2Input{Bucket: aws.String(bucketName)})
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//log.Printf("Objects %d", len(s3List.Contents))
-
-	//for _, item := range s3List.Contents {
-	//	fmt.Println("Name:         ", *item.Key)
-	//	fmt.Println("Etag:         ", *item.ETag)
-	//	fmt.Println("Last modified:", *item.LastModified)
-	//	fmt.Println("Size:         ", *item.Size)
-	//	fmt.Println("")
-	//
-	//}
-
 	bucketName, err := GetBcvBucket()
 	if err != nil {
 		return err
@@ -82,7 +69,7 @@ func Check(ctx context.Context) error {
 		fileName := link[strings.LastIndex(link, "/")+1:]
 		objectKey := fmt.Sprintf("rates/bcv=%d=%s", pos, fileName)
 
-		headObj, err := s3Client.HeadObject(context.Background(), &s3.HeadObjectInput{
+		headObj, err := s3Client.HeadObject(ctx, &s3.HeadObjectInput{
 			Bucket: aws.String(bucketName),
 			Key:    aws.String(objectKey),
 		})
@@ -145,13 +132,17 @@ func Check(ctx context.Context) error {
 		metadata["etag"] = etag
 		metadata["lastmodified"] = res.Header.Get("Last-Modified")
 		metadata["url"] = link
-		metadata["processed"] = "false"
+		
+		if headObj == nil || headObj.Metadata[MetadataProcessedKey] == "" {
+			metadata[MetadataProcessedKey] = "false"
+		}
 		//metadata["hash"] = fmt.Sprintf("%d", hash)
 
-		_, err = s3Client.PutObject(context.Background(), &s3.PutObjectInput{
-			Bucket: aws.String(bucketName),
-			Key:    aws.String(objectKey),
-			Body:   res.Body,
+		_, err = s3Client.PutObject(ctx, &s3.PutObjectInput{
+			Bucket:            aws.String(bucketName),
+			Key:               aws.String(objectKey),
+			Body:              res.Body,
+			ChecksumAlgorithm: types.ChecksumAlgorithmCrc64nvme,
 			//ChecksumCRC32:             nil,
 			//ChecksumCRC32C:            nil,
 			//ChecksumSHA1:              nil,

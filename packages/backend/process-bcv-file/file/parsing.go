@@ -20,18 +20,24 @@ import (
 	"unicode"
 )
 
-func fileParse(ctx context.Context, bucket, key string) error {
-	client, err := bcv.GetS3Client(ctx)
+type ParsingParams struct {
+	Ctx         context.Context
+	Bucket, Key string
+	ProcessAll  *bool
+}
+
+func fileParse(params ParsingParams) error {
+	client, err := bcv.GetS3Client(params.Ctx)
 	if err != nil {
 		return err
 	}
 
-	objKey := strings.ReplaceAll(key, "%3D", "=")
+	objKey := strings.ReplaceAll(params.Key, "%3D", "=")
 
 	log.Printf("Processing %s\n", objKey)
 
-	output, err := client.GetObject(ctx, &s3.GetObjectInput{
-		Bucket: aws.String(bucket),
+	output, err := client.GetObject(params.Ctx, &s3.GetObjectInput{
+		Bucket: aws.String(params.Bucket),
 		Key:    aws.String(objKey),
 	})
 
@@ -52,17 +58,32 @@ func fileParse(ctx context.Context, bucket, key string) error {
 		return fmt.Errorf("error reading response body: %w", err)
 	}
 
-	result, err := Parse(objKey, data)
+	var processed = false
+	if params.ProcessAll != nil {
+		processed = *params.ProcessAll
+	} else {
+		processed, _ = strconv.ParseBool(output.Metadata[bcv.MetadataProcessedKey])
+	}
+
+	info := ParsingInfo{
+		BucketKey:           objKey,
+		Data:                data,
+		PreviouslyProcessed: processed,
+	}
+
+	result, err := info.parse()
 	if err != nil {
 		return err
 	}
 
-	output.Metadata["processed"] = "true"
+	output.Metadata[bcv.MetadataProcessedKey] = "true"
+	output.Metadata["lastProcessed"] = time.Now().Format(time.RFC3339)
+	output.Metadata["ratesParsed"] = strconv.FormatInt(result.Parsed, 10)
 
-	_, err = client.CopyObject(ctx, &s3.CopyObjectInput{
-		Bucket:            &bucket,
+	_, err = client.CopyObject(params.Ctx, &s3.CopyObjectInput{
+		Bucket:            &params.Bucket,
 		Key:               &objKey,
-		CopySource:        aws.String(bucket + "/" + key),
+		CopySource:        aws.String(params.Bucket + "/" + params.Key),
 		Metadata:          output.Metadata,
 		MetadataDirective: types.MetadataDirectiveReplace,
 	})
@@ -76,12 +97,12 @@ func fileParse(ctx context.Context, bucket, key string) error {
 	return nil
 }
 
-func ParseFile(ctx context.Context, bucket, key string) error {
+func ParseFile(params ParsingParams) error {
 
-	err := fileParse(ctx, bucket, key)
+	err := fileParse(params)
 
 	if err != nil {
-		log.Printf("Error parsing file: %s %v\n", key, err)
+		log.Printf("Error parsing file: %s %v\n", params.Key, err)
 	}
 
 	return err
@@ -110,12 +131,24 @@ type Result struct {
 	Parsed   int64
 }
 
-func Parse(bucketKey string, data []byte) (*Result, error) {
-	parsingError := ParsingError{
-		BucketKey: bucketKey,
+type ParsingInfo struct {
+	BucketKey           string
+	Data                []byte
+	PreviouslyProcessed bool
+}
+
+func (info *ParsingInfo) parse() (*Result, error) {
+
+	location, err := time.LoadLocation("America/Caracas")
+	if err != nil {
+		return nil, err
 	}
 
-	reader := bytes.NewReader(data)
+	parsingError := ParsingError{
+		BucketKey: info.BucketKey,
+	}
+
+	reader := bytes.NewReader(info.Data)
 
 	result := Result{}
 	workbook, err := xls.OpenReader(reader)
@@ -177,10 +210,6 @@ func Parse(bucketKey string, data []byte) (*Result, error) {
 						parsingError.Value = timeSplit[1]
 						return nil, parsingError.err(err)
 					}
-					location, err := time.LoadLocation("America/Caracas")
-					if err != nil {
-						return nil, err
-					}
 
 					temp := time.Date(year, time.Month(month), day, hour, minute, 0, 0, location)
 					dateOfFile = &temp
@@ -217,11 +246,6 @@ func Parse(bucketKey string, data []byte) (*Result, error) {
 						return nil, parsingError.err(err)
 					}
 
-					location, err := time.LoadLocation("America/Caracas")
-					if err != nil {
-						return nil, parsingError.err(err)
-					}
-
 					temp := time.Date(year, time.Month(month), day, 0, 0, 0, 0, location)
 					dateOfFile = &temp
 				}
@@ -247,10 +271,6 @@ func Parse(bucketKey string, data []byte) (*Result, error) {
 				}
 
 				year, err := strconv.Atoi(split[2])
-				if err != nil {
-					return nil, parsingError.err(err)
-				}
-				location, err := time.LoadLocation("America/Caracas")
 				if err != nil {
 					return nil, parsingError.err(err)
 				}
@@ -291,7 +311,7 @@ func Parse(bucketKey string, data []byte) (*Result, error) {
 					return nil, parsingError.err(err)
 				}
 
-				str := strings.ReplaceAll(dateOfRate.Format(time.DateOnly), "-", "") + api.ToASCII(currency) + api.PadLeft(strconv.Itoa(sheetIndex), 4)
+				str := strings.ReplaceAll(dateOfRate.Format(time.DateOnly), "-", "") + api.ToASCII(currency)
 				id, err := strconv.ParseInt(str, 10, 64)
 				if err != nil {
 					parsingError.Value = str
@@ -318,13 +338,20 @@ func Parse(bucketKey string, data []byte) (*Result, error) {
 
 		//log.Printf("Sheet: %s rates: %d %s %s", sheet.GetName(), len(rateArray), dateOfRate, dateOfFile)
 		result.Parsed += int64(len(rateArray))
-		ratesInserted, err := processRates(&rateArray)
-		parsingError.Value = ""
-		if err != nil {
-			return nil, parsingError.err(err)
+
+		if !info.PreviouslyProcessed || sheetIndex == 0 {
+
+			ratesInserted, err := processRates(&rateArray)
+			parsingError.Value = ""
+			if err != nil {
+				return nil, parsingError.err(err)
+			}
+			result.Inserted += ratesInserted
 		}
 
-		result.Parsed += ratesInserted
+		if info.PreviouslyProcessed {
+			break
+		}
 	}
 
 	return &result, nil
@@ -338,22 +365,6 @@ func processRates(rateArray *[]model.Rates) (int64, error) {
 	}
 
 	return rowsAffected, nil
-
-	//ratesToInsert, err := rates.CheckRateInsert(rateArray)
-	//if err != nil {
-	//	return 0, err
-	//}
-	//
-	//if len(ratesToInsert) > 0 {
-	//	rowsAffected, err := rates.Insert(ratesToInsert)
-	//	if err != nil {
-	//		return 0, err
-	//	}
-	//
-	//	return rowsAffected, nil
-	//}
-	//
-	//return 0, nil
 }
 
 func toASCII(str string) string {

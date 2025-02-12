@@ -30,7 +30,12 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 				continue
 			}
 
-			err := file.ParseFile(ctx, s3Record.S3.Bucket.Name, s3Record.S3.Object.Key)
+			err := file.ParseFile(file.ParsingParams{
+				Ctx:    ctx,
+				Bucket: s3Record.S3.Bucket.Name,
+				Key:    s3Record.S3.Object.Key,
+			})
+
 			if err != nil {
 				return err
 			}

@@ -123,7 +123,7 @@ export default $config({
     api.route("$default", {
       handler: "packages/backend/api",
       runtime: "go",
-      link: [bucket, secretTursoUrl]
+      link: [bucket, secretTursoUrl, bcvUrl, bcvFileStartPath]
     });
 
     // const api = new sst.aws.Function("ApiFunction", {

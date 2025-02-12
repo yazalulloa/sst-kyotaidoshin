@@ -18,6 +18,16 @@
     main.action.bcv.files.process.all
   </button>
 
+  <button hx-get="/api/bcv-bucket/look-up"
+          hx-trigger="mousedown"
+          hx-swap="none"
+          hx-disabled-elt="this"
+          hx-indicator=".htmx-indicator"
+          type="button"
+          class="w-fit inline-flex items-center justify-between gap-2 whitespace-nowrap border-outline bg-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark border rounded-radius">
+    main.action.bcv.files.look.up
+  </button>
+
 </div>
 
 <div id="container" hx-swap-oob="true">

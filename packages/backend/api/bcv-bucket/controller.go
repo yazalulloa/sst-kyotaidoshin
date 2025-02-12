@@ -32,6 +32,7 @@ func Routes(server *mux.Router) {
 	server.HandleFunc(_PATH+"/{id}", bcvBucketDelete).Methods("DELETE")
 	server.HandleFunc(_PATH+"/process/{id}", process).Methods("POST")
 	server.HandleFunc(_PATH+"/process-all", processAll).Methods("GET")
+	server.HandleFunc(_PATH+"/look-up", lookUp).Methods("GET")
 }
 
 func search(w http.ResponseWriter, r *http.Request) {
@@ -82,7 +83,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 			}
 
 			url := obj.Metadata["url"]
-			processed := obj.Metadata["processed"]
+			processed := obj.Metadata[bcv.MetadataProcessedKey]
 			processedBool := false
 			if processed != "" {
 				processedBool, _ = strconv.ParseBool(processed)
@@ -198,7 +199,13 @@ func process(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Handling PROCESS %s", str)
 
-	err = file.ParseFile(r.Context(), bucketName, str)
+	ProcessAll := true
+	err = file.ParseFile(file.ParsingParams{
+		Ctx:        r.Context(),
+		Bucket:     bucketName,
+		Key:        str,
+		ProcessAll: &ProcessAll,
+	})
 	//err = invokeParsingFunction(r.Context(), bucketName, str)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -276,7 +283,14 @@ func processAll(w http.ResponseWriter, r *http.Request) {
 		go func(item types.Object) {
 			defer wg.Done()
 
-			err := file.ParseFile(r.Context(), bucketName, *item.Key)
+			ProcessAll := true
+			err := file.ParseFile(file.ParsingParams{
+				Ctx:        r.Context(),
+				Bucket:     bucketName,
+				Key:        *item.Key,
+				ProcessAll: &ProcessAll,
+			})
+
 			if err != nil {
 				handleErr(err)
 				return
@@ -314,4 +328,14 @@ type Item struct {
 type TableResponse struct {
 	TotalCount int
 	Results    []Item
+}
+
+func lookUp(w http.ResponseWriter, r *http.Request) {
+	err := bcv.Check(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
