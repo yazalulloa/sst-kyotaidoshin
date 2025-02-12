@@ -47,7 +47,7 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 }
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Llongfile)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	// Make the handler available for Remote Procedure Call by AWS Lambda
 	lambda.Start(handler)
 }

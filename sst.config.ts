@@ -54,6 +54,7 @@ export default $config({
       link: [secretTursoUrl, bucket, queue],
       runtime: "go",
       handler: "packages/backend/process-bcv-file/",
+      timeout: "90 seconds",
 
       // volume: {
       //   efs: efs,
