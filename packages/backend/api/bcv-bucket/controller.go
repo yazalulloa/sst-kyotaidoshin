@@ -20,6 +20,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 const _PATH = "/api/bcv-bucket"
@@ -89,6 +90,20 @@ func search(w http.ResponseWriter, r *http.Request) {
 				processedBool, _ = strconv.ParseBool(processed)
 			}
 
+			ratesParsedStr := obj.Metadata[bcv.MetadataRatesParsedKey]
+			ratesParsed, _ := strconv.Atoi(ratesParsedStr)
+
+			lastProcessedStr := obj.Metadata[bcv.MetadataLastProcessedKey]
+
+			var processedDate *int64
+			if lastProcessedStr != "" {
+				date, err := time.Parse(time.RFC3339, lastProcessedStr)
+				if err == nil {
+					tmp := date.UnixMilli()
+					processedDate = &tmp
+				}
+			}
+
 			results[i] = Item{
 				Item: S3File{
 					Name:          *item.Key,
@@ -98,6 +113,8 @@ func search(w http.ResponseWriter, r *http.Request) {
 					LastModified:  (*item.LastModified).UnixMilli(),
 					Url:           url,
 					Processed:     processedBool,
+					Rates:         ratesParsed,
+					ProcessedDate: processedDate,
 				},
 				Key:    *api.Base64Encode(*item.Key),
 				CardId: "bcv-buckets-" + uuid.NewString(),
@@ -317,6 +334,8 @@ type S3File struct {
 	LastModified  int64
 	Url           string
 	Processed     bool
+	Rates         int
+	ProcessedDate *int64
 }
 
 type Item struct {

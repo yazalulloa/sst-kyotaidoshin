@@ -58,17 +58,17 @@ func fileParse(params ParsingParams) error {
 		return fmt.Errorf("error reading response body: %w", err)
 	}
 
-	var processed = false
+	var processAll = false
 	if params.ProcessAll != nil {
-		processed = *params.ProcessAll
+		processAll = *params.ProcessAll
 	} else {
-		processed, _ = strconv.ParseBool(output.Metadata[bcv.MetadataProcessedKey])
+		processAll, _ = strconv.ParseBool(output.Metadata[bcv.MetadataProcessedKey])
 	}
 
 	info := ParsingInfo{
-		BucketKey:           objKey,
-		Data:                data,
-		PreviouslyProcessed: processed,
+		BucketKey:  objKey,
+		Data:       data,
+		ProcessAll: processAll,
 	}
 
 	result, err := info.parse()
@@ -77,8 +77,8 @@ func fileParse(params ParsingParams) error {
 	}
 
 	output.Metadata[bcv.MetadataProcessedKey] = "true"
-	output.Metadata["lastProcessed"] = time.Now().Format(time.RFC3339)
-	output.Metadata["ratesParsed"] = strconv.FormatInt(result.Parsed, 10)
+	output.Metadata[bcv.MetadataLastProcessedKey] = time.Now().Format(time.RFC3339)
+	output.Metadata[bcv.MetadataRatesParsedKey] = strconv.FormatInt(result.Parsed, 10)
 
 	_, err = client.CopyObject(params.Ctx, &s3.CopyObjectInput{
 		Bucket:            &params.Bucket,
@@ -132,12 +132,12 @@ type Result struct {
 }
 
 type ParsingInfo struct {
-	BucketKey           string
-	Data                []byte
-	PreviouslyProcessed bool
+	BucketKey  string
+	Data       []byte
+	ProcessAll bool
 }
 
-func (info *ParsingInfo) parse() (*Result, error) {
+func (info ParsingInfo) parse() (*Result, error) {
 
 	location, err := time.LoadLocation("America/Caracas")
 	if err != nil {
@@ -339,7 +339,7 @@ func (info *ParsingInfo) parse() (*Result, error) {
 		//log.Printf("Sheet: %s rates: %d %s %s", sheet.GetName(), len(rateArray), dateOfRate, dateOfFile)
 		result.Parsed += int64(len(rateArray))
 
-		if !info.PreviouslyProcessed || sheetIndex == 0 {
+		if info.ProcessAll || sheetIndex == 0 {
 
 			ratesInserted, err := processRates(&rateArray)
 			parsingError.Value = ""
@@ -347,10 +347,6 @@ func (info *ParsingInfo) parse() (*Result, error) {
 				return nil, parsingError.err(err)
 			}
 			result.Inserted += ratesInserted
-		}
-
-		if info.PreviouslyProcessed {
-			break
 		}
 	}
 

@@ -21,6 +21,8 @@ import (
 )
 
 const MetadataProcessedKey = "processed"
+const MetadataLastProcessedKey = "lastprocessed"
+const MetadataRatesParsedKey = "ratesparsed"
 
 var (
 	netTransport = &http.Transport{
@@ -132,11 +134,10 @@ func Check(ctx context.Context) error {
 		metadata["etag"] = etag
 		metadata["lastmodified"] = res.Header.Get("Last-Modified")
 		metadata["url"] = link
-		
+
 		if headObj == nil || headObj.Metadata[MetadataProcessedKey] == "" {
 			metadata[MetadataProcessedKey] = "false"
 		}
-		//metadata["hash"] = fmt.Sprintf("%d", hash)
 
 		_, err = s3Client.PutObject(ctx, &s3.PutObjectInput{
 			Bucket:            aws.String(bucketName),

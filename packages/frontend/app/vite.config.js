@@ -20,4 +20,7 @@ export default defineConfig({
   server: {
     historyApiFallback: true, // This will route all requests to index.html
   },
+  assetsInclude: [
+    "./pages/**/*.html",
+  ]
 });

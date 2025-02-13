@@ -74,7 +74,7 @@ templ Search(res TableResponse) {
 					data-resource={ item.Key }
 					hx-on::before-request="localStorage.setItem('resource', this.getAttribute('data-resource'))"
 				>
-					<svg data-src="/assets/images/edit_icon.svg" data-cache="21600" class="h-6 w-6"></svg>
+					<svg x-init="$el.setAttribute('data-src', window.editIconUrl)" data-cache="21600" class="h-6 w-6"></svg>
 				</button>
 				@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
 			</div>

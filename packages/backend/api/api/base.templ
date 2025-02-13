@@ -81,7 +81,7 @@ templ DeleteBtn(deleteUrl string, cardIdRef string, attrs templ.Attributes) {
 			hx-swap="delete swap:300ms"
 			{ attrs... }
 		>
-			<svg data-src="/assets/images/delete-cross.svg" data-cache="21600" class="h-6 w-6"></svg>
+			<svg x-init="$el.setAttribute('data-src', window.deleteIconUrl)" data-cache="21600" class="h-6 w-6"></svg>
 		</button>
 	</div>
 }

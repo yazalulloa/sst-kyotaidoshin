@@ -7,6 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.36.1
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.76.1
 	github.com/shakinm/xlsReader v0.9.12
+	github.com/sst/sst/v3 v3.8.3
 )
 
 require (

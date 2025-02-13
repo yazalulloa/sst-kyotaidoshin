@@ -279,7 +279,7 @@ func DeleteBtn(deleteUrl string, cardIdRef string, attrs templ.Attributes) templ
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "><svg data-src=\"/assets/images/delete-cross.svg\" data-cache=\"21600\" class=\"h-6 w-6\"></svg></button></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "><svg x-init=\"$el.setAttribute(&#39;data-src&#39;, window.deleteIconUrl)\" data-cache=\"21600\" class=\"h-6 w-6\"></svg></button></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

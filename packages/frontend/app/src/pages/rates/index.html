@@ -15,7 +15,14 @@
   <div data-change-element="rates-updater"
        data-change-event="update-rates">
 
-    <div hx-get="/rates/currencyPicker.html"
+    <script type="module">
+      import targetUrl from './currencyPicker.html?url'
+      let component = document.getElementById('rates-currency-picker-component');
+      component.setAttribute('hx-get', targetUrl)
+      console.log('component', component)
+    </script>
+
+    <div id="rates-currency-picker-component"
          hx-trigger="load"
          hx-swap="outerHTML">
     </div>

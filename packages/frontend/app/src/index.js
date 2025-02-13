@@ -8,12 +8,30 @@ import collapse from '@alpinejs/collapse'
 import mask from '@alpinejs/mask'
 import AlpineI18n from 'alpinejs-i18n';
 import htmx from "htmx.org";
+import messages from './messages.json?raw'
+
+import deleteIconUrl from './assets/images/delete-cross.svg';
+import processIconUrl from './assets/images/process.svg';
+import editIconUrl from './assets/images/edit_icon.svg';
+
+window.deleteIconUrl = deleteIconUrl;
+window.processIconUrl = processIconUrl;
+window.editIconUrl = editIconUrl;
+
+const flagDir = import.meta.glob('./assets/images/flags/*.svg', {as: 'url'});
+
+window.flags = new Map();
+
+for (let record in flagDir) {
+  let key = record.substring(record.lastIndexOf('/') + 1,
+      record.lastIndexOf('.'));
+  flags.set(key, record);
+}
 
 // htmx.logAll();
 htmx.config.selfRequestsOnly = false;
 
-
-if (false) {
+if (true) {
   SVGLoader.destroyCache();
 }
 
@@ -49,10 +67,6 @@ window.limitInputToMaxLength = function (input) {
     }
   }
 }
-
-
-
-import messages from './messages.json?raw'
 
 document.addEventListener('alpine-i18n:ready', function () {
   let locale = 'en';

@@ -64,51 +64,66 @@
     <div class="flex flex-col gap-2 overflow-y-auto pb-6">
 
       <a href="/rates"
-         hx-get="/rates/index.html"
          hx-target="#container"
          hx-indicator=".htmx-indicator"
          hx-trigger="click, navigate"
          hx-swap="innerHTML"
          class="flex items-center rounded-radius gap-2 px-2 py-1.5 text-sm font-medium text-on-surface underline-offset-2 hover:bg-primary/5 hover:text-on-surface-strong focus-visible:underline focus:outline-hidden dark:text-on-surface-dark dark:hover:bg-primary-dark/5 dark:hover:text-on-surface-dark-strong">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5 shrink-0 hidden"
-             aria-hidden="true">
-          <path
-              d="M15.5 2A1.5 1.5 0 0 0 14 3.5v13a1.5 1.5 0 0 0 1.5 1.5h1a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 16.5 2h-1ZM9.5 6A1.5 1.5 0 0 0 8 7.5v9A1.5 1.5 0 0 0 9.5 18h1a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 10.5 6h-1ZM3.5 10A1.5 1.5 0 0 0 2 11.5v5A1.5 1.5 0 0 0 3.5 18h1A1.5 1.5 0 0 0 6 16.5v-5A1.5 1.5 0 0 0 4.5 10h-1Z"/>
-        </svg>
 
-        <svg data-src="/assets/images/rates.svg" data-cache="21600" class="size-5"></svg>
+        <script type="module">
+          import svg from './assets/images/rates.svg'
+          import targetUrl from './pages/rates/index.html?url'
+
+          let anchor = document.querySelector('a[href="/rates"]');
+          anchor.setAttribute('hx-get', targetUrl);
+          anchor.querySelector('svg').setAttribute('data-src', svg);
+
+        </script>
+
+        <svg data-cache="21600" class="size-5"></svg>
         <span>main.title.rates</span>
       </a>
 
       <a href="/bcv-bucket"
-         hx-get="/bcv-bucket/index.html"
-         hx-target="#container"
-         hx-indicator=".htmx-indicator"
-         hx-trigger="click, navigate"
-         hx-swap="innerHTML"
-         class="flex items-center rounded-radius gap-2 bg-primary/10 px-2 py-1.5 text-sm font-medium text-on-surface-strong underline-offset-2 focus-visible:underline focus:outline-hidden dark:bg-primary-dark/10 dark:text-on-surface-dark-strong">
-
-        <svg data-src="/assets/images/bucket.svg" data-cache="21600" class="size-5"></svg>
-        <span>main.title.bcv.files</span>
-        <span class="sr-only">active</span>
-      </a>
-
-      <a href="/packages/frontend/app/src/buildings"
-         hx-get="/buildings/index.html"
          hx-target="#container"
          hx-indicator=".htmx-indicator"
          hx-trigger="load, click, navigate"
          hx-swap="innerHTML"
+         class="flex items-center rounded-radius gap-2 bg-primary/10 px-2 py-1.5 text-sm font-medium text-on-surface-strong underline-offset-2 focus-visible:underline focus:outline-hidden dark:bg-primary-dark/10 dark:text-on-surface-dark-strong">
+
+        <script type="module">
+          import svg from './assets/images/bucket.svg'
+          import targetUrl from './pages/bcv-bucket/main.html?url'
+
+          let anchor = document.querySelector('a[href="/bcv-bucket"]');
+          anchor.setAttribute('hx-get', targetUrl);
+          anchor.querySelector('svg').setAttribute('data-src', svg);
+
+        </script>
+        <svg data-cache="21600" class="size-5"></svg>
+        <span>main.title.bcv.files</span>
+        <span class="sr-only">active</span>
+      </a>
+
+      <a href="/buildings"
+         hx-target="#container"
+         hx-indicator=".htmx-indicator"
+         hx-trigger="click, navigate"
+         hx-swap="innerHTML"
          class="flex items-center rounded-radius gap-2 px-2 py-1.5 text-sm font-medium text-on-surface underline-offset-2 hover:bg-primary/5 hover:text-on-surface-strong focus-visible:underline focus:outline-hidden dark:text-on-surface-dark dark:hover:bg-primary-dark/5 dark:hover:text-on-surface-dark-strong">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5 shrink-0"
-             aria-hidden="true">
-          <path fill-rule="evenodd"
-                d="M4.606 12.97a.75.75 0 0 1-.134 1.051 2.494 2.494 0 0 0-.93 2.437 2.494 2.494 0 0 0 2.437-.93.75.75 0 1 1 1.186.918 3.995 3.995 0 0 1-4.482 1.332.75.75 0 0 1-.461-.461 3.994 3.994 0 0 1 1.332-4.482.75.75 0 0 1 1.052.134Z"
-                clip-rule="evenodd"/>
-          <path fill-rule="evenodd"
-                d="M5.752 12A13.07 13.07 0 0 0 8 14.248v4.002c0 .414.336.75.75.75a5 5 0 0 0 4.797-6.414 12.984 12.984 0 0 0 5.45-10.848.75.75 0 0 0-.735-.735 12.984 12.984 0 0 0-10.849 5.45A5 5 0 0 0 1 11.25c.001.414.337.75.751.75h4.002ZM13 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"
-                clip-rule="evenodd"/>
-        </svg>
+
+        <script type="module">
+          import svg from './assets/images/building.svg'
+          // document.getElementById('buildings-icon-nav').setAttribute('data-src', svg);
+
+          import targetUrl from './pages/buildings/index.html?url'
+
+          let anchor = document.querySelector('a[href="/buildings"]');
+          anchor.setAttribute('hx-get', targetUrl);
+          anchor.querySelector('svg').setAttribute('data-src', svg);
+        </script>
+
+        <svg data-cache="21600" class="size-5"></svg>
         <span>main.title.buildings</span>
       </a>
 

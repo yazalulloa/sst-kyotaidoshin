@@ -2,6 +2,7 @@ package bcv
 
 import (
 	"context"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -9,68 +10,81 @@ import (
 	"sync"
 )
 
-var s3Instance *S3Helper
-var s3Once sync.Once
-
-type S3Helper struct {
-	Client *s3.Client
-}
-
-func GetS3Client(ctx context.Context) (*s3.Client, error) {
-	var err error
-	s3Once.Do(func() {
-		s3Instance, err = s3client(ctx)
-	})
-
-	return s3Instance.Client, err
-}
-
-func s3client(ctx context.Context) (*S3Helper, error) {
-
-	cfg, err := config.LoadDefaultConfig(ctx, func(opts *config.LoadOptions) error {
+func loadConfig(ctx context.Context) (aws.Config, error) {
+	return config.LoadDefaultConfig(ctx, func(opts *config.LoadOptions) error {
 		opts.Region = os.Getenv("AWS_REGION")
 		return nil
 	})
+}
+
+var s3ClientInstance *s3.Client
+var s3ClientOnce sync.Once
+
+func GetS3Client(ctx context.Context) (*s3.Client, error) {
+	var err error
+	s3ClientOnce.Do(func() {
+		s3ClientInstance, err = s3client(ctx)
+	})
+
+	return s3ClientInstance, err
+}
+
+func s3client(ctx context.Context) (*s3.Client, error) {
+
+	cfg, err := loadConfig(ctx)
 
 	if err != nil {
 		return nil, err
 	}
 	client := s3.NewFromConfig(cfg)
 
-	return &S3Helper{
-		Client: client,
-	}, nil
+	return client, nil
 }
 
-var lambdaInstance *LambdaHelper
-var lambdaOnce sync.Once
-
-type LambdaHelper struct {
-	Client *lambda.Client
-}
+var lambdaClientInstance *lambda.Client
+var lambdaClientOnce sync.Once
 
 func GetLambdaClient(ctx context.Context) (*lambda.Client, error) {
 	var err error
-	lambdaOnce.Do(func() {
-		lambdaInstance, err = lambdaClient(ctx)
+	lambdaClientOnce.Do(func() {
+		lambdaClientInstance, err = lambdaClient(ctx)
 	})
 
-	return lambdaInstance.Client, err
+	return lambdaClientInstance, err
 }
 
-func lambdaClient(ctx context.Context) (*LambdaHelper, error) {
+func lambdaClient(ctx context.Context) (*lambda.Client, error) {
 
-	cfg, err := config.LoadDefaultConfig(ctx, func(opts *config.LoadOptions) error {
-		opts.Region = os.Getenv("AWS_REGION")
-		return nil
-	})
+	cfg, err := loadConfig(ctx)
 
 	if err != nil {
 		return nil, err
 	}
 	client := lambda.NewFromConfig(cfg)
 
-	return &LambdaHelper{
-		Client: client,
-	}, nil
+	return client, nil
+}
+
+var presignClientInstance *s3.PresignClient
+var presignClientOnce sync.Once
+
+func GetPresignClient(ctx context.Context) (*s3.PresignClient, error) {
+	var err error
+	presignClientOnce.Do(func() {
+		presignClientInstance, err = presignClient(ctx)
+	})
+
+	return presignClientInstance, err
+}
+
+func presignClient(ctx context.Context) (*s3.PresignClient, error) {
+
+	cfg, err := loadConfig(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+	client := s3.NewPresignClient(s3.NewFromConfig(cfg))
+
+	return client, nil
 }

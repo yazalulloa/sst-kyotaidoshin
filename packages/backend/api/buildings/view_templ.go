@@ -199,7 +199,7 @@ func Search(res TableResponse) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" hx-on::before-request=\"localStorage.setItem(&#39;resource&#39;, this.getAttribute(&#39;data-resource&#39;))\"><svg data-src=\"/assets/images/edit_icon.svg\" data-cache=\"21600\" class=\"h-6 w-6\"></svg></button>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" hx-on::before-request=\"localStorage.setItem(&#39;resource&#39;, this.getAttribute(&#39;data-resource&#39;))\"><svg x-init=\"$el.setAttribute(&#39;data-src&#39;, window.editIconUrl)\" data-cache=\"21600\" class=\"h-6 w-6\"></svg></button>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
