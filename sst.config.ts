@@ -148,18 +148,18 @@ export default $config({
         command: "bun run build",
         output: "dist"
       },
-      // assets: {
-      //   fileOptions: [
-      //     {
-      //       files: ["**/*"],
-      //       cacheControl: "max-age=21600,must-revalidate,public,immutable"
-      //     },
-      //     // {
-      //     //   files: "**/*.html",
-      //     //   cacheControl: "max-age=0,no-cache,no-store,must-revalidate"
-      //     // }
-      //   ]
-      // }
+      assets: {
+        fileOptions: [
+          {
+            files: ["**/*"],
+            cacheControl: "max-age=21600,must-revalidate,public,immutable"
+          },
+          // {
+          //   files: "**/*.html",
+          //   cacheControl: "max-age=0,no-cache,no-store,must-revalidate"
+          // }
+        ]
+      }
     });
 
     // const router = new sst.aws.Router("MyRouter", {
