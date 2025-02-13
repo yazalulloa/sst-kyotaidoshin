@@ -1,6 +1,4 @@
 import 'htmx.org';
-
-// window.htmx = require('htmx.org');
 import "external-svg-loader";
 import Alpine from 'alpinejs'
 import focus from '@alpinejs/focus'
@@ -9,29 +7,16 @@ import mask from '@alpinejs/mask'
 import AlpineI18n from 'alpinejs-i18n';
 import htmx from "htmx.org";
 import messages from './messages.json?raw'
+import './partials.js';
+import './flags.js';
+import './images.js';
 
-import deleteIconUrl from './assets/images/delete-cross.svg';
-import processIconUrl from './assets/images/process.svg';
-import editIconUrl from './assets/images/edit_icon.svg';
-
-window.deleteIconUrl = deleteIconUrl;
-window.processIconUrl = processIconUrl;
-window.editIconUrl = editIconUrl;
-
-const flagDir = import.meta.glob('./assets/images/flags/*.svg', {as: 'url'});
-
-window.flags = new Map();
-
-for (let record in flagDir) {
-  let key = record.substring(record.lastIndexOf('/') + 1,
-      record.lastIndexOf('.'));
-  flags.set(key, record);
-}
+window.htmx = htmx;
 
 // htmx.logAll();
 htmx.config.selfRequestsOnly = false;
 
-if (true) {
+if (import.meta.env.VITE_IS_DEV === 'true') {
   SVGLoader.destroyCache();
 }
 

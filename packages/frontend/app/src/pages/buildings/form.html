@@ -286,7 +286,6 @@ x-show="open">
 
     <div class="flex flex-row gap-2 justify-start">
       <button
-
           x-effect="
                   let v = !(id?.trim()?.length > 0 && name?.trim()?.length > 0 && rif?.trim()?.length > 0 && (fixedPay ? fixedPayAmount > 0 : true));
                   $el.disabled=v;
@@ -296,7 +295,7 @@ x-show="open">
         main.action.submit
       </button>
       <button type="button"
-              hx-get="/buildings/index.html"
+              x-bind:hx-get="buildingsIndexPartialUrl"
               hx-disabled-elt="this"
               hx-indicator=".htmx-indicator"
               hx-swap="none"

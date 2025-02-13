@@ -1,18 +1,17 @@
 <div id="header-container" hx-swap-oob="true">
   <div x-data="{
-   url: '/buildings/index.html'
+   url: buildingsIndexPartialUrl
   }">
-    <div hx-get="/partials/backBtn.html"
+    <div x-bind:hx-get="backBtnPartialUrl"
          hx-trigger="load"
-         hx-swap="outerHTML"></div>
+         hx-swap="outerHTML">
+    </div>
   </div>
 </div>
 
 <div id="container" hx-swap-oob="true">
-
-  <div hx-get="/buildings/form.html"
+  <div x-bind:hx-get="buildingsFormPartialUrl"
        hx-trigger="load"
        hx-swap="outerHTML">
   </div>
-
 </div>

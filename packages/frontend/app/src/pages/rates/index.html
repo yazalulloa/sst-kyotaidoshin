@@ -12,19 +12,24 @@
     <span x-show="query">{main.title.items}: <span x-text="query"></span></span>
   </div>
 
-  <div data-change-element="rates-updater"
-       data-change-event="update-rates">
+  <div
+      data-change-element="rates-updater"
+      data-change-event="update-rates"
+      x-data="{
+   currencies: []
+  }"
+  >
 
-    <script type="module">
-      import targetUrl from './currencyPicker.html?url'
-      let component = document.getElementById('rates-currency-picker-component');
-      component.setAttribute('hx-get', targetUrl)
-      console.log('component', component)
-    </script>
-
-    <div id="rates-currency-picker-component"
+    <div hx-get="/api/rates/currencies"
          hx-trigger="load"
-         hx-swap="outerHTML">
+         hx-swap="outerHTML"
+         hidden="hidden">
+    </div>
+
+    <div x-bind:hx-get="currencyPickerPartialUrl"
+         hx-trigger="load"
+         hx-swap="outerHTML"
+         hidden="hidden">
     </div>
   </div>
 

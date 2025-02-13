@@ -278,7 +278,7 @@ func Search(res TableResponse) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" hx-disabled-elt=\"this\" hx-indicator=\".htmx-indicator\" hx-swap=\"none\" hx-trigger=\"mousedown\"><svg x-init=\"$el.setAttribute(&#39;data-src&#39;, window.editIconUrl)\" data-cache=\"21600\" class=\"h-6 w-6\"></svg></button>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" hx-disabled-elt=\"this\" hx-indicator=\".htmx-indicator\" hx-swap=\"none\" hx-trigger=\"mousedown\"><svg x-init=\"$el.setAttribute(&#39;data-src&#39;, window.processIconUrl)\" data-cache=\"21600\" class=\"h-6 w-6\"></svg></button>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

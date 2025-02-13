@@ -1,4 +1,4 @@
-<div x-data="{modalIsOpen: false, currenciesSelected: [], currencies: []}"
+<div x-data="{modalIsOpen: false, currenciesSelected: []}"
      x-init="$watch('currenciesSelected', value => {
            let parentElement = $el.parentElement;
            let elemId = parentElement.getAttribute('data-change-element');
@@ -8,10 +8,7 @@
            }
            })"
 >
-  <div hx-get="/api/rates/currencies"
-       hx-trigger="load"
-       hx-swap="innerHTML">
-  </div>
+
   <button x-on:click="modalIsOpen = true" type="button"
           class="w-fit inline-flex items-center justify-between gap-2 whitespace-nowrap border-outline bg-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark border rounded-radius">
     <span class="text-center">{main.title.currencies}: <span x-text="currenciesSelected.length"></span></span>
@@ -58,6 +55,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
               </svg>
             </div>
+            <svg x-bind:data-src="flags.get(value.toLowerCase())" data-cache="21600" class="h-6 w-8"></svg>
 
             <span x-text="value"></span>
           </label>

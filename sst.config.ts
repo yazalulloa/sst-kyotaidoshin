@@ -1,11 +1,13 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 
+const PROD_STAGE = "production";
+
 export default $config({
   app(input) {
     return {
       name: "kyotaidoshin",
-      removal: input?.stage === "production" ? "retain" : "remove",
-      protect: ["production"].includes(input?.stage),
+      removal: input?.stage === PROD_STAGE ? "retain" : "remove",
+      protect: [PROD_STAGE].includes(input?.stage),
       home: "aws",
     };
   },
@@ -139,7 +141,8 @@ export default $config({
       path: "packages/frontend/app",
       environment: {
         // Accessible in the browser
-        VITE_VAR_ENV: api.url
+        VITE_VAR_ENV: api.url,
+        VITE_IS_DEV: Boolean($app.stage !== PROD_STAGE).toString(),
       },
       build: {
         command: "bun run build",
