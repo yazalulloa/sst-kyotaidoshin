@@ -63,20 +63,33 @@ func search(w http.ResponseWriter, r *http.Request) {
 }
 
 func buildingDelete(w http.ResponseWriter, r *http.Request) {
-
-	id := api.GetQueryParamAsString(r, "id")
+	vars := mux.Vars(r)
+	id := vars["id"]
 	if id == "" {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 
-	_, err := deleteById(id)
+	var dest string
+	err := api.Decode(id, &dest)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	log.Printf("Deleting building with ID: %s", dest)
+	counters, err := deleteAndReturnCounters(dest)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = CountersView(*counters).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 }
 
