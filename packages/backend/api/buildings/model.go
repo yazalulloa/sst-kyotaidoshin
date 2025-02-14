@@ -46,3 +46,9 @@ type EmailConfig struct {
 	key   string
 	email string
 }
+
+type FormResponse struct {
+	createdNew *bool
+	key        *string
+	errorStr   string
+}

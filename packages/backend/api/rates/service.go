@@ -22,7 +22,7 @@ func getRateTableResponse(rateQuery RateQuery) (TableResponse, error) {
 		for i, rate := range rateArray {
 
 			results[i] = Item{
-				Key:        *api.Base64Encode(*rate.ID),
+				Key:        *api.Encode(*rate.ID),
 				CardId:     "rates-" + uuid.NewString(),
 				Item:       rate,
 				DateOfRate: rate.DateOfRate.Format(time.DateOnly),

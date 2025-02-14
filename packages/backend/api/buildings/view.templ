@@ -80,6 +80,7 @@ templ Search(res TableResponse) {
 			</div>
 		</li>
 	}
+	
 	if res.NextPageUrl != "" {
 		@api.NextPageLi(res.NextPageUrl, templ.Attributes{})
 	}
@@ -146,4 +147,36 @@ templ FormView(dto FormDto) {
 			<option value={ emailConfig.key }>{ emailConfig.id } { emailConfig.email }</option>
 		}
 	</div>
+}
+
+templ FormResponseView(res FormResponse) {
+	<div
+		if res.createdNew != nil {
+			data-response-created-new={ fmt.Sprint(*res.createdNew) }
+		}
+		data-response-err={ res.errorStr }
+		x-init="
+		let createdNew = $el.getAttribute('data-response-created-new')
+		if (createdNew !== null) {
+		 isEdit = createdNew === 'true'
+		}
+
+errMsg = $el.getAttribute('data-response-err');
+
+if (errMsg === '') {
+let form = $el.closest('form')
+form.classList.add('border', 'border-success');
+await sleep(3000);
+form.classList.remove('border', 'border-success');
+}
+
+"
+	></div>
+
+	if res.createdNew != nil && *res.createdNew && res.key != nil {
+		<div id="buildings-form" hx-swap-oob="beforeend">
+		<input type="hidden" name="key" value={ *res.key }/>
+		</div>
+	}
+
 }

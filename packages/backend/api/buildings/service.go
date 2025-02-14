@@ -18,7 +18,7 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 		for i, item := range array {
 
 			results[i] = Item{
-				Key:       *api.Base64Encode(item.ID),
+				Key:       *api.Encode(item.ID),
 				CardId:    "buildings-" + uuid.NewString(),
 				Item:      item,
 				CreatedAt: item.CreatedAt.UnixMilli(),

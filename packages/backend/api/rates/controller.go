@@ -40,12 +40,12 @@ func search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rates := response.Results
+	results := response.Results
 
 	var nextPageUrl string
-	if len(rates) == rateQuery.Limit {
-		rates = rates[:len(rates)-1]
-		last := rates[len(rates)-1]
+	if len(results) == rateQuery.Limit {
+		results = results[:len(results)-1]
+		last := results[len(results)-1]
 		var sb strings.Builder
 		sb.WriteString(fmt.Sprintf(_SEARCH+"?next_page=%d", *last.Item.ID))
 		if rateQuery.DateOfRate != nil {
@@ -62,7 +62,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.NextPageUrl = nextPageUrl
-	response.Results = rates
+	response.Results = results
 
 	err = Search(response).Render(r.Context(), w)
 	if err != nil {

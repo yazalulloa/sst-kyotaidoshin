@@ -53,6 +53,11 @@ window.limitInputToMaxLength = function (input) {
   }
 }
 
+window.sleep = function (ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
 document.addEventListener('alpine-i18n:ready', function () {
   let locale = 'en';
   window.AlpineI18n.create(locale, JSON.parse(messages));

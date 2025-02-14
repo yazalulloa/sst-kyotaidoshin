@@ -22,7 +22,7 @@ const CsrfInputName = "gorilla.csrf.Token"
 
 var ErrNoRows = errors.New("qrm: no rows in result set")
 
-func Base64Encode(obj any) *string {
+func Encode(obj any) *string {
 	b := bytes.Buffer{}
 	e := gob.NewEncoder(&b)
 	err := e.Encode(obj)
@@ -73,6 +73,22 @@ func GetQueryParamAsDate(r *http.Request, paramName string) *time.Time {
 	if err != nil {
 		return nil
 	}
+
+	return &value
+}
+
+func GetQueryParamAsTimestamp(r *http.Request, paramName string) *time.Time {
+	param := r.URL.Query().Get(paramName)
+	if param == "" {
+		return nil
+	}
+
+	unix, err := strconv.ParseInt(param, 10, 64)
+	if err != nil {
+		return nil
+	}
+
+	value := time.UnixMilli(unix)
 
 	return &value
 }

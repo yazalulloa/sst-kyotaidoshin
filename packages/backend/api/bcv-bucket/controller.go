@@ -116,7 +116,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 					Rates:         ratesParsed,
 					ProcessedDate: processedDate,
 				},
-				Key:    *api.Base64Encode(*item.Key),
+				Key:    *api.Encode(*item.Key),
 				CardId: "bcv-buckets-" + uuid.NewString(),
 			}
 		}(item)

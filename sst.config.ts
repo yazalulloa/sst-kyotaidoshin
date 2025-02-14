@@ -110,7 +110,7 @@ export default $config({
 
     // https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-scheduled-rule-pattern.html
     new sst.aws.Cron("bcv-cron", {
-      schedule: "cron(0/30 14-20 ? * MON-FRI *)",
+      schedule: "cron(0/15 18-23 ? * MON-FRI *)",
       // schedule: "cron(0/15 * * * ? *)",
       function: bcvFunction.arn,
     })

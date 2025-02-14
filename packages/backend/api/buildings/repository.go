@@ -36,7 +36,7 @@ func selectList(req RequestQuery) ([]model.Buildings, error) {
 	if req.LastCreatedAt != nil {
 		date := *req.LastCreatedAt
 		dateTime := sqlite.DateTime(date.Year(), date.Month(), date.Day(), date.Hour(), date.Minute(), date.Second())
-		condition = condition.AND(Buildings.CreatedAt.LT_EQ(dateTime))
+		condition = condition.AND(Buildings.CreatedAt.LT(dateTime))
 	}
 
 	stmt := Buildings.SELECT(Buildings.AllColumns).FROM(Buildings).WHERE(condition)
