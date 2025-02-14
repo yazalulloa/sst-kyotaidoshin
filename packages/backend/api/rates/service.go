@@ -10,50 +10,50 @@ import (
 	"time"
 )
 
-func getRateTableResponse(rateQuery RateQuery) (TableResponse, error) {
-	var rateTableResponse TableResponse
+func getTableResponse(requestQuery RateQuery) (TableResponse, error) {
+	var tableResponse TableResponse
 	var oErr error
 	var wg sync.WaitGroup
 	wg.Add(3)
 	go func() {
 		defer wg.Done()
-		rateArray, err := GetRates(rateQuery)
-		results := make([]Item, len(rateArray))
-		for i, rate := range rateArray {
+		array, err := GetRates(requestQuery)
+		results := make([]Item, len(array))
+		for i, item := range array {
 
 			results[i] = Item{
-				Key:        *api.Encode(*rate.ID),
+				Key:        *api.Encode(*item.ID),
 				CardId:     "rates-" + uuid.NewString(),
-				Item:       rate,
-				DateOfRate: rate.DateOfRate.Format(time.DateOnly),
-				DateOfFile: rate.DateOfFile.UnixMilli(),
-				CreatedAt:  rate.CreatedAt.UnixMilli(),
+				Item:       item,
+				DateOfRate: item.DateOfRate.Format(time.DateOnly),
+				DateOfFile: item.DateOfFile.UnixMilli(),
+				CreatedAt:  item.CreatedAt.UnixMilli(),
 			}
 
 		}
-		rateTableResponse.Results = results
+		tableResponse.Results = results
 		oErr = err
 	}()
 
 	go func() {
 		defer wg.Done()
-		totalCount, err := GetTotalCount()
-		rateTableResponse.Counters.TotalCount = totalCount
+		totalCount, err := getTotalCount()
+		tableResponse.Counters.TotalCount = totalCount
 		oErr = err
 	}()
 
 	go func() {
 		defer wg.Done()
-		queryCount, err := getQueryCount(rateQuery)
+		queryCount, err := getQueryCount(requestQuery)
 		if queryCount != nil {
-			rateTableResponse.Counters.QueryCount = queryCount
+			tableResponse.Counters.QueryCount = queryCount
 		}
 
 		oErr = err
 	}()
 
 	wg.Wait()
-	return rateTableResponse, oErr
+	return tableResponse, oErr
 }
 
 func CheckRateInsert(ratesArr *[]model.Rates) ([]model.Rates, error) {
@@ -121,7 +121,7 @@ func deleteRateReturnCounters(id int64, rateQuery RateQuery) (*Counters, error) 
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		totalCount, err := GetTotalCount()
+		totalCount, err := getTotalCount()
 		if err != nil {
 			handleErr(err)
 			return

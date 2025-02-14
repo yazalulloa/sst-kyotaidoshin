@@ -33,7 +33,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 		SortOrder:  api.GetQueryParamAsSortOrderType(r, "sort_order"),
 	}
 
-	response, err := getRateTableResponse(rateQuery)
+	response, err := getTableResponse(rateQuery)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

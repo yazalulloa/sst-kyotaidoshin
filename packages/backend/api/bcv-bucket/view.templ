@@ -20,7 +20,6 @@ templ Search(res TableResponse) {
 	for _, item := range res.Results {
 		<li
 			id={ item.CardId }
-			class="grid grid-cols-[4fr_1fr_3fr_3fr_2fr_1fr] gap-4 items-center text-center fade-me-in fade-me-out"
 		>
 			<a
 				href={ templ.URL(item.Item.Url) }

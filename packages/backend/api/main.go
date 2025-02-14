@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/sst/sst/v3/sdk/golang/resource"
+	"kyotaidoshin/apartments"
 	"kyotaidoshin/api"
 	bcv_bucket "kyotaidoshin/bcv-bucket"
 	"kyotaidoshin/buildings"
@@ -64,6 +65,7 @@ func router() http.Handler {
 	rates.Routes(newRouter)
 	bcv_bucket.Routes(newRouter)
 	buildings.Routes(newRouter)
+	apartments.Routes(newRouter)
 
 	newRouter.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 

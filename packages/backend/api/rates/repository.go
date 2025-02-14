@@ -46,16 +46,16 @@ func GetRates(rateQuery RateQuery) ([]model.Rates, error) {
 		stmt = stmt.ORDER_BY(Rates.ID.DESC())
 	}
 
-	var rates []model.Rates
-	err := stmt.Query(db.GetDB().DB, &rates)
+	var list []model.Rates
+	err := stmt.Query(db.GetDB().DB, &list)
 	if err != nil {
 		return nil, err
 	}
 
-	return rates, nil
+	return list, nil
 }
 
-func GetTotalCount() (int64, error) {
+func getTotalCount() (int64, error) {
 	var dest struct {
 		Count int64
 	}

@@ -6,12 +6,15 @@ import buildingsNewPartialUrl from './pages/buildings/new.html?url'
 import buildingsFormPartialUrl from './pages/buildings/form.html?url'
 import buildingsEditPartialUrl from './pages/buildings/edit.html?url'
 import bucketIndexPartialUrl from './pages/bcv-bucket/main.html?url'
+import apartmentsIndexPartialUrl from './pages/apartments/index.html?url'
 
 window.backBtnPartialUrl = backBtnPartialUrl;
 window.currencyPickerPartialUrl = currencyPickerPartialUrl;
+window.apartmentsIndexPartialUrl = apartmentsIndexPartialUrl;
 window.buildingsIndexPartialUrl = buildingsIndexPartialUrl;
 window.buildingsNewPartialUrl = buildingsNewPartialUrl;
 window.buildingsFormPartialUrl = buildingsFormPartialUrl;
 window.buildingsEditPartialUrl = buildingsEditPartialUrl;
 window.ratesIndexPartialUrl = ratesIndexPartialUrl;
 window.bucketIndexPartialUrl = bucketIndexPartialUrl;
+

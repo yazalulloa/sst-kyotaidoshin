@@ -77,7 +77,6 @@ func buildingDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Deleting building with ID: %s", dest)
 	counters, err := deleteAndReturnCounters(dest)
 
 	if err != nil {

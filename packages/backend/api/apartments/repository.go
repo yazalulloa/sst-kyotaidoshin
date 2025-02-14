@@ -1,0 +1,119 @@
+package apartments
+
+import (
+	"db"
+	"db/gen/model"
+	. "db/gen/table"
+	"fmt"
+	"github.com/go-jet/jet/v2/sqlite"
+	"log"
+)
+
+func searchExpression(search string) sqlite.BoolExpression {
+	q := fmt.Sprintf("%%%s%%", search)
+	return sqlite.RawBool(
+		"concat(apartments.building_id, apartments.number, apartments.name, apartments.emails) LIKE :search",
+		sqlite.RawArgs{":search": q}).IS_TRUE()
+}
+func getTotalCount() (int64, error) {
+
+	var dest struct {
+		Count int64
+	}
+	err := Apartments.SELECT(sqlite.COUNT(sqlite.STAR).AS("Count")).FROM(Apartments).Query(db.GetDB().DB, &dest)
+	if err != nil {
+		return 0, err
+	}
+	return dest.Count, nil
+}
+
+func queryCondition(requestQuery RequestQuery) *sqlite.BoolExpression {
+	condition := sqlite.Bool(true)
+	isThereAnyCondition := false
+
+	if requestQuery.q != "" {
+		concatExpression := Apartments.BuildingID.CONCAT(Apartments.Number).CONCAT(Apartments.Name).CONCAT(Apartments.Emails).
+			LIKE(sqlite.RawString(fmt.Sprintf("%%%s%%", requestQuery.q)))
+		condition = condition.AND(concatExpression)
+		isThereAnyCondition = true
+	}
+
+	if len(requestQuery.buildings) > 0 {
+		var buildingIds []sqlite.Expression
+		for _, buildingId := range requestQuery.buildings {
+			buildingIds = append(buildingIds, sqlite.String(buildingId))
+		}
+		condition = condition.AND(Apartments.BuildingID.IN(buildingIds...))
+		isThereAnyCondition = true
+	}
+
+	if !isThereAnyCondition {
+		return nil
+	}
+
+	return &condition
+}
+
+func getQueryCount(requestQuery RequestQuery) (*int64, error) {
+
+	condition := queryCondition(requestQuery)
+	if condition == nil {
+		return nil, nil
+	}
+
+	stmt := Apartments.SELECT(sqlite.COUNT(sqlite.STAR).AS("Count")).FROM(Apartments).WHERE(*condition)
+
+	log.Printf("CountQuery : %v\n", stmt.DebugSql())
+	var dest struct {
+		Count int64
+	}
+
+	err := stmt.Query(db.GetDB().DB, &dest)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dest.Count, nil
+}
+
+func selectList(requestQuery RequestQuery) ([]model.Apartments, error) {
+	condition := sqlite.Bool(true)
+
+	if requestQuery.lastBuildingId != "" && requestQuery.lastNumber != "" {
+		condition = condition.AND(Apartments.BuildingID.EQ(sqlite.String(requestQuery.lastBuildingId))).
+			AND(Apartments.Number.LT(sqlite.String(requestQuery.lastNumber)))
+	}
+
+	commonQueryCondition := queryCondition(requestQuery)
+	if commonQueryCondition != nil {
+		condition.AND(*commonQueryCondition)
+	}
+
+	stmt := Apartments.SELECT(Apartments.AllColumns).FROM(Apartments).WHERE(condition).
+		GROUP_BY(Apartments.BuildingID, Apartments.Number).
+		ORDER_BY(Apartments.BuildingID.ASC(), Apartments.Number.ASC()).
+		LIMIT(int64(requestQuery.Limit))
+
+	log.Printf("selectList : %v\n", stmt.DebugSql())
+
+	var list []model.Apartments
+
+	err := stmt.Query(db.GetDB().DB, &list)
+	if err != nil {
+		return nil, err
+	}
+
+	return list, nil
+}
+
+func deleteByKeys(keys Keys) (int64, error) {
+
+	stmt := Apartments.DELETE().WHERE(Apartments.BuildingID.EQ(sqlite.String(keys.BuildingId)).
+		AND(Apartments.Number.EQ(sqlite.String(keys.Number))))
+	result, err := stmt.Exec(db.GetDB().DB)
+	if err != nil {
+		return 0, err
+	}
+
+	return result.RowsAffected()
+}
