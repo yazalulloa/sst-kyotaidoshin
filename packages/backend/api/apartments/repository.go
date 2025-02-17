@@ -6,7 +6,6 @@ import (
 	. "db/gen/table"
 	"fmt"
 	"github.com/go-jet/jet/v2/sqlite"
-	"log"
 	"strings"
 )
 
@@ -34,14 +33,12 @@ func queryCondition(requestQuery RequestQuery) *sqlite.BoolExpression {
 	isThereAnyCondition := false
 
 	if requestQuery.q != "" {
-		log.Printf("Search : %s\n", requestQuery.q)
-
 		condition = condition.AND(searchExpression(requestQuery.q))
 		isThereAnyCondition = true
 	}
 
 	if len(requestQuery.buildings) > 0 {
-		log.Printf("Buildings : %v\n", requestQuery.buildings)
+		//log.Printf("Buildings : %v\n", requestQuery.buildings)
 		var buildingIds []sqlite.Expression
 		for _, buildingId := range requestQuery.buildings {
 			buildingId = strings.TrimSpace(buildingId)
@@ -74,7 +71,7 @@ func getQueryCount(requestQuery RequestQuery) (*int64, error) {
 
 	stmt := Apartments.SELECT(sqlite.COUNT(sqlite.STAR).AS("Count")).FROM(Apartments).WHERE(*condition)
 
-	log.Printf("CountQuery : %v\n", stmt.DebugSql())
+	//log.Printf("CountQuery : %v\n", stmt.DebugSql())
 	var dest struct {
 		Count int64
 	}
@@ -108,7 +105,7 @@ func selectList(requestQuery RequestQuery) ([]model.Apartments, error) {
 		ORDER_BY(Apartments.BuildingID.ASC(), Apartments.Number.ASC()).
 		LIMIT(int64(requestQuery.Limit))
 
-	log.Printf("selectList : %v\n", stmt.DebugSql())
+	//log.Printf("selectList : %v\n", stmt.DebugSql())
 
 	var list []model.Apartments
 
