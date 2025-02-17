@@ -2,6 +2,7 @@ package buildings
 
 import (
 	"db/gen/model"
+	"encoding/json"
 	"fmt"
 	"github.com/go-playground/form"
 	"github.com/go-playground/validator/v10"
@@ -17,6 +18,8 @@ import (
 
 const _PATH = "/api/buildings"
 const _SEARCH = _PATH + "/search"
+const _UPLOAD_BACKUP_FORM = _PATH + "/uploadBackupForm"
+const _UPLOAD_BACKUP = _PATH + "/upload/backup"
 
 func Routes(server *mux.Router) {
 
@@ -24,6 +27,8 @@ func Routes(server *mux.Router) {
 	server.HandleFunc(_PATH+"/{id}", buildingDelete).Methods("DELETE")
 	server.HandleFunc(_PATH, buildingPut).Methods("PUT")
 	server.HandleFunc(_PATH+"/formData", formData).Methods("GET")
+	server.HandleFunc(_UPLOAD_BACKUP_FORM, getUploadBackupForm).Methods("GET")
+	server.HandleFunc(_UPLOAD_BACKUP, uploadBackup).Methods("GET")
 }
 
 func search(w http.ResponseWriter, r *http.Request) {
@@ -288,6 +293,82 @@ func formData(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Add("Content-Type", "text/html")
 	err := FormView(formDto).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func getUploadBackupForm(w http.ResponseWriter, r *http.Request) {
+
+	component, err := api.BuildUploadForm(r.Context(), _UPLOAD_BACKUP[1:], "buildings")
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = component.Render(r.Context(), w)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+type BuildingRecord struct {
+	Building buildingDto `json:"building"`
+}
+
+type buildingDto struct {
+	Id                          string   `json:"id"`
+	Name                        string   `json:"name"`
+	Rif                         string   `json:"rif"`
+	MainCurrency                string   `json:"main_currency"`
+	DebtCurrency                string   `json:"debt_currency"`
+	CurrenciesToShowAmountToPay []string `json:"currencies_to_show_amount_to_pay"`
+	FixedPay                    bool     `json:"fixed_pay"`
+	FixedPayAmount              *float64 `json:"fixed_pay_amount"`
+	RoundUpPayments             bool     `json:"round_up_payments"`
+}
+
+func uploadBackup(w http.ResponseWriter, r *http.Request) {
+
+	component, err := api.ProcessUploadBackup(r, _UPLOAD_BACKUP_FORM, "buildings-updater", "update-buildings",
+		func(decoder *json.Decoder) (int64, error) {
+			var dto []BuildingRecord
+			err := decoder.Decode(&dto)
+			if err != nil {
+				log.Printf("Error decoding json: %s", err)
+				return 0, err
+			}
+
+			buildings := make([]model.Buildings, len(dto))
+			for i, record := range dto {
+				buildings[i] = model.Buildings{
+					ID:                          record.Building.Id,
+					Name:                        record.Building.Name,
+					Rif:                         record.Building.Rif,
+					MainCurrency:                record.Building.MainCurrency,
+					DebtCurrency:                record.Building.DebtCurrency,
+					CurrenciesToShowAmountToPay: strings.Join(record.Building.CurrenciesToShowAmountToPay, ","),
+					FixedPay:                    record.Building.FixedPay,
+					FixedPayAmount:              record.Building.FixedPayAmount,
+					RoundUpPayments:             record.Building.RoundUpPayments,
+					EmailConfig:                 "test",
+				}
+			}
+
+			return insertBackup(buildings)
+		})
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = component.Render(r.Context(), w)
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

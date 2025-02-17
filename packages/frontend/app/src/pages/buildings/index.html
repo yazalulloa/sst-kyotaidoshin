@@ -15,16 +15,28 @@
     main.title.buildings.new
   </button>
 
+  <button disabled type="button"
+          class="whitespace-nowrap bg-transparent rounded-radius border border-secondary px-4 py-2 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-secondary-dark dark:text-secondary-dark dark:focus-visible:outline-secondary-dark"
+          x-text="$t('main-actions-upload-backup')"
+          hx-get="/api/buildings/uploadBackupForm"
+          hx-trigger="load"
+          hx-swap="outerHTML">
+  </button>
+
+  <div id="buildings-updater"
+       hidden="hidden"
+       hx-get="/api/buildings/search"
+       hx-trigger="load, update-buildings"
+       hx-target="#buildings-table"
+       hx-swap="innerHTML"
+       hx-sync="this:replace"
+       hx-indicator=".htmx-indicator">
+  </div>
+
 </div>
 
 <div id="container" hx-swap-oob="true">
-  <ul class="flex flex-col gap-2">
-    <li hx-get="/api/buildings/search"
-        hx-trigger="load"
-        hx-swap="outerHTML"
-        hx-sync="this:replace"
-        hx-indicator=".htmx-indicator">
-    </li>
+  <ul id="buildings-table" class="flex flex-col gap-2">
   </ul>
 
 </div>

@@ -1,6 +1,7 @@
 package api
 
 import "log"
+import "fmt"
 
 templ Base() {
 	<!DOCTYPE html>
@@ -100,5 +101,78 @@ templ BackBtn(backUrl string) {
 		hx-trigger="click"
 	>
 		<svg x-bind:data-src="backBtnIcon" data-cache="21600" class="h-4 w-4"></svg>
+	</button>
+}
+
+templ UploadBackupForm(url string, values map[string]string) {
+	<form
+		id="backup-file-uploader"
+		class="whitespace-nowrap bg-transparent rounded-radius border border-secondary px-4 py-2 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-secondary-dark dark:text-secondary-dark dark:focus-visible:outline-secondary-dark disabled:opacity-75 disabled:cursor-not-allowed"
+		hx-post={ url }
+		hx-encoding="multipart/form-data"
+		hx-disabled-elt="this, #backup-file-uploader * > input:not([disabled]), #backup-file-uploader * > label:not([disabled])"
+		hx-swap="outerHTML"
+		hx-trigger="send-file"
+		hx-indicator=".htmx-indicator"
+		x-data="{ file: ''}"
+		x-init="$watch('file', (value) => {
+            if (value) {
+              $el.dispatchEvent(new CustomEvent('send-file'));
+            }
+          })
+     "
+	>
+		for k, v := range values {
+			<input type="hidden" name={ k } value={ v }/>
+		}
+		<label
+			class="flex flex-row gap-0"
+			x-data="{ filename: ''}"
+		>
+			<span>main.actions.upload.backup</span>
+			<span x-show="filename !== ''">:&nbsp;</span>
+			<span
+				x-bind:class="filename === '' ? 'hidden' : ''"
+				x-text="filename"
+				x-init="$watch('file', (value) => {
+            if (value && value.length > 0) {
+              filename = $el.nextElementSibling.files[0].name;
+             } else {
+              filename = '';
+             }
+          })"
+			></span>
+			<input
+				class="hidden"
+				type="file"
+				accept=".json.gz"
+				name="file"
+				x-model="file"
+			/>
+		</label>
+	</form>
+}
+
+templ UploadBackupResponse(inserted int64, formUrl string, idUpdater string, event string) {
+	<button
+		disabled
+		type="button"
+		class="inline-flex items-center gap-2 whitespace-nowrap bg-transparent rounded-radius border border-secondary px-4 py-2 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-secondary-dark dark:text-secondary-dark dark:focus-visible:outline-secondary-dark"
+		hx-get={ formUrl }
+		hx-trigger="load delay:2s"
+		hx-swap="outerHTML"
+		if inserted > 0 {
+			x-init={ fmt.Sprintf("sendEvent('%s', '%s')", idUpdater, event) }
+		}
+	>
+		<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="size-5 animate-spin motion-reduce:animate-none fill-on-secondary dark:fill-on-secondary-dark">
+			<path opacity="0.25" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"></path>
+			<path d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"></path>
+		</svg>
+		<div class="inline-flex">
+			<span x-text="$t('main-description-inserted')"></span>
+			<span>:&nbsp;</span>
+			<span>{ fmt.Sprint(inserted) }</span>
+		</div>
 	</button>
 }
