@@ -38,8 +38,18 @@
              x-bind:placeholder="$t('main-action-search')"
              aria-label="search"
              @event-new_apt="updateApt()"
-             @changed="updateApt()"
-             @keyup="updateApt()"
+             x-data="{ search: ''}"
+             x-model.debounce.300ms="search"
+             x-init="
+             $el.addEventListener('input', () => {
+                $el.value = $el.value.trim();
+             });
+              $watch('search', (value, oldValue) => {
+                if (value !== oldValue) {
+                   updateApt()
+                }
+              });"
+             x-effect="search"
              @search="updateApt()"/>
     </div>
 
