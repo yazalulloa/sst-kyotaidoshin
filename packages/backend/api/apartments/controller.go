@@ -12,6 +12,7 @@ import (
 	"github.com/sst/sst/v3/sdk/golang/resource"
 	"io"
 	"kyotaidoshin/api"
+	"kyotaidoshin/util"
 	"log"
 	"net/http"
 	"strings"
@@ -28,6 +29,7 @@ func Routes(server *mux.Router) {
 	server.HandleFunc(_PATH+"/{key}", aptDelete).Methods("DELETE")
 	server.HandleFunc(_UPLOAD_BACKUP_FORM, getUploadBackupForm).Methods("GET")
 	server.HandleFunc(_UPLOAD_BACKUP, uploadBackup).Methods("GET")
+	server.HandleFunc(_PATH+"/buildingsIds", getBuildingIds).Methods("GET")
 	//server.HandleFunc(_PATH+"/upload/backup", uploadBackupUrl).Methods("GET")
 	//server.HandleFunc(_PATH, aptPut).Methods("PUT")
 	//server.HandleFunc(_PATH+"/formData", formData).Methods("GET")
@@ -258,6 +260,22 @@ func uploadBackup(w http.ResponseWriter, r *http.Request) {
 
 	err = uploadBackupResponse(inserted).Render(r.Context(), w)
 
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func getBuildingIds(w http.ResponseWriter, r *http.Request) {
+	buildingIds, err := buildingIds()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	str := util.StringArrayToString(buildingIds)
+
+	err = buildingIdsView(str).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -5,13 +5,12 @@ go 1.23.4
 require (
 	github.com/aws/aws-lambda-go v1.47.0
 	github.com/aws/aws-sdk-go-v2 v1.36.1
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.76.1
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.77.0
 	github.com/shakinm/xlsReader v0.9.12
-	github.com/sst/sst/v3 v3.8.3
 )
 
 require (
-	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.8 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.9 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.32 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.32 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.32 // indirect
@@ -21,6 +20,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.18.13 // indirect
 	github.com/aws/smithy-go v1.22.2 // indirect
 	github.com/metakeule/fmtdate v1.1.2 // indirect
-	github.com/stretchr/testify v1.8.4 // indirect
-	golang.org/x/text v0.3.2 // indirect
+	github.com/stretchr/testify v1.10.0 // indirect
+	golang.org/x/text v0.21.0 // indirect
 )

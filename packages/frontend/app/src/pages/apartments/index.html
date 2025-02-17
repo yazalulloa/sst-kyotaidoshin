@@ -22,10 +22,15 @@
     <div
         data-change-element="apartments-updater"
         data-change-event="update-apartments">
-      <input hidden="hidden" name="building_input" />
+
+      <div x-bind:hx-get="apartmentsBuildingSelectorPartialUrl"
+           hx-trigger="load"
+           hx-swap="outerHTML"
+           hidden="hidden">
+      </div>
     </div>
 
-    <div class="relative flex w-full max-w-xs flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+    <div class="relative flex w-full max-w-3xs flex-col gap-1 text-on-surface dark:text-on-surface-dark">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
            aria-hidden="true"
            class="absolute left-2.5 top-1/2 size-5 -translate-y-1/2 text-on-surface/50 dark:text-on-surface-dark/50">

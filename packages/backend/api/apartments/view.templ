@@ -117,3 +117,12 @@ templ uploadBackupResponse(inserted int64) {
 		</div>
 	</button>
 }
+
+templ buildingIdsView(ids string) {
+  <div
+
+ x-init={ fmt.Sprintf("buildings = %s", ids)}
+  >
+
+  </div>
+}
