@@ -5,6 +5,8 @@ import ratesIcon from './assets/images/rates.svg?url'
 import bucketIcon from './assets/images/bucket.svg?url'
 import buildingsIcon from './assets/images/building.svg?url'
 import apartmentsIcon from './assets/images/apartments.svg?url'
+import nextPageIcon from './assets/images/chevron-double-down.svg?url'
+import backBtnIcon from './assets/images/left-arrow.svg?url'
 
 window.deleteIconUrl = deleteIconUrl;
 window.processIconUrl = processIconUrl;
@@ -14,3 +16,6 @@ window.ratesIcon = ratesIcon;
 window.bucketIcon = bucketIcon;
 window.buildingsIcon = buildingsIcon;
 window.apartmentsIcon = apartmentsIcon;
+
+window.nextPageIcon = nextPageIcon;
+window.backBtnIcon = backBtnIcon;

@@ -120,13 +120,35 @@ export default $config({
       cors: {
         allowOrigins: ["*"],
         allowMethods: ["GET", "HEAD", "PUT", "POST", "DELETE", "OPTIONS"],
+        // allowHeaders: ["date", "keep-alive", "access-control-request-headers"],
+        // exposeHeaders: ["date", "keep-alive", "access-control-request-headers"]
       }
     });
+
+    const uploadBackupBucket = new sst.aws.Bucket("UploadBackup", {
+      versioning: false,
+      cors: {
+        allowHeaders: ["*"],
+        allowOrigins: ["*"],
+        allowMethods: ["DELETE", "GET", "HEAD", "POST", "PUT"],
+        exposeHeaders: [],
+        maxAge: "0 seconds"
+      }
+    });
+
+    const apiFunction = new sst.aws.Function("ApiFunction", {
+      url: true,
+      handler: "packages/backend/api",
+      runtime: "go",
+      link: [bucket, secretTursoUrl, bcvUrl, bcvFileStartPath, uploadBackupBucket],
+      timeout: "60 seconds",
+    });
+
 
     api.route("$default", {
       handler: "packages/backend/api",
       runtime: "go",
-      link: [bucket, secretTursoUrl, bcvUrl, bcvFileStartPath],
+      link: [bucket, secretTursoUrl, bcvUrl, bcvFileStartPath, uploadBackupBucket, apiFunction],
       timeout: "60 seconds",
     });
 
@@ -170,6 +192,7 @@ export default $config({
     // });
 
     return {
+      ApiFunction: apiFunction.url,
       MyBucket: bucket.name,
       BcvUrl: bcvUrl.value,
       BcvFileStartPath: bcvFileStartPath.value,

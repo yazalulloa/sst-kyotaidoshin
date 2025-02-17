@@ -734,3 +734,12 @@ select option {
     background: var(--color-surface-dark-alt);
   }
 }
+
+.next-page-element {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  border: 0;
+  padding: 1rem;
+}

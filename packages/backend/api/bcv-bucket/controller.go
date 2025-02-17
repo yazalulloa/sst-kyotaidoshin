@@ -1,6 +1,7 @@
 package bcv_bucket
 
 import (
+	"aws_h"
 	"bcv/bcv"
 	"context"
 	"fmt"
@@ -43,7 +44,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s3Client, err := bcv.GetS3Client(r.Context())
+	s3Client, err := aws_h.GetS3Client(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -165,7 +166,7 @@ func bcvBucketDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s3Client, err := bcv.GetS3Client(r.Context())
+	s3Client, err := aws_h.GetS3Client(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -238,7 +239,7 @@ func invokeParsingFunction(ctx context.Context, bucket string, key string) error
 	if err != nil {
 		return err
 	}
-	lambdaClient, err := bcv.GetLambdaClient(ctx)
+	lambdaClient, err := aws_h.GetLambdaClient(ctx)
 	if err != nil {
 		return err
 	}
@@ -265,7 +266,7 @@ func processAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s3Client, err := bcv.GetS3Client(r.Context())
+	s3Client, err := aws_h.GetS3Client(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

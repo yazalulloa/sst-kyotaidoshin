@@ -9,6 +9,11 @@ declare module "sst" {
       "type": "sst.aws.ApiGatewayV2"
       "url": string
     }
+    "ApiFunction": {
+      "name": string
+      "type": "sst.aws.Function"
+      "url": string
+    }
     "BcvFunction": {
       "name": string
       "type": "sst.aws.Function"
@@ -33,6 +38,10 @@ declare module "sst" {
     "SecretTursoUrl": {
       "type": "sst.sst.Secret"
       "value": string
+    }
+    "UploadBackup": {
+      "name": string
+      "type": "sst.aws.Bucket"
     }
     "WebApp": {
       "type": "sst.aws.StaticSite"

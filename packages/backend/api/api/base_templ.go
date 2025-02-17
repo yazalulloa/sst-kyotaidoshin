@@ -172,14 +172,14 @@ func NextPageLi(nextUrl string, attrs templ.Attributes) templ.Component {
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div hx-get=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"next-page-element\" hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(nextUrl)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 59, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 60, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -193,7 +193,7 @@ func NextPageLi(nextUrl string, attrs templ.Attributes) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "><svg x-bind:data-src=\"nextPageIcon\" data-cache=\"21600\" class=\"h-4 w-4\"></svg></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -234,7 +234,7 @@ func DeleteBtn(deleteUrl string, cardIdRef string, attrs templ.Attributes) templ
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(CrsfHeaders(ctx))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 74, Col: 33}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 77, Col: 33}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -252,7 +252,7 @@ func DeleteBtn(deleteUrl string, cardIdRef string, attrs templ.Attributes) templ
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(deleteUrl)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 76, Col: 24}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 79, Col: 24}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -265,7 +265,7 @@ func DeleteBtn(deleteUrl string, cardIdRef string, attrs templ.Attributes) templ
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("#" + cardIdRef)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 77, Col: 30}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 80, Col: 30}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -279,7 +279,7 @@ func DeleteBtn(deleteUrl string, cardIdRef string, attrs templ.Attributes) templ
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "><svg x-init=\"$el.setAttribute(&#39;data-src&#39;, window.deleteIconUrl)\" data-cache=\"21600\" class=\"h-6 w-6\"></svg></button></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "><svg x-bind:data-src=\"deleteIconUrl\" data-cache=\"21600\" class=\"h-6 w-6\"></svg></button></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -315,13 +315,13 @@ func BackBtn(backUrl string) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(backUrl)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 92, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 95, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" hx-disabled-elt=\"this\" hx-indicator=\".htmx-indicator\" hx-swap=\"none\" todo-hx-push-url=\"true\" hx-trigger=\"click\"><svg data-src=\"/assets/images/left-arrow.svg\" data-cache=\"21600\" class=\"h-4 w-4\"></svg></button>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" hx-disabled-elt=\"this\" hx-indicator=\".htmx-indicator\" hx-swap=\"none\" todo-hx-push-url=\"true\" hx-trigger=\"click\"><svg x-bind:data-src=\"backBtnIcon\" data-cache=\"21600\" class=\"h-4 w-4\"></svg></button>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

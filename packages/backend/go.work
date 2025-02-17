@@ -4,6 +4,7 @@ use (
 	./api
 	./bcv
 	./db
+	./aws_h
 	./process-bcv-file
 	./process-rates
 )

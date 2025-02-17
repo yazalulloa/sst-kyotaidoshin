@@ -1,7 +1,7 @@
 <div id="header-container" hx-swap-oob="true"
      class="flex flex-col gap-2 text-center items-center">
 
-  <div class="flex flex-row flex-wrap w-full gap-2 justify-start">
+  <div class="flex flex-row flex-wrap w-full gap-2 justify-start text-center items-center">
     <div class="flex flex-row gap-2"
          x-data="{
    total: null,
@@ -13,29 +13,65 @@
       <span x-show="query">{main.title.items}: <span x-text="query"></span></span>
     </div>
 
+    <script>
+      function updateApt() {
+        sendEvent('apartments-updater', 'update-apartments');
+      }
+    </script>
+
     <div
         data-change-element="apartments-updater"
         data-change-event="update-apartments">
+      <input hidden="hidden" name="building_input" />
     </div>
+
+    <div class="relative flex w-full max-w-xs flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+           aria-hidden="true"
+           class="absolute left-2.5 top-1/2 size-5 -translate-y-1/2 text-on-surface/50 dark:text-on-surface-dark/50">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
+      </svg>
+      <input type="search"
+             class="w-full rounded-radius border border-outline bg-surface-alt py-2 pl-10 pr-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+             name="apt_search_input"
+             x-bind:placeholder="$t('main-action-search')"
+             aria-label="search"
+             @event-new_apt="updateApt()"
+             @changed="updateApt()"
+             @keyup="updateApt()"
+             @search="updateApt()"/>
+    </div>
+
 
     <div id="apartments-updater"
          hidden="hidden"
          hx-get="/api/apartments/search"
          hx-trigger="load, update-apartments delay:300ms"
+         hx-include="[name='building_input'],[name='apt_search_input']"
          hx-target="#apartments-table"
          hx-swap="innerHTML"
          hx-sync="this:replace"
          hx-indicator=".htmx-indicator">
     </div>
-  </div>
 
+    <button disabled type="button"
+            class="whitespace-nowrap bg-transparent rounded-radius border border-secondary px-4 py-2 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-secondary-dark dark:text-secondary-dark dark:focus-visible:outline-secondary-dark"
+            x-text="$t('main-actions-upload-backup')"
+            hx-get="/api/apartments/uploadBackupForm"
+            hx-trigger="load"
+            hx-swap="outerHTML">
+    </button>
+
+
+  </div>
 
 
 </div>
 
 <div id="container" hx-swap-oob="true">
   <ul id="apartments-table"
-      class="flex flex-col gap-2 *:grid *:grid-cols-6 *:gap-2 *:items-center *:text-center *:fade-me-in *:fade-me-out">
+      class="flex flex-col *:p-1 *:grid *:grid-cols-6 *:gap-2 *:items-center *:text-center fade-me-in fade-me-out *:border-b *:border-surface-dark *:dark:border-surface *:dark:text-surface *:hover:opacity-55">
 
   </ul>
 

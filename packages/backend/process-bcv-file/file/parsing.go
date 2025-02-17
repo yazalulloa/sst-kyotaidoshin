@@ -1,6 +1,7 @@
 package file
 
 import (
+	"aws_h"
 	"bcv/bcv"
 	"bytes"
 	"context"
@@ -27,7 +28,7 @@ type ParsingParams struct {
 }
 
 func fileParse(params ParsingParams) error {
-	client, err := bcv.GetS3Client(params.Ctx)
+	client, err := aws_h.GetS3Client(params.Ctx)
 	if err != nil {
 		return err
 	}

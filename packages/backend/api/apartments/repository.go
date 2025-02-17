@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/go-jet/jet/v2/sqlite"
 	"log"
+	"strings"
 )
 
 func searchExpression(search string) sqlite.BoolExpression {
@@ -15,6 +16,7 @@ func searchExpression(search string) sqlite.BoolExpression {
 		"concat(apartments.building_id, apartments.number, apartments.name, apartments.emails) LIKE :search",
 		sqlite.RawArgs{":search": q}).IS_TRUE()
 }
+
 func getTotalCount() (int64, error) {
 
 	var dest struct {
@@ -32,19 +34,28 @@ func queryCondition(requestQuery RequestQuery) *sqlite.BoolExpression {
 	isThereAnyCondition := false
 
 	if requestQuery.q != "" {
-		concatExpression := Apartments.BuildingID.CONCAT(Apartments.Number).CONCAT(Apartments.Name).CONCAT(Apartments.Emails).
-			LIKE(sqlite.RawString(fmt.Sprintf("%%%s%%", requestQuery.q)))
-		condition = condition.AND(concatExpression)
+		log.Printf("Search : %s\n", requestQuery.q)
+
+		condition = condition.AND(searchExpression(requestQuery.q))
 		isThereAnyCondition = true
 	}
 
 	if len(requestQuery.buildings) > 0 {
+		log.Printf("Buildings : %v\n", requestQuery.buildings)
 		var buildingIds []sqlite.Expression
 		for _, buildingId := range requestQuery.buildings {
+			buildingId = strings.TrimSpace(buildingId)
+			if buildingId == "" {
+				continue
+			}
+
 			buildingIds = append(buildingIds, sqlite.String(buildingId))
 		}
-		condition = condition.AND(Apartments.BuildingID.IN(buildingIds...))
-		isThereAnyCondition = true
+
+		if len(buildingIds) > 0 {
+			condition = condition.AND(Apartments.BuildingID.IN(buildingIds...))
+			isThereAnyCondition = true
+		}
 	}
 
 	if !isThereAnyCondition {
@@ -80,13 +91,16 @@ func selectList(requestQuery RequestQuery) ([]model.Apartments, error) {
 	condition := sqlite.Bool(true)
 
 	if requestQuery.lastBuildingId != "" && requestQuery.lastNumber != "" {
-		condition = condition.AND(Apartments.BuildingID.EQ(sqlite.String(requestQuery.lastBuildingId))).
-			AND(Apartments.Number.LT(sqlite.String(requestQuery.lastNumber)))
+		condition = condition.AND(
+			sqlite.RawBool(
+				"(apartments.building_id,apartments.number) > (:LastBuildingId,:LastNumber)",
+				sqlite.RawArgs{":LastBuildingId": requestQuery.lastBuildingId, ":LastNumber": requestQuery.lastNumber}).IS_TRUE(),
+		)
 	}
 
 	commonQueryCondition := queryCondition(requestQuery)
 	if commonQueryCondition != nil {
-		condition.AND(*commonQueryCondition)
+		condition = condition.AND(*commonQueryCondition)
 	}
 
 	stmt := Apartments.SELECT(Apartments.AllColumns).FROM(Apartments).WHERE(condition).
@@ -116,4 +130,25 @@ func deleteByKeys(keys Keys) (int64, error) {
 	}
 
 	return result.RowsAffected()
+}
+
+func insertBulk(apartments []model.Apartments) (int64, error) {
+	stmt := Apartments.INSERT(Apartments.BuildingID, Apartments.Number, Apartments.Name, Apartments.Aliquot, Apartments.Emails).
+		ON_CONFLICT().DO_NOTHING()
+
+	for _, apartment := range apartments {
+		stmt = stmt.VALUES(apartment.BuildingID, apartment.Number, apartment.Name, apartment.Aliquot, apartment.Emails)
+	}
+
+	res, err := stmt.Exec(db.GetDB().DB)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
 }

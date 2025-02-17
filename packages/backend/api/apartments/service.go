@@ -1,8 +1,10 @@
 package apartments
 
 import (
+	"db/gen/model"
 	"github.com/google/uuid"
 	"kyotaidoshin/api"
+	"strings"
 	"sync"
 )
 
@@ -17,10 +19,13 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 		results := make([]Item, len(array))
 		for i, item := range array {
 
+			emails := strings.Split(*item.Emails, ",")
+
 			results[i] = Item{
 				Key:    *api.Encode(keys(item)),
 				CardId: "apartments-" + uuid.NewString(),
 				Item:   item,
+				Emails: emails,
 			}
 
 		}
@@ -86,4 +91,23 @@ func deleteAndReturnCounters(keys Keys) (*Counters, error) {
 
 	counters.TotalCount -= rowsDeleted
 	return &counters, nil
+}
+
+func insertDtos(apts []ApartmentDto) (int64, error) {
+
+	array := make([]model.Apartments, len(apts))
+
+	for i, apt := range apts {
+		emails := strings.Join(apt.Emails, ",")
+		array[i] = model.Apartments{
+			BuildingID: apt.BuildingID,
+			Number:     apt.Number,
+			Name:       apt.Name,
+			Aliquot:    apt.Aliquot,
+			Emails:     &emails,
+		}
+	}
+
+	return insertBulk(array)
+
 }

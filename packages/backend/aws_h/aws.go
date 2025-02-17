@@ -1,4 +1,4 @@
-package bcv
+package aws_h
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"log"
 	"os"
 	"sync"
 )
@@ -87,4 +88,22 @@ func presignClient(ctx context.Context) (*s3.PresignClient, error) {
 	client := s3.NewPresignClient(s3.NewFromConfig(cfg))
 
 	return client, nil
+}
+
+func PresignPostObject(ctx context.Context, bucketName string, objectKey string, optionFn func(options *s3.PresignPostOptions)) (*s3.PresignedPostRequest, error) {
+
+	client, err := GetPresignClient(ctx)
+	if err != nil {
+		log.Printf("Couldn't get a presigned post request to put %v:%v. Here's why: %v\n", bucketName, objectKey, err)
+		return nil, err
+	}
+
+	request, err := client.PresignPostObject(ctx, &s3.PutObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(objectKey),
+	}, optionFn)
+	if err != nil {
+		log.Printf("Couldn't get a presigned post request to put %v:%v. Here's why: %v\n", bucketName, objectKey, err)
+	}
+	return request, nil
 }

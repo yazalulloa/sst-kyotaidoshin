@@ -1,6 +1,8 @@
 package apartments
 
-import "db/gen/model"
+import (
+	"db/gen/model"
+)
 
 type Apt struct {
 	Number string
@@ -30,6 +32,7 @@ type Item struct {
 	CardId string
 	Key    string
 	Item   model.Apartments
+	Emails []string
 }
 
 type Keys struct {
@@ -42,4 +45,12 @@ func keys(apartments model.Apartments) Keys {
 		BuildingId: apartments.BuildingID,
 		Number:     apartments.Number,
 	}
+}
+
+type ApartmentDto struct {
+	BuildingID string   `json:"building_id"`
+	Number     string   `json:"number"`
+	Name       string   `json:"name"`
+	Aliquot    float64  `json:"aliquot"`
+	Emails     []string `json:"emails"`
 }

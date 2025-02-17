@@ -1,6 +1,7 @@
 package bcv
 
 import (
+	"aws_h"
 	"context"
 	"crypto/tls"
 	"fmt"
@@ -55,7 +56,7 @@ func Check(ctx context.Context) error {
 		return err
 	}
 
-	s3Client, err := GetS3Client(ctx)
+	s3Client, err := aws_h.GetS3Client(ctx)
 	if err != nil {
 		return err
 	}
