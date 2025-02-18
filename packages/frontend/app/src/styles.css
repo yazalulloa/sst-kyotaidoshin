@@ -161,6 +161,11 @@ input[type=number] {
 
 @layer base {
 
+  :root {
+    scrollbar-color: color-mix(in oklch, currentColor 35%, #0000) #0000;
+    scrollbar-width: thin;
+  }
+
   [data-theme=arctic] {
     /* Fonts */
     --font-body: 'Inter', sans-serif;

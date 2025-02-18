@@ -1,0 +1,44 @@
+package reserveFunds
+
+import (
+	"fmt"
+	"kyotaidoshin/api"
+)
+
+templ FormView(dto FormDto) {
+	<div id="reserve-funds-list" hx-swap-oob="innerHTML">
+		for _, item := range dto.Items {
+			<li
+				id={ item.CardId }
+			>
+				<a class="grid grid-cols-4 gap-1 p-2 items-center text-center fade-me-in fade-me-out border-b border-surface-dark dark:border-surface dark:text-surface hover:opacity-55">
+					<div class="flex flex-col items-center gap-2 text-center">
+						<span>{ item.Item.Name }</span>
+						<span>{ fmt.Sprint(item.Item.Fund) }</span>
+					</div>
+					<div class="flex flex-col items-center gap-2 text-center">
+						<div
+							class={ "flex flex-row gap-0 justify-center peer rounded-radius w-fit border px-2 py-1 text-xs font-medium tracking-wide ",
+                        					   templ.KV("border-success bg-success text-on-success dark:border-success dark:bg-success dark:text-on-success", item.Item.Active),
+                        					   templ.KV("border-danger bg-danger text-on-danger dark:border-danger dark:bg-danger dark:text-on-danger", !item.Item.Active) }
+						>
+							<span>{ fmt.Sprint(*item.Item.Pay) }</span>
+							if item.Item.Type == "PERCENTAGE" {
+								<span>%</span>
+							}
+						</div>
+						<div
+							class={ "flex flex-row gap-0 justify-center peer rounded-radius w-fit border px-2 py-1 text-xs font-medium tracking-wide ",
+                                					   templ.KV("border-success bg-success text-on-success dark:border-success dark:bg-success dark:text-on-success", item.Item.Active),
+                                					   templ.KV("border-danger bg-danger text-on-danger dark:border-danger dark:bg-danger dark:text-on-danger", !item.Item.Active) }
+						>
+							<span>{ fmt.Sprint(item.Item.ExpenseType) }</span>
+						</div>
+					</div>
+					<span>{ fmt.Sprint(*item.Item.Expense) }</span>
+					@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
+				</a>
+			</li>
+		}
+	</div>
+}

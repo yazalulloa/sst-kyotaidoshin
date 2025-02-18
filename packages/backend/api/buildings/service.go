@@ -3,6 +3,7 @@ package buildings
 import (
 	"github.com/google/uuid"
 	"kyotaidoshin/api"
+	"kyotaidoshin/reserveFunds"
 	"sync"
 )
 
@@ -10,10 +11,23 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 	var rateTableResponse TableResponse
 	var oErr error
 	var wg sync.WaitGroup
+	var once sync.Once
+	handleErr := func(e error) {
+		if e != nil {
+			once.Do(func() {
+				oErr = e
+			})
+		}
+	}
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
 		array, err := selectList(requestQuery)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+
 		results := make([]Item, len(array))
 		for i, item := range array {
 
@@ -26,14 +40,16 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 
 		}
 		rateTableResponse.Results = results
-		oErr = err
 	}()
 
 	go func() {
 		defer wg.Done()
 		totalCount, err := getTotalCount()
+		if err != nil {
+			handleErr(err)
+			return
+		}
 		rateTableResponse.Counters.TotalCount = totalCount
-		oErr = err
 	}()
 
 	wg.Wait()
@@ -53,7 +69,7 @@ func deleteAndReturnCounters(id string) (*Counters, error) {
 		}
 	}
 	var wg sync.WaitGroup
-	wg.Add(2)
+	wg.Add(3)
 
 	go func() {
 		defer wg.Done()
@@ -66,6 +82,12 @@ func deleteAndReturnCounters(id string) (*Counters, error) {
 		defer wg.Done()
 		totalCount, err := getTotalCount()
 		counters.TotalCount = totalCount
+		handleErr(err)
+	}()
+
+	go func() {
+		defer wg.Done()
+		_, err := reserveFunds.DeleteByBuilding(id)
 		handleErr(err)
 	}()
 

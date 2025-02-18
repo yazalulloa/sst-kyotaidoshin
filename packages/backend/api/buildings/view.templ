@@ -3,6 +3,7 @@ package buildings
 import (
 	"fmt"
 	"kyotaidoshin/api"
+	"kyotaidoshin/reserveFunds"
 )
 
 templ Search(res TableResponse) {
@@ -141,12 +142,18 @@ templ FormView(dto FormDto) {
 
 	"
 		></div>
+		
+		@reserveFunds.FormView(dto.reserveFundFormDto)
+
 	}
 	<div id="emailConfigSelect" hx-swap-oob="innerHTML">
 		for _,emailConfig := range dto.emailConfigs {
 			<option value={ emailConfig.key }>{ emailConfig.id } { emailConfig.email }</option>
 		}
 	</div>
+
+
+
 }
 
 templ FormResponseView(res FormResponse) {

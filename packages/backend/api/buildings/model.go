@@ -3,6 +3,7 @@ package buildings
 import (
 	"db/gen/model"
 	"kyotaidoshin/apartments"
+	"kyotaidoshin/reserveFunds"
 	"kyotaidoshin/util"
 	"time"
 )
@@ -36,6 +37,7 @@ type FormDto struct {
 	key                         *string
 	emailConfigs                []EmailConfig
 	building                    *model.Buildings
+	reserveFundFormDto          reserveFunds.FormDto
 	apts                        []apartments.Apt
 	currencies                  string
 	currenciesToShowAmountToPay string

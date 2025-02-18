@@ -3,17 +3,20 @@ package buildings
 import (
 	"db/gen/model"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/go-playground/form"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"kyotaidoshin/api"
+	"kyotaidoshin/reserveFunds"
 	"kyotaidoshin/util"
 	"log"
 	"maps"
 	"net/http"
 	"slices"
 	"strings"
+	"sync"
 )
 
 const _PATH = "/api/buildings"
@@ -272,21 +275,54 @@ func formData(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		building, err := selectById(id)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+		var oErr error
+		var wg sync.WaitGroup
+		var once sync.Once
+		handleErr := func(e error) {
+			if e != nil {
+				once.Do(func() {
+					oErr = e
+				})
+			}
 		}
+		wg.Add(2)
 
-		if building == nil {
-			http.Error(w, "Building not found", http.StatusNotFound)
+		go func() {
+			defer wg.Done()
+			building, err := selectById(id)
+			if err != nil {
+				handleErr(err)
+				return
+			}
+			if building == nil {
+				handleErr(errors.New("Building not found"))
+				return
+			}
+
+			formDto.building = building
+		}()
+
+		go func() {
+			defer wg.Done()
+			reserveFundFormDto, err := reserveFunds.GetFormDto(id)
+			if err != nil {
+				handleErr(err)
+				return
+			}
+
+			formDto.reserveFundFormDto = *reserveFundFormDto
+		}()
+
+		wg.Wait()
+
+		if oErr != nil {
+			http.Error(w, oErr.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		formDto.isEdit = true
-		formDto.building = building
 		formDto.key = &idParam
-		formDto.currenciesToShowAmountToPay = util.StringArrayToString(strings.Split(building.CurrenciesToShowAmountToPay, ","))
+		formDto.currenciesToShowAmountToPay = util.StringArrayToString(strings.Split(formDto.building.CurrenciesToShowAmountToPay, ","))
 
 	}
 
@@ -317,7 +353,8 @@ func getUploadBackupForm(w http.ResponseWriter, r *http.Request) {
 }
 
 type BuildingRecord struct {
-	Building buildingDto `json:"building"`
+	Building     buildingDto      `json:"building"`
+	ReserveFunds []reserveFundDto `json:"reserve_funds"`
 }
 
 type buildingDto struct {
@@ -332,6 +369,18 @@ type buildingDto struct {
 	RoundUpPayments             bool     `json:"round_up_payments"`
 }
 
+type reserveFundDto struct {
+	BuildingID    string   `json:"building_id"`
+	Name          string   `json:"name"`
+	Fund          float64  `json:"fund"`
+	Expense       *float64 `json:"expense"`
+	Pay           *float64 `json:"pay"`
+	Active        bool     `json:"active"`
+	Type          string   `json:"type"`
+	ExpenseType   string   `json:"expense_type"`
+	AddToExpenses bool     `json:"add_to_expenses"`
+}
+
 func uploadBackup(w http.ResponseWriter, r *http.Request) {
 
 	component, err := api.ProcessUploadBackup(r, _UPLOAD_BACKUP_FORM, "buildings-updater", "update-buildings",
@@ -344,6 +393,7 @@ func uploadBackup(w http.ResponseWriter, r *http.Request) {
 			}
 
 			buildings := make([]model.Buildings, len(dto))
+			var reserveFundArray []model.ReserveFunds
 			for i, record := range dto {
 				buildings[i] = model.Buildings{
 					ID:                          record.Building.Id,
@@ -357,9 +407,33 @@ func uploadBackup(w http.ResponseWriter, r *http.Request) {
 					RoundUpPayments:             record.Building.RoundUpPayments,
 					EmailConfig:                 "test",
 				}
+
+				for _, reserveFund := range record.ReserveFunds {
+					reserveFundArray = append(reserveFundArray, model.ReserveFunds{
+						BuildingID:    reserveFund.BuildingID,
+						Name:          reserveFund.Name,
+						Fund:          reserveFund.Fund,
+						Expense:       reserveFund.Expense,
+						Pay:           reserveFund.Pay,
+						Active:        reserveFund.Active,
+						Type:          reserveFund.Type,
+						ExpenseType:   reserveFund.ExpenseType,
+						AddToExpenses: reserveFund.AddToExpenses,
+					})
+				}
 			}
 
-			return insertBackup(buildings)
+			rowsAffected, err := insertBackup(buildings)
+			if err != nil {
+				return 0, err
+			}
+
+			_, err = reserveFunds.InsertBackup(reserveFundArray)
+			if err != nil {
+				return 0, err
+			}
+
+			return rowsAffected, nil
 		})
 
 	if err != nil {

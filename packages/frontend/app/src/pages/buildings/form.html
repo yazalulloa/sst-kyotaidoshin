@@ -1,6 +1,7 @@
 <div class="w-full flex flex-col gap-4 items-center justify-center"
      x-data="{
     open: false,
+    isEdit: false,
 currencies: [],
   }"
      x-show="open">
@@ -13,7 +14,6 @@ currencies: [],
       hx-target="#building-form-error"
       hx-swap="innerHTML"
       x-data="{
-    isEdit: false,
     id: '',
     name: '',
     rif: '',
@@ -308,4 +308,17 @@ currencies: [],
       </button>
     </div>
   </form>
+
+  <hr>
+
+  <div x-show="isEdit" class="w-full">
+
+    <div hidden="hidden"
+         x-bind:hx-get="reserveFundFormPartialUrl"
+         hx-trigger="load"
+         hx-swap="outerHTML">
+    </div>
+
+  </div>
+
 </div>

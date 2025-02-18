@@ -9,6 +9,7 @@ import bucketIndexPartialUrl from './pages/bcv-bucket/main.html?url'
 import apartmentsIndexPartialUrl from './pages/apartments/index.html?url'
 import apartmentsBuildingSelectorPartialUrl
   from './pages/apartments/buildingSelector.html?url'
+import reserveFundFormPartialUrl from './pages/reserve-funds/form.html?url'
 
 window.backBtnPartialUrl = backBtnPartialUrl;
 window.currencyPickerPartialUrl = currencyPickerPartialUrl;
@@ -20,4 +21,5 @@ window.buildingsEditPartialUrl = buildingsEditPartialUrl;
 window.ratesIndexPartialUrl = ratesIndexPartialUrl;
 window.bucketIndexPartialUrl = bucketIndexPartialUrl;
 window.apartmentsBuildingSelectorPartialUrl = apartmentsBuildingSelectorPartialUrl;
+window.reserveFundFormPartialUrl = reserveFundFormPartialUrl;
 
