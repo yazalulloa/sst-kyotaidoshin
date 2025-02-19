@@ -26,6 +26,7 @@ templ FormView(dto FormDto) {
 templ ItemView(item Item) {
 	<li
 		id={ item.CardId }
+		class="fade-me-in fade-me-out"
 		if item.isUpdate != nil && *item.isUpdate {
 			hx-swap-oob="true"
 		}
@@ -39,26 +40,20 @@ templ ItemView(item Item) {
 			<span>{ fmt.Sprint(item.Item.Fund) }</span>
 		</div>
 		<div class="flex flex-row gap-4 justify-center">
-			<div
-				class={ "peer rounded-radius w-fit border px-2 py-1 text-xs font-medium tracking-wide ",
-                                            					   templ.KV("border-success bg-success text-on-success dark:border-success dark:bg-success dark:text-on-success", item.Item.Active),
-                                            					   templ.KV("border-danger bg-danger text-on-danger dark:border-danger dark:bg-danger dark:text-on-danger", !item.Item.Active) }
-			>
+			@api.Badge(item.Item.Active) {
 				<span>{ fmt.Sprint(item.Item.Pay) }</span>
 				if item.Item.Type == "PERCENTAGE" {
 					<span>%</span>
 				}
-			</div>
+			}
 		</div>
 		<div class="flex justify-center">
-			<div
-				class={ "flex flex-col gap-2 justify-center peer rounded-radius w-fit border px-2 py-1 text-xs font-medium tracking-wide ",
-                                                    					   templ.KV("border-success bg-success text-on-success dark:border-success dark:bg-success dark:text-on-success", item.Item.AddToExpenses),
-                                                    					   templ.KV("border-danger bg-danger text-on-danger dark:border-danger dark:bg-danger dark:text-on-danger", !item.Item.AddToExpenses) }
-			>
-				<span>{ fmt.Sprint(item.Item.Expense) }</span>
-				<span>{ fmt.Sprint(item.Item.ExpenseType) }</span>
-			</div>
+			@api.Badge(item.Item.AddToExpenses) {
+				<div class="flex flex-col gap-2 justify-center">
+					<span>{ fmt.Sprint(item.Item.Expense) }</span>
+					<span>{ fmt.Sprint(item.Item.ExpenseType) }</span>
+				</div>
+			}
 		</div>
 		@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
 	</li>

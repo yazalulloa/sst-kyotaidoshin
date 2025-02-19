@@ -177,11 +177,19 @@ templ UploadBackupResponse(inserted int64, formUrl string, idUpdater string, eve
 	</button>
 }
 
-
 templ initView() {
-
 }
 
 templ RefreshView(url string) {
-<meta http-equiv="refresh" content={ fmt.Sprintf("0; url=%s",url) }>
+	<meta http-equiv="refresh" content={ fmt.Sprintf("0; url=%s", url) }/>
+}
+
+templ Badge(condition bool) {
+	<div
+		class={ "peer rounded-radius w-fit border px-2 py-1 text-xs font-medium tracking-wide ",
+    templ.KV("border-success bg-success text-on-success dark:border-success dark:bg-success dark:text-on-success", condition),
+    templ.KV("border-danger bg-danger text-on-danger dark:border-danger dark:bg-danger dark:text-on-danger", !condition) }
+	>
+		{ children... }
+	</div>
 }

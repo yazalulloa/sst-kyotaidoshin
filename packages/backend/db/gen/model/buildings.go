@@ -24,4 +24,5 @@ type Buildings struct {
 	EmailConfig                 string
 	CreatedAt                   *time.Time
 	UpdatedAt                   *time.Time
+	AptCount                    int64
 }

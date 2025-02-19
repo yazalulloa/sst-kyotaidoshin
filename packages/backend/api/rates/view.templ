@@ -21,7 +21,7 @@ templ Search(res TableResponse) {
 	for _, item := range res.Results {
 		<li
 			id={ item.CardId }
-			class="p-1 grid grid-cols-[3fr_1fr_1fr_1fr_3fr_1fr] items-center fade-me-in fade-me-out"
+			class="fade-me-in fade-me-out"
 		>
 			<span>{ fmt.Sprint(*item.Item.ID) }</span>
 			<div class="flex flex-row justify-center gap-2">

@@ -39,7 +39,10 @@ func selectList(req RequestQuery) ([]model.Buildings, error) {
 		condition = condition.AND(Buildings.CreatedAt.LT(dateTime))
 	}
 
-	stmt := Buildings.SELECT(Buildings.AllColumns).FROM(Buildings).WHERE(condition)
+	stmt := Buildings.SELECT(Buildings.AllColumns, sqlite.COUNT(Apartments.BuildingID).AS("buildings.apt_count")).
+		FROM(Buildings.LEFT_JOIN(Apartments, Apartments.BuildingID.EQ(Buildings.ID))).
+		WHERE(condition).GROUP_BY(Buildings.ID)
+
 	if req.SortOrder == util.SortOrderTypeASC {
 		stmt = stmt.ORDER_BY(Buildings.CreatedAt.ASC())
 	} else {

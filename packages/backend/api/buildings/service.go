@@ -30,6 +30,7 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 
 		results := make([]Item, len(array))
 		for i, item := range array {
+			//log.Printf("ID %d aptCount %d\n", item.ID, *item.AptCount)
 
 			results[i] = Item{
 				Key:       *api.Encode(item.ID),

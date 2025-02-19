@@ -10,58 +10,59 @@ templ Search(res TableResponse) {
 	for _, item := range res.Results {
 		<li
 			id={ item.CardId }
-			class="fade-me-in fade-me-out grid grid-cols-[7fr_1fr] gap-4 text-center items-center rounded-radius border border-outline bg-surface-alt dark:border-outline-dark dark:bg-surface-dark-alt"
+			class="fade-me-in fade-me-out"
 		>
-			<div class="flex flex-row flex-wrap gap-4 justify-around text-center items-center">
-				<div class="flex flex-col gap-2">
-					<span>{ fmt.Sprint(item.Item.ID) }</span>
-					<span>{ fmt.Sprint(item.Item.Name) }</span>
-					<span>{ fmt.Sprint(item.Item.Rif) }</span>
-				</div>
-				<div class="flex flex-col gap-2">
-					<span>
-						<span x-text="$t('main-buildings-main-currency')"></span>:
-						<span>{ fmt.Sprint(item.Item.MainCurrency) }</span>
-					</span>
-					<span>
-						<span x-text="$t('main-buildings-debt-currency')"></span>:
-						<span>{ fmt.Sprint(item.Item.DebtCurrency) }</span>
-					</span>
-					<span>
-						<span x-text="$t('main-buildings-show-currencies-amount-pay')"></span>:
-						<span>{ fmt.Sprint(item.Item.CurrenciesToShowAmountToPay) }</span>
-					</span>
-				</div>
+			<div class="flex flex-col gap-2">
+				<span>{ fmt.Sprint(item.Item.ID) }</span>
+				<span>{ fmt.Sprint(item.Item.Name) }</span>
+				<span>{ fmt.Sprint(item.Item.Rif) }</span>
+			</div>
+			<div class="flex flex-col gap-2">
+				<span>
+					<span x-text="$t('main-buildings-main-currency')"></span>:
+					<span>{ fmt.Sprint(item.Item.MainCurrency) }</span>
+				</span>
+				<span>
+					<span x-text="$t('main-buildings-debt-currency')"></span>:
+					<span>{ fmt.Sprint(item.Item.DebtCurrency) }</span>
+				</span>
+				<span>
+					<span x-text="$t('main-buildings-show-currencies-amount-pay')"></span>:
+					<span>{ fmt.Sprint(item.Item.CurrenciesToShowAmountToPay) }</span>
+				</span>
+			</div>
+			<div class="flex flex-col gap-2 justify-center items-center text-center">
 				if item.Item.FixedPay && item.Item.FixedPayAmount != 0 {
-					<span>
-						<span x-text="$t('main-buildings-fixed-pay')"></span>:
+					<span class="flex flex-row">
+						<span x-text="$t('main-buildings-fixed-pay')"></span>
+						<span>:&nbsp;</span>
 						<span>{ fmt.Sprint(item.Item.FixedPayAmount) }</span>
 					</span>
 				}
-				if item.Item.RoundUpPayments {
-					<span
-						class="rounded-radius w-fit border border-success bg-success px-2 py-1 text-xs font-medium text-on-success dark:border-success dark:bg-success dark:text-on-success"
-						x-text="$t('main-buildings-round-up-payments')"
-					></span>
-				} else {
-					<span
-						class="rounded-radius w-fit border border-danger bg-danger px-2 py-1 text-xs font-medium text-on-danger dark:border-danger dark:bg-danger dark:text-on-danger"
-						x-text="$t('main-buildings-round-up-payments')"
-					></span>
+				@api.Badge(item.Item.RoundUpPayments) {
+					<span x-text="$t('main-buildings-round-up-payments')"></span>
 				}
-				<span>
-					<span x-text="$t('main-buildings-email-config')"></span>:
+			</div>
+			<div class="flex flex-col gap-2 justify-center items-center text-center">
+				<span class="flex flex-row">
+					<span x-text="$t('main-title-apartments')"></span>
+					<span>:&nbsp;</span>
+					<span>{ fmt.Sprint(item.Item.AptCount) }</span>
+				</span>
+				<span class="flex flex-row">
+					<span x-text="$t('main-buildings-email-config')"></span>
+					<span>:&nbsp;</span>
 					<span>{ fmt.Sprint(item.Item.EmailConfig) }</span>
 				</span>
-				<span
-					data-date={ fmt.Sprint(item.CreatedAt) }
-					x-init="
+			</div>
+			<span
+				data-date={ fmt.Sprint(item.CreatedAt) }
+				x-init="
       					$el.innerHTML = new Date(parseInt($el.getAttribute('data-date')))
                                             //.toLocaleDateString()
                                            .toLocaleString()
                                            "
-				></span>
-			</div>
+			></span>
 			<div class="flex flex-row flex-wrap gap-2 justify-center items-center">
 				<a href={ templ.URL(fmt.Sprintf("/buildings/edit/%s", item.Key)) }>
 					<button
