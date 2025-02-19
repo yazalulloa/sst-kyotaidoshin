@@ -47,6 +47,7 @@ BEGIN
     UPDATE apartments SET updated_at = CURRENT_TIMESTAMP WHERE building_id = OLD.building_id AND number = OLD.number;
 END;
 
+-- DROP TABLE IF EXISTS buildings;
 CREATE TABLE IF NOT EXISTS buildings
 (
     id                               CHAR(20)                                       NOT NULL UNIQUE PRIMARY KEY,
@@ -56,7 +57,7 @@ CREATE TABLE IF NOT EXISTS buildings
     debt_currency                    TEXT CHECK ( debt_currency IN ('USD', 'VED') ) NOT NULL,
     currencies_to_show_amount_to_pay TEXT                                           NOT NULL,
     fixed_pay                        BOOL                                           NOT NULL,
-    fixed_pay_amount                 DECIMAL(16, 2),
+    fixed_pay_amount                 DECIMAL(16, 2)                                 NOT NULL,
     round_up_payments                BOOL                                           NOT NULL,
     email_config                     TEXT                                           NOT NULL,
     created_at                       DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -102,15 +103,15 @@ SET updated_at = CURRENT_TIMESTAMP
 WHERE id = OLD.id;
 END;
 
-
+-- DROP TABLE IF EXISTS reserve_funds;
 CREATE TABLE IF NOT EXISTS reserve_funds
 (
     id              INTEGER PRIMARY KEY,
     building_id     CHAR(20)                                              NOT NULL,
     name            VARCHAR(100)                                          NOT NULL,
     fund            DECIMAL(16, 2)                                        NOT NULL,
-    expense         DECIMAL(16, 2),
-    pay             DECIMAL(16, 2),
+    expense         DECIMAL(16, 2)                                        NOT NULL,
+    pay             DECIMAL(16, 2)                                        NOT NULL,
     active          BOOL                                                  NOT NULL,
     type            TEXT CHECK ( type IN ('FIXED_PAY', 'PERCENTAGE') )    NOT NULL,
     expense_type    TEXT CHECK ( expense_type IN ('COMMON', 'UNCOMMON') ) NOT NULL,

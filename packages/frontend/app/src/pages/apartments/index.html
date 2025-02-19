@@ -46,9 +46,7 @@
              x-data="{ search: ''}"
              x-model.debounce.300ms="search"
              x-init="
-             $el.addEventListener('input', () => {
-                $el.value = $el.value.trim();
-             });
+            trimInput($el);
               $watch('search', (value, oldValue) => {
                 if (value !== oldValue) {
                    updateApt()

@@ -176,3 +176,12 @@ templ UploadBackupResponse(inserted int64, formUrl string, idUpdater string, eve
 		</div>
 	</button>
 }
+
+
+templ initView() {
+
+}
+
+templ RefreshView(url string) {
+<meta http-equiv="refresh" content={ fmt.Sprintf("0; url=%s",url) }>
+}

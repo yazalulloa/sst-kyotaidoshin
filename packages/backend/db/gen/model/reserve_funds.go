@@ -16,8 +16,8 @@ type ReserveFunds struct {
 	BuildingID    string
 	Name          string
 	Fund          float64
-	Expense       *float64
-	Pay           *float64
+	Expense       float64
+	Pay           float64
 	Active        bool
 	Type          string
 	ExpenseType   string

@@ -14,6 +14,7 @@ import (
 	bcv_bucket "kyotaidoshin/bcv-bucket"
 	"kyotaidoshin/buildings"
 	"kyotaidoshin/rates"
+	"kyotaidoshin/reserveFunds"
 	"log"
 	"net/http"
 	"strings"
@@ -65,6 +66,7 @@ func router() http.Handler {
 	rates.Routes(newRouter)
 	bcv_bucket.Routes(newRouter)
 	buildings.Routes(newRouter)
+	reserveFunds.Routes(newRouter)
 	apartments.Routes(newRouter)
 
 	newRouter.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

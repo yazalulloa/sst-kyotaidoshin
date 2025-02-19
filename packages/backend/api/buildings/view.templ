@@ -32,10 +32,10 @@ templ Search(res TableResponse) {
 						<span>{ fmt.Sprint(item.Item.CurrenciesToShowAmountToPay) }</span>
 					</span>
 				</div>
-				if item.Item.FixedPay && item.Item.FixedPayAmount != nil {
+				if item.Item.FixedPay && item.Item.FixedPayAmount != 0 {
 					<span>
 						<span x-text="$t('main-buildings-fixed-pay')"></span>:
-						<span>{ fmt.Sprint(*item.Item.FixedPayAmount) }</span>
+						<span>{ fmt.Sprint(item.Item.FixedPayAmount) }</span>
 					</span>
 				}
 				if item.Item.RoundUpPayments {
@@ -63,25 +63,18 @@ templ Search(res TableResponse) {
 				></span>
 			</div>
 			<div class="flex flex-row flex-wrap gap-2 justify-center items-center">
-				<button
-					@click="localStorage.setItem('resource', $el.getAttribute('data-resource'))"
-					type="button"
-					class="whitespace-nowrap bg-transparent rounded-full border border-secondary p-1 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-secondary-dark dark:text-secondary-dark dark:focus-visible:outline-secondary-dark"
-					x-bind:hx-get="buildingsEditPartialUrl"
-					hx-disabled-elt="this"
-					hx-indicator=".htmx-indicator"
-					hx-swap="none"
-					hx-trigger="mousedown"
-					data-resource={ item.Key }
-					hx-on::before-request="localStorage.setItem('resource', this.getAttribute('data-resource'))"
-				>
-					<svg x-init="$el.setAttribute('data-src', window.editIconUrl)" data-cache="21600" class="h-6 w-6"></svg>
-				</button>
+				<a href={ templ.URL(fmt.Sprintf("/buildings/edit/%s", item.Key)) }>
+					<button
+						type="button"
+						class="whitespace-nowrap bg-transparent rounded-full border border-secondary p-1 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-secondary-dark dark:text-secondary-dark dark:focus-visible:outline-secondary-dark"
+					>
+						<svg x-bind:data-src="editIconUrl" data-cache="21600" class="h-6 w-6"></svg>
+					</button>
+				</a>
 				@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
 			</div>
 		</li>
 	}
-	
 	if res.NextPageUrl != "" {
 		@api.NextPageLi(res.NextPageUrl, templ.Attributes{})
 	}
@@ -120,11 +113,7 @@ templ FormView(dto FormDto) {
 			data-building-debt-currency={ dto.building.DebtCurrency }
 			data-building-currencies-to-show-amount-to-pay={ dto.currenciesToShowAmountToPay }
 			data-building-fixed-pay={ fmt.Sprint(dto.building.FixedPay) }
-			if dto.building.FixedPayAmount != nil {
-				data-building-fixed-pay-amount={ fmt.Sprint(*dto.building.FixedPayAmount) }
-			} else {
-				data-building-fixed-pay-amount="0"
-			}
+			data-building-fixed-pay-amount={ fmt.Sprint(dto.building.FixedPayAmount) }
 			data-building-round-up-payments={ fmt.Sprint(dto.building.RoundUpPayments) }
 			data-building-email-config={ dto.building.EmailConfig }
 			x-init="
@@ -142,32 +131,19 @@ templ FormView(dto FormDto) {
 
 	"
 		></div>
-		
 		@reserveFunds.FormView(dto.reserveFundFormDto)
-
 	}
 	<div id="emailConfigSelect" hx-swap-oob="innerHTML">
 		for _,emailConfig := range dto.emailConfigs {
 			<option value={ emailConfig.key }>{ emailConfig.id } { emailConfig.email }</option>
 		}
 	</div>
-
-
-
 }
 
 templ FormResponseView(res FormResponse) {
 	<div
-		if res.createdNew != nil {
-			data-response-created-new={ fmt.Sprint(*res.createdNew) }
-		}
 		data-response-err={ res.errorStr }
 		x-init="
-		let createdNew = $el.getAttribute('data-response-created-new')
-		if (createdNew !== null) {
-		 isEdit = createdNew === 'true'
-		}
-
 errMsg = $el.getAttribute('data-response-err');
 
 if (errMsg === '') {
@@ -179,11 +155,4 @@ form.classList.remove('border', 'border-success');
 
 "
 	></div>
-
-	if res.createdNew != nil && *res.createdNew && res.key != nil {
-		<div id="buildings-form" hx-swap-oob="beforeend">
-		<input type="hidden" name="key" value={ *res.key }/>
-		</div>
-	}
-
 }

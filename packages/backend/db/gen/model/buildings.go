@@ -12,16 +12,16 @@ import (
 )
 
 type Buildings struct {
-	ID                          string     `sql:"primary_key" json:"ID,omitempty"`
-	Name                        string     `json:"name,omitempty"`
-	Rif                         string     `json:"rif,omitempty"`
-	MainCurrency                string     `json:"mainCurrency,omitempty"`
-	DebtCurrency                string     `json:"debtCurrency,omitempty"`
-	CurrenciesToShowAmountToPay string     `json:"currenciesToShowAmountToPay,omitempty"`
-	FixedPay                    bool       `json:"fixedPay,omitempty"`
-	FixedPayAmount              *float64   `json:"fixedPayAmount,omitempty"`
-	RoundUpPayments             bool       `json:"roundUpPayments,omitempty"`
-	EmailConfig                 string     `json:"emailConfig,omitempty"`
-	CreatedAt                   *time.Time `json:"createdAt,omitempty"`
-	UpdatedAt                   *time.Time `json:"updatedAt,omitempty"`
+	ID                          string `sql:"primary_key"`
+	Name                        string
+	Rif                         string
+	MainCurrency                string
+	DebtCurrency                string
+	CurrenciesToShowAmountToPay string
+	FixedPay                    bool
+	FixedPayAmount              float64
+	RoundUpPayments             bool
+	EmailConfig                 string
+	CreatedAt                   *time.Time
+	UpdatedAt                   *time.Time
 }

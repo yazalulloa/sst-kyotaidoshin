@@ -126,7 +126,6 @@ func buildingPut(w http.ResponseWriter, r *http.Request) {
 		validate := validator.New(validator.WithRequiredStructEnabled())
 
 		isUpdate := request.Key != nil
-		log.Printf("Is update: %v", isUpdate)
 		if isUpdate {
 			err := api.Decode(*request.Key, &request.Id)
 			if err != nil {
@@ -175,13 +174,6 @@ func buildingPut(w http.ResponseWriter, r *http.Request) {
 
 		currenciesToShowAmountToPay := strings.Join(slices.Collect(maps.Keys(currencies)), ",")
 
-		var fixedPayAmount *float64
-		if request.FixedPay {
-			fixedPayAmount = &request.FixedPayAmount
-		} else {
-			fixedPayAmount = nil
-		}
-
 		building := model.Buildings{
 			ID:                          request.Id,
 			Name:                        request.Name,
@@ -190,7 +182,7 @@ func buildingPut(w http.ResponseWriter, r *http.Request) {
 			DebtCurrency:                request.DebtCurrency,
 			CurrenciesToShowAmountToPay: currenciesToShowAmountToPay,
 			FixedPay:                    request.FixedPay,
-			FixedPayAmount:              fixedPayAmount,
+			FixedPayAmount:              request.FixedPayAmount,
 			RoundUpPayments:             request.RoundUpPayments,
 			EmailConfig:                 request.EmailConfig,
 		}
@@ -210,11 +202,21 @@ func buildingPut(w http.ResponseWriter, r *http.Request) {
 		response.key = newKey
 		tmp := !isUpdate
 		response.createdNew = &tmp
-		log.Printf("Created new: %v", *response.createdNew)
 		return response
 	}
 
 	response := upsert()
+
+	if response.createdNew != nil && *response.createdNew && response.key != nil {
+		redirectUrl := "/buildings/edit/" + *response.key
+		w.Header().Add("HX-Redirect", redirectUrl)
+		err := api.RefreshView(redirectUrl).Render(r.Context(), w)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		return
+	}
 
 	err := FormResponseView(response).Render(r.Context(), w)
 	if err != nil {
@@ -265,6 +267,7 @@ func formData(w http.ResponseWriter, r *http.Request) {
 		},
 		currencies:                  util.HtmlCurrencies(),
 		currenciesToShowAmountToPay: "[]",
+		reserveFundFormDto:          reserveFunds.FormDto{},
 	}
 
 	if idParam != "" {
@@ -365,20 +368,20 @@ type buildingDto struct {
 	DebtCurrency                string   `json:"debt_currency"`
 	CurrenciesToShowAmountToPay []string `json:"currencies_to_show_amount_to_pay"`
 	FixedPay                    bool     `json:"fixed_pay"`
-	FixedPayAmount              *float64 `json:"fixed_pay_amount"`
+	FixedPayAmount              float64  `json:"fixed_pay_amount"`
 	RoundUpPayments             bool     `json:"round_up_payments"`
 }
 
 type reserveFundDto struct {
-	BuildingID    string   `json:"building_id"`
-	Name          string   `json:"name"`
-	Fund          float64  `json:"fund"`
-	Expense       *float64 `json:"expense"`
-	Pay           *float64 `json:"pay"`
-	Active        bool     `json:"active"`
-	Type          string   `json:"type"`
-	ExpenseType   string   `json:"expense_type"`
-	AddToExpenses bool     `json:"add_to_expenses"`
+	BuildingID    string  `json:"building_id"`
+	Name          string  `json:"name"`
+	Fund          float64 `json:"fund"`
+	Expense       float64 `json:"expense"`
+	Pay           float64 `json:"pay"`
+	Active        bool    `json:"active"`
+	Type          string  `json:"type"`
+	ExpenseType   string  `json:"expense_type"`
+	AddToExpenses bool    `json:"add_to_expenses"`
 }
 
 func uploadBackup(w http.ResponseWriter, r *http.Request) {

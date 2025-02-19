@@ -131,15 +131,15 @@ func Search(res TableResponse) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if item.Item.FixedPay && item.Item.FixedPayAmount != nil {
+			if item.Item.FixedPay && item.Item.FixedPayAmount != 0 {
 				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<span><span x-text=\"$t(&#39;main-buildings-fixed-pay&#39;)\"></span>: <span>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var9 string
-				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(*item.Item.FixedPayAmount))
+				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(item.Item.FixedPayAmount))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 38, Col: 51}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 38, Col: 50}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -187,20 +187,16 @@ func Search(res TableResponse) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" x-init=\"\n      \t\t\t\t\t$el.innerHTML = new Date(parseInt($el.getAttribute(&#39;data-date&#39;)))\n                                            //.toLocaleDateString()\n                                           .toLocaleString()\n                                           \"></span></div><div class=\"flex flex-row flex-wrap gap-2 justify-center items-center\"><button @click=\"localStorage.setItem(&#39;resource&#39;, $el.getAttribute(&#39;data-resource&#39;))\" type=\"button\" class=\"whitespace-nowrap bg-transparent rounded-full border border-secondary p-1 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-secondary-dark dark:text-secondary-dark dark:focus-visible:outline-secondary-dark\" x-bind:hx-get=\"buildingsEditPartialUrl\" hx-disabled-elt=\"this\" hx-indicator=\".htmx-indicator\" hx-swap=\"none\" hx-trigger=\"mousedown\" data-resource=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "\" x-init=\"\n      \t\t\t\t\t$el.innerHTML = new Date(parseInt($el.getAttribute(&#39;data-date&#39;)))\n                                            //.toLocaleDateString()\n                                           .toLocaleString()\n                                           \"></span></div><div class=\"flex flex-row flex-wrap gap-2 justify-center items-center\"><a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var12 string
-			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(item.Key)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 75, Col: 29}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+			var templ_7745c5c3_Var12 templ.SafeURL = templ.URL(fmt.Sprintf("/buildings/edit/%s", item.Key))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var12)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" hx-on::before-request=\"localStorage.setItem(&#39;resource&#39;, this.getAttribute(&#39;data-resource&#39;))\"><svg x-init=\"$el.setAttribute(&#39;data-src&#39;, window.editIconUrl)\" data-cache=\"21600\" class=\"h-6 w-6\"></svg></button>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\"><button type=\"button\" class=\"whitespace-nowrap bg-transparent rounded-full border border-secondary p-1 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-secondary-dark dark:text-secondary-dark dark:focus-visible:outline-secondary-dark\"><svg x-bind:data-src=\"editIconUrl\" data-cache=\"21600\" class=\"h-6 w-6\"></svg></button></a>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -255,7 +251,7 @@ func CountersView(counters Counters) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(counters.TotalCount))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 96, Col: 52}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 89, Col: 52}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -273,7 +269,7 @@ func CountersView(counters Counters) templ.Component {
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(*counters.QueryCount))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 98, Col: 54}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 91, Col: 54}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -324,7 +320,7 @@ func FormView(dto FormDto) templ.Component {
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("open = true; currencies = %s", dto.currencies))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 109, Col: 74}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 102, Col: 74}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
@@ -342,7 +338,7 @@ func FormView(dto FormDto) templ.Component {
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(*dto.key)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 111, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 104, Col: 50}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -361,7 +357,7 @@ func FormView(dto FormDto) templ.Component {
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(dto.building.ID))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 116, Col: 49}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 109, Col: 49}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -374,7 +370,7 @@ func FormView(dto FormDto) templ.Component {
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(dto.building.Name)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 117, Col: 41}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 110, Col: 41}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -387,7 +383,7 @@ func FormView(dto FormDto) templ.Component {
 			var templ_7745c5c3_Var21 string
 			templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(dto.building.Rif)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 118, Col: 39}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 111, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 			if templ_7745c5c3_Err != nil {
@@ -400,7 +396,7 @@ func FormView(dto FormDto) templ.Component {
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(dto.building.MainCurrency)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 119, Col: 58}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 112, Col: 58}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 			if templ_7745c5c3_Err != nil {
@@ -413,7 +409,7 @@ func FormView(dto FormDto) templ.Component {
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(dto.building.DebtCurrency)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 120, Col: 58}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 113, Col: 58}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 			if templ_7745c5c3_Err != nil {
@@ -426,7 +422,7 @@ func FormView(dto FormDto) templ.Component {
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(dto.currenciesToShowAmountToPay)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 121, Col: 83}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 114, Col: 83}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 			if templ_7745c5c3_Err != nil {
@@ -439,67 +435,52 @@ func FormView(dto FormDto) templ.Component {
 			var templ_7745c5c3_Var25 string
 			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(dto.building.FixedPay))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 122, Col: 62}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 115, Col: 62}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "\" data-building-fixed-pay-amount=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			if dto.building.FixedPayAmount != nil {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, " data-building-fixed-pay-amount=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var26 string
-				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(*dto.building.FixedPayAmount))
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 124, Col: 77}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, " data-building-fixed-pay-amount=\"0\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
+			var templ_7745c5c3_Var26 string
+			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(dto.building.FixedPayAmount))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 116, Col: 75}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, " data-building-round-up-payments=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "\" data-building-round-up-payments=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var27 string
 			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(dto.building.RoundUpPayments))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 128, Col: 77}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 117, Col: 77}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "\" data-building-email-config=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "\" data-building-email-config=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var28 string
 			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.JoinStringErrs(dto.building.EmailConfig)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 129, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 118, Col: 56}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var28))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\" x-init=\"\n\tisEdit = true;\n\tid = $el.getAttribute(&#39;data-building-id&#39;);\n\tname = $el.getAttribute(&#39;data-building-name&#39;);\n  rif = $el.getAttribute(&#39;data-building-rif&#39;);\n  mainCurrency = $el.getAttribute(&#39;data-building-main-currency&#39;);\n  debtCurrency = $el.getAttribute(&#39;data-building-debt-currency&#39;);\n  currenciesToShowAmountToPay = $el.getAttribute(&#39;data-building-currencies-to-show-amount-to-pay&#39;);\n  fixedPay = &#39;true&#39; === $el.getAttribute(&#39;data-building-fixed-pay&#39;);\n  fixedPayAmount = $el.getAttribute(&#39;data-building-fixed-pay-amount&#39;);\n  roundUpPayments = &#39;true&#39; === $el.getAttribute(&#39;data-building-round-up-payments&#39;);\n  emailConfig = $el.getAttribute(&#39;data-building-email-config&#39;);\n\n\t\"></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "\" x-init=\"\n\tisEdit = true;\n\tid = $el.getAttribute(&#39;data-building-id&#39;);\n\tname = $el.getAttribute(&#39;data-building-name&#39;);\n  rif = $el.getAttribute(&#39;data-building-rif&#39;);\n  mainCurrency = $el.getAttribute(&#39;data-building-main-currency&#39;);\n  debtCurrency = $el.getAttribute(&#39;data-building-debt-currency&#39;);\n  currenciesToShowAmountToPay = $el.getAttribute(&#39;data-building-currencies-to-show-amount-to-pay&#39;);\n  fixedPay = &#39;true&#39; === $el.getAttribute(&#39;data-building-fixed-pay&#39;);\n  fixedPayAmount = $el.getAttribute(&#39;data-building-fixed-pay-amount&#39;);\n  roundUpPayments = &#39;true&#39; === $el.getAttribute(&#39;data-building-round-up-payments&#39;);\n  emailConfig = $el.getAttribute(&#39;data-building-email-config&#39;);\n\n\t\"></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -508,56 +489,56 @@ func FormView(dto FormDto) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, "<div id=\"emailConfigSelect\" hx-swap-oob=\"innerHTML\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<div id=\"emailConfigSelect\" hx-swap-oob=\"innerHTML\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, emailConfig := range dto.emailConfigs {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "<option value=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 39, "<option value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var29 string
 			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(emailConfig.key)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 151, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 138, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 40, "\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var30 string
 			templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(emailConfig.id)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 151, Col: 53}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 138, Col: 53}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, " ")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 41, " ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var31 string
 			templ_7745c5c3_Var31, templ_7745c5c3_Err = templ.JoinStringErrs(emailConfig.email)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 151, Col: 75}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 138, Col: 75}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var31))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "</option>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 42, "</option>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 46, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 43, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -586,64 +567,22 @@ func FormResponseView(res FormResponse) templ.Component {
 			templ_7745c5c3_Var32 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 47, "<div")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 44, "<div data-response-err=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if res.createdNew != nil {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 48, " data-response-created-new=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var33 string
-			templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(*res.createdNew))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 162, Col: 58}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 49, "\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		var templ_7745c5c3_Var33 string
+		templ_7745c5c3_Var33, templ_7745c5c3_Err = templ.JoinStringErrs(res.errorStr)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 145, Col: 34}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 50, " data-response-err=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var33))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var34 string
-		templ_7745c5c3_Var34, templ_7745c5c3_Err = templ.JoinStringErrs(res.errorStr)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 164, Col: 34}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var34))
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 45, "\" x-init=\"\nerrMsg = $el.getAttribute(&#39;data-response-err&#39;);\n\nif (errMsg === &#39;&#39;) {\nlet form = $el.closest(&#39;form&#39;)\nform.classList.add(&#39;border&#39;, &#39;border-success&#39;);\nawait sleep(3000);\nform.classList.remove(&#39;border&#39;, &#39;border-success&#39;);\n}\n\n\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "\" x-init=\"\n\t\tlet createdNew = $el.getAttribute(&#39;data-response-created-new&#39;)\n\t\tif (createdNew !== null) {\n\t\t isEdit = createdNew === &#39;true&#39;\n\t\t}\n\nerrMsg = $el.getAttribute(&#39;data-response-err&#39;);\n\nif (errMsg === &#39;&#39;) {\nlet form = $el.closest(&#39;form&#39;)\nform.classList.add(&#39;border&#39;, &#39;border-success&#39;);\nawait sleep(3000);\nform.classList.remove(&#39;border&#39;, &#39;border-success&#39;);\n}\n\n\"></div>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if res.createdNew != nil && *res.createdNew && res.key != nil {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 52, "<div id=\"buildings-form\" hx-swap-oob=\"beforeend\"><input type=\"hidden\" name=\"key\" value=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var35 string
-			templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(*res.key)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `buildings/view.templ`, Line: 185, Col: 50}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 53, "\"></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
 		}
 		return nil
 	})
