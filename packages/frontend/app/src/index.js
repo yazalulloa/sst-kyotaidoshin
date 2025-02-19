@@ -111,6 +111,49 @@ window.scrollThroughParent = (element) => {
 
 }
 
+function padLeft(value, length) {
+  if (value.length >= length) {
+    return value;
+  }
+
+  return (new Array(length + 1).join('0') + value).slice(-length);
+}
+
+function formatInputCurrency(input) {
+  let value = input.value.replace(/[^0-9]/g, '');
+  value = padLeft(value, 3);
+  let idx = value.length - 2;
+  value = value.slice(0, idx) + "." + value.slice(idx);
+
+  if (value !== "0.00") {
+    let num = parseFloat(value);
+    value = num.toString();
+  }
+
+  input.value = value
+
+  console.log("value: ", value);
+}
+
+window.configureCurrencyInput = function (input) {
+  formatInputCurrency(input);
+  input.addEventListener("input", (event) => {
+    formatInputCurrency(input);
+  });
+}
+
+function configureCurrencyInputs() {
+  // get all input with attribute data-currency
+  const inputs = document.querySelectorAll('input[data-type="currency"]')
+  console.log("inputs: ", inputs.length);
+  inputs.forEach(configureCurrencyInput)
+
+}
+
+document.addEventListener("htmx:afterSettle", function (event) {
+  // configureCurrencyInputs();
+});
+
 document.addEventListener('alpine-i18n:ready', function () {
   let locale = 'en';
   window.AlpineI18n.create(locale, JSON.parse(messages));

@@ -147,7 +147,10 @@ x-data="{
             step=".01"
             x-model="fund"
             x-bind:class="fundErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
-            x-init="limitInputToMaxLength($el)"
+            x-init="
+            limitInputToMaxLength($el)
+            configureCurrencyInput($el)
+            "
             required
         />
         <small x-model="fundErr"
@@ -173,7 +176,10 @@ x-data="{
             step=".01"
             x-model="pay"
             x-bind:class="payErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
-            x-init="limitInputToMaxLength($el)"
+            x-init="
+            limitInputToMaxLength($el)
+            configureCurrencyInput($el)
+            "
             required
         />
         <small x-model="payErr"
@@ -257,7 +263,10 @@ x-data="{
             step=".01"
             x-model="expense"
             x-bind:class="expenseErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
-            x-init="limitInputToMaxLength($el)"
+            x-init="
+            limitInputToMaxLength($el)
+            configureCurrencyInput($el)
+            "
             required
         />
         <small x-model="expenseErr"

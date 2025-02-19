@@ -20,7 +20,7 @@
     mainCurrency: '',
     debtCurrency: '',
     fixedPay: false,
-    fixedPayAmount: 0,
+    fixedPayAmount: '0.00',
     roundUpPayments: false,
     emailConfig: '',
     currenciesToShowAmountToPay: [],
@@ -212,7 +212,10 @@
             min="0"
             maxlength="10"
             step=".01"
-            x-init="limitInputToMaxLength($el)"
+            x-init="
+            limitInputToMaxLength($el)
+            configureCurrencyInput($el)
+            "
             class="w-full rounded-radius border bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
             name="fixedPayAmount"
             x-model="fixedPayAmount"
