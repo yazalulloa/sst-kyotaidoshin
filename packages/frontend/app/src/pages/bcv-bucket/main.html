@@ -5,7 +5,9 @@
    query: null
   }">
     <div id="bcv-files-counters" hidden="hidden"></div>
-    <span x-show="total">{main.title.files}: <span x-text="total"></span></span>
+    <div x-show="total" class="flex flex-row gap-0">
+      <span x-text="$t('main-title-bcv-files')"></span><span>:&nbsp;</span><span x-text="total"></span>
+    </div>
   </div>
 
   <button hx-get="/api/bcv-bucket/process-all"
@@ -14,8 +16,8 @@
           hx-disabled-elt="this"
           hx-indicator=".htmx-indicator"
           type="button"
-          class="w-fit inline-flex items-center justify-between gap-2 whitespace-nowrap border-outline bg-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark border rounded-radius">
-    main.action.bcv.files.process.all
+          class="w-fit inline-flex items-center justify-between gap-2 whitespace-nowrap border-outline bg-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark border rounded-radius"
+          x-text="$t('main-action-process-all')">
   </button>
 
   <button hx-get="/api/bcv-bucket/look-up"
@@ -24,14 +26,14 @@
           hx-disabled-elt="this"
           hx-indicator=".htmx-indicator"
           type="button"
-          class="w-fit inline-flex items-center justify-between gap-2 whitespace-nowrap border-outline bg-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark border rounded-radius">
-    main.action.bcv.files.look.up
+          class="w-fit inline-flex items-center justify-between gap-2 whitespace-nowrap border-outline bg-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark border rounded-radius"
+          x-text="$t('main-action-bcv-files-look-up')">
   </button>
 
 </div>
 
 <div id="container" hx-swap-oob="true">
-  <ul class="flex flex-col gap-2 *:md:grid *:md:grid-cols-[5fr_1fr_4fr_4fr_3fr_1fr] *:md:gap-2 *:sm:flex *:sm:flex-row *:sm:flex-wrap *:sm:gap-4 *:items-center *:text-center">
+  <ul class="flex flex-col gap-2 *:md:grid *:md:grid-cols-[5fr_1fr_4fr_4fr_3fr_1fr] *:md:gap-2 *:flex *:flex-row *:flex-wrap *:gap-4 *:items-center *:text-center">
     <li hidden="hidden"
         hx-get="/api/bcv-bucket/search"
         hx-trigger="load"

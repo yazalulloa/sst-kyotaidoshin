@@ -9,8 +9,12 @@
   }">
       <div id="apartments-counters" hidden="hidden"></div>
 
-      <span x-show="total">{main.title.apartments}: <span x-text="total"></span></span>
-      <span x-show="query">{main.title.items}: <span x-text="query"></span></span>
+      <div x-show="total" class="flex flex-row gap-0">
+        <span x-text="$t('main-title-apartments')"></span><span>:&nbsp;</span><span x-text="total"></span>
+      </div>
+      <div x-show="query" class="flex flex-row gap-0">
+        <span x-text="$t('main-title-items')"></span><span>:&nbsp;</span><span x-text="query"></span>
+      </div>
     </div>
 
     <script>
@@ -69,7 +73,7 @@
 
     <button disabled type="button"
             class="whitespace-nowrap bg-transparent rounded-radius border border-secondary px-4 py-2 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-secondary-dark dark:text-secondary-dark dark:focus-visible:outline-secondary-dark"
-            x-text="$t('main-actions-upload-backup')"
+            x-text="$t('main-action-upload-backup')"
             hx-get="/api/apartments/uploadBackupForm"
             hx-trigger="load"
             hx-swap="outerHTML">
@@ -83,7 +87,7 @@
 
 <div id="container" hx-swap-oob="true">
   <ul id="apartments-table"
-      class="flex flex-col *:p-1 *:md:grid *:md:grid-cols-6 *:md:gap-2 *:sm:flex *:sm:flex-row *:sm:flex-wrap *:sm:gap-4 *:items-center *:text-center *:border-b *:border-surface-dark *:dark:border-surface *:dark:text-surface *:hover:opacity-55">
+      class="flex flex-col *:p-1 *:md:grid *:md:grid-cols-6 *:md:gap-2 *:flex *:flex-row *:flex-wrap *:gap-4 *:items-center *:text-center *:border-b *:border-surface-dark *:dark:border-surface *:dark:text-surface *:hover:opacity-55">
 
   </ul>
 

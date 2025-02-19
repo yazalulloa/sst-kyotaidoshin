@@ -5,18 +5,23 @@
    query: null
   }">
     <div id="buildings-counters" hidden="hidden"></div>
-    <span x-show="total">main.title.buildings: <span x-text="total"></span></span>
+    <div x-show="total" class="flex flex-row gap-0">
+      <span x-text="$t('main-title-buildings')"></span><span>:&nbsp;</span><span x-text="total"></span>
+    </div>
+    <div x-show="query" class="flex flex-row gap-0">
+      <span x-text="$t('main-title-items')"></span><span>:&nbsp;</span><span x-text="query"></span>
+    </div>
   </div>
 
   <a type="button"
      href="/buildings/new"
-     class="whitespace-nowrap rounded-radius bg-primary border border-primary px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark">
-    main.title.buildings.new
+     class="whitespace-nowrap rounded-radius bg-primary border border-primary px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+     x-text="$t('main-title-buildings-new')">
   </a>
 
   <button disabled type="button"
           class="whitespace-nowrap bg-transparent rounded-radius border border-secondary px-4 py-2 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-secondary-dark dark:text-secondary-dark dark:focus-visible:outline-secondary-dark"
-          x-text="$t('main-actions-upload-backup')"
+          x-text="$t('main-action-upload-backup')"
           hx-get="/api/buildings/uploadBackupForm"
           hx-trigger="load"
           hx-swap="outerHTML">
@@ -35,7 +40,8 @@
 </div>
 
 <div id="container" hx-swap-oob="true">
-  <ul id="buildings-table" class="flex flex-col gap-2 *:md:grid *:md:grid-cols-6 *:sm:flex *:sm:flex-row *:sm:flex-wrap *:gap-4 *:text-center *:items-center *:rounded-radius *:border *:border-outline *:bg-surface-alt *:dark:border-outline-dark *:dark:bg-surface-dark-alt">
+  <ul id="buildings-table"
+      class="flex flex-col gap-2 *:md:grid *:md:grid-cols-6 *:flex *:flex-row *:flex-wrap *:gap-4 *:justify-around *:text-center *:items-center *:rounded-radius *:border *:border-outline *:bg-surface-alt *:dark:border-outline-dark *:dark:bg-surface-dark-alt">
   </ul>
 
 </div>

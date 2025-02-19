@@ -400,7 +400,7 @@ func UploadBackupForm(url string, values map[string]string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<label class=\"flex flex-row gap-0\" x-data=\"{ filename: &#39;&#39;}\"><span>main.actions.upload.backup</span> <span x-show=\"filename !== &#39;&#39;\">:&nbsp;</span> <span x-bind:class=\"filename === &#39;&#39; ? &#39;hidden&#39; : &#39;&#39;\" x-text=\"filename\" x-init=\"$watch(&#39;file&#39;, (value) =&gt; {\n            if (value &amp;&amp; value.length &gt; 0) {\n              filename = $el.nextElementSibling.files[0].name;\n             } else {\n              filename = &#39;&#39;;\n             }\n          })\"></span> <input class=\"hidden\" type=\"file\" accept=\".json.gz\" name=\"file\" x-model=\"file\"></label></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<label class=\"flex flex-row gap-0\" x-data=\"{ filename: &#39;&#39;}\"><span x-text=\"$t(&#39;main-action-upload-backup&#39;)\"></span> <span x-show=\"filename !== &#39;&#39;\">:&nbsp;</span> <span x-bind:class=\"filename === &#39;&#39; ? &#39;hidden&#39; : &#39;&#39;\" x-text=\"filename\" x-init=\"$watch(&#39;file&#39;, (value) =&gt; {\n            if (value &amp;&amp; value.length &gt; 0) {\n              filename = $el.nextElementSibling.files[0].name;\n             } else {\n              filename = &#39;&#39;;\n             }\n          })\"></span> <input class=\"hidden\" type=\"file\" accept=\".json.gz\" name=\"file\" x-model=\"file\"></label></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -129,7 +129,7 @@ templ UploadBackupForm(url string, values map[string]string) {
 			class="flex flex-row gap-0"
 			x-data="{ filename: ''}"
 		>
-			<span>main.actions.upload.backup</span>
+			<span x-text="$t('main-action-upload-backup')"></span>
 			<span x-show="filename !== ''">:&nbsp;</span>
 			<span
 				x-bind:class="filename === '' ? 'hidden' : ''"

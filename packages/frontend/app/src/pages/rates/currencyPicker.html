@@ -11,7 +11,9 @@
 
   <button x-on:click="modalIsOpen = true" type="button"
           class="w-fit inline-flex items-center justify-between gap-2 whitespace-nowrap border-outline bg-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark border rounded-radius">
-    <span class="text-center">{main.title.currencies}: <span x-text="currenciesSelected.length"></span></span>
+    <div class="flex flex-row gap-0">
+      <span x-text="$t('main-title-currencies')"></span><span>:&nbsp;</span><span x-text="currenciesSelected.length"></span>
+    </div>
   </button>
   <div x-cloak x-show="modalIsOpen" x-transition.opacity.duration.200ms asd-x-trap.inert.noscroll="modalIsOpen"
        x-on:keydown.esc.window="modalIsOpen = false" x-on:click.self="modalIsOpen = false"
@@ -26,8 +28,8 @@
       <div
           class="flex items-center justify-between border-b border-outline bg-surface-alt/60 p-4 dark:border-outline-dark dark:bg-surface-dark/20">
         <h3 id="defaultModalTitle"
-            class="font-semibold tracking-wide text-on-surface-strong dark:text-on-surface-dark-strong">
-          {main.action.select.currency}</h3>
+            class="font-semibold tracking-wide text-on-surface-strong dark:text-on-surface-dark-strong"
+          x-text="$t('main-title-select-currency')"></h3>
         <button x-on:click="modalIsOpen = false" aria-label="close modal">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor"
                fill="none" stroke-width="1.4" class="w-5 h-5">
@@ -65,15 +67,16 @@
       <!-- Dialog Footer -->
       <div
           class="flex flex-col-reverse justify-between gap-2 border-t border-outline bg-surface-alt/60 p-4 dark:border-outline-dark dark:bg-surface-dark/20 sm:flex-row sm:items-center md:justify-end">
-        <button x-on:click="modalIsOpen = false" type="button"
-                class="whitespace-nowrap rounded-radius px-4 py-2 text-center text-sm font-medium tracking-wide text-on-surface transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark">
-          Remind me later
-        </button>
-        <button x-on:click="modalIsOpen = false" type="button"
-                class="whitespace-nowrap rounded-radius border border-primary dark:border-primary-dark bg-primary px-4 py-2 text-center text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark">
-          Upgrade Now
+        <button x-on:click="
+                  modalIsOpen = false
+                  currenciesSelected = []
+                "
+                type="button"
+                class="whitespace-nowrap rounded-radius border border-primary dark:border-primary-dark bg-primary px-4 py-2 text-center text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+                x-text="$t('main-action-clear')">
         </button>
       </div>
+    </div>
     </div>
   </div>
 </div>
