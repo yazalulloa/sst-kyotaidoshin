@@ -2,13 +2,16 @@ package buildings
 
 import (
 	"db/gen/model"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/go-playground/form"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
+	"kyotaidoshin/apartments"
 	"kyotaidoshin/api"
+	"kyotaidoshin/extraCharges"
 	"kyotaidoshin/reserveFunds"
 	"kyotaidoshin/util"
 	"log"
@@ -288,7 +291,7 @@ func formData(w http.ResponseWriter, r *http.Request) {
 				})
 			}
 		}
-		wg.Add(2)
+		wg.Add(4)
 
 		go func() {
 			defer wg.Done()
@@ -314,6 +317,36 @@ func formData(w http.ResponseWriter, r *http.Request) {
 			}
 
 			formDto.reserveFundFormDto = *reserveFundFormDto
+		}()
+
+		go func() {
+			defer wg.Done()
+			extraChargesFormDto, err := extraCharges.GetBuildingFormDto(id)
+			if err != nil {
+				handleErr(err)
+				return
+			}
+
+			formDto.extraChargesFormDto = *extraChargesFormDto
+		}()
+
+		go func() {
+			defer wg.Done()
+			apts, err := apartments.SelectNumberAndNameByBuildingId(id)
+			if err != nil {
+				handleErr(err)
+				return
+			}
+
+			aptStr, err := json.Marshal(apts)
+			if err != nil {
+				handleErr(err)
+				return
+			}
+
+			base64Str := base64.URLEncoding.EncodeToString(aptStr)
+
+			formDto.apts = base64Str
 		}()
 
 		wg.Wait()
@@ -358,6 +391,7 @@ func getUploadBackupForm(w http.ResponseWriter, r *http.Request) {
 type BuildingRecord struct {
 	Building     buildingDto      `json:"building"`
 	ReserveFunds []reserveFundDto `json:"reserve_funds"`
+	ExtraCharges []extraChargeDto `json:"extra_charges"`
 }
 
 type buildingDto struct {
@@ -384,6 +418,21 @@ type reserveFundDto struct {
 	AddToExpenses bool    `json:"add_to_expenses"`
 }
 
+type extraChargeDto struct {
+	BuildingID      string   `json:"building_id"`
+	ParentReference string   `json:"parent_reference"`
+	Type            string   `json:"type"`
+	Description     string   `json:"description"`
+	Amount          float64  `json:"amount"`
+	Currency        string   `json:"currency"`
+	Active          bool     `json:"active"`
+	Apartments      []aptDto `json:"apartments"`
+}
+
+type aptDto struct {
+	Number string `json:"number"`
+}
+
 func uploadBackup(w http.ResponseWriter, r *http.Request) {
 
 	component, err := api.ProcessUploadBackup(r, _UPLOAD_BACKUP_FORM, "buildings-updater", "update-buildings",
@@ -397,6 +446,7 @@ func uploadBackup(w http.ResponseWriter, r *http.Request) {
 
 			buildings := make([]model.Buildings, len(dto))
 			var reserveFundArray []model.ReserveFunds
+			var extraChargeArray []model.ExtraCharges
 			for i, record := range dto {
 				buildings[i] = model.Buildings{
 					ID:                          record.Building.Id,
@@ -424,6 +474,27 @@ func uploadBackup(w http.ResponseWriter, r *http.Request) {
 						AddToExpenses: reserveFund.AddToExpenses,
 					})
 				}
+
+				for _, extraCharge := range record.ExtraCharges {
+					var builder strings.Builder
+					for idx, apt := range extraCharge.Apartments {
+						builder.WriteString(apt.Number)
+						if idx < len(extraCharge.Apartments)-1 {
+							builder.WriteString(",")
+						}
+					}
+
+					extraChargeArray = append(extraChargeArray, model.ExtraCharges{
+						BuildingID:      extraCharge.BuildingID,
+						ParentReference: extraCharge.ParentReference,
+						Type:            extraCharge.Type,
+						Description:     extraCharge.Description,
+						Amount:          extraCharge.Amount,
+						Currency:        extraCharge.Currency,
+						Active:          extraCharge.Active,
+						Apartments:      builder.String(),
+					})
+				}
 			}
 
 			rowsAffected, err := insertBackup(buildings)
@@ -432,6 +503,11 @@ func uploadBackup(w http.ResponseWriter, r *http.Request) {
 			}
 
 			_, err = reserveFunds.InsertBackup(reserveFundArray)
+			if err != nil {
+				return 0, err
+			}
+
+			_, err = extraCharges.InsertBackup(extraChargeArray)
 			if err != nil {
 				return 0, err
 			}

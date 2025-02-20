@@ -1,4 +1,4 @@
-package reserveFunds
+package extraCharges
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 )
 
 templ FormView(dto FormDto) {
-	<div id="reserve-funds-list" hx-swap-oob="innerHTML">
+	<div id="extra-charges-list" hx-swap-oob="innerHTML">
 		for _, item := range dto.Items {
 			@ItemView(item)
 		}
@@ -32,27 +32,21 @@ templ ItemView(item Item) {
 		}
 		if item.UpdateParams != nil {
 			data-update-params={ *item.UpdateParams }
-			@click="$dispatch('event-reserve-fund-form-update', { params: $el.getAttribute('data-update-params') })"
+			@click="$dispatch('event-extra-charge-form-update', { params: $el.getAttribute('data-update-params') })"
 		}
 	>
 		<div class="flex flex-col items-center gap-2 text-center">
-			<span>{ item.Item.Name }</span>
-			<span>{ fmt.Sprint(item.Item.Fund) }</span>
+			<span>{ item.Item.Description }</span>
+			@api.BadgeIndicator(item.Item.Active, "active")
 		</div>
-		<div class="flex flex-row gap-4 justify-center">
-			@api.Badge(item.Item.Active) {
-				<span>{ fmt.Sprint(item.Item.Pay) }</span>
-				if item.Item.Type == "PERCENTAGE" {
-					<span>%</span>
-				}
-			}
+		<div class="flex flex-col items-center gap-2 text-center">
+			<span>{ fmt.Sprint(item.Item.Amount) }</span>
+			<span>{ item.Item.Currency }</span>
 		</div>
-		<div class="flex justify-center">
-			@api.Badge(item.Item.AddToExpenses) {
-				<div class="flex flex-col gap-2 justify-center">
-					<span>{ fmt.Sprint(item.Item.Expense) }</span>
-					<span>{ fmt.Sprint(item.Item.ExpenseType) }</span>
-				</div>
+		<div class="grid grid-cols-[1fr_6fr] gap-1">
+			for _, apt := range item.Apts {
+				<span>{ apt }</span>
+				<span class="text-start" data-apt={ apt } x-text="aptMap.get($el.getAttribute('data-apt'))"></span>
 			}
 		</div>
 		@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
@@ -68,7 +62,7 @@ templ FormResponseView(res FormResponse) {
   		counter = parseInt($el.getAttribute('data-counter'));
 
  		if (errMsg === '') {
- 		  $dispatch('event-reserve-fund-form-reset');
+ 		  $dispatch('event-extra-charge-form-reset');
  		 }
  		"
 	></div>
@@ -77,7 +71,7 @@ templ FormResponseView(res FormResponse) {
 			if *res.item.isUpdate {
 				@ItemView(*res.item)
 			} else {
-				<div id="reserve-funds-list" hx-swap-oob="beforeend">
+				<div id="extra-charges-list" hx-swap-oob="beforeend">
 					@ItemView(*res.item)
 				</div>
 			}
@@ -87,7 +81,7 @@ templ FormResponseView(res FormResponse) {
 
 templ DeleteResponse(counter int64, key string) {
 	<div
-		id="reserve-funds-list"
+		id="extra-charges-list"
 		hx-swap-oob="beforeend"
 	>
 		<div
@@ -95,7 +89,7 @@ templ DeleteResponse(counter int64, key string) {
 			data-counter={ fmt.Sprint(counter) }
 			x-init="
         		counter = parseInt($el.getAttribute('data-counter'));
-        		$dispatch('event-reserve-fund-building-restart-after-deletion', { key: key });
+        		$dispatch('event-extra-charge-form-restart-after-deletion', { key: key });
         		$el.remove()
         		"
 		></div>

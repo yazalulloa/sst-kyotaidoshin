@@ -25,6 +25,7 @@ type extraChargesTable struct {
 	Amount          sqlite.ColumnFloat
 	Currency        sqlite.ColumnString
 	Active          sqlite.ColumnBool
+	Apartments      sqlite.ColumnString
 	CreatedAt       sqlite.ColumnTimestamp
 	UpdatedAt       sqlite.ColumnTimestamp
 
@@ -75,10 +76,11 @@ func newExtraChargesTableImpl(schemaName, tableName, alias string) extraChargesT
 		AmountColumn          = sqlite.FloatColumn("amount")
 		CurrencyColumn        = sqlite.StringColumn("currency")
 		ActiveColumn          = sqlite.BoolColumn("active")
+		ApartmentsColumn      = sqlite.StringColumn("apartments")
 		CreatedAtColumn       = sqlite.TimestampColumn("created_at")
 		UpdatedAtColumn       = sqlite.TimestampColumn("updated_at")
-		allColumns            = sqlite.ColumnList{IDColumn, BuildingIDColumn, ParentReferenceColumn, TypeColumn, DescriptionColumn, AmountColumn, CurrencyColumn, ActiveColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns        = sqlite.ColumnList{BuildingIDColumn, ParentReferenceColumn, TypeColumn, DescriptionColumn, AmountColumn, CurrencyColumn, ActiveColumn, CreatedAtColumn, UpdatedAtColumn}
+		allColumns            = sqlite.ColumnList{IDColumn, BuildingIDColumn, ParentReferenceColumn, TypeColumn, DescriptionColumn, AmountColumn, CurrencyColumn, ActiveColumn, ApartmentsColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns        = sqlite.ColumnList{BuildingIDColumn, ParentReferenceColumn, TypeColumn, DescriptionColumn, AmountColumn, CurrencyColumn, ActiveColumn, ApartmentsColumn, CreatedAtColumn, UpdatedAtColumn}
 	)
 
 	return extraChargesTable{
@@ -93,6 +95,7 @@ func newExtraChargesTableImpl(schemaName, tableName, alias string) extraChargesT
 		Amount:          AmountColumn,
 		Currency:        CurrencyColumn,
 		Active:          ActiveColumn,
+		Apartments:      ApartmentsColumn,
 		CreatedAt:       CreatedAtColumn,
 		UpdatedAt:       UpdatedAtColumn,
 

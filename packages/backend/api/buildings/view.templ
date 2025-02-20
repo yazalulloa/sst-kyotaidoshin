@@ -3,6 +3,7 @@ package buildings
 import (
 	"fmt"
 	"kyotaidoshin/api"
+	"kyotaidoshin/extraCharges"
 	"kyotaidoshin/reserveFunds"
 )
 
@@ -117,6 +118,7 @@ templ FormView(dto FormDto) {
 			data-building-fixed-pay-amount={ fmt.Sprint(dto.building.FixedPayAmount) }
 			data-building-round-up-payments={ fmt.Sprint(dto.building.RoundUpPayments) }
 			data-building-email-config={ dto.building.EmailConfig }
+			data-apts={ dto.apts }
 			x-init="
 	isEdit = true;
 	id = $el.getAttribute('data-building-id');
@@ -130,9 +132,23 @@ templ FormView(dto FormDto) {
   roundUpPayments = 'true' === $el.getAttribute('data-building-round-up-payments');
   emailConfig = $el.getAttribute('data-building-email-config');
 
+  let base64 = $el.getAttribute('data-apts');
+  let decodedString = atob(base64);
+  let array = JSON.parse(decodedString);
+
+  array.forEach((apt) => {
+    apartments.push(apt);
+  });
+
+  apartments.forEach((apt) => {
+    aptMap.set(apt.number, apt.name);
+  });
+
+ $el.remove();
 	"
 		></div>
 		@reserveFunds.FormView(dto.reserveFundFormDto)
+		@extraCharges.FormView(dto.extraChargesFormDto)
 	}
 	<div id="emailConfigSelect" hx-swap-oob="innerHTML">
 		for _,emailConfig := range dto.emailConfigs {

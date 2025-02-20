@@ -10,6 +10,8 @@ import apartmentsIndexPartialUrl from './pages/apartments/index.html?url'
 import apartmentsBuildingSelectorPartialUrl
   from './pages/apartments/buildingSelector.html?url'
 import reserveFundFormPartialUrl from './pages/reserve-funds/form.html?url'
+import extraChargesFormPartialUrl from './pages/extra-charges/form.html?url'
+import apartmentsSelectorPartialUrl from './pages/apartments/selector.html?url'
 
 window.backBtnPartialUrl = backBtnPartialUrl;
 window.currencyPickerPartialUrl = currencyPickerPartialUrl;
@@ -22,4 +24,6 @@ window.ratesIndexPartialUrl = ratesIndexPartialUrl;
 window.bucketIndexPartialUrl = bucketIndexPartialUrl;
 window.apartmentsBuildingSelectorPartialUrl = apartmentsBuildingSelectorPartialUrl;
 window.reserveFundFormPartialUrl = reserveFundFormPartialUrl;
+window.extraChargesFormPartialUrl = extraChargesFormPartialUrl;
+window.apartmentsSelectorPartialUrl = apartmentsSelectorPartialUrl;
 

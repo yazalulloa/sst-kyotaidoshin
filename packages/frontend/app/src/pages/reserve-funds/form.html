@@ -1,11 +1,11 @@
 <div class="flex flex-col gap-2 overflow-hidden"
-x-data="{
+     x-data="{
  counter: 0
 }">
   <div class="flex flex-row gap-0 justify-center font-extrabold capitalize">
     <span x-text="$t('main-title-reserve-funds')"></span>:&nbsp;<span x-text="counter"></span>
   </div>
-  <div class="md:grid md:grid-cols-[7fr_3fr] sm:flex sm:flex-col gap-4 justify-center"
+  <div class="md:grid md:grid-cols-[7fr_3fr] flex flex-col gap-4 justify-center"
        x-data="{
          is_edit: false,
          buildingKey: '',
@@ -40,7 +40,6 @@ x-data="{
           expenseType = jsonObject.expenseType;
           active = jsonObject.active;
           addToExpenses = jsonObject.addToExpenses;
-
 
      "
        @event-reserve-fund-building-restart-after-deletion="
@@ -85,7 +84,7 @@ x-data="{
         <span x-text="$t('main-title-actions')"></span>
       </div>
       <ol id="reserve-funds-list"
-          class="*:grid *:grid-cols-4 *:gap-1 *:p-2 *:items-center *:text-center *:border-b *:border-surface-dark *:dark:border-surface *:dark:text-surface *:hover:opacity-55">
+          class="*:grid *:grid-cols-4 *:gap-2 *:p-2 *:items-center *:text-center *:border-b *:border-surface-dark *:dark:border-surface *:dark:text-surface">
 
       </ol>
     </div>
@@ -284,13 +283,17 @@ x-data="{
                   let v = !(name?.trim()?.length > 0 && parseFloat(pay) > 0);
                   $el.disabled=v;
                   "
-
-            class="whitespace-nowrap rounded-radius bg-primary border border-primary px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark">
+            class="whitespace-nowrap rounded-radius bg-primary border border-primary px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+            @click="
+              let form = document.getElementById('reserve-fund-form');
+              form.classList.remove('border', 'border-success')
+              errMsg = '';
+            ">
         </button>
         <button type="button"
                 class="whitespace-nowrap rounded-radius bg-surface-alt border border-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface-strong transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface-alt active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark-alt"
                 @click.prevent="$dispatch('event-reserve-fund-form-reset')"
-                x-text="$t('main-action-cancel')">
+                x-text="$t('main-action-clear')">
         </button>
       </div>
 

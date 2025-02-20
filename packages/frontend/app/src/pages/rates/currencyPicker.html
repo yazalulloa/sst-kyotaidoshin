@@ -1,11 +1,21 @@
 <div x-data="{modalIsOpen: false, currenciesSelected: []}"
-     x-init="$watch('currenciesSelected', value => {
+     x-init="
+
+     let local = localStorage.getItem('currencies-selected')
+     if (local && local.length > 0) {
+<!--        currenciesSelected = local.split(',');-->
+     }
+
+     $watch('currenciesSelected', value => {
            let parentElement = $el.parentElement;
            let elemId = parentElement.getAttribute('data-change-element');
            let event = parentElement.getAttribute('data-change-event');
            if (elemId && event) {
               document.getElementById(elemId).dispatchEvent(new CustomEvent(event));
            }
+
+            let str = value.join(',');
+            localStorage.setItem('currencies-selected', str);
            })"
 >
 

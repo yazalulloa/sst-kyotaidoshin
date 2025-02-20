@@ -193,3 +193,21 @@ templ Badge(condition bool) {
 		{ children... }
 	</div>
 }
+
+templ BadgeIndicator(condition bool, badge string) {
+	if condition {
+		<span class="w-fit inline-flex overflow-hidden rounded-radius border border-success bg-surface text-xs font-medium text-success dark:border-success dark:bg-surface-dark dark:text-success">
+			<span class="flex items-center gap-1 bg-success/10 px-2 py-1 dark:bg-success/10">
+				<span class="size-1.5 rounded-full bg-success dark:bg-success"></span>
+				{ badge }
+			</span>
+		</span>
+	} else {
+		<span class="w-fit inline-flex overflow-hidden rounded-radius border border-danger bg-surface text-xs font-medium text-danger dark:border-danger dark:bg-surface-dark dark:text-danger">
+			<span class="flex items-center gap-1 bg-danger/10 px-2 py-1 dark:bg-danger/10">
+				<span class="size-1.5 rounded-full bg-danger dark:bg-danger"></span>
+				{ badge }
+			</span>
+		</span>
+	}
+}

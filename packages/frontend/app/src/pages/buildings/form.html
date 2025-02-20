@@ -3,6 +3,8 @@
     open: false,
     isEdit: false,
    currencies: [],
+   apartments: [],
+   aptMap: new Map(),
   }"
      x-show="open">
   <form
@@ -273,6 +275,16 @@
 
     <div hidden="hidden"
          x-bind:hx-get="reserveFundFormPartialUrl"
+         hx-trigger="load"
+         hx-swap="outerHTML">
+    </div>
+
+  </div>
+  <hr>
+  <div x-show="isEdit" class="w-full">
+
+    <div hidden="hidden"
+         x-bind:hx-get="extraChargesFormPartialUrl"
          hx-trigger="load"
          hx-swap="outerHTML">
     </div>

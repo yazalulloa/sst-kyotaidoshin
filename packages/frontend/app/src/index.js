@@ -131,8 +131,6 @@ function formatInputCurrency(input) {
   }
 
   input.value = value
-
-  console.log("value: ", value);
 }
 
 window.configureCurrencyInput = function (input) {

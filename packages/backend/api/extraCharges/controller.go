@@ -1,4 +1,4 @@
-package reserveFunds
+package extraCharges
 
 import (
 	"db/gen/model"
@@ -7,20 +7,21 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"kyotaidoshin/api"
+	"kyotaidoshin/util"
 	"log"
 	"net/http"
+	"strings"
 )
 
-const _PATH = "/api/reserveFunds"
+const _PATH = "/api/extraCharges"
 
 func Routes(server *mux.Router) {
 
-	server.HandleFunc(_PATH, reserveFundPut).Methods("PUT")
-	server.HandleFunc(_PATH+"/{key}", reserveFundDelete).Methods("DELETE")
+	server.HandleFunc(_PATH, extraChargesPut).Methods("PUT")
+	server.HandleFunc(_PATH+"/{key}", extraChargesDelete).Methods("DELETE")
 }
 
-func reserveFundPut(w http.ResponseWriter, r *http.Request) {
-
+func extraChargesPut(w http.ResponseWriter, r *http.Request) {
 	upsert := func() FormResponse {
 
 		response := FormResponse{}
@@ -51,6 +52,13 @@ func reserveFundPut(w http.ResponseWriter, r *http.Request) {
 		}
 
 		validate := validator.New(validator.WithRequiredStructEnabled())
+		err = validate.RegisterValidation("notblank", util.NotBlank)
+		if err != nil {
+			log.Printf("Error registering custom validation: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
 		err = validate.Struct(request)
 		if err != nil {
 			// Validation failed, handle the error
@@ -62,17 +70,17 @@ func reserveFundPut(w http.ResponseWriter, r *http.Request) {
 			return response
 		}
 
-		reserveFund := model.ReserveFunds{
-			ID:            keys.Id,
-			BuildingID:    keys.BuildingId,
-			Name:          request.Name,
-			Fund:          request.Fund,
-			Expense:       request.Expense,
-			Pay:           request.Pay,
-			Active:        request.Active,
-			Type:          request.Type,
-			ExpenseType:   request.ExpenseType,
-			AddToExpenses: request.AddToExpenses,
+		apartments := strings.Join(request.Apartments, ",")
+		extraCharge := model.ExtraCharges{
+			ID:              keys.Id,
+			BuildingID:      keys.BuildingID,
+			ParentReference: keys.ParentReference,
+			Type:            keys.Type,
+			Description:     request.Description,
+			Amount:          request.Amount,
+			Currency:        request.Currency,
+			Active:          request.Active,
+			Apartments:      apartments,
 		}
 
 		isUpdate := keys.Id != nil
@@ -80,18 +88,18 @@ func reserveFundPut(w http.ResponseWriter, r *http.Request) {
 		var idToLookup int32
 		var cardIdStr *string
 		if isUpdate {
-			_, err = update(reserveFund)
+			_, err = update(extraCharge)
 			idToLookup = *keys.Id
 			cardIdStr = &keys.CardId
 		} else {
-			lastInsertId, err := insert(reserveFund)
+			lastInsertId, err := insert(extraCharge)
 			if err == nil {
 				idToLookup = int32(lastInsertId)
 			}
 		}
 
 		if err != nil {
-			log.Printf("Error inserting/updating reserveFund: %v", err)
+			log.Printf("Error inserting/updating extraCharge: %v", err)
 			response.errorStr = err.Error()
 			return response
 		}
@@ -103,7 +111,7 @@ func reserveFundPut(w http.ResponseWriter, r *http.Request) {
 			return response
 		}
 
-		count, err := countByBuilding(keys.BuildingId)
+		count, err := countByBuilding(keys.BuildingID)
 		if err != nil {
 			log.Printf("Error getting count: %v", err)
 			response.errorStr = err.Error()
@@ -124,11 +132,12 @@ func reserveFundPut(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 }
 
-func reserveFundDelete(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	key := vars["key"]
+func extraChargesDelete(w http.ResponseWriter, r *http.Request) {
+
+	key := mux.Vars(r)["key"]
 	var keys Keys
 	err := api.Decode(key, &keys)
 	if err != nil {
@@ -138,19 +147,19 @@ func reserveFundDelete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if keys.Id == nil {
-		log.Printf("Error deleting reserveFund: %v", "id is required")
+		log.Printf("Error deleting extraCharges: %v", "id is required")
 		http.Error(w, "BadRequest", http.StatusBadRequest)
 		return
 	}
 
 	_, err = deleteById(*keys.Id)
 	if err != nil {
-		log.Printf("Error deleting reserveFund: %v", err)
+		log.Printf("Error deleting extraCharges: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	count, err := countByBuilding(keys.BuildingId)
+	count, err := countByBuilding(keys.BuildingID)
 
 	if err != nil {
 		log.Printf("Error getting count: %v", err)

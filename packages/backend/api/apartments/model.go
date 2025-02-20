@@ -5,8 +5,8 @@ import (
 )
 
 type Apt struct {
-	Number string
-	Name   string
+	Number string `json:"number"`
+	Name   string `json:"name"`
 }
 
 type RequestQuery struct {

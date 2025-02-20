@@ -72,7 +72,7 @@ BEGIN
 UPDATE buildings SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
 END;
 
-
+-- DROP TABLE IF EXISTS extra_charges;
 CREATE TABLE IF NOT EXISTS extra_charges
 (
     id               INTEGER PRIMARY KEY,
@@ -83,9 +83,10 @@ CREATE TABLE IF NOT EXISTS extra_charges
     amount           DECIMAL(16, 2)                                 NOT NULL,
     currency         TEXT CHECK ( currency IN ('USD', 'VED') )      NOT NULL,
     active           BOOL                                           NOT NULL,
+    apartments       TEXT                                           NOT NULL,
     created_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at       DATETIME
-    );
+);
 
 
 CREATE INDEX IF NOT EXISTS extra_charges_parent_reference_idx ON extra_charges (parent_reference);

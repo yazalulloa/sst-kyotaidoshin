@@ -160,3 +160,22 @@ func buildingIds() ([]string, error) {
 
 	return dest, nil
 }
+
+func SelectNumberAndNameByBuildingId(buildingId string) ([]Apt, error) {
+	stmt := Apartments.SELECT(Apartments.Number, Apartments.Name).FROM(Apartments).
+		WHERE(Apartments.BuildingID.EQ(sqlite.String(buildingId))).
+		ORDER_BY(Apartments.Number.ASC())
+
+	var dest []model.Apartments
+	err := stmt.Query(db.GetDB().DB, &dest)
+	if err != nil {
+		return nil, err
+	}
+	apts := make([]Apt, len(dest))
+	for i, apt := range dest {
+		apts[i].Number = apt.Number
+		apts[i].Name = apt.Name
+	}
+
+	return apts, nil
+}

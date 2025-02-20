@@ -20,6 +20,7 @@ type ExtraCharges struct {
 	Amount          float64
 	Currency        string
 	Active          bool
+	Apartments      string
 	CreatedAt       *time.Time
 	UpdatedAt       *time.Time
 }
