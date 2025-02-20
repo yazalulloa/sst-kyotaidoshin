@@ -59,7 +59,7 @@ templ CountersView(counters Counters) {
 }
 
 templ buildingIdsView(ids string) {
-	<div
+	<div hidden="hidden"
 		x-init={ fmt.Sprintf("buildings = %s", ids) }
 	></div>
 }
