@@ -119,9 +119,25 @@ function padLeft(value, length) {
   return (new Array(length + 1).join('0') + value).slice(-length);
 }
 
-function formatInputCurrency(input) {
+function formatInputCurrency(input, event) {
+  // console.log("formatInputCurrency: ", input.value);
+
+ let isPaste = false;
+  if (event) {
+    isPaste = event.inputType === "insertFromPaste";
+    if (isPaste) {
+      // console.log("event: ", event);
+      if (!input.value.includes(".") && !input.value.endsWith(",")) {
+        input.value = input.value + ".00";
+      }
+    }
+  }
+
+  let isNegative = input.value.startsWith("-");
   let value = input.value.replace(/[^0-9]/g, '');
   value = padLeft(value, 3);
+
+
   let idx = value.length - 2;
   value = value.slice(0, idx) + "." + value.slice(idx);
 
@@ -131,12 +147,20 @@ function formatInputCurrency(input) {
   }
 
   input.value = value
+  if (isNegative) {
+    input.value = "-" + input.value;
+  }
 }
 
 window.configureCurrencyInput = function (input) {
   formatInputCurrency(input);
+
+  input.addEventListener("pasted", (event) => {
+
+  });
+
   input.addEventListener("input", (event) => {
-    formatInputCurrency(input);
+    formatInputCurrency(input, event);
   });
 }
 
