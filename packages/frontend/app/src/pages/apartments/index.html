@@ -74,7 +74,7 @@
     <div id="apartments-updater"
          hidden="hidden"
          hx-get="/api/apartments/search"
-         hx-trigger="load, update-apartments delay:300ms"
+         hx-trigger="load, update-apartments delay:300ms, new-apt"
          hx-include="[name='building_input'],[name='apt_search_input']"
          hx-target="#apartments-table"
          hx-swap="innerHTML"

@@ -93,7 +93,7 @@ func ItemView(item Item) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if item.isUpdate != nil && *item.isUpdate {
+		if item.isUpdate {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, " hx-swap-oob=\"true\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -351,31 +351,27 @@ func FormResponseView(res FormResponse) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" x-init=\"\n \t\terrMsg = $el.getAttribute(&#39;data-response-err&#39;);\n  \t\tcounter = parseInt($el.getAttribute(&#39;data-counter&#39;));\n\n \t\tif (errMsg === &#39;&#39;) {\n \t\t  modalIsOpen = false;\n \t\t }\n \t\t\"></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" data-send-event=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if res.item != nil {
-			if res.item.isUpdate != nil {
-				if *res.item.isUpdate {
-					templ_7745c5c3_Err = ItemView(*res.item).Render(ctx, templ_7745c5c3_Buffer)
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-				} else {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<div id=\"extra-charges-list\" hx-swap-oob=\"beforeend\">")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = ItemView(*res.item).Render(ctx, templ_7745c5c3_Buffer)
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</div>")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-				}
+		var templ_7745c5c3_Var17 string
+		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(res.errorStr == "" && res.item == nil))
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `apartments/view.templ`, Line: 70, Col: 69}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" x-init=\"\n \t\terrMsg = $el.getAttribute(&#39;data-response-err&#39;);\n  \t\tcounter = parseInt($el.getAttribute(&#39;data-counter&#39;));\n\n \t\tif (errMsg === &#39;&#39;) {\n \t\t  modalIsOpen = false;\n \t\t }\n\n  \t\tif ($el.getAttribute(&#39;data-send-event&#39;) === &#39;true&#39;) {\n  \t\t   sendEvent(&#39;apartments-updater&#39;, &#39;new-apt&#39;);\n  \t\t}\n \t\t\"></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if res.item != nil && res.item.isUpdate {
+			templ_7745c5c3_Err = ItemView(*res.item).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
 			}
 		}
 		return nil

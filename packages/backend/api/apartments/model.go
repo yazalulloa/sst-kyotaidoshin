@@ -35,7 +35,7 @@ type Item struct {
 	Item         model.Apartments
 	Emails       []string
 	UpdateParams *string
-	isUpdate     *bool
+	isUpdate     bool
 }
 
 func cardId() string {

@@ -20,7 +20,7 @@ templ ItemView(item Item) {
 	<li
 		id={ item.CardId }
 		class="fade-me-in fade-me-out"
-		if item.isUpdate != nil && *item.isUpdate {
+		if item.isUpdate {
 			hx-swap-oob="true"
 		}
 		if item.UpdateParams != nil {
@@ -67,6 +67,7 @@ templ buildingIdsView(ids string) {
 templ FormResponseView(res FormResponse) {
 	<div
 		data-response-err={ res.errorStr }
+		data-send-event={ fmt.Sprint(res.errorStr == "" && res.item == nil) }
 		x-init="
  		errMsg = $el.getAttribute('data-response-err');
   		counter = parseInt($el.getAttribute('data-counter'));
@@ -74,17 +75,13 @@ templ FormResponseView(res FormResponse) {
  		if (errMsg === '') {
  		  modalIsOpen = false;
  		 }
+
+  		if ($el.getAttribute('data-send-event') === 'true') {
+  		   sendEvent('apartments-updater', 'new-apt');
+  		}
  		"
 	></div>
-	if res.item != nil {
-		if res.item.isUpdate != nil {
-			if *res.item.isUpdate {
-				@ItemView(*res.item)
-			} else {
-				<div id="extra-charges-list" hx-swap-oob="beforeend">
-					@ItemView(*res.item)
-				</div>
-			}
-		}
+	if res.item != nil && res.item.isUpdate {
+		@ItemView(*res.item)
 	}
 }

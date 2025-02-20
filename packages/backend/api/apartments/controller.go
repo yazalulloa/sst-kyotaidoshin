@@ -232,8 +232,8 @@ func aptPut(w http.ResponseWriter, r *http.Request) {
 				return response
 			}
 
+			item.isUpdate = true
 			response.item = item
-			response.item.isUpdate = &isUpdate
 		}
 
 		return response
