@@ -126,7 +126,12 @@ func buildingPut(w http.ResponseWriter, r *http.Request) {
 			return response
 		}
 
-		validate := validator.New(validator.WithRequiredStructEnabled())
+		validate, err := util.GetValidator()
+		if err != nil {
+			log.Printf("Error getting validator: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
 
 		isUpdate := request.Key != nil
 		if isUpdate {

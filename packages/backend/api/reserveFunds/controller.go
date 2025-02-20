@@ -7,6 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"kyotaidoshin/api"
+	"kyotaidoshin/util"
 	"log"
 	"net/http"
 )
@@ -50,7 +51,7 @@ func reserveFundPut(w http.ResponseWriter, r *http.Request) {
 			return response
 		}
 
-		validate := validator.New(validator.WithRequiredStructEnabled())
+		validate, _ := util.GetValidator()
 		err = validate.Struct(request)
 		if err != nil {
 			// Validation failed, handle the error

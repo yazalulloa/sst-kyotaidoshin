@@ -21,8 +21,12 @@
     "main-title-actions": "Actions",
     "main-title-apartments": "Apartments",
     "main-title-select-apartment": "Select Apartment",
+    "main-title-aliquot": "Aliquot",
+    "main-title-apt-number": "Apt Number",
+    "main-title-email": "Email",
     "main-title-buildings": "Buildings",
     "main-title-buildings-new": "New Building",
+    "main-title-building": "Building",
     "main-title-select-building": "Select Building",
     "main-title-reserve-funds": "Reserve Funds",
     "main-title-rates": "Rates",
@@ -30,6 +34,8 @@
     "main-title-currencies": "Currencies",
     "main-title-select-currency": "Select Currency",
     "main-title-extra-charges": "Extra Charges",
+    "main-apartments-new": "New Apartment",
+    "main-apartments-edit": "Edit Apartment",
     "main-buildings-id": "ID",
     "main-buildings-rif": "RIF",
     "main-buildings-main-currency": "Main Currency",
@@ -43,7 +49,8 @@
     "main-bcv-files-processed": "Processed",
     "main-reserve-funds-add-to-expenses": "Add to Expenses",
     "main-reserve-fund-type": "Fund Type",
-    "main-expenses-type": "Expense Type"
+    "main-expenses-type": "Expense Type",
+    "main-error-invalid-email": "Invalid email"
   },
   "es": {
     "main-action-create": "Crear",
@@ -67,8 +74,12 @@
     "main-title-actions": "Acciones",
     "main-title-apartments": "Apartamentos",
     "main-title-select-apartment": "Seleccionar Apartamento",
+    "main-title-aliquot": "Alícuota",
+    "main-title-apt-number": "Nro de Apartamento",
+    "main-title-email": "Email",
     "main-title-buildings": "Edificios",
     "main-title-buildings-new": "Nuevo Edificio",
+    "main-title-building": "Edificio",
     "main-title-select-building": "Seleccionar Edificio",
     "main-title-reserve-funds": "Fondos de Reserva",
     "main-title-rates": "Tasas de Cambio",
@@ -76,6 +87,8 @@
     "main-title-currencies": "Monedas",
     "main-title-select-currency": "Seleccionar Moneda",
     "main-title-extra-charges": "Cargos Extras",
+    "main-apartments-new": "Nuevo Apartamento",
+    "main-apartments-edit": "Editar Apartamento",
     "main-buildings-id": "ID",
     "main-buildings-rif": "RIF",
     "main-buildings-main-currency": "Moneda Principal",
@@ -89,6 +102,7 @@
     "main-bcv-files-processed": "Procesados",
     "main-reserve-funds-add-to-expenses": "Agregar a Gastos",
     "main-reserve-fund-type": "Tipo de Fondo",
-    "main-expenses-type": "Tipo de Gasto"
+    "main-expenses-type": "Tipo de Gasto",
+    "main-error-invalid-email": "Email inválido"
   }
 }

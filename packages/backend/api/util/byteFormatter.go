@@ -3,8 +3,10 @@ package util
 import (
 	"fmt"
 	"github.com/go-playground/validator/v10"
+	"log"
 	"reflect"
 	"strings"
+	"sync"
 )
 
 const OneKb = 1024.0
@@ -101,4 +103,21 @@ func NotBlank(fl validator.FieldLevel) bool {
 	default:
 		return field.IsValid() && field.Interface() != reflect.Zero(field.Type()).Interface()
 	}
+}
+
+var validatorInstance *validator.Validate
+var once sync.Once
+
+func GetValidator() (*validator.Validate, error) {
+	var err error
+	once.Do(func() {
+		validatorInstance = validator.New(validator.WithRequiredStructEnabled())
+		err = validatorInstance.RegisterValidation("notblank", NotBlank)
+
+		log.Printf("Validator validatorInstance created: %v", validatorInstance != nil)
+	})
+
+	log.Printf("Returning validator validatorInstance: %v", validatorInstance != nil)
+
+	return validatorInstance, err
 }

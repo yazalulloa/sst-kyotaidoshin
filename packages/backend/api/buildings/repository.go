@@ -127,3 +127,13 @@ func selectById(id string) (*model.Buildings, error) {
 	}
 	return &dest, nil
 }
+
+func SelectIds() ([]string, error) {
+	stmt := Buildings.SELECT(Buildings.ID).FROM(Buildings).ORDER_BY(Buildings.ID.ASC())
+	var dest []string
+	err := stmt.Query(db.GetDB().DB, &dest)
+	if err != nil {
+		return nil, err
+	}
+	return dest, nil
+}

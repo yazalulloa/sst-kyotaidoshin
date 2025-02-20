@@ -22,16 +22,16 @@ CREATE INDEX IF NOT EXISTS rates_date_of_rate_idx ON rates (date_of_rate);
 CREATE INDEX IF NOT EXISTS rates_from_currency_date_of_rate_idx ON rates (from_currency, date_of_rate);
 
 
-
+-- DROP TABLE IF EXISTS apartments;
 CREATE TABLE IF NOT EXISTS apartments
 (
     building_id CHAR(20)      NOT NULL,
     number      CHAR(20)      NOT NULL,
     name        VARCHAR(100)  NOT NULL,
-    id_doc      CHAR(20),
+    id_doc      CHAR(20)      NOT NULL,
     aliquot     DECIMAL(3, 2) NOT NULL DEFAULT 0.00,
-    emails      TEXT,
-    created_at  DATETIME               DEFAULT CURRENT_TIMESTAMP,
+    emails      TEXT          NOT NULL,
+    created_at  DATETIME      DEFAULT CURRENT_TIMESTAMP,
     updated_at  DATETIME,
     PRIMARY KEY (building_id, number)
 );

@@ -111,6 +111,11 @@ window.scrollThroughParent = (element) => {
 
 }
 
+window.isValidEmail = function (value) {
+  const emailRegex = /^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(value);
+}
+
 function padLeft(value, length) {
   if (value.length >= length) {
     return value;
@@ -122,7 +127,7 @@ function padLeft(value, length) {
 function formatInputCurrency(input, event) {
   // console.log("formatInputCurrency: ", input.value);
 
- let isPaste = false;
+  let isPaste = false;
   if (event) {
     isPaste = event.inputType === "insertFromPaste";
     if (isPaste) {
@@ -133,10 +138,19 @@ function formatInputCurrency(input, event) {
     }
   }
 
+  let allowNegative = true
+
+  let dataGt = input.getAttribute('data-gt')
+  if (dataGt) {
+    let v = parseFloat(dataGt)
+    if (v <= 0) {
+      allowNegative = false
+    }
+  }
+
   let isNegative = input.value.startsWith("-");
   let value = input.value.replace(/[^0-9]/g, '');
   value = padLeft(value, 3);
-
 
   let idx = value.length - 2;
   value = value.slice(0, idx) + "." + value.slice(idx);
@@ -147,7 +161,7 @@ function formatInputCurrency(input, event) {
   }
 
   input.value = value
-  if (isNegative) {
+  if (allowNegative && isNegative) {
     input.value = "-" + input.value;
   }
 }

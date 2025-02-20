@@ -130,11 +130,11 @@ func deleteByKeys(keys Keys) (int64, error) {
 }
 
 func insertBulk(apartments []model.Apartments) (int64, error) {
-	stmt := Apartments.INSERT(Apartments.BuildingID, Apartments.Number, Apartments.Name, Apartments.Aliquot, Apartments.Emails).
+	stmt := Apartments.INSERT(Apartments.BuildingID, Apartments.Number, Apartments.Name, Apartments.IDDoc, Apartments.Aliquot, Apartments.Emails).
 		ON_CONFLICT().DO_NOTHING()
 
 	for _, apartment := range apartments {
-		stmt = stmt.VALUES(apartment.BuildingID, apartment.Number, apartment.Name, apartment.Aliquot, apartment.Emails)
+		stmt = stmt.VALUES(apartment.BuildingID, apartment.Number, apartment.Name, apartment.IDDoc, apartment.Aliquot, apartment.Emails)
 	}
 
 	res, err := stmt.Exec(db.GetDB().DB)
@@ -178,4 +178,37 @@ func SelectNumberAndNameByBuildingId(buildingId string) ([]Apt, error) {
 	}
 
 	return apts, nil
+}
+
+func aptExists(buildingId, number string) (bool, error) {
+	stmt := Apartments.SELECT(sqlite.COUNT(sqlite.STAR).AS("Count")).FROM(Apartments).
+		WHERE(Apartments.BuildingID.EQ(sqlite.String(buildingId)).AND(Apartments.Number.EQ(sqlite.String(number))))
+
+	var dest struct {
+		Count int64
+	}
+	err := stmt.Query(db.GetDB().DB, &dest)
+	if err != nil {
+		return false, err
+	}
+
+	return dest.Count > 0, nil
+}
+
+func update(apartment model.Apartments) error {
+	stmt := Apartments.UPDATE(Apartments.Name, Apartments.IDDoc, Apartments.Aliquot, Apartments.Emails).
+		WHERE(Apartments.BuildingID.EQ(sqlite.String(apartment.BuildingID)).AND(Apartments.Number.EQ(sqlite.String(apartment.Number)))).
+		SET(apartment.Name, apartment.IDDoc, apartment.Aliquot, apartment.Emails)
+
+	_, err := stmt.Exec(db.GetDB().DB)
+	return err
+}
+
+func insert(apartment model.Apartments) error {
+	stmt := Apartments.INSERT(Apartments.BuildingID, Apartments.Number, Apartments.Name, Apartments.IDDoc, Apartments.Aliquot, Apartments.Emails).
+		VALUES(apartment.BuildingID, apartment.Number, apartment.Name, apartment.IDDoc, apartment.Aliquot, apartment.Emails)
+
+	_, err := stmt.Exec(db.GetDB().DB)
+	return err
+
 }

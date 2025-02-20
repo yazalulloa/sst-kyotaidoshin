@@ -1,7 +1,10 @@
 <div id="header-container" hx-swap-oob="true"
      class="flex flex-col gap-2 text-center items-center">
 
-  <div class="flex flex-row flex-wrap w-full gap-2 justify-start text-center items-center">
+  <div class="flex flex-row flex-wrap w-full gap-2 justify-start text-center items-center"
+  x-data="{
+  buildings: []
+  }">
     <div class="flex flex-row gap-2"
          x-data="{
    total: null,
@@ -22,6 +25,14 @@
         sendEvent('apartments-updater', 'update-apartments');
       }
     </script>
+
+
+
+    <div hx-get="/api/apartments/buildingsIds"
+         hx-trigger="load"
+         hx-swap="outerHTML"
+         hidden="hidden">
+    </div>
 
     <div
         data-change-element="apartments-updater"
@@ -79,7 +90,11 @@
             hx-swap="outerHTML">
     </button>
 
-
+    <div x-bind:hx-get="apartmentsFormDialogPartialUrl"
+         hx-trigger="load"
+         hx-swap="outerHTML"
+         hidden="hidden">
+    </div>
   </div>
 
 

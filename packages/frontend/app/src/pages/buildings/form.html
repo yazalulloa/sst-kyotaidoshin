@@ -73,7 +73,7 @@
       <label for="buildingNameInput"
              x-bind:class="nameErr !== '' ? 'text-danger' : ''"
              class="flex w-fit items-center gap-1 pl-0.5 text-sm">
-        <svg x-show="idErr !== ''" x-bind:data-src="crossIcon" data-cache="21600" class="size-4"></svg>
+        <svg x-show="nameErr !== ''" x-bind:data-src="crossIcon" data-cache="21600" class="size-4"></svg>
         <span x-text="$t('main-title-name')"></span>
       </label>
       <input

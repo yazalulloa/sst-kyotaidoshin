@@ -51,10 +51,9 @@ func extraChargesPut(w http.ResponseWriter, r *http.Request) {
 			return response
 		}
 
-		validate := validator.New(validator.WithRequiredStructEnabled())
-		err = validate.RegisterValidation("notblank", util.NotBlank)
+		validate, err := util.GetValidator()
 		if err != nil {
-			log.Printf("Error registering custom validation: %v", err)
+			log.Printf("Error getting validator: %v", err)
 			response.errorStr = err.Error()
 			return response
 		}

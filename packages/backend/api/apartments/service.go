@@ -2,7 +2,8 @@ package apartments
 
 import (
 	"db/gen/model"
-	"github.com/google/uuid"
+	"encoding/base64"
+	"encoding/json"
 	"kyotaidoshin/api"
 	"strings"
 	"sync"
@@ -11,47 +12,104 @@ import (
 func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 	var tableResponse TableResponse
 	var oErr error
+	var once sync.Once
+	handleErr := func(e error) {
+		if e != nil {
+			once.Do(func() {
+				oErr = e
+			})
+		}
+	}
 	var wg sync.WaitGroup
 	wg.Add(3)
 	go func() {
 		defer wg.Done()
 		array, err := selectList(requestQuery)
-		results := make([]Item, len(array))
+		if err != nil {
+			handleErr(err)
+			return
+		}
+
+		items := make([]Item, len(array))
 		for i, item := range array {
 
-			emails := strings.Split(*item.Emails, ",")
-
-			results[i] = Item{
-				Key:    *api.Encode(keys(item)),
-				CardId: "apartments-" + uuid.NewString(),
-				Item:   item,
-				Emails: emails,
+			obj, err := toItem(&item, nil)
+			if err != nil {
+				handleErr(err)
+				return
 			}
 
+			items[i] = *obj
+
 		}
-		tableResponse.Results = results
-		oErr = err
+		tableResponse.Results = items
 	}()
 
 	go func() {
 		defer wg.Done()
 		totalCount, err := getTotalCount()
+		if err != nil {
+			handleErr(err)
+			return
+		}
 		tableResponse.Counters.TotalCount = totalCount
-		oErr = err
 	}()
 
 	go func() {
 		defer wg.Done()
 		queryCount, err := getQueryCount(requestQuery)
+		if err != nil {
+			handleErr(err)
+			return
+		}
 		if queryCount != nil {
 			tableResponse.Counters.QueryCount = queryCount
 		}
-
-		oErr = err
 	}()
 
 	wg.Wait()
+
 	return tableResponse, oErr
+}
+
+func toItem(item *model.Apartments, oldCardId *string) (*Item, error) {
+	var cardIdStr string
+	if oldCardId != nil {
+		cardIdStr = *oldCardId
+	} else {
+		cardIdStr = cardId()
+	}
+
+	keys := keys(*item, cardIdStr)
+	key := *api.Encode(keys)
+
+	updateParams := UpdateParams{
+		Key:      key,
+		Building: item.BuildingID,
+		Number:   item.Number,
+		Name:     item.Name,
+		IDDoc:    item.IDDoc,
+		Aliquot:  item.Aliquot,
+		Emails:   item.Emails,
+	}
+
+	byteArray, err := json.Marshal(updateParams)
+
+	if err != nil {
+		return nil, err
+	}
+
+	base64Str := base64.URLEncoding.EncodeToString(byteArray)
+
+	emails := strings.Split(item.Emails, ",")
+
+	return &Item{
+		CardId:       keys.CardId,
+		Key:          key,
+		Item:         *item,
+		Emails:       emails,
+		UpdateParams: &base64Str,
+	}, nil
 }
 
 func deleteAndReturnCounters(keys Keys) (*Counters, error) {
@@ -104,7 +162,7 @@ func insertDtos(apts []ApartmentDto) (int64, error) {
 			Number:     apt.Number,
 			Name:       apt.Name,
 			Aliquot:    apt.Aliquot,
-			Emails:     &emails,
+			Emails:     emails,
 		}
 	}
 

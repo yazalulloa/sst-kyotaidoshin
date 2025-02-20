@@ -15,9 +15,9 @@ type Apartments struct {
 	BuildingID string `sql:"primary_key"`
 	Number     string `sql:"primary_key"`
 	Name       string
-	IDDoc      *string
+	IDDoc      string
 	Aliquot    float64
-	Emails     *string
+	Emails     string
 	CreatedAt  *time.Time
 	UpdatedAt  *time.Time
 }

@@ -7,27 +7,39 @@ import (
 
 templ Search(res TableResponse) {
 	for _, item := range res.Results {
-		<li
-			id={ item.CardId }
-			class="fade-me-in fade-me-out"
-		>
-			<span>{ item.Item.BuildingID }</span>
-			<span>{ item.Item.Number }</span>
-			<span>{ item.Item.Name }</span>
-			<span>{ fmt.Sprint(item.Item.Aliquot) }</span>
-			<div class="flex flex-col gap-1 justify-center items-center text-center">
-				for _,email := range item.Emails {
-					<span>{ email }</span>
-				}
-			</div>
-			@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
-		</li>
+		@ItemView(item)
 	}
 	if res.NextPageUrl != "" {
 		@api.NextPageLi(res.NextPageUrl, templ.Attributes{
 			"hx-include": "[name='building_input'],[name='apt_search_input']"})
 	}
 	@CountersView(res.Counters)
+}
+
+templ ItemView(item Item) {
+	<li
+		id={ item.CardId }
+		class="fade-me-in fade-me-out"
+		if item.isUpdate != nil && *item.isUpdate {
+			hx-swap-oob="true"
+		}
+		if item.UpdateParams != nil {
+			data-update-params={ *item.UpdateParams }
+			@click="$dispatch('event-apartment-form-update', { params: $el.getAttribute('data-update-params') })"
+		}
+	>
+		<span>{ item.Item.BuildingID }</span>
+		<span>{ item.Item.Number }</span>
+		<span>{ item.Item.Name }</span>
+		<span>{ fmt.Sprint(item.Item.Aliquot) }</span>
+		<div class="flex flex-col gap-1 justify-center items-center text-center">
+			for _,email := range item.Emails {
+				<span>{ email }</span>
+			}
+		</div>
+		@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{
+			"hx-include": "[name='building_input'],[name='apt_search_input']"})
+	</li>
 }
 
 templ CountersView(counters Counters) {
@@ -46,11 +58,33 @@ templ CountersView(counters Counters) {
 	></div>
 }
 
-
 templ buildingIdsView(ids string) {
-  <div
- x-init={ fmt.Sprintf("buildings = %s", ids)}
-  >
+	<div
+		x-init={ fmt.Sprintf("buildings = %s", ids) }
+	></div>
+}
 
-  </div>
+templ FormResponseView(res FormResponse) {
+	<div
+		data-response-err={ res.errorStr }
+		x-init="
+ 		errMsg = $el.getAttribute('data-response-err');
+  		counter = parseInt($el.getAttribute('data-counter'));
+
+ 		if (errMsg === '') {
+ 		  modalIsOpen = false;
+ 		 }
+ 		"
+	></div>
+	if res.item != nil {
+		if res.item.isUpdate != nil {
+			if *res.item.isUpdate {
+				@ItemView(*res.item)
+			} else {
+				<div id="extra-charges-list" hx-swap-oob="beforeend">
+					@ItemView(*res.item)
+				</div>
+			}
+		}
+	}
 }

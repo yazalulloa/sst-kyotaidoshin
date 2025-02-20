@@ -1,13 +1,17 @@
 package apartments
 
 import (
+	"db/gen/model"
 	"encoding/json"
 	"fmt"
+	"github.com/go-playground/form"
+	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"kyotaidoshin/api"
 	"kyotaidoshin/util"
 	"log"
 	"net/http"
+	"slices"
 	"strings"
 )
 
@@ -19,12 +23,12 @@ const _UPLOAD_BACKUP = _PATH + "/upload/backup"
 func Routes(server *mux.Router) {
 
 	server.HandleFunc(_SEARCH, search).Methods("GET")
+	server.HandleFunc(_PATH, aptPut).Methods("PUT")
 	server.HandleFunc(_PATH+"/{key}", aptDelete).Methods("DELETE")
 	server.HandleFunc(_UPLOAD_BACKUP_FORM, getUploadBackupForm).Methods("GET")
 	server.HandleFunc(_UPLOAD_BACKUP, uploadBackup).Methods("GET")
 	server.HandleFunc(_PATH+"/buildingsIds", getBuildingIds).Methods("GET")
 	//server.HandleFunc(_PATH+"/upload/backup", uploadBackupUrl).Methods("GET")
-	//server.HandleFunc(_PATH, aptPut).Methods("PUT")
 	//server.HandleFunc(_PATH+"/formData", formData).Methods("GET")
 }
 
@@ -116,6 +120,132 @@ func aptDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+
+func aptPut(w http.ResponseWriter, r *http.Request) {
+	upsert := func() FormResponse {
+
+		response := FormResponse{}
+
+		err := r.ParseForm()
+		if err != nil {
+			log.Printf("Error parsing form: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		decoder := form.NewDecoder()
+		var request FormRequest
+		err = decoder.Decode(&request, r.Form)
+
+		if err != nil {
+			log.Printf("Error decoding form: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		isUpdate := request.Key != ""
+
+		var keys Keys
+
+		if isUpdate {
+			err = api.Decode(request.Key, &keys)
+			if err != nil {
+				log.Printf("Error decoding key: %v", err)
+				response.errorStr = err.Error()
+				return response
+			}
+		}
+
+		validate, err := util.GetValidator()
+		if err != nil {
+			log.Printf("Error getting validator: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		err = validate.Struct(request)
+		if err != nil {
+			// Validation failed, handle the error
+			errors := err.(validator.ValidationErrors)
+			for _, valErr := range errors {
+				log.Printf("Validation error: %v", valErr)
+			}
+			response.errorStr = fmt.Sprintf("Validation error: %s", errors)
+			return response
+		}
+
+		if !isUpdate {
+			exists, err := aptExists(request.Building, request.Number)
+			if err != nil {
+				response.errorStr = err.Error()
+				return response
+			}
+
+			if exists {
+				response.errorStr = fmt.Sprintf("Apartment %s already exists", request.Number)
+				return response
+			}
+		}
+
+		if !isUpdate {
+			buildingIds, err := buildingIds()
+			if err != nil {
+				response.errorStr = err.Error()
+				return response
+			}
+
+			if !slices.Contains(buildingIds, request.Building) {
+				response.errorStr = fmt.Sprintf("Building ID %s does not exist", request.Building)
+				return response
+			}
+		}
+
+		apartment := model.Apartments{
+			BuildingID: request.Building,
+			Number:     request.Number,
+			Name:       request.Name,
+			Aliquot:    request.Aliquot,
+			Emails:     strings.Join(request.Emails, ","),
+		}
+
+		if isUpdate {
+			apartment.BuildingID = keys.BuildingId
+			apartment.Number = keys.Number
+
+			err = update(apartment)
+		} else {
+			err = insert(apartment)
+		}
+
+		if err != nil {
+			log.Printf("Error inserting/updating reserveFund: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		if isUpdate {
+			item, err := toItem(&apartment, &keys.CardId)
+			if err != nil {
+				log.Printf("Error getting item: %v", err)
+				response.errorStr = err.Error()
+				return response
+			}
+
+			response.item = item
+			response.item.isUpdate = &isUpdate
+		}
+
+		return response
+	}
+
+	response := upsert()
+
+	err := FormResponseView(response).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func getUploadBackupForm(w http.ResponseWriter, r *http.Request) {
