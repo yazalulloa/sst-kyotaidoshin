@@ -7,12 +7,14 @@ import buildingsFormPartialUrl from './pages/buildings/form.html?url'
 import buildingsEditPartialUrl from './pages/buildings/edit.html?url'
 import bucketIndexPartialUrl from './pages/bcv-bucket/main.html?url'
 import apartmentsIndexPartialUrl from './pages/apartments/index.html?url'
-import apartmentsBuildingSelectorPartialUrl
-  from './pages/apartments/buildingSelector.html?url'
+import apartmentsBuildingSelectorPartialUrl from './pages/apartments/buildingSelector.html?url'
 import reserveFundFormPartialUrl from './pages/reserve-funds/form.html?url'
 import extraChargesFormPartialUrl from './pages/extra-charges/form.html?url'
 import apartmentsSelectorPartialUrl from './pages/apartments/selector.html?url'
 import apartmentsFormDialogPartialUrl from './pages/apartments/formDialog.html?url'
+import receiptsIndexPartialUrl from './pages/receipts/index.html?url'
+import monthsSelectorPartialUrl from './pages/receipts/monthSelector.html?url'
+import receiptYearsSelectorPartialUrl from './pages/receipts/yearSelector.html?url'
 
 window.backBtnPartialUrl = backBtnPartialUrl;
 window.currencyPickerPartialUrl = currencyPickerPartialUrl;
@@ -28,4 +30,7 @@ window.reserveFundFormPartialUrl = reserveFundFormPartialUrl;
 window.extraChargesFormPartialUrl = extraChargesFormPartialUrl;
 window.apartmentsSelectorPartialUrl = apartmentsSelectorPartialUrl;
 window.apartmentsFormDialogPartialUrl = apartmentsFormDialogPartialUrl;
+window.receiptsIndexPartialUrl = receiptsIndexPartialUrl;
+window.monthsSelectorPartialUrl = monthsSelectorPartialUrl;
+window.receiptYearsSelectorPartialUrl = receiptYearsSelectorPartialUrl;
 

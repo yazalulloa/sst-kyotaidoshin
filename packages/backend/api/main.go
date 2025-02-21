@@ -15,6 +15,7 @@ import (
 	"kyotaidoshin/buildings"
 	"kyotaidoshin/extraCharges"
 	"kyotaidoshin/rates"
+	"kyotaidoshin/receipts"
 	"kyotaidoshin/reserveFunds"
 	"log"
 	"net/http"
@@ -70,6 +71,7 @@ func router() http.Handler {
 	reserveFunds.Routes(newRouter)
 	apartments.Routes(newRouter)
 	extraCharges.Routes(newRouter)
+	receipts.Routes(newRouter)
 
 	newRouter.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 

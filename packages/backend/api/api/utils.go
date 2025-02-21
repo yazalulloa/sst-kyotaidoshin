@@ -181,7 +181,7 @@ func IsDevMode() bool {
 //	return ctx.HTML(statusCode, buf.String())
 //}
 
-func BuildUploadForm(ctx context.Context, uploadPath string, filePrefix string) (templ.Component, error) {
+func GetUploadFormParams(ctx context.Context, uploadPath string, filePrefix string) (*UploadBackupParams, error) {
 	bucketName, err := resource.Get("UploadBackup", "name")
 	if err != nil {
 		log.Printf("Error getting bucket name: %s", err)
@@ -218,7 +218,18 @@ func BuildUploadForm(ctx context.Context, uploadPath string, filePrefix string) 
 	presignedPostRequest.Values["success_action_redirect"] = redirectUrl
 	presignedPostRequest.Values["x-amz-meta-uuid"] = metaUuid
 
-	return UploadBackupForm(presignedPostRequest.URL, presignedPostRequest.Values), nil
+	return &UploadBackupParams{
+		Url:    presignedPostRequest.URL,
+		Values: presignedPostRequest.Values,
+	}, nil
+}
+
+func BuildUploadForm(ctx context.Context, uploadPath string, filePrefix string) (templ.Component, error) {
+	params, err := GetUploadFormParams(ctx, uploadPath, filePrefix)
+	if err != nil {
+		return nil, err
+	}
+	return UploadBackupForm(*params), nil
 }
 
 func ProcessUploadBackup(r *http.Request, uploadBackupFormUrl string, idUpdater string, event string, processJson func(*json.Decoder) (int64, error)) (templ.Component, error) {
@@ -248,6 +259,20 @@ func ProcessUploadBackup(r *http.Request, uploadBackupFormUrl string, idUpdater 
 		log.Printf("Error getting object from bucket %s key %s: %s", bucket, key, err)
 		return nil, err
 	}
+
+	deleteObj := func() {
+		log.Printf("Deleting object from bucket %s key %s", bucket, key)
+		_, err = s3Client.DeleteObject(r.Context(), &s3.DeleteObjectInput{
+			Bucket: &bucket,
+			Key:    &key,
+		})
+
+		if err != nil {
+			log.Printf("Error deleting object from bucket %s key %s: %s", bucket, key, err)
+		}
+	}
+
+	defer deleteObj()
 
 	closeBody := func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -279,15 +304,6 @@ func ProcessUploadBackup(r *http.Request, uploadBackupFormUrl string, idUpdater 
 			return nil, err
 		}
 		inserted += rowsAffected
-	}
-
-	_, err = s3Client.DeleteObject(r.Context(), &s3.DeleteObjectInput{
-		Bucket: &bucket,
-		Key:    &key,
-	})
-
-	if err != nil {
-		log.Printf("Error deleting object from bucket %s key %s: %s", bucket, key, err)
 	}
 
 	return UploadBackupResponse(inserted, uploadBackupFormUrl, idUpdater, event), nil

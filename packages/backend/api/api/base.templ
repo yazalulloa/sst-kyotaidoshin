@@ -104,11 +104,11 @@ templ BackBtn(backUrl string) {
 	</button>
 }
 
-templ UploadBackupForm(url string, values map[string]string) {
+templ UploadBackupForm(params UploadBackupParams) {
 	<form
 		id="backup-file-uploader"
 		class="whitespace-nowrap bg-transparent rounded-radius border border-secondary px-4 py-2 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-secondary-dark dark:text-secondary-dark dark:focus-visible:outline-secondary-dark disabled:opacity-75 disabled:cursor-not-allowed"
-		hx-post={ url }
+		hx-post={ params.Url }
 		hx-encoding="multipart/form-data"
 		hx-disabled-elt="this, #backup-file-uploader * > input:not([disabled]), #backup-file-uploader * > label:not([disabled])"
 		hx-swap="outerHTML"
@@ -122,7 +122,7 @@ templ UploadBackupForm(url string, values map[string]string) {
           })
      "
 	>
-		for k, v := range values {
+		for k, v := range params.Values {
 			<input type="hidden" name={ k } value={ v }/>
 		}
 		<label

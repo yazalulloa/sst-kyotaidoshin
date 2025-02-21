@@ -1,0 +1,76 @@
+package receipts
+
+import (
+	"fmt"
+	"kyotaidoshin/api"
+	"time"
+)
+
+templ InitView(dto InitDto) {
+	if dto.UploadBackupParams != nil {
+		@api.UploadBackupForm(*dto.UploadBackupParams)
+	}
+	<div
+		x-init={ fmt.Sprintf("buildings = %s; $el.remove()", dto.BuildingIds) }
+	></div>
+}
+
+templ Search(res TableResponse) {
+	for _, item := range res.Results {
+		@ItemView(item)
+	}
+	if res.NextPageUrl != "" {
+		@api.NextPageLi(res.NextPageUrl, templ.Attributes{
+			"hx-include": "[name='building_input'],[name='month_input'],[name='year_input']"})
+	}
+	@CountersView(res.Counters)
+}
+
+templ ItemView(item Item) {
+	<li
+		id={ item.CardId }
+		class="fade-me-in fade-me-out"
+		if item.isUpdate {
+			hx-swap-oob="true"
+		}
+		if item.UpdateParams != nil {
+			data-update-params={ *item.UpdateParams }
+			@click="$dispatch('event-receipt-form-update', { params: $el.getAttribute('data-update-params') })"
+		}
+	>
+		<span>{ item.Item.BuildingID }</span>
+		<span>{ fmt.Sprint(item.Item.Year) }</span>
+		<span x-text={ fmt.Sprintf("$t('main-months-%d')", item.Item.Month) }></span>
+		<span>{ item.Item.Date.Format(time.DateOnly) }</span>
+		<span
+			data-date={ fmt.Sprint(item.CreatedAt) }
+			x-init="
+    					$el.innerHTML = new Date(parseInt($el.getAttribute('data-date')))
+                                          //.toLocaleDateString()
+                                         .toLocaleString()
+                                         "
+		></span>
+		@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{
+		"hx-include": "[name='building_input'],[name='month_input'],[name='year_input']"})
+	</li>
+}
+
+templ CountersView(counters Counters) {
+	<div
+		id="receipts-counters"
+		hidden="hidden"
+		hx-swap-oob="true"
+		data-total-count={ fmt.Sprint(counters.TotalCount) }
+		if counters.QueryCount != nil {
+			data-query-count={ fmt.Sprint(*counters.QueryCount) }
+		}
+		x-init="
+	total = $el.getAttribute('data-total-count');
+	query = $el.getAttribute('data-query-count');
+	"
+	></div>
+}
+
+templ YearsView(init string) {
+	<div x-init={ init }></div>
+}

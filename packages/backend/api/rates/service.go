@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func getTableResponse(requestQuery RateQuery) (TableResponse, error) {
+func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 	var tableResponse TableResponse
 	var oErr error
 	var wg sync.WaitGroup
@@ -99,7 +99,7 @@ func CheckRateInsert(ratesArr *[]model.Rates) ([]model.Rates, error) {
 	return ratesToInsert, nil
 }
 
-func deleteRateReturnCounters(id int64, rateQuery RateQuery) (*Counters, error) {
+func deleteRateReturnCounters(id int64, rateQuery RequestQuery) (*Counters, error) {
 
 	_, err := deleteRateById(id)
 	if err != nil {

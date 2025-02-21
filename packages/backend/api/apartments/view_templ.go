@@ -113,7 +113,7 @@ func ItemView(item Item) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" @click=\"$dispatch(&#39;event-apartment-form-update&#39;, { params: $el.getAttribute(&#39;data-update-params&#39;) })\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" @dblclick.prevent=\"$dispatch(&#39;event-apartment-form-update&#39;, { params: $el.getAttribute(&#39;data-update-params&#39;) })\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

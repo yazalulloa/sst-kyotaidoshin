@@ -25,7 +25,7 @@ templ ItemView(item Item) {
 		}
 		if item.UpdateParams != nil {
 			data-update-params={ *item.UpdateParams }
-			@click="$dispatch('event-apartment-form-update', { params: $el.getAttribute('data-update-params') })"
+			@dblclick.prevent="$dispatch('event-apartment-form-update', { params: $el.getAttribute('data-update-params') })"
 		}
 	>
 		<span>{ item.Item.BuildingID }</span>

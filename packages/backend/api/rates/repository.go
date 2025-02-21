@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func queryCondition(rateQuery *RateQuery) (sqlite.BoolExpression, bool) {
+func queryCondition(rateQuery *RequestQuery) (sqlite.BoolExpression, bool) {
 	condition := sqlite.Bool(true)
 	justTrue := true
 
@@ -31,7 +31,7 @@ func queryCondition(rateQuery *RateQuery) (sqlite.BoolExpression, bool) {
 	return condition, justTrue
 }
 
-func GetRates(rateQuery RateQuery) ([]model.Rates, error) {
+func GetRates(rateQuery RequestQuery) ([]model.Rates, error) {
 	condition, _ := queryCondition(&rateQuery)
 
 	if rateQuery.LastId > 0 {
@@ -66,7 +66,7 @@ func getTotalCount() (int64, error) {
 	return dest.Count, nil
 }
 
-func getQueryCount(rateQuery RateQuery) (*int64, error) {
+func getQueryCount(rateQuery RequestQuery) (*int64, error) {
 	condition, justTrue := queryCondition(&rateQuery)
 	if justTrue {
 		return nil, nil
@@ -183,4 +183,24 @@ func deleteRateById(id int64) (int64, error) {
 	}
 
 	return rowsAffected, nil
+}
+
+func GetFirstBeforeDate(date time.Time) (model.Rates, error) {
+
+	stmt := Rates.SELECT(Rates.AllColumns).FROM(Rates).
+		WHERE(Rates.DateOfRate.LT_EQ(sqlite.Date(date.Date()))).
+		ORDER_BY(Rates.DateOfRate.DESC()).LIMIT(1)
+
+	var dest []model.Rates
+	err := stmt.Query(db.GetDB().DB, &dest)
+	if err != nil {
+		return model.Rates{}, err
+	}
+
+	if len(dest) == 0 {
+		return model.Rates{}, api.ErrNoRows
+	}
+
+	return dest[0], nil
+
 }

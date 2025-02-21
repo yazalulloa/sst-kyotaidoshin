@@ -69,3 +69,16 @@ type FormRequest struct {
 	Active      bool     `form:"active"`
 	Apartments  []string `form:"apartment_input" validate:"required,gt=0,dive,notblank"`
 }
+type AptDto struct {
+	Number string `json:"number"`
+}
+type ExtraChargeDto struct {
+	BuildingID      string   `json:"building_id"`
+	ParentReference string   `json:"parent_reference"`
+	Type            string   `json:"type"`
+	Description     string   `json:"description"`
+	Amount          float64  `json:"amount"`
+	Currency        string   `json:"currency"`
+	Active          bool     `json:"active"`
+	Apartments      []AptDto `json:"apartments"`
+}

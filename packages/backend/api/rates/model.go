@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type RateQuery struct {
+type RequestQuery struct {
 	LastId     int64
 	Limit      int
 	DateOfRate *time.Time
@@ -32,7 +32,4 @@ type Item struct {
 	DateOfRate string
 	DateOfFile int64
 	CreatedAt  int64
-}
-
-type Pagination struct {
 }

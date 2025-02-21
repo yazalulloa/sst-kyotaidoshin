@@ -5,6 +5,7 @@ import (
 	"db/gen/model"
 	. "db/gen/table"
 	"github.com/go-jet/jet/v2/sqlite"
+	"log"
 )
 
 func selectById(id int32) (*model.ExtraCharges, error) {
@@ -64,6 +65,9 @@ func deleteById(id int32) (int64, error) {
 }
 
 func InsertBackup(array []model.ExtraCharges) (int64, error) {
+	if len(array) == 0 {
+		return 0, nil
+	}
 
 	stmt := ExtraCharges.INSERT(ExtraCharges.BuildingID, ExtraCharges.ParentReference, ExtraCharges.Type, ExtraCharges.Description, ExtraCharges.Amount, ExtraCharges.Currency, ExtraCharges.Active, ExtraCharges.Apartments)
 
@@ -73,6 +77,7 @@ func InsertBackup(array []model.ExtraCharges) (int64, error) {
 
 	result, err := stmt.Exec(db.GetDB().DB)
 	if err != nil {
+		log.Printf("Error inserting extra charges: %s\n%v\n", stmt.DebugSql(), err)
 		return 0, err
 	}
 

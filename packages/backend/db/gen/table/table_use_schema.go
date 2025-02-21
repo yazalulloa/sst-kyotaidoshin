@@ -12,7 +12,10 @@ package table
 func UseSchema(schema string) {
 	Apartments = Apartments.FromSchema(schema)
 	Buildings = Buildings.FromSchema(schema)
+	Debts = Debts.FromSchema(schema)
+	Expenses = Expenses.FromSchema(schema)
 	ExtraCharges = ExtraCharges.FromSchema(schema)
 	Rates = Rates.FromSchema(schema)
+	Receipts = Receipts.FromSchema(schema)
 	ReserveFunds = ReserveFunds.FromSchema(schema)
 }

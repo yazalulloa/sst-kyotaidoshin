@@ -394,9 +394,9 @@ func getUploadBackupForm(w http.ResponseWriter, r *http.Request) {
 }
 
 type BuildingRecord struct {
-	Building     buildingDto      `json:"building"`
-	ReserveFunds []reserveFundDto `json:"reserve_funds"`
-	ExtraCharges []extraChargeDto `json:"extra_charges"`
+	Building     buildingDto                   `json:"building"`
+	ReserveFunds []reserveFundDto              `json:"reserve_funds"`
+	ExtraCharges []extraCharges.ExtraChargeDto `json:"extra_charges"`
 }
 
 type buildingDto struct {
@@ -421,21 +421,6 @@ type reserveFundDto struct {
 	Type          string  `json:"type"`
 	ExpenseType   string  `json:"expense_type"`
 	AddToExpenses bool    `json:"add_to_expenses"`
-}
-
-type extraChargeDto struct {
-	BuildingID      string   `json:"building_id"`
-	ParentReference string   `json:"parent_reference"`
-	Type            string   `json:"type"`
-	Description     string   `json:"description"`
-	Amount          float64  `json:"amount"`
-	Currency        string   `json:"currency"`
-	Active          bool     `json:"active"`
-	Apartments      []aptDto `json:"apartments"`
-}
-
-type aptDto struct {
-	Number string `json:"number"`
 }
 
 func uploadBackup(w http.ResponseWriter, r *http.Request) {

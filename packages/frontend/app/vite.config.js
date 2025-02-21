@@ -1,7 +1,7 @@
-import { defineConfig } from 'vite';
+import {defineConfig} from 'vite';
 import tailwindcss from '@tailwindcss/vite'
 import handlebars from 'vite-plugin-handlebars';
-import { resolve } from 'path';
+import {resolve} from 'path';
 
 export default defineConfig({
   root: 'src', // Assuming your source files are in the 'src' directory
@@ -22,5 +22,6 @@ export default defineConfig({
   },
   assetsInclude: [
     "./pages/**/*.html",
+    "./assets/**/*",
   ]
 });

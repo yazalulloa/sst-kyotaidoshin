@@ -133,3 +133,65 @@ SET updated_at = CURRENT_TIMESTAMP
 WHERE id = OLD.id;
 END;
 
+-- DROP TABLE IF EXISTS receipts;
+CREATE TABLE IF NOT EXISTS receipts
+(
+    id          INTEGER  PRIMARY KEY,
+    building_id CHAR(20)            NOT NULL,
+    year        SMALLINT            NOT NULL,
+    month       SMALLINT            NOT NULL,
+    date        DATE                NOT NULL,
+    rate_id     BIGINT              NOT NULL,
+    sent        BOOL                NOT NULL,
+    last_sent   DATETIME,
+    created_at  DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at  DATETIME
+);
+
+
+CREATE INDEX IF NOT EXISTS receipts_building_id_idx ON receipts (building_id);
+CREATE INDEX IF NOT EXISTS receipts_month_idx ON receipts (month);
+CREATE INDEX IF NOT EXISTS receipts_date_idx ON receipts (date);
+
+CREATE TRIGGER IF NOT EXISTS receipts_updated_at_trigger
+    AFTER UPDATE
+                                ON receipts
+                                FOR EACH ROW
+BEGIN
+UPDATE receipts
+SET updated_at = CURRENT_TIMESTAMP
+WHERE id = OLD.id;
+END;
+
+
+-- DROP TABLE IF EXISTS expenses;
+CREATE TABLE IF NOT EXISTS expenses
+(
+    id           INTEGER PRIMARY KEY,
+    building_id  CHAR(20)                                      NOT NULL,
+    receipt_id   INTEGER                                       NOT NULL,
+    description  TEXT                                          NOT NULL,
+    amount       DECIMAL(16, 2)                                NOT NULL,
+    currency     TEXT CHECK ( currency IN ('USD', 'VED') )     NOT NULL,
+    reserve_fund BOOL                                          NOT NULL,
+    type         TEXT CHECK ( type IN ('COMMON', 'UNCOMMON') ) NOT NULL
+    );
+
+
+CREATE INDEX IF NOT EXISTS expenses_building_id_idx ON expenses (building_id);
+CREATE INDEX IF NOT EXISTS expenses_receipt_id_idx ON expenses (receipt_id);
+
+
+-- DROP TABLE IF EXISTS debts;
+CREATE TABLE IF NOT EXISTS debts
+(
+    building_id                      CHAR(20)       NOT NULL,
+    receipt_id                       INTEGER        NOT NULL,
+    apt_number                       CHAR(20)       NOT NULL,
+    receipts                         SMALLINT       NOT NULL,
+    amount                           DECIMAL(16, 2) NOT NULL,
+    months                           TEXT           NOT NULL,
+    previous_payment_amount          DECIMAL(16, 2) NOT NULL,
+    previous_payment_amount_currency TEXT CHECK ( previous_payment_amount_currency IN ('USD', 'VED') ) NOT NULL,
+    PRIMARY KEY (building_id, receipt_id, apt_number)
+);

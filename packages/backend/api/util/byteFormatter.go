@@ -5,6 +5,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"log"
 	"reflect"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -120,4 +121,25 @@ func GetValidator() (*validator.Validate, error) {
 	log.Printf("Returning validator validatorInstance: %v", validatorInstance != nil)
 
 	return validatorInstance, err
+}
+
+func SplitArray[T any](arr []T, chunkSize int) [][]T {
+	var chunks [][]T
+	for i := 0; i < len(arr); i += chunkSize {
+		end := i + chunkSize
+		if end > len(arr) {
+			end = len(arr)
+		}
+		chunks = append(chunks, arr[i:end])
+	}
+	return chunks
+}
+
+func StringToInt16(str string) int16 {
+	num, err := strconv.ParseInt(str, 10, 16)
+	if err != nil {
+		return 0
+	}
+
+	return int16(num)
 }
