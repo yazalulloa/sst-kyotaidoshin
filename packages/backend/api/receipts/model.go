@@ -37,6 +37,7 @@ type Item struct {
 	Key          string
 	Item         model.Receipts
 	CreatedAt    int64
+	LastSent     *int64
 	UpdateParams *string
 	isUpdate     bool
 }

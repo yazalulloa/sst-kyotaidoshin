@@ -13,8 +13,11 @@ import extraChargesFormPartialUrl from './pages/extra-charges/form.html?url'
 import apartmentsSelectorPartialUrl from './pages/apartments/selector.html?url'
 import apartmentsFormDialogPartialUrl from './pages/apartments/formDialog.html?url'
 import receiptsIndexPartialUrl from './pages/receipts/index.html?url'
+import receiptsEditPartialUrl from './pages/receipts/edit.html?url'
+import receiptsFormPartialUrl from './pages/receipts/form.html?url'
 import monthsSelectorPartialUrl from './pages/receipts/monthSelector.html?url'
 import receiptYearsSelectorPartialUrl from './pages/receipts/yearSelector.html?url'
+import expensesFormPartialUrl from './pages/expenses/form.html?url'
 
 window.backBtnPartialUrl = backBtnPartialUrl;
 window.currencyPickerPartialUrl = currencyPickerPartialUrl;
@@ -30,7 +33,10 @@ window.reserveFundFormPartialUrl = reserveFundFormPartialUrl;
 window.extraChargesFormPartialUrl = extraChargesFormPartialUrl;
 window.apartmentsSelectorPartialUrl = apartmentsSelectorPartialUrl;
 window.apartmentsFormDialogPartialUrl = apartmentsFormDialogPartialUrl;
+window.receiptsFormPartialUrl = receiptsFormPartialUrl;
 window.receiptsIndexPartialUrl = receiptsIndexPartialUrl;
+window.receiptsEditPartialUrl = receiptsEditPartialUrl;
 window.monthsSelectorPartialUrl = monthsSelectorPartialUrl;
 window.receiptYearsSelectorPartialUrl = receiptYearsSelectorPartialUrl;
+window.expensesFormPartialUrl = expensesFormPartialUrl;
 

@@ -323,11 +323,18 @@ func toItem(item *model.Receipts, oldCardId *string) (*Item, error) {
 
 	base64Str := base64.URLEncoding.EncodeToString(byteArray)
 
+	var lastSent *int64
+	if item.LastSent != nil {
+		tmp := item.LastSent.UnixMilli()
+		lastSent = &tmp
+	}
+
 	return &Item{
 		CardId:       keys.CardId,
 		Key:          key,
 		Item:         *item,
 		CreatedAt:    item.CreatedAt.UnixMilli(),
 		UpdateParams: &base64Str,
+		LastSent:     lastSent,
 	}, nil
 }

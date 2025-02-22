@@ -2,6 +2,7 @@ package receipts
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"kyotaidoshin/api"
 	"time"
 )
@@ -33,15 +34,21 @@ templ ItemView(item Item) {
 		if item.isUpdate {
 			hx-swap-oob="true"
 		}
-		if item.UpdateParams != nil {
-			data-update-params={ *item.UpdateParams }
-			@click="$dispatch('event-receipt-form-update', { params: $el.getAttribute('data-update-params') })"
-		}
+		@dblclick={ fmt.Sprintf("window.location.href = '/receipts/edit/%s'", item.Key) }
 	>
 		<span>{ item.Item.BuildingID }</span>
-		<span>{ fmt.Sprint(item.Item.Year) }</span>
 		<span x-text={ fmt.Sprintf("$t('main-months-%d')", item.Item.Month) }></span>
+		<span>{ fmt.Sprint(item.Item.Year) }</span>
 		<span>{ item.Item.Date.Format(time.DateOnly) }</span>
+		<div class="flex justify-center w-full">
+			if item.Item.LastSent != nil {
+				{{
+		tooltipId := "tooltip-" + uuid.New().String()
+		lastSent := fmt.Sprint(*item.LastSent)
+				}}
+				@api.BadgeIndicatorWithTooltip(item.Item.Sent, tooltipId, api.SpanWitX_Text("$t('main-title-sent')"), api.Tooltip(tooltipId, api.SpanFormatDate(lastSent)))
+			}
+		</div>
 		<span
 			data-date={ fmt.Sprint(item.CreatedAt) }
 			x-init="
@@ -51,7 +58,7 @@ templ ItemView(item Item) {
                                          "
 		></span>
 		@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{
-		"hx-include": "[name='building_input'],[name='month_input'],[name='year_input']"})
+			"hx-include": "[name='building_input'],[name='month_input'],[name='year_input']"})
 	</li>
 }
 

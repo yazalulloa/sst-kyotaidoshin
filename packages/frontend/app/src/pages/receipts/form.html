@@ -1,0 +1,162 @@
+<div class="w-full flex flex-col gap-4 items-center justify-center"
+     x-data="{
+    open: true,
+    isEdit: true,
+   currencies: CURRENCIES_GLOBAL,
+   months: MONTHS_GLOBAL,
+   years: GetSelectYears(),
+   apartments: [],
+   aptMap: new Map(),
+
+
+  }"
+     x-show="open">
+
+  <form
+      id="receipts-form"
+      class="flex flex-col gap-4 justify-center rounded-lg p-4"
+      hx-put="/api/receipts"
+      hx-disabled-elt="this, #receipts-form * > input:not([disabled]), #receipts-form * > button:not([disabled]), #receipts-form * > select:not([disabled])"
+      hx-indicator=".htmx-indicator"
+      hx-target="#receipts-form-error"
+      hx-swap="innerHTML"
+      x-data="{
+
+        date: '',
+        year: '',
+        month: '',
+        rates: [],
+        errMsg: '',
+
+
+        }">
+
+    <div x-bind:hx-get="'/api/receipts/formData?id=' + getLastPathSegment()"
+         hx-trigger="asload"
+         hx-target="this"
+         hx-swap="outerHTML">
+    </div>
+
+    <div id="receipts-form-error" hidden="hidden"></div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div class="relative flex w-full max-w-xs flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+        <label for="receiptYearSelect"
+               class="w-fit pl-0.5 text-sm"
+               x-text="$t('main-title-year')">
+        </label>
+        <svg x-bind:data-src="selectIcon" data-cache="21600"></svg>
+        <select id="receiptYearSelect"
+                name="year"
+                x-model="year"
+                class="w-full appearance-none rounded-radius border border-outline bg-surface-alt px-4 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+          <template x-for="v in years">
+            <option x-bind:value="v" x-text="v"></option>
+          </template>
+        </select>
+      </div>
+
+      <div class="relative flex w-full max-w-xs flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+        <label for="receiptMonthSelect"
+               class="w-fit pl-0.5 text-sm"
+               x-text="$t('main-title-month')">
+        </label>
+        <svg x-bind:data-src="selectIcon" data-cache="21600"></svg>
+        <select id="receiptMonthSelect"
+                name="month"
+                x-model="month"
+                class="w-full appearance-none rounded-radius border border-outline bg-surface-alt px-4 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+          <template x-for="month in months">
+            <option x-bind:value="month" x-text="$t('main-months-' + month)"></option>
+          </template>
+        </select>
+      </div>
+      <div class="relative flex w-full max-w-xs flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+        <label for="receiptDateInput"
+               class="w-fit pl-0.5 text-sm"
+               x-text="$t('main-title-date')">
+        </label>
+        <input
+            id="receiptDateInput"
+            class="w-fit inline-flex items-center justify-between gap-2 whitespace-nowrap border-outline bg-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark border rounded-radius"
+            type="date"
+            name="date"
+            placeholder="YYYY-MM-DD"
+            x-model="date"
+        />
+      </div>
+
+      <div class="relative flex w-full max-w-xs flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+        <label for="receiptRateSelect"
+               class="w-fit pl-0.5 text-sm"
+               x-text="$t('main-title-rate')">
+        </label>
+        <svg x-bind:data-src="selectIcon" data-cache="21600"></svg>
+        <select id="receiptRateSelect"
+                name="month"
+                x-model="month"
+                class="w-full appearance-none rounded-radius border border-outline bg-surface-alt px-4 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+          <template x-for="rates in rates">
+            <option x-bind:value="month" x-text="month"></option>
+          </template>
+        </select>
+      </div>
+    </div>
+
+
+    <p x-show="errMsg !== ''" x-text="errMsg" class="text-danger border border-danger"></p>
+
+    <div class="flex flex-row gap-2 justify-start">
+      <button
+          x-text="isEdit ? $t('main-action-update') : $t('main-action-create')"
+          class="whitespace-nowrap rounded-radius bg-primary border border-primary px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+          @click="
+          let form = document.getElementById('receipts-form');
+          form.classList.remove('border', 'border-success')
+          errMsg = '';
+          "
+      >
+      </button>
+      <a href="/receipts">
+        <button type="button"
+                class="whitespace-nowrap rounded-radius bg-surface-alt border border-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface-strong transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface-alt active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark-alt"
+                x-text="$t('main-action-cancel')">
+        </button>
+      </a>
+    </div>
+  </form>
+
+  <hr>
+
+  <div x-show="isEdit" class="w-full">
+
+    <div hidden="hidden"
+         x-bind:hx-get="expensesFormPartialUrl"
+         hx-trigger="load"
+         hx-swap="outerHTML">
+    </div>
+
+  </div>
+
+  <hr>
+
+  <div x-show="isEdit" class="w-full">
+
+    <div hidden="hidden"
+         x-bind:hx-get="reserveFundFormPartialUrl"
+         hx-trigger="load"
+         hx-swap="outerHTML">
+    </div>
+
+  </div>
+  <hr>
+  <div x-show="isEdit" class="w-full">
+
+    <div hidden="hidden"
+         x-bind:hx-get="extraChargesFormPartialUrl"
+         hx-trigger="load"
+         hx-swap="outerHTML">
+    </div>
+
+  </div>
+</div>

@@ -165,6 +165,16 @@
                   x-init="htmx.process($el)">
         </template>
 
+        <template x-route="/receipts/edit/:id"
+                  x-handler="[(ctx) => $el.dispatchEvent(new CustomEvent('navigate')) ]"
+                  x-bind:hx-get="receiptsEditPartialUrl"
+                  hx-target="#container"
+                  hx-indicator=".htmx-indicator"
+                  hx-trigger="navigate"
+                  hx-swap="innerHTML"
+                  x-init="htmx.process($el)">
+        </template>
+
         <svg x-bind:data-src="ratesIcon" data-cache="21600" class="size-5"></svg>
         <span x-text="$t('main-title-receipts')"></span>
       </a>

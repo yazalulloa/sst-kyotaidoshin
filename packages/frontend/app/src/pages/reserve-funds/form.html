@@ -212,9 +212,6 @@
             <option value="PERCENTAGE">PERCENTAGE</option>
           </select>
         </div>
-      </div>
-
-      <div class="grid grid-cols-[1fr_3fr] gap-2">
 
         <label for="reserveFundAddToExpenses"
                class="flex items-center gap-2 text-sm font-medium text-on-surface dark:text-on-surface-dark has-checked:text-on-surface-strong dark:has-checked:text-on-surface-dark-strong has-disabled:cursor-not-allowed has-disabled:opacity-75">
@@ -246,7 +243,7 @@
 
 
       <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-        <label for="reserveFundExpenseNameInput"
+        <label for="reserveFundExpenseInput"
                x-bind:class="expenseErr !== '' ? 'text-danger' : ''"
                class="flex w-fit items-center gap-1 pl-0.5 text-sm">
 
@@ -254,7 +251,7 @@
           <span x-text="$t('main-title-expense')"></span>
         </label>
         <input
-            id="reserveFundExpenseNameInput"
+            id="reserveFundExpenseInput"
             class="w-full rounded-radius border bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
             type="number"
             name="expense"

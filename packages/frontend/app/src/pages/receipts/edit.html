@@ -1,0 +1,17 @@
+<div id="header-container" hx-swap-oob="true">
+  <div x-data="{
+   url: '/receipts'
+  }">
+    <div x-bind:hx-get="backBtnPartialUrl"
+         hx-trigger="load"
+         hx-swap="outerHTML">
+    </div>
+  </div>
+</div>
+
+<div id="container" hx-swap-oob="true">
+  <div x-bind:hx-get="receiptsFormPartialUrl"
+       hx-trigger="load"
+       hx-swap="outerHTML">
+  </div>
+</div>

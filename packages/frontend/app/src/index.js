@@ -11,6 +11,7 @@ import messages from './messages.json?raw'
 import './partials.js';
 import './flags.js';
 import './images.js';
+import './config.js';
 
 window.htmx = htmx;
 
@@ -184,6 +185,12 @@ function configureCurrencyInputs() {
   console.log("inputs: ", inputs.length);
   inputs.forEach(configureCurrencyInput)
 
+}
+
+window.FormatDate = function (date) {
+  return new Date(parseInt(date))
+  //.toLocaleDateString()
+  .toLocaleString()
 }
 
 document.addEventListener("htmx:afterSettle", function (event) {
