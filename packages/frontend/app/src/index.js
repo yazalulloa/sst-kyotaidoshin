@@ -179,6 +179,15 @@ window.configureCurrencyInput = function (input) {
   });
 }
 
+window.configureNumberInput = function (input) {
+  input.addEventListener("input", () => {
+    input.value = input.value.replace(/[^0-9]/g, '');
+    if (input.value.length > 0) {
+      input.value = parseInt(input.value);
+    }
+  });
+}
+
 function configureCurrencyInputs() {
   // get all input with attribute data-currency
   const inputs = document.querySelectorAll('input[data-type="currency"]')

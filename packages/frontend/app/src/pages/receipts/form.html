@@ -159,4 +159,14 @@
     </div>
 
   </div>
+  <hr>
+  <div x-show="isEdit" class="w-full">
+
+    <div hidden="hidden"
+         x-bind:hx-get="debtsFormPartialUrl"
+         hx-trigger="load"
+         hx-swap="outerHTML">
+    </div>
+
+  </div>
 </div>

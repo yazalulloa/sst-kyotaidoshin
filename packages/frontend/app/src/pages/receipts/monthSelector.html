@@ -1,6 +1,6 @@
 <div x-data="{modalIsOpen: false,
-        months: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-      , monthsSelected: []}"
+        months: MONTHS_GLOBAL
+      }"
      x-init="
 
      $watch('monthsSelected', value => {
@@ -14,7 +14,7 @@
 >
 
   <button x-on:click="modalIsOpen = true" type="button"
-          class="w-fit inline-flex items-center justify-between gap-2 whitespace-nowrap border-outline bg-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark border rounded-radius">
+          class="w-full inline-flex items-center justify-center gap-2 whitespace-nowrap border-outline bg-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark border rounded-radius">
     <div class="flex flex-row gap-0">
       <span x-text="$t('main-title-months')"></span><span>:&nbsp;</span><span x-text="monthsSelected.length"></span>
     </div>

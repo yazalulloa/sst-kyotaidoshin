@@ -41,7 +41,10 @@
 
     <div
         data-change-element="receipts-updater"
-        data-change-event="update-receipts">
+        data-change-event="update-receipts"
+        x-data="{
+      monthsSelected: []
+      }">
 
       <div x-bind:hx-get="monthsSelectorPartialUrl"
            hx-trigger="load"

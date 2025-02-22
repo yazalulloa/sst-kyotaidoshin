@@ -1,0 +1,204 @@
+<div class="flex flex-col gap-2 overflow-hidden"
+     x-data="{
+ counter: 0,
+ total: 0,
+ receipts: 0
+}">
+  <div class="flex flex-row gap-3 justify-center">
+    <div class="flex flex-row gap-0 justify-center font-extrabold capitalize">
+      <span x-text="$t('main-title-debts')"></span>:&nbsp;<span x-text="counter"></span>
+    </div>
+
+    <div class="flex flex-row gap-0 justify-center font-extrabold capitalize">
+      <span x-text="$t('main-title-total')"></span>:&nbsp;<span x-text="total"></span>
+    </div>
+
+    <div class="flex flex-row gap-0 justify-center font-extrabold capitalize">
+      <span x-text="$t('main-title-receipts')"></span>:&nbsp;<span x-text="receipts"></span>
+    </div>
+  </div>
+
+  <div x-data="{
+      open_form: true,
+      key: '',
+      apartment: '',
+      receipts: 0,
+      amount: 0,
+      monthsSelected: [],
+      previousPaymentAmount: '',
+      previousPaymentAmountCurrency: '',
+
+      amountErr: '',
+      receiptsErr: '',
+      previousPaymentAmountErr: '',
+      errMsg: ''
+  }"
+       class="flex flex-col gap-4 justify-center"
+       x-bind:class="open_form ? 'md:grid md:grid-cols-[7fr_3fr]' : ''">
+
+
+    <div class="flex flex-col gap-0">
+      <div
+          class="font-bold grid grid-cols-[2fr_1fr_1fr_1fr_1fr] border-b border-surface-dark dark:border-surface dark:text-surface">
+        <span x-text="$t('main-title-apartment')"></span>
+        <span x-text="$t('main-title-receipts')"></span>
+        <span x-text="$t('main-title-amount')"></span>
+        <span x-text="$t('main-title-months')"></span>
+        <span x-text="$t('main-title-previous-payment')"></span>
+      </div>
+      <ol id="debts-list"
+          class="*:grid *:grid-cols-[2fr_1fr_1fr_1fr_1fr] *:gap-2 *:p-2 *:items-center *:text-center *:border-b *:border-surface-dark *:dark:border-surface *:dark:text-surface">
+
+      </ol>
+    </div>
+
+    <form id="debts-form"
+          x-show="open_form"
+          class="relative top-0 flex h-fit flex-col gap-2"
+          x-init="scrollThroughParent($el)"
+          hx-put="/api/debts"
+          hx-indicator=".htmx-indicator"
+          hx-target="#debts-form-error"
+          hx-swap="innerHTML"
+          hx-disabled-elt="this, #debts-form * > input:not([disabled]), #debts-form * > button:not([disabled]), #debts-form * > select:not([disabled])">
+
+      <div id="debts-form-error" hidden="hidden"></div>
+      <input hidden="hidden" name="key" x-model="key">
+
+      <span x-text="apartment"></span>
+
+      <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+        <label for="debtsAmountInput"
+               x-bind:class="amountErr !== '' ? 'text-danger' : ''"
+               class="flex w-fit items-center gap-1 pl-0.5 text-sm">
+
+          <svg x-show="amountErr !== ''" x-bind:data-src="crossIcon" data-cache="21600" class="size-4"></svg>
+          <span x-text="$t('main-title-amount')"></span>
+        </label>
+        <input
+            id="debtsAmountInput"
+            class="w-full rounded-radius border bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+            type="number"
+            name="amount"
+            maxlength="14"
+            step=".01"
+            x-model="amount"
+            x-bind:class="amountErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
+            x-init="
+            limitInputToMaxLength($el)
+            configureCurrencyInput($el)
+            "
+            required
+        />
+        <small x-model="amountErr"
+               x-bind:class="amountErr !== '' ? 'text-danger' : ''"
+               class="text-start pl-0.5">
+        </small>
+      </div>
+
+      <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+        <label for="debtsReceiptInput"
+               x-bind:class="receiptsErr !== '' ? 'text-danger' : ''"
+               class="flex w-fit items-center gap-1 pl-0.5 text-sm">
+
+          <svg x-show="receiptsErr !== ''" x-bind:data-src="crossIcon" data-cache="21600" class="size-4"></svg>
+          <span x-text="$t('main-title-receipts')"></span>
+        </label>
+        <input
+            id="debtsReceiptInput"
+            class="w-full rounded-radius border bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+            type="number"
+            name="amount"
+            maxlength="14"
+            x-model="receipts"
+            x-bind:class="receiptsErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
+            x-init="
+            configureNumberInput($el)
+            limitInputToMaxLength($el)
+            "
+            required
+        />
+        <small x-model="receiptsErr"
+               x-bind:class="receiptsErr !== '' ? 'text-danger' : ''"
+               class="text-start pl-0.5">
+        </small>
+      </div>
+
+      <div x-bind:hx-get="monthsSelectorPartialUrl"
+           hx-trigger="load"
+           hx-disabled-elt="this"
+           hx-swap="outerHTML"
+           hx-target="this"
+           hidden="hidden">
+      </div>
+
+      <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+        <label for="debtsPreviousPaymentAmountInput"
+               x-bind:class="previousPaymentAmountErr !== '' ? 'text-danger' : ''"
+               class="flex w-fit items-center gap-1 pl-0.5 text-sm">
+          <svg x-show="previousPaymentAmountErr !== ''" x-bind:data-src="crossIcon" data-cache="21600"
+               class="size-4"></svg>
+          <span x-text="$t('main-title-previous-payment')"></span>
+        </label>
+        <input
+            id="debtsPreviousPaymentAmountInput"
+            class="w-full rounded-radius border bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+            type="number"
+            name="amount"
+            maxlength="14"
+            step=".01"
+            x-model="previousPaymentAmount"
+            x-bind:class="previousPaymentAmountErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
+            x-init="
+            limitInputToMaxLength($el)
+            configureCurrencyInput($el)
+            "
+            required
+        />
+        <small x-model="previousPaymentAmountErr"
+               x-bind:class="previousPaymentAmountErr !== '' ? 'text-danger' : ''"
+               class="text-start pl-0.5">
+        </small>
+      </div>
+
+      <div class="relative flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+        <label for="debtsPreviousPaymentCurrencySelect" class="w-fit pl-0.5 text-sm"
+               x-text="$t('main-title-currency')"></label>
+        <svg x-bind:data-src="selectIcon" data-cache="21600"></svg>
+        <select id="debtsPreviousPaymentCurrencySelect"
+                name="previousPaymentAmountCurrency"
+                x-model="previousPaymentAmountCurrency"
+                class="w-full appearance-none rounded-radius border border-outline bg-surface-alt px-4 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+          <template x-for="value in CURRENCIES_GLOBAL">
+            <option x-bind:value="value" x-text="value"></option>
+          </template>
+        </select>
+        <small></small>
+      </div>
+
+
+      <p x-show="errMsg !== ''" x-text="errMsg" class="text-danger border border-danger"></p>
+
+      <div class="flex flex-row gap-2 justify-start">
+        <button
+            x-text="$t('main-action-update')"
+            x-effect="
+             $el.disabled=!(receipts > 0 && amount > 0 && previousPaymentAmount > 0 && monthsSelected.length > 0)
+            "
+            class="whitespace-nowrap rounded-radius bg-primary border border-primary px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+            @click="
+              let form = $el.closest('form');
+              form.classList.remove('border', 'border-success')
+              errMsg = '';
+            ">
+        </button>
+        <button type="button"
+                class="whitespace-nowrap rounded-radius bg-surface-alt border border-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface-strong transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface-alt active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark-alt"
+                @click.prevent="$dispatch('event-expense-form-reset')"
+                x-text="$t('main-action-clear')">
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>

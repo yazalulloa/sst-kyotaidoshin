@@ -18,6 +18,7 @@ import receiptsFormPartialUrl from './pages/receipts/form.html?url'
 import monthsSelectorPartialUrl from './pages/receipts/monthSelector.html?url'
 import receiptYearsSelectorPartialUrl from './pages/receipts/yearSelector.html?url'
 import expensesFormPartialUrl from './pages/expenses/form.html?url'
+import debtsFormPartialUrl from './pages/debts/form.html?url'
 
 window.backBtnPartialUrl = backBtnPartialUrl;
 window.currencyPickerPartialUrl = currencyPickerPartialUrl;
@@ -39,4 +40,5 @@ window.receiptsEditPartialUrl = receiptsEditPartialUrl;
 window.monthsSelectorPartialUrl = monthsSelectorPartialUrl;
 window.receiptYearsSelectorPartialUrl = receiptYearsSelectorPartialUrl;
 window.expensesFormPartialUrl = expensesFormPartialUrl;
+window.debtsFormPartialUrl = debtsFormPartialUrl;
 
