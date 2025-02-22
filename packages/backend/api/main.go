@@ -104,6 +104,7 @@ func loggingMiddleware(next http.Handler) http.Handler {
 }
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	//log.SetFlags(log.LstdFlags | log.Lshortfile)
+	log.SetFlags(log.LstdFlags | log.Llongfile)
 	lambda.Start(httpadapter.NewV2(router()).ProxyWithContext)
 }

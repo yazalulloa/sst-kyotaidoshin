@@ -1,12 +1,16 @@
 package receipts
 
 import (
+	"db/gen/model"
 	"encoding/json"
 	"fmt"
+	"github.com/go-playground/form"
+	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"golang.org/x/sync/syncmap"
 	"kyotaidoshin/api"
 	"kyotaidoshin/buildings"
+	"kyotaidoshin/rates"
 	"kyotaidoshin/util"
 	"log"
 	"net/http"
@@ -24,13 +28,14 @@ const _UPLOAD_BACKUP = _PATH + "/upload/backup"
 func Routes(server *mux.Router) {
 
 	server.HandleFunc(_SEARCH, search).Methods("GET")
-	//server.HandleFunc(_PATH, aptPut).Methods("PUT")
+	server.HandleFunc(_PATH, receiptPut).Methods("PUT")
 	//server.HandleFunc(_PATH+"/{key}", aptDelete).Methods("DELETE")
 	server.HandleFunc(_PATH+"/init", getInit).Methods("GET")
 	server.HandleFunc(_UPLOAD_BACKUP_FORM, getUploadBackupForm).Methods("GET")
 	server.HandleFunc(_UPLOAD_BACKUP, uploadBackup).Methods("GET")
 	server.HandleFunc(_PATH+"/years", getYears).Methods("GET")
 	//server.HandleFunc(_PATH+"/buildingsIds", getBuildingIds).Methods("GET")
+	server.HandleFunc(_PATH+"/formData/{key}", formData).Methods("GET")
 }
 
 func getInit(w http.ResponseWriter, r *http.Request) {
@@ -285,6 +290,139 @@ func getYears(w http.ResponseWriter, r *http.Request) {
 	builder.WriteString("]")
 
 	err = YearsView(builder.String()).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func formData(w http.ResponseWriter, r *http.Request) {
+	keyStr := mux.Vars(r)["key"]
+	if keyStr == "" {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	var keys Keys
+	err := api.Decode(keyStr, &keys)
+	if err != nil {
+		log.Printf("failed to decode key: %v", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	formDto, oErr := getFormDto(keys)
+
+	if oErr != nil {
+		http.Error(w, oErr.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = FormView(*formDto).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func receiptPut(w http.ResponseWriter, r *http.Request) {
+
+	upsert := func() FormResponse {
+
+		response := FormResponse{}
+
+		err := r.ParseForm()
+		if err != nil {
+			log.Printf("Error parsing form: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		decoder := form.NewDecoder()
+		var request FormRequest
+		err = decoder.Decode(&request, r.Form)
+
+		if err != nil {
+			log.Printf("Error decoding form: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		var keys Keys
+		err = api.Decode(request.Key, &keys)
+		if err != nil {
+			log.Printf("Error decoding key: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		validate, err := util.GetValidator()
+		if err != nil {
+			log.Printf("Error getting validator: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		err = validate.Struct(request)
+		if err != nil {
+			// Validation failed, handle the error
+			errors := err.(validator.ValidationErrors)
+			for _, valErr := range errors {
+				log.Printf("Validation error: %v", valErr)
+			}
+			response.errorStr = fmt.Sprintf("Validation error: %s", errors)
+			return response
+		}
+
+		date, err := time.Parse(time.DateOnly, request.Date)
+		if err != nil {
+			log.Printf("Error parsing date: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		var rateId *int64
+		err = api.Decode(request.RateKey, &rateId)
+		if err != nil {
+			log.Printf("Error decoding rateId: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		exist, err := rates.CheckRateExist(*rateId)
+		if err != nil {
+			log.Printf("Error checking rate: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		if !exist {
+			response.errorStr = "Rate does not exist"
+			return response
+		}
+
+		receipt := model.Receipts{
+			ID:         &keys.Id,
+			BuildingID: keys.BuildingId,
+			Year:       request.Year,
+			Month:      request.Month,
+			Date:       date,
+			RateID:     *rateId,
+		}
+
+		_, err = update(receipt)
+		if err != nil {
+			log.Printf("Error updating receipt: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		return response
+	}
+
+	response := upsert()
+
+	err := FormResponseView(response).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

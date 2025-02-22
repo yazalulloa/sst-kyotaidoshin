@@ -81,3 +81,47 @@ templ CountersView(counters Counters) {
 templ YearsView(init string) {
 	<div x-init={ init }></div>
 }
+
+templ FormView(dto FormDto) {
+	@api.CSRF()
+	<input type="hidden" name="key" value={ dto.key }/>
+	<div
+		hidden="hidden"
+		data-params={ dto.updateParams }
+		x-init="$dispatch('event-receipt-form-update', { params: $el.getAttribute('data-params') })"
+	></div>
+
+	<div id="receiptRateSelect" hx-swap-oob="innerHTML">
+
+    for _, rate := range dto.rates {
+        <option value={ rate.Key }
+            if rate.ID == dto.receipt.RateID {
+                selected
+            }
+        >
+        <span>{ rate.DateOfRate }</span>&nbsp;&nbsp;&nbsp;<span>{ fmt.Sprint(rate.Rate) }</span>
+
+        </option>
+    }
+
+	</div>
+}
+
+templ FormResponseView(res FormResponse) {
+	<div
+		data-response-err={ res.errorStr }
+		x-init="
+errMsg = $el.getAttribute('data-response-err');
+
+if (errMsg === '') {
+let form = $el.closest('form')
+form.classList.add('border', 'border-success');
+await sleep(3000);
+form.classList.remove('border', 'border-success');
+}
+
+"
+	></div>
+}
+
+

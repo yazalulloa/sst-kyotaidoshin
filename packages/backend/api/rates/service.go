@@ -17,7 +17,7 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 	wg.Add(3)
 	go func() {
 		defer wg.Done()
-		array, err := GetRates(requestQuery)
+		array, err := SelectList(requestQuery)
 		results := make([]Item, len(array))
 		for i, item := range array {
 
@@ -74,7 +74,7 @@ func CheckRateInsert(ratesArr *[]model.Rates) ([]model.Rates, error) {
 	for i, rateToCheck := range *ratesArr {
 		go func(rate model.Rates) {
 			defer wg.Done()
-			exists, err := checkRateExist(rate)
+			exists, err := CheckRateExist(*rate.ID)
 			if err != nil {
 				log.Printf("Error checking rate: %v", err)
 				handleErr(err)

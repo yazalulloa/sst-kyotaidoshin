@@ -1,6 +1,6 @@
 <div class="w-full flex flex-col gap-4 items-center justify-center"
      x-data="{
-    open: true,
+    open: false,
     isEdit: true,
    currencies: CURRENCIES_GLOBAL,
    months: MONTHS_GLOBAL,
@@ -14,7 +14,7 @@
 
   <form
       id="receipts-form"
-      class="flex flex-col gap-4 justify-center rounded-lg p-4"
+      class="flex flex-col gap-4 justify-center rounded-lg p-4 max-w-xs w-full"
       hx-put="/api/receipts"
       hx-disabled-elt="this, #receipts-form * > input:not([disabled]), #receipts-form * > button:not([disabled]), #receipts-form * > select:not([disabled])"
       hx-indicator=".htmx-indicator"
@@ -25,21 +25,29 @@
         date: '',
         year: '',
         month: '',
-        rates: [],
         errMsg: '',
+        }"
+      @event-receipt-form-update="
+         let base64 = $event.detail.params;
+         let decodedString = atob(base64);
+         let jsonObject = JSON.parse(decodedString);
 
+         open = true;
+         date = jsonObject.date;
+         year = jsonObject.year;
+         month = jsonObject.month;
 
-        }">
+      ">
 
-    <div x-bind:hx-get="'/api/receipts/formData?id=' + getLastPathSegment()"
-         hx-trigger="asload"
+    <div x-bind:hx-get="'/api/receipts/formData/' + getLastPathSegment()"
+         hx-trigger="load"
          hx-target="this"
          hx-swap="outerHTML">
     </div>
 
     <div id="receipts-form-error" hidden="hidden"></div>
 
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid gap-4 w-full">
       <div class="relative flex w-full max-w-xs flex-col gap-1 text-on-surface dark:text-on-surface-dark">
         <label for="receiptYearSelect"
                class="w-fit pl-0.5 text-sm"
@@ -78,7 +86,7 @@
         </label>
         <input
             id="receiptDateInput"
-            class="w-fit inline-flex items-center justify-between gap-2 whitespace-nowrap border-outline bg-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark border rounded-radius"
+            class="w-full inline-flex items-center justify-between gap-2 whitespace-nowrap border-outline bg-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark border rounded-radius"
             type="date"
             name="date"
             placeholder="YYYY-MM-DD"
@@ -93,12 +101,8 @@
         </label>
         <svg x-bind:data-src="selectIcon" data-cache="21600"></svg>
         <select id="receiptRateSelect"
-                name="month"
-                x-model="month"
+                name="rate"
                 class="w-full appearance-none rounded-radius border border-outline bg-surface-alt px-4 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
-          <template x-for="rates in rates">
-            <option x-bind:value="month" x-text="month"></option>
-          </template>
         </select>
       </div>
     </div>

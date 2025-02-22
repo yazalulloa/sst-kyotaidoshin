@@ -4,21 +4,22 @@ import (
 	"db/gen/model"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"kyotaidoshin/api"
 	"strings"
 )
 
 func GetBuildingFormDto(buildingId string) (*FormDto, error) {
 
-	extraCharges, err := selectByBuilding(buildingId)
+	list, err := selectByBuilding(buildingId)
 
 	if err != nil {
 		return nil, err
 	}
 
-	items := make([]Item, len(extraCharges))
+	items := make([]Item, len(list))
 
-	for i, item := range extraCharges {
+	for i, item := range list {
 
 		obj, err := toItem(&item, nil)
 
@@ -34,6 +35,37 @@ func GetBuildingFormDto(buildingId string) (*FormDto, error) {
 			BuildingID:      buildingId,
 			ParentReference: buildingId,
 			Type:            TypeBuilding,
+		}),
+		Items: items,
+	}, nil
+}
+
+func GetReceiptFormDto(buildingId string, receiptId int32) (*FormDto, error) {
+
+	list, err := SelectByReceipt(receiptId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	items := make([]Item, len(list))
+
+	for i, item := range list {
+
+		obj, err := toItem(&item, nil)
+
+		if err != nil {
+			return nil, err
+		}
+
+		items[i] = *obj
+	}
+
+	return &FormDto{
+		Key: *api.Encode(Keys{
+			BuildingID:      buildingId,
+			ParentReference: fmt.Sprint(receiptId),
+			Type:            TypeReceipt,
 		}),
 		Items: items,
 	}, nil

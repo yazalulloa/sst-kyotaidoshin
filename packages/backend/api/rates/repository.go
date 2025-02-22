@@ -31,7 +31,7 @@ func queryCondition(rateQuery *RequestQuery) (sqlite.BoolExpression, bool) {
 	return condition, justTrue
 }
 
-func GetRates(rateQuery RequestQuery) ([]model.Rates, error) {
+func SelectList(rateQuery RequestQuery) ([]model.Rates, error) {
 	condition, _ := queryCondition(&rateQuery)
 
 	if rateQuery.LastId > 0 {
@@ -83,35 +83,9 @@ func getQueryCount(rateQuery RequestQuery) (*int64, error) {
 	return &dest.Count, nil
 }
 
-func checkRateExist(rate model.Rates) (bool, error) {
-	if true {
-		stmt := Rates.SELECT(Rates.ID.AS("ID")).FROM(Rates).
-			WHERE(Rates.ID.EQ(sqlite.Int64(*rate.ID)))
-
-		var dest []struct {
-			ID *int32
-		}
-
-		err := stmt.Query(db.GetDB().DB, &dest)
-		if err != nil {
-
-			if api.ErrNoRows.Error() == err.Error() {
-				return false, nil
-			}
-
-			return false, err
-		}
-
-		return len(dest) > 0, nil
-	}
-
+func CheckRateExist(id int64) (bool, error) {
 	stmt := Rates.SELECT(Rates.ID.AS("ID")).FROM(Rates).
-		WHERE(Rates.FromCurrency.EQ(sqlite.String(rate.FromCurrency)).
-			AND(Rates.ToCurrency.EQ(sqlite.String(rate.ToCurrency))).
-			AND(Rates.Rate.EQ(sqlite.Float(rate.Rate))).
-			AND(Rates.DateOfRate.EQ(sqlite.Date(rate.DateOfRate.Date()))))
-
-	//log.Printf("Query: %s", stmt.DebugSql())
+		WHERE(Rates.ID.EQ(sqlite.Int64(id)))
 
 	var dest []struct {
 		ID *int32
@@ -185,10 +159,10 @@ func deleteRateById(id int64) (int64, error) {
 	return rowsAffected, nil
 }
 
-func GetFirstBeforeDate(date time.Time) (model.Rates, error) {
+func GetFirstBeforeDate(fromCurrency string, date time.Time) (model.Rates, error) {
 
 	stmt := Rates.SELECT(Rates.AllColumns).FROM(Rates).
-		WHERE(Rates.DateOfRate.LT_EQ(sqlite.Date(date.Date()))).
+		WHERE(Rates.FromCurrency.EQ(sqlite.String(fromCurrency)).AND(Rates.DateOfRate.LT_EQ(sqlite.Date(date.Date())))).
 		ORDER_BY(Rates.DateOfRate.DESC()).LIMIT(1)
 
 	var dest []model.Rates
@@ -202,5 +176,38 @@ func GetFirstBeforeDate(date time.Time) (model.Rates, error) {
 	}
 
 	return dest[0], nil
+
+}
+
+func GetFromDate(fromCurrency string, date time.Time, limit int64, isLt bool) ([]model.Rates, error) {
+
+	condition := Rates.FromCurrency.EQ(sqlite.String(fromCurrency))
+
+	if isLt {
+		condition = condition.AND(Rates.DateOfRate.LT(sqlite.Date(date.Date())))
+	} else {
+		condition = condition.AND(Rates.DateOfRate.GT_EQ(sqlite.Date(date.Date())))
+	}
+
+	stmt := Rates.SELECT(Rates.AllColumns).FROM(Rates).
+		WHERE(condition).LIMIT(limit)
+
+	if isLt {
+		stmt = stmt.ORDER_BY(Rates.ID.DESC())
+	} else {
+		stmt = stmt.ORDER_BY(Rates.ID.ASC())
+	}
+
+	var dest []model.Rates
+	err := stmt.Query(db.GetDB().DB, &dest)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(dest) == 0 {
+		return nil, err
+	}
+
+	return dest, nil
 
 }

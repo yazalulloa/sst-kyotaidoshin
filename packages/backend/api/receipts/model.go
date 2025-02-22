@@ -8,8 +8,8 @@ import (
 	"kyotaidoshin/debts"
 	"kyotaidoshin/expenses"
 	"kyotaidoshin/extraCharges"
+	"kyotaidoshin/reserveFunds"
 	"kyotaidoshin/util"
-	"time"
 )
 
 type RequestQuery struct {
@@ -70,7 +70,7 @@ type ReceiptRecord struct {
 	Receipt      ReceiptDto                    `json:"receipt"`
 	ExtraCharges []extraCharges.ExtraChargeDto `json:"extra_charges"`
 	Expenses     []expenses.ExpenseDto         `json:"expenses"`
-	Debts        []debts.DebtDto               `json:"debts"`
+	Debts        []debts.DebtDto               `json:"debtFormDto"`
 }
 
 type ReceiptDto struct {
@@ -87,9 +87,39 @@ type RatesHolder struct {
 }
 
 type UpdateParams struct {
-	Key    string
-	Year   int16
-	Month  int16
-	Date   time.Time
-	RateID int64
+	Key   string `json:"key"`
+	Year  int16  `json:"year"`
+	Month int16  `json:"month"`
+	Date  string `json:"date"`
+}
+
+type RateDto struct {
+	ID         int64
+	Key        string
+	Rate       float64
+	DateOfRate string
+}
+
+type FormDto struct {
+	key                string
+	updateParams       string
+	receipt            *model.Receipts
+	rates              []RateDto
+	expenseFormDto     expenses.FormDto
+	reserveFundFormDto reserveFunds.FormDto
+	extraChargeFormDto extraCharges.FormDto
+	debtFormDto        debts.FormDto
+	apts               string
+}
+
+type FormRequest struct {
+	Key     string `form:"key" validate:"required,min=3,max=100"`
+	Year    int16  `form:"year" validate:"required,gt=2015,lte=2100"`
+	Month   int16  `form:"month" validate:"required,gte=1,lte=12"`
+	Date    string `form:"date" validate:"required,min=10,max=10"`
+	RateKey string `form:"rate" validate:"required,min=3,max=100"`
+}
+
+type FormResponse struct {
+	errorStr string
 }

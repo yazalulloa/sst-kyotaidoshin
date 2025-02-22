@@ -4,6 +4,7 @@ import (
 	"db"
 	"db/gen/model"
 	. "db/gen/table"
+	"fmt"
 	"github.com/go-jet/jet/v2/sqlite"
 	"log"
 )
@@ -121,4 +122,16 @@ func update(extraCharge model.ExtraCharges) (int64, error) {
 	}
 
 	return rowsAffected, nil
+}
+
+func SelectByReceipt(receiptID int32) ([]model.ExtraCharges, error) {
+	//receiptID to string
+	parentReference := fmt.Sprint(receiptID)
+	stmt := ExtraCharges.SELECT(ExtraCharges.AllColumns).WHERE(ExtraCharges.ParentReference.EQ(sqlite.String(parentReference)))
+	var dest []model.ExtraCharges
+	err := stmt.Query(db.GetDB().DB, &dest)
+	if err != nil {
+		return nil, err
+	}
+	return dest, nil
 }

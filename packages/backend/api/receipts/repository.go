@@ -141,3 +141,33 @@ func selectYears() ([]int16, error) {
 
 	return years, nil
 }
+
+func selectById(id int32) (*model.Receipts, error) {
+	stmt := Receipts.SELECT(Receipts.AllColumns).FROM(Receipts).WHERE(Receipts.ID.EQ(sqlite.Int32(id)))
+
+	var dest model.Receipts
+	err := stmt.Query(db.GetDB().DB, &dest)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dest, nil
+}
+
+func update(receipt model.Receipts) (int64, error) {
+	stmt := Receipts.UPDATE(Receipts.Year, Receipts.Month, Receipts.Date, Receipts.RateID).
+		WHERE(Receipts.ID.EQ(sqlite.Int32(*receipt.ID))).
+		SET(receipt.Year, receipt.Month, receipt.Date, receipt.RateID)
+
+	res, err := stmt.Exec(db.GetDB().DB)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
+}

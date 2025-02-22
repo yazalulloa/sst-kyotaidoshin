@@ -43,3 +43,12 @@ func InsertBackup(array []model.Expenses) (int64, error) {
 
 	return rowsAffected, nil
 }
+
+func SelectByReceipt(receiptID int32) ([]model.Expenses, error) {
+	var dest []model.Expenses
+	err := Expenses.SELECT(Expenses.AllColumns).WHERE(Expenses.ReceiptID.EQ(sqlite.Int32(receiptID))).Query(db.GetDB().DB, &dest)
+	if err != nil {
+		return nil, err
+	}
+	return dest, nil
+}

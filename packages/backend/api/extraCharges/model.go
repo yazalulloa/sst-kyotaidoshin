@@ -27,7 +27,6 @@ type Keys struct {
 	BuildingID      string
 	ParentReference string
 	Type            string
-	ReceiptId       *int64
 	CardId          string
 }
 
@@ -37,7 +36,6 @@ func keys(item model.ExtraCharges, cardId string) Keys {
 		BuildingID:      item.BuildingID,
 		ParentReference: item.ParentReference,
 		Type:            item.Type,
-		ReceiptId:       nil,
 		CardId:          cardId,
 	}
 }

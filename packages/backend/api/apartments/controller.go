@@ -102,8 +102,8 @@ func aptDelete(w http.ResponseWriter, r *http.Request) {
 	var keys Keys
 	err := api.Decode(keyStr, &keys)
 	if err != nil {
-		log.Printf("failed to decode nextPage: %v", err)
-		http.Error(w, "Bad Request nextPage", http.StatusBadRequest)
+		log.Printf("failed to decode key: %v", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 
@@ -122,6 +122,7 @@ func aptDelete(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// TODO when creating a new apartment create new debt for every receipt
 func aptPut(w http.ResponseWriter, r *http.Request) {
 	upsert := func() FormResponse {
 

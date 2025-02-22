@@ -5,12 +5,15 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"kyotaidoshin/apartments"
 	"kyotaidoshin/api"
 	"kyotaidoshin/debts"
 	"kyotaidoshin/expenses"
 	"kyotaidoshin/extraCharges"
 	"kyotaidoshin/rates"
+	"kyotaidoshin/reserveFunds"
 	"log"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -69,7 +72,7 @@ func loadRates(records []ReceiptRecord, ratesHolder *RatesHolder) error {
 				return
 			}
 
-			rate, err := rates.GetFirstBeforeDate(parsedDate)
+			rate, err := rates.GetFirstBeforeDate("USD", parsedDate)
 			if err != nil {
 				handleErr(err)
 				return
@@ -307,21 +310,20 @@ func toItem(item *model.Receipts, oldCardId *string) (*Item, error) {
 	keys := keys(*item, cardIdStr)
 	key := *api.Encode(keys)
 
-	updateParams := UpdateParams{
-		Key:    key,
-		Year:   item.Year,
-		Month:  item.Month,
-		Date:   item.Date,
-		RateID: item.RateID,
-	}
+	//updateParams := UpdateParams{
+	//	Key:    key,
+	//	Year:   item.Year,
+	//	Month:  item.Month,
+	//	Date:   item.Date.Format(time.DateOnly),
+	//}
 
-	byteArray, err := json.Marshal(updateParams)
-
-	if err != nil {
-		return nil, err
-	}
-
-	base64Str := base64.URLEncoding.EncodeToString(byteArray)
+	//byteArray, err := json.Marshal(updateParams)
+	//
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//base64Str := base64.URLEncoding.EncodeToString(byteArray)
 
 	var lastSent *int64
 	if item.LastSent != nil {
@@ -330,11 +332,237 @@ func toItem(item *model.Receipts, oldCardId *string) (*Item, error) {
 	}
 
 	return &Item{
-		CardId:       keys.CardId,
-		Key:          key,
-		Item:         *item,
-		CreatedAt:    item.CreatedAt.UnixMilli(),
-		UpdateParams: &base64Str,
-		LastSent:     lastSent,
+		CardId:    keys.CardId,
+		Key:       key,
+		Item:      *item,
+		CreatedAt: item.CreatedAt.UnixMilli(),
+		//UpdateParams: &base64Str,
+		LastSent: lastSent,
 	}, nil
+}
+
+func getFormDto(keys Keys) (*FormDto, error) {
+	formDto := FormDto{}
+
+	var oErr error
+	var wg sync.WaitGroup
+	var once sync.Once
+	handleErr := func(e error) {
+		if e != nil {
+			once.Do(func() {
+				oErr = e
+			})
+		}
+	}
+	wg.Add(6)
+
+	go func() {
+		defer wg.Done()
+
+		receipt, err := selectById(keys.Id)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+
+		if receipt == nil {
+			handleErr(errors.New("receipt not found"))
+			return
+		}
+
+		ratesDtos, err := getRatesDtos(&receipt.Date)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+
+		var rateId *string
+		for _, rate := range ratesDtos {
+			if rate.ID == receipt.RateID {
+				rateId = &rate.Key
+				break
+			}
+		}
+
+		if rateId == nil {
+			rateId = &ratesDtos[0].Key
+		}
+
+		newKeys := Keys{
+			BuildingId: receipt.BuildingID,
+			Id:         *receipt.ID,
+		}
+
+		newKeysStr := api.Encode(newKeys)
+
+		updateParams := UpdateParams{
+			Key:   *newKeysStr,
+			Year:  receipt.Year,
+			Month: receipt.Month,
+			Date:  receipt.Date.Format(time.DateOnly),
+		}
+
+		byteArray, err := json.Marshal(updateParams)
+
+		if err != nil {
+			handleErr(err)
+			return
+		}
+
+		base64Str := base64.URLEncoding.EncodeToString(byteArray)
+
+		formDto.key = *newKeysStr
+		formDto.receipt = receipt
+		formDto.rates = ratesDtos
+		formDto.updateParams = base64Str
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		dto, err := expenses.GetFormDto(keys.BuildingId, keys.Id)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+
+		formDto.expenseFormDto = *dto
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		reserveFundFormDto, err := reserveFunds.GetFormDto(keys.BuildingId)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+
+		formDto.reserveFundFormDto = *reserveFundFormDto
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		dto, err := extraCharges.GetReceiptFormDto(keys.BuildingId, keys.Id)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+
+		formDto.extraChargeFormDto = *dto
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		dto, err := debts.GetFormDto(keys.BuildingId, keys.Id)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+
+		formDto.debtFormDto = *dto
+	}()
+
+	go func() {
+		defer wg.Done()
+		apts, err := apartments.SelectNumberAndNameByBuildingId(keys.BuildingId)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+
+		aptStr, err := json.Marshal(apts)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+
+		base64Str := base64.URLEncoding.EncodeToString(aptStr)
+
+		formDto.apts = base64Str
+	}()
+
+	wg.Wait()
+
+	if oErr != nil {
+		return nil, oErr
+	}
+
+	return &formDto, nil
+}
+
+func getRatesDtos(date *time.Time) ([]RateDto, error) {
+	var oErr error
+	var wg sync.WaitGroup
+	var once sync.Once
+	handleErr := func(e error) {
+		if e != nil {
+			once.Do(func() {
+				oErr = e
+			})
+		}
+	}
+	wg.Add(2)
+
+	var firstRateArray []model.Rates
+	var secondRateArray []model.Rates
+
+	go func() {
+		defer wg.Done()
+		arr, err := rates.GetFromDate("USD", *date, 5, true)
+
+		if err != nil {
+			handleErr(err)
+			return
+		}
+
+		slices.Reverse(arr)
+		firstRateArray = arr
+	}()
+
+	go func() {
+		defer wg.Done()
+		arr, err := rates.GetFromDate("USD", *date, 5, false)
+
+		if err != nil {
+			handleErr(err)
+			return
+		}
+
+		secondRateArray = arr
+	}()
+
+	wg.Wait()
+
+	if oErr != nil {
+		return nil, oErr
+	}
+
+	firstLen := len(firstRateArray)
+	ratesDto := make([]RateDto, len(firstRateArray)+len(secondRateArray))
+
+	for i, rate := range firstRateArray {
+
+		ratesDto[i] = RateDto{
+			ID:         *rate.ID,
+			Key:        *api.Encode(rate.ID),
+			Rate:       rate.Rate,
+			DateOfRate: rate.DateOfRate.Format(time.DateOnly),
+		}
+	}
+
+	for i, rate := range secondRateArray {
+
+		ratesDto[i+firstLen] = RateDto{
+			ID:         *rate.ID,
+			Key:        *api.Encode(rate.ID),
+			Rate:       rate.Rate,
+			DateOfRate: rate.DateOfRate.Format(time.DateOnly),
+		}
+	}
+
+	return ratesDto, nil
+
 }
