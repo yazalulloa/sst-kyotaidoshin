@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"kyotaidoshin/api"
-	"time"
 	"kyotaidoshin/expenses"
 	"kyotaidoshin/extraCharges"
 	"kyotaidoshin/reserveFunds"
+	"kyotaidoshin/util"
+	"time"
 )
 
 templ InitView(dto InitDto) {
@@ -110,26 +111,21 @@ templ FormView(dto FormDto) {
     $el.remove();
 		"
 	></div>
-
 	<div id="receiptRateSelect" hx-swap-oob="innerHTML">
-
-    for _, rate := range dto.rates {
-        <option value={ rate.Key }
-            if rate.ID == dto.receipt.RateID {
-                selected
-            }
-        >
-        <span>{ rate.DateOfRate }</span>&nbsp;&nbsp;&nbsp;<span>{ fmt.Sprint(rate.Rate) }</span>
-
-        </option>
-    }
-
+		for _, rate := range dto.rates {
+			<option
+				value={ rate.Key }
+				if rate.ID == dto.receipt.RateID {
+					selected
+				}
+			>
+				<span>{ rate.DateOfRate }</span>&nbsp;&nbsp;&nbsp;<span>{ util.FormatFloat64(rate.Rate) }</span>
+			</option>
+		}
 	</div>
-
-
-		@expenses.FormView(dto.expenseFormDto)
-		@reserveFunds.FormView(dto.reserveFundFormDto)
-		@extraCharges.FormView(dto.extraChargesFormDto)
+	@expenses.FormView(dto.expenseFormDto)
+	@reserveFunds.FormView(dto.reserveFundFormDto)
+	@extraCharges.FormView(dto.extraChargesFormDto)
 }
 
 templ FormResponseView(res FormResponse) {
@@ -147,7 +143,4 @@ form.classList.remove('border', 'border-success');
 
 "
 	></div>
-
 }
-
-

@@ -3,6 +3,7 @@ package apartments
 import (
 	"fmt"
 	"kyotaidoshin/api"
+	"kyotaidoshin/util"
 )
 
 templ Search(res TableResponse) {
@@ -31,7 +32,7 @@ templ ItemView(item Item) {
 		<span>{ item.Item.BuildingID }</span>
 		<span>{ item.Item.Number }</span>
 		<span>{ item.Item.Name }</span>
-		<span>{ fmt.Sprint(item.Item.Aliquot) }</span>
+		<span>{ util.FormatFloat64(item.Item.Aliquot) }</span>
 		<div class="flex flex-col gap-1 justify-center items-center text-center">
 			for _,email := range item.Emails {
 				<span>{ email }</span>
@@ -59,7 +60,8 @@ templ CountersView(counters Counters) {
 }
 
 templ buildingIdsView(ids string) {
-	<div hidden="hidden"
+	<div
+		hidden="hidden"
 		x-init={ fmt.Sprintf("buildings = %s", ids) }
 	></div>
 }

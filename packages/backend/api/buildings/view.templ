@@ -5,6 +5,7 @@ import (
 	"kyotaidoshin/api"
 	"kyotaidoshin/extraCharges"
 	"kyotaidoshin/reserveFunds"
+	"kyotaidoshin/util"
 )
 
 templ Search(res TableResponse) {
@@ -37,7 +38,7 @@ templ Search(res TableResponse) {
 					<span class="flex flex-row">
 						<span x-text="$t('main-buildings-fixed-pay')"></span>
 						<span>:&nbsp;</span>
-						<span>{ fmt.Sprint(item.Item.FixedPayAmount) }</span>
+						<span>{ util.FormatFloat64(item.Item.FixedPayAmount) }</span>
 					</span>
 				}
 				@api.Badge(item.Item.RoundUpPayments) {

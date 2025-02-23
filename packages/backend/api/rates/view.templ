@@ -3,6 +3,7 @@ package rates
 import (
 	"fmt"
 	"kyotaidoshin/api"
+	"kyotaidoshin/util"
 	"strings"
 )
 
@@ -33,7 +34,7 @@ templ Search(res TableResponse) {
 				></svg>
 				<div class="w-8">{ item.Item.FromCurrency }</div>
 			</div>
-			<span class="text-end">{ fmt.Sprint(item.Item.Rate) }</span>
+			<span class="text-end">{ util.FormatFloat64(item.Item.Rate) }</span>
 			<span>{ item.DateOfRate }</span>
 			<span
 				data-date={ fmt.Sprint(item.DateOfFile) }

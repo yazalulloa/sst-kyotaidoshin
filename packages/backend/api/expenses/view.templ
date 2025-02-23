@@ -3,6 +3,7 @@ package expenses
 import (
 	"fmt"
 	"kyotaidoshin/api"
+	"kyotaidoshin/util"
 	"strings"
 )
 
@@ -38,7 +39,7 @@ templ ItemView(item Item) {
 	>
 		<span class="text-start">{ item.Item.Description }</span>
 		<div class="flex flex-row gap-2 justify-center">
-			<span>{ fmt.Sprint(item.Item.Amount) }</span>
+			<span>{ util.FormatFloat64(item.Item.Amount) }</span>
 			<span>{ item.Item.Currency }</span>
 		</div>
 		<span x-text={ fmt.Sprintf("$t('main-title-%s')", strings.ToLower(item.Item.Type)) }></span>
@@ -67,9 +68,8 @@ templ FormResponseView(res FormResponse) {
 	<div
 		data-response-err={ res.errorStr }
 		if res.counter != nil {
-		  data-counter={ fmt.Sprint(*res.counter) }
+			data-counter={ fmt.Sprint(*res.counter) }
 		}
-
 		x-init="
  		  errMsg = $el.getAttribute('data-response-err');
  		  let dataCounter = $el.getAttribute('data-counter')

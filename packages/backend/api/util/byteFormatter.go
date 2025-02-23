@@ -138,3 +138,7 @@ func StringToInt16(str string) int16 {
 
 	return int16(num)
 }
+
+func FormatFloat64(number float64) string {
+	return strconv.FormatFloat(number, 'f', -1, 64)
+}
