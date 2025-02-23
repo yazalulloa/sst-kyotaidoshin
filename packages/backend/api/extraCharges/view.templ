@@ -3,7 +3,6 @@ package extraCharges
 import (
 	"fmt"
 	"kyotaidoshin/api"
-	"kyotaidoshin/util"
 )
 
 templ FormView(dto FormDto) {
@@ -40,9 +39,8 @@ templ ItemView(item Item) {
 			<span>{ item.Item.Description }</span>
 			@api.BadgeIndicator(item.Item.Active, "active")
 		</div>
-		<div class="flex flex-col items-center gap-2 text-center">
-			<span>{ util.FormatFloat64(item.Item.Amount) }</span>
-			<span>{ item.Item.Currency }</span>
+		<div class="flex justify-center items-center text-center">
+			@api.SpanFormatCurrency(item.Item.Amount, item.Item.Currency)
 		</div>
 		<div class="grid grid-cols-[1fr_6fr] gap-1">
 			for _, apt := range item.Apts {

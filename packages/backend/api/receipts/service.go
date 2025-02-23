@@ -187,11 +187,14 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 			months := strings.Join(stringArray, ",")
 
 			debtsArray = append(debtsArray, model.Debts{
-				BuildingID: debt.BuildingID,
-				ReceiptID:  int32(receiptId),
-				AptNumber:  debt.AptNumber,
-				Amount:     debt.Amount,
-				Months:     months,
+				BuildingID:                    debt.BuildingID,
+				ReceiptID:                     int32(receiptId),
+				AptNumber:                     debt.AptNumber,
+				Receipts:                      debt.Receipts,
+				Amount:                        debt.Amount,
+				Months:                        months,
+				PreviousPaymentAmount:         debt.PreviousPaymentAmount,
+				PreviousPaymentAmountCurrency: debt.PreviousPaymentAmountCurrency,
 			})
 		}
 
