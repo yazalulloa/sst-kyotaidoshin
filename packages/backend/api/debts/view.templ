@@ -2,6 +2,7 @@ package debts
 
 import (
 	"fmt"
+	"kyotaidoshin/api"
 	"kyotaidoshin/util"
 )
 
@@ -37,15 +38,14 @@ templ ItemView(item Item) {
 			<span class="text-start" data-apt={ item.Item.AptNumber } x-text="aptMap.get($el.getAttribute('data-apt'))"></span>
 		</div>
 		<span>{ fmt.Sprint(item.Item.Receipts) }</span>
-		<span>{ util.FormatFloat64(item.Item.Amount) }</span>
+		<span class="text-end" x-text={ fmt.Sprintf("FormatCurrency(parseFloat(%s), %s)", util.FormatFloat2(item.Item.Amount), "debtCurrency") }></span>
 		<div class="flex flex-row flex-wrap gap-1 justify-center">
 			for _,month := range item.Months {
 				<span x-text={ fmt.Sprintf("$t('main-months-short-%d')", month) }></span>
 			}
 		</div>
-		<div class="flex flex-row gap-1 justify-center">
-			<span>{ util.FormatFloat64(item.Item.PreviousPaymentAmount) }</span>
-			<span>{ item.Item.PreviousPaymentAmountCurrency }</span>
+		<div class="flex justify-center items-center text-center">
+			@api.SpanFormatCurrency(item.Item.PreviousPaymentAmount, item.Item.PreviousPaymentAmountCurrency)
 		</div>
 	</li>
 }
