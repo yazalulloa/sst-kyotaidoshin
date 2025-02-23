@@ -105,7 +105,6 @@ func insert(expense model.Expenses) (int64, error) {
 	stmt := Expenses.INSERT(Expenses.BuildingID, Expenses.ReceiptID, Expenses.Description, Expenses.Amount, Expenses.Currency, Expenses.Type).
 		VALUES(expense.BuildingID, expense.ReceiptID, expense.Description, expense.Amount, expense.Currency, expense.Type)
 
-	log.Printf("Sql query: %v", stmt.DebugSql())
 	result, err := stmt.Exec(db.GetDB().DB)
 	if err != nil {
 		return 0, err

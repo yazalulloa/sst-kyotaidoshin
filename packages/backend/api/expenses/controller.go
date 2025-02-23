@@ -81,12 +81,9 @@ func expensesPut(w http.ResponseWriter, r *http.Request) {
 		isUpdate := keys.ID != nil
 
 		if isUpdate {
-			log.Printf("Updating expense: %v", expense)
 			_, err = update(expense)
 		} else {
-			log.Printf("Inserting expense: %v", expense)
 			lastInsertId, err := insert(expense)
-			log.Printf("Last insert id: %v", lastInsertId)
 			if err == nil {
 				id := int32(lastInsertId)
 				keys.ID = &id
