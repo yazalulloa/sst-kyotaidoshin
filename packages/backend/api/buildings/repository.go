@@ -137,3 +137,16 @@ func SelectIds() ([]string, error) {
 	}
 	return dest, nil
 }
+
+func SelectById(id string) (*model.Buildings, error) {
+
+	stmt := Buildings.SELECT(Buildings.AllColumns).FROM(Buildings).WHERE(Buildings.ID.EQ(sqlite.String(id)))
+
+	var dest model.Buildings
+	err := stmt.Query(db.GetDB().DB, &dest)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dest, nil
+}

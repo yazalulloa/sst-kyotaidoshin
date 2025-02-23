@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"kyotaidoshin/api"
 	"kyotaidoshin/util"
+	"strings"
 )
 
 templ FormView(dto FormDto) {
@@ -40,12 +41,16 @@ templ ItemView(item Item) {
 			<span>{ item.Item.Name }</span>
 			<span>{ util.FormatFloat64(item.Item.Fund) }</span>
 		</div>
-		<div class="flex flex-row gap-4 justify-center">
+		<div class="flex justify-center">
 			@api.Badge(item.Item.Active) {
-				<span>{ util.FormatFloat64(item.Item.Pay) }</span>
-				if item.Item.Type == "PERCENTAGE" {
-					<span>%</span>
-				}
+				<div class="flex flex-col gap-2 justify-center">
+				<span><span>{ util.FormatFloat64(item.Item.Pay) }</span>
+              				if item.Item.Type == "PERCENTAGE" {
+              					<span>%</span>
+              				}</span>
+
+         @api.SpanWitX_Text(fmt.Sprintf("$t('main-title-%s')", strings.ToLower(item.Item.Type)))
+				</div>
 			}
 		</div>
 		<div class="flex justify-center">

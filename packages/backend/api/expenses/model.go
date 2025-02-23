@@ -5,6 +5,13 @@ import (
 	"github.com/google/uuid"
 )
 
+type ExpenseType string
+
+const (
+	COMMON   ExpenseType = "COMMON"
+	UNCOMMON ExpenseType = "UNCOMMON"
+)
+
 type ExpenseDto struct {
 	BuildingID  string  `json:"building_id"`
 	ReceiptID   int32   `json:"receipt_id"`
@@ -16,8 +23,12 @@ type ExpenseDto struct {
 }
 
 type FormDto struct {
-	Key   string
-	Items []Item
+	Key                      string
+	Items                    []Item
+	TotalCommon              float64
+	TotalUnCommon            float64
+	TotalCommonPlusReserve   float64
+	TotalUnCommonPlusReserve float64
 }
 
 type Item struct {
@@ -28,8 +39,10 @@ type Item struct {
 	isUpdate     *bool
 }
 
-func cardId() string {
-	return "expenses-" + uuid.NewString()
+const CardIdPrefix = "expenses-"
+
+func CardId() string {
+	return CardIdPrefix + uuid.NewString()
 }
 
 type Keys struct {

@@ -250,10 +250,9 @@ templ BadgeIndicatorWithTooltip(condition bool, tooltipId string, badge templ.Co
 				@badge
 			</span>
 		</span>
-
 		if (tooltipId != "") {
-      @tooltip
-    }
+			@tooltip
+		}
 	</div>
 }
 
@@ -282,4 +281,8 @@ templ SpanWitX_Text(text string) {
 
 templ EmptyDiv() {
 	<div></div>
+}
+
+templ SpanFormatCurrency(amount float64, currency string) {
+	<span class="text-end" x-text={ fmt.Sprintf("FormatCurrency(parseFloat(%f), '%s')", amount, currency) }></span>
 }

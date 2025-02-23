@@ -1,9 +1,38 @@
 <div class="flex flex-col gap-2"
      x-data="{
- counter: 0
+ counter: 0,
+ totalCommon: 0,
+ totalUnCommon: 0,
+ totalCommonPlusReserve: 0,
+  totalUnCommonPlusReserve: 0,
 }">
-  <div class="flex flex-row gap-0 justify-center font-extrabold capitalize">
+  <div class="flex flex-col gap-2 font-extrabold capitalize">
+    <div class="flex flex-row gap-4 justify-center">
+    <span class="flex flex-row gap-0 justify-center">
     <span x-text="$t('main-title-expenses')"></span>:&nbsp;<span x-text="counter"></span>
+  </span>
+      <span class="flex flex-row gap-0 justify-center">
+    <span x-text="$t('main-title-total-common')"></span>:&nbsp;<span
+          x-text="FormatCurrency(parseFloat(totalCommon), 'VED')"></span>
+  </span>
+      <span class="flex flex-row gap-0 justify-center">
+    <span x-text="$t('main-title-total-uncommon')"></span>:&nbsp;<span
+          x-text="FormatCurrency(parseFloat(totalUnCommon), 'VED')"></span>
+  </span>
+    </div>
+    <div class="flex flex-row gap-4 justify-center">
+       <span class="flex flex-row gap-0 justify-center">
+    <span x-text="$t('main-title-total-common')"></span>&nbsp; + &nbsp;
+         <span x-text="$t('main-title-reserve-fund')"></span>:&nbsp;
+         <span x-text="FormatCurrency(parseFloat(totalCommonPlusReserve), 'VED')"></span>
+  </span>
+      <span class="flex flex-row gap-0 justify-center">
+    <span x-text="$t('main-title-total-uncommon')"></span>&nbsp; + &nbsp;
+         <span x-text="$t('main-title-reserve-fund')"></span>:&nbsp;
+        <span
+          x-text="FormatCurrency(parseFloat(totalUnCommonPlusReserve), 'VED')"></span>
+  </span>
+    </div>
   </div>
 
   <div x-data="{

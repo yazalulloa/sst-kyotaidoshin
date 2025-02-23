@@ -42,7 +42,7 @@ func toItem(item *model.Expenses, oldCardId *string) (*Item, error) {
 	if oldCardId != nil {
 		cardIdStr = *oldCardId
 	} else {
-		cardIdStr = cardId()
+		cardIdStr = CardId()
 	}
 
 	keys := keys(*item, &cardIdStr)

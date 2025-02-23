@@ -94,10 +94,15 @@ templ FormView(dto FormDto) {
 	<input type="hidden" name="key" value={ dto.key }/>
 	<div
 		hidden="hidden"
+		data-main-currency={ dto.building.MainCurrency }
+		data-debt-currency={ dto.building.DebtCurrency }
 		data-params={ dto.updateParams }
 		data-apts={ dto.apts }
 		x-init="
 		$dispatch('event-receipt-form-update', { params: $el.getAttribute('data-params') });
+
+		mainCurrency = $el.getAttribute('data-main-currency');
+    debtCurrency = $el.getAttribute('data-debt-currency');
 
 		let base64 = $el.getAttribute('data-apts');
     let decodedString = atob(base64);

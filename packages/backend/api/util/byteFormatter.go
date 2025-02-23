@@ -142,3 +142,19 @@ func StringToInt16(str string) int16 {
 func FormatFloat64(number float64) string {
 	return strconv.FormatFloat(number, 'f', -1, 64)
 }
+
+func FormatFloat2(number float64) string {
+	return strconv.FormatFloat(number, 'f', 2, 64)
+}
+
+func PercentageOf(percentage float64, total float64) float64 {
+	if percentage == 0 || total == 0 {
+		return 0
+	}
+
+	if percentage == 100 {
+		return total
+	}
+
+	return percentage * total / 100
+}

@@ -7,11 +7,13 @@ import (
 	"errors"
 	"kyotaidoshin/apartments"
 	"kyotaidoshin/api"
+	"kyotaidoshin/buildings"
 	"kyotaidoshin/debts"
 	"kyotaidoshin/expenses"
 	"kyotaidoshin/extraCharges"
 	"kyotaidoshin/rates"
 	"kyotaidoshin/reserveFunds"
+	"kyotaidoshin/util"
 	"log"
 	"slices"
 	"strconv"
@@ -357,7 +359,19 @@ func getFormDto(keys Keys) (*FormDto, error) {
 			})
 		}
 	}
-	wg.Add(6)
+	wg.Add(7)
+
+	go func() {
+		defer wg.Done()
+
+		building, err := buildings.SelectById(keys.BuildingId)
+		if err != nil {
+			handleErr(err)
+			return
+		}
+
+		formDto.building = *building
+	}()
 
 	go func() {
 		defer wg.Done()
@@ -377,18 +391,6 @@ func getFormDto(keys Keys) (*FormDto, error) {
 		if err != nil {
 			handleErr(err)
 			return
-		}
-
-		var rateId *string
-		for _, rate := range ratesDtos {
-			if rate.ID == receipt.RateID {
-				rateId = &rate.Key
-				break
-			}
-		}
-
-		if rateId == nil {
-			rateId = &ratesDtos[0].Key
 		}
 
 		newKeys := Keys{
@@ -492,6 +494,69 @@ func getFormDto(keys Keys) (*FormDto, error) {
 	if oErr != nil {
 		return nil, oErr
 	}
+
+	var rate float64 = 0
+	for _, v := range formDto.rates {
+		if v.ID == formDto.receipt.RateID {
+			rate = v.Rate
+			break
+		}
+	}
+
+	if rate == 0 {
+		rate = formDto.rates[0].Rate
+	}
+
+	totalCommon, totalUnCommon := expenses.Totals(formDto.expenseFormDto.Items)
+
+	formDto.expenseFormDto.TotalCommon = totalCommon
+	formDto.expenseFormDto.TotalUnCommon = totalUnCommon
+
+	reserveFundExpenses := make([]expenses.Item, 0)
+
+	for _, item := range formDto.reserveFundFormDto.Items {
+		if item.Item.Active && item.Item.AddToExpenses {
+
+			var total float64
+			if item.Item.Type == "COMMON" {
+				total = totalCommon
+			} else {
+				total = totalUnCommon
+			}
+
+			var amount float64
+			nameSuffix := ""
+			if reserveFunds.IsFixedPay(item.Item.Type) {
+				amount = item.Item.Pay
+			} else {
+				amount = util.PercentageOf(item.Item.Pay, total)
+				nameSuffix = " " + util.FormatFloat2(item.Item.Pay) + "%"
+			}
+
+			expenseCardId := strings.Replace(item.CardId, reserveFunds.CardIdPrefix, expenses.CardIdPrefix, 1)
+
+			expenseItem := expenses.Item{
+				CardId: expenseCardId,
+				Item: model.Expenses{
+					BuildingID:  item.Item.BuildingID,
+					ReceiptID:   keys.Id,
+					Description: item.Item.Name + nameSuffix,
+					Amount:      amount,
+					Currency:    "VED",
+					Type:        item.Item.ExpenseType,
+				},
+			}
+
+			reserveFundExpenses = append(reserveFundExpenses, expenseItem)
+		}
+	}
+
+	formDto.expenseFormDto.Items = append(reserveFundExpenses, formDto.expenseFormDto.Items...)
+
+	totalCommonPlusReserve, totalUnCommonPlusReserve := expenses.Totals(formDto.expenseFormDto.Items)
+
+	formDto.expenseFormDto.TotalCommonPlusReserve = totalCommonPlusReserve
+	formDto.expenseFormDto.TotalUnCommonPlusReserve = totalUnCommonPlusReserve
 
 	return &formDto, nil
 }

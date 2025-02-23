@@ -22,6 +22,20 @@ if (import.meta.env.VITE_IS_DEV === 'true') {
   SVGLoader.destroyCache();
 }
 
+window.USD_FORMATTER = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" })
+window.VED_FORMATTER = new Intl.NumberFormat("es-VE", { style: "currency", currency: "VES" })
+
+window.FormatCurrency = function (value, currency) {
+  if (currency === "USD") {
+    return window.USD_FORMATTER.format(value);
+  } else if (currency === "VED") {
+    return window.VED_FORMATTER.format(value).replace("Bs.S", "Bs.");
+  }
+
+  return value;
+
+}
+
 // console.log('htmx', htmx.config);
 
 window.addEventListener("popstate", (event) => {

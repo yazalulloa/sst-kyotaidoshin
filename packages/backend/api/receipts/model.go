@@ -103,6 +103,7 @@ type RateDto struct {
 type FormDto struct {
 	key                 string
 	updateParams        string
+	building            model.Buildings
 	receipt             *model.Receipts
 	rates               []RateDto
 	expenseFormDto      expenses.FormDto

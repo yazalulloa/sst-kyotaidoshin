@@ -5,6 +5,17 @@ import (
 	"github.com/google/uuid"
 )
 
+type Type string
+
+const (
+	FIXED_PAY  Type = "FIXED_PAY"
+	PERCENTAGE Type = "PERCENTAGE"
+)
+
+func IsFixedPay(str string) bool {
+	return str == "FIXED_PAY"
+}
+
 type Item struct {
 	CardId       string
 	Key          string
@@ -14,8 +25,10 @@ type Item struct {
 	isUpdate     *bool
 }
 
+const CardIdPrefix = "reserve-funds-"
+
 func cardId() string {
-	return "reserve-funds-" + uuid.NewString()
+	return CardIdPrefix + uuid.NewString()
 }
 
 type Keys struct {
