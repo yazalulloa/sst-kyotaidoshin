@@ -76,7 +76,20 @@
     "main-months-9": "September",
     "main-months-10": "October",
     "main-months-11": "November",
-    "main-months-12": "December"
+    "main-months-12": "December",
+    "main-months-short-1": "Jan",
+    "main-months-short-2": "Feb",
+    "main-months-short-3": "Mar",
+    "main-months-short-4": "Apr",
+    "main-months-short-5": "May",
+    "main-months-short-6": "Jun",
+    "main-months-short-7": "Jul",
+    "main-months-short-8": "Aug",
+    "main-months-short-9": "Sep",
+    "main-months-short-10": "Oct",
+    "main-months-short-11": "Nov",
+    "main-months-short-12": "Dec"
+
   },
   "es": {
     "main-action-create": "Crear",
@@ -155,6 +168,18 @@
     "main-months-9": "Septiembre",
     "main-months-10": "Octubre",
     "main-months-11": "Noviembre",
-    "main-months-12": "Diciembre"
+    "main-months-12": "Diciembre",
+    "main-months-short-1": "Ene",
+    "main-months-short-2": "Feb",
+    "main-months-short-3": "Mar",
+    "main-months-short-4": "Abr",
+    "main-months-short-5": "May",
+    "main-months-short-6": "Jun",
+    "main-months-short-7": "Jul",
+    "main-months-short-8": "Ago",
+    "main-months-short-9": "Sep",
+    "main-months-short-10": "Oct",
+    "main-months-short-11": "Nov",
+    "main-months-short-12": "Dic"
   }
 }

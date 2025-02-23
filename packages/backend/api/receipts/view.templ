@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"kyotaidoshin/api"
+	"kyotaidoshin/debts"
 	"kyotaidoshin/expenses"
 	"kyotaidoshin/extraCharges"
 	"kyotaidoshin/reserveFunds"
@@ -126,6 +127,7 @@ templ FormView(dto FormDto) {
 	@expenses.FormView(dto.expenseFormDto)
 	@reserveFunds.FormView(dto.reserveFundFormDto)
 	@extraCharges.FormView(dto.extraChargesFormDto)
+	@debts.FormView(dto.debtFormDto)
 }
 
 templ FormResponseView(res FormResponse) {

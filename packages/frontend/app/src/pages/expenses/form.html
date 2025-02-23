@@ -20,7 +20,7 @@
       amountErr: '',
       errMsg: ''
              }"
-       @event-expense-form-update.window="
+       @event-expense-form-update="
          let base64 = $event.detail.params;
          let decodedString = atob(base64);
          let jsonObject = JSON.parse(decodedString);

@@ -183,14 +183,14 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 				stringArray[i] = strconv.Itoa(int(num))
 			}
 			months := strings.Join(stringArray, ",")
-			debtArray := model.Debts{
+
+			debtsArray = append(debtsArray, model.Debts{
 				BuildingID: debt.BuildingID,
 				ReceiptID:  int32(receiptId),
 				AptNumber:  debt.AptNumber,
 				Amount:     debt.Amount,
 				Months:     months,
-			}
-			debtsArray = append(debtsArray, debtArray)
+			})
 		}
 
 	}
@@ -210,20 +210,24 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 
 	go func() {
 		defer wg.Done()
-		_, err := extraCharges.InsertBackup(extraChargeArray)
+		rows, err := extraCharges.InsertBackup(extraChargeArray)
 		handleErr(err)
+		log.Printf("Inserted %d/%d extra charges", len(extraChargeArray), rows)
 	}()
 
 	go func() {
 		defer wg.Done()
-		_, err := expenses.InsertBackup(expensesArray)
+		rows, err := expenses.InsertBackup(expensesArray)
 		handleErr(err)
+		log.Printf("Inserted %d/%d expenses", len(expensesArray), rows)
 	}()
 
 	go func() {
 		defer wg.Done()
-		_, err := debts.InsertBackup(debtsArray)
+
+		rows, err := debts.InsertBackup(debtsArray)
 		handleErr(err)
+		log.Printf("Inserted %d/%d debts", len(debtsArray), rows)
 	}()
 
 	wg.Wait()

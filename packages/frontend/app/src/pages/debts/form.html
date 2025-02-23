@@ -33,6 +33,26 @@
       previousPaymentAmountErr: '',
       errMsg: ''
   }"
+       @event-debt-form-update="
+         let base64 = $event.detail.params;
+         let decodedString = atob(base64);
+         let jsonObject = JSON.parse(decodedString);
+
+          apartment = jsonObject.apt;
+          key = jsonObject.key;
+          receipts = jsonObject.receipts;
+          amount = jsonObject.amount;
+
+          if (jsonObject.months === null) {
+             monthsSelected = [];
+          } else {
+             monthsSelected = jsonObject.months;
+          }
+
+          previousPaymentAmount = jsonObject.previousPaymentAmount;
+          previousPaymentAmountCurrency = jsonObject.previousPaymentAmountCurrency;
+          open_form = true;
+     "
        class="flex flex-col gap-4 justify-center"
        x-bind:class="open_form ? 'md:grid md:grid-cols-[7fr_3fr]' : ''">
 
@@ -47,7 +67,7 @@
         <span x-text="$t('main-title-previous-payment')"></span>
       </div>
       <ol id="debts-list"
-          class="*:grid *:grid-cols-[2fr_1fr_1fr_1fr_1fr] *:gap-2 *:p-2 *:items-center *:text-center *:border-b *:border-surface-dark *:dark:border-surface *:dark:text-surface">
+          class="*:grid *:grid-cols-[2fr_1fr_1fr_1fr_1fr] *:gap-2 *:p-2 *:items-center *:text-center *:border-b *:border-surface-dark *:dark:border-surface *:dark:text-surface *:hover:text-on-surface-strong *:dark:hover:bg-primary-dark/5 *:dark:hover:text-on-surface-dark-strong">
 
       </ol>
     </div>
@@ -65,7 +85,9 @@
       <div id="debts-form-error" hidden="hidden"></div>
       <input hidden="hidden" name="key" x-model="key">
 
-      <span x-text="apartment"></span>
+      <div class="flex flex-row gap-1 justify-start font-bold">
+        <span x-text="apartment"></span><span x-text="aptMap.get(apartment)"></span>
+      </div>
 
       <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
         <label for="debtsAmountInput"
@@ -183,7 +205,7 @@
         <button
             x-text="$t('main-action-update')"
             x-effect="
-             $el.disabled=!(receipts > 0 && amount > 0 && previousPaymentAmount > 0 && monthsSelected.length > 0)
+             $el.disabled=!(receipts > 0 && amount > 0 && monthsSelected.length > 0)
             "
             class="whitespace-nowrap rounded-radius bg-primary border border-primary px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
             @click="
@@ -194,7 +216,7 @@
         </button>
         <button type="button"
                 class="whitespace-nowrap rounded-radius bg-surface-alt border border-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface-strong transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface-alt active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark-alt"
-                @click.prevent="$dispatch('event-expense-form-reset')"
+                @click.prevent="open_form = false"
                 x-text="$t('main-action-clear')">
         </button>
       </div>

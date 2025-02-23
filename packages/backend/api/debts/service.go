@@ -46,14 +46,21 @@ func toItem(item *model.Debts, oldCardId *string) (*Item, error) {
 	keys := keys(*item, cardIdStr)
 	key := *api.Encode(keys)
 
-	split := strings.Split(item.Months, ",")
-	months := make([]int16, len(split))
-	for i, v := range split {
-		months[i] = util.StringToInt16(v)
+	var months []int16
+
+	if item.Months == "" {
+		months = make([]int16, 0)
+	} else {
+		split := strings.Split(item.Months, ",")
+		months = make([]int16, len(split))
+		for i, v := range split {
+			months[i] = util.StringToInt16(v)
+		}
 	}
 
 	updateParams := UpdateParams{
 		Key:                           key,
+		Apt:                           item.AptNumber,
 		Receipts:                      item.Receipts,
 		Amount:                        item.Amount,
 		Months:                        months,
@@ -74,5 +81,6 @@ func toItem(item *model.Debts, oldCardId *string) (*Item, error) {
 		Key:          key,
 		Item:         *item,
 		UpdateParams: &base64Str,
+		Months:       months,
 	}, nil
 }

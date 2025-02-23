@@ -24,7 +24,9 @@ type Item struct {
 	CardId       string
 	Key          string
 	Item         model.Debts
+	Months       []int16
 	UpdateParams *string
+	isUpdate     *bool
 }
 
 func cardId() string {
@@ -49,6 +51,7 @@ func keys(item model.Debts, cardId string) Keys {
 
 type UpdateParams struct {
 	Key                           string  `json:"key"`
+	Apt                           string  `json:"apt"`
 	Receipts                      int16   `json:"receipts"`
 	Amount                        float64 `json:"amount"`
 	Months                        []int16 `json:"months"`

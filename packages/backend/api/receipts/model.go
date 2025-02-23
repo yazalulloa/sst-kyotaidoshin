@@ -70,7 +70,7 @@ type ReceiptRecord struct {
 	Receipt      ReceiptDto                    `json:"receipt"`
 	ExtraCharges []extraCharges.ExtraChargeDto `json:"extra_charges"`
 	Expenses     []expenses.ExpenseDto         `json:"expenses"`
-	Debts        []debts.DebtDto               `json:"debtFormDto"`
+	Debts        []debts.DebtDto               `json:"debts"`
 }
 
 type ReceiptDto struct {

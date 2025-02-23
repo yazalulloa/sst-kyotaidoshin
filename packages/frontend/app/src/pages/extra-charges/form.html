@@ -23,7 +23,7 @@
       amountErr: '',
       errMsg: ''
              }"
-       @event-extra-charge-form-update.window="
+       @event-extra-charge-form-update="
          let base64 = $event.detail.params;
          let decodedString = atob(base64);
          let jsonObject = JSON.parse(decodedString);
@@ -72,7 +72,7 @@
         <span x-text="$t('main-title-actions')"></span>
       </div>
       <ol id="extra-charges-list"
-          class="*:grid *:grid-cols-[2fr_1fr_3fr_1fr] *:gap-2 *:p-2 *:items-center *:text-center *:border-b *:border-surface-dark *:dark:border-surface *:dark:text-surface">
+          class="*:grid *:grid-cols-[2fr_1fr_3fr_1fr] *:gap-2 *:p-2 *:items-center *:text-center *:border-b *:border-surface-dark *:dark:border-surface *:dark:text-surface *:hover:text-on-surface-strong *:dark:hover:bg-primary-dark/5 *:dark:hover:text-on-surface-dark-strong">
 
       </ol>
     </div>
