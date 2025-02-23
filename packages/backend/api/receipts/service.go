@@ -449,7 +449,7 @@ func getFormDto(keys Keys) (*FormDto, error) {
 			return
 		}
 
-		formDto.extraChargeFormDto = *dto
+		formDto.extraChargesFormDto = *dto
 	}()
 
 	go func() {

@@ -101,15 +101,15 @@ type RateDto struct {
 }
 
 type FormDto struct {
-	key                string
-	updateParams       string
-	receipt            *model.Receipts
-	rates              []RateDto
-	expenseFormDto     expenses.FormDto
-	reserveFundFormDto reserveFunds.FormDto
-	extraChargeFormDto extraCharges.FormDto
-	debtFormDto        debts.FormDto
-	apts               string
+	key                 string
+	updateParams        string
+	receipt             *model.Receipts
+	rates               []RateDto
+	expenseFormDto      expenses.FormDto
+	reserveFundFormDto  reserveFunds.FormDto
+	extraChargesFormDto extraCharges.FormDto
+	debtFormDto         debts.FormDto
+	apts                string
 }
 
 type FormRequest struct {

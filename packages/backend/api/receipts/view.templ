@@ -6,6 +6,8 @@ import (
 	"kyotaidoshin/api"
 	"time"
 	"kyotaidoshin/expenses"
+	"kyotaidoshin/extraCharges"
+	"kyotaidoshin/reserveFunds"
 )
 
 templ InitView(dto InitDto) {
@@ -89,7 +91,24 @@ templ FormView(dto FormDto) {
 	<div
 		hidden="hidden"
 		data-params={ dto.updateParams }
-		x-init="$dispatch('event-receipt-form-update', { params: $el.getAttribute('data-params') })"
+		data-apts={ dto.apts }
+		x-init="
+		$dispatch('event-receipt-form-update', { params: $el.getAttribute('data-params') });
+
+		let base64 = $el.getAttribute('data-apts');
+    let decodedString = atob(base64);
+    let array = JSON.parse(decodedString);
+
+    array.forEach((apt) => {
+        apartments.push(apt);
+    });
+
+    apartments.forEach((apt) => {
+      aptMap.set(apt.number, apt.name);
+    });
+
+    $el.remove();
+		"
 	></div>
 
 	<div id="receiptRateSelect" hx-swap-oob="innerHTML">
@@ -109,6 +128,8 @@ templ FormView(dto FormDto) {
 
 
 		@expenses.FormView(dto.expenseFormDto)
+		@reserveFunds.FormView(dto.reserveFundFormDto)
+		@extraCharges.FormView(dto.extraChargesFormDto)
 }
 
 templ FormResponseView(res FormResponse) {
