@@ -204,9 +204,6 @@
       <div class="flex flex-row gap-2 justify-start">
         <button
             x-text="$t('main-action-update')"
-            x-effect="
-             $el.disabled=!(receipts > 0 && amount > 0 && monthsSelected.length > 0)
-            "
             class="whitespace-nowrap rounded-radius bg-primary border border-primary px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
             @click="
               let form = $el.closest('form');

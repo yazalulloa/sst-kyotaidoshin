@@ -1,10 +1,17 @@
 <div x-data="{modalIsOpen: false, currenciesSelected: []}"
      x-init="
 
-     let local = localStorage.getItem('currencies-selected')
-     if (local && local.length > 0) {
+
+
+<!--     $watch('currencies', value => {-->
+<!--      if (value.length > 0) {-->
+
+<!--      let local = localStorage.getItem('currencies-selected')-->
+<!--     if (local && local.length > 0) {-->
 <!--        currenciesSelected = local.split(',');-->
-     }
+<!--     }-->
+<!--      }-->
+<!--     })-->
 
      $watch('currenciesSelected', value => {
            let parentElement = $el.parentElement;
