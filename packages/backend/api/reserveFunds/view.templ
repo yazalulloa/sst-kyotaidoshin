@@ -3,7 +3,6 @@ package reserveFunds
 import (
 	"fmt"
 	"kyotaidoshin/api"
-	"kyotaidoshin/util"
 	"strings"
 )
 
@@ -37,29 +36,28 @@ templ ItemView(item Item) {
 			@click="$dispatch('event-reserve-fund-form-update', { params: $el.getAttribute('data-update-params') })"
 		}
 	>
-		<div class="flex flex-col items-center gap-2 text-center">
-			<span>{ item.Item.Name }</span>
-			<span>{ util.FormatFloat64(item.Item.Fund) }</span>
+		<div class="flex flex-col gap-2 justify-center text-center items-center">
+			<div class="flex flex-row justify-center">
+				<span>{ item.Item.Name }</span>
+				<span>:&nbsp;</span>
+				@api.SpanFormatCurrency(item.Item.Fund, "VED")
+			</div>
+			<div class="flex flex-row justify-center font-light">
+			  @api.SpanWitX_Text("$t('main-title-expense')")
+			  <span>:&nbsp;</span>
+				@api.SpanFormatCurrency(item.Item.Expense, "VED")
+			</div>
 		</div>
-		<div class="flex justify-center">
-			@api.Badge(item.Item.Active) {
-				<div class="flex flex-col gap-2 justify-center">
-				<span><span>{ util.FormatFloat64(item.Item.Pay) }</span>
-              				if item.Item.Type == "PERCENTAGE" {
-              					<span>%</span>
-              				}</span>
-
-         @api.SpanWitX_Text(fmt.Sprintf("$t('main-title-%s')", strings.ToLower(item.Item.Type)))
-				</div>
+		<div class="flex justify-center items-center text-center">
+			if item.Item.Type == "PERCENTAGE" {
+				<span>{ fmt.Sprint(item.Item.Pay) + " %" }</span>
+			} else {
+				@api.SpanFormatCurrency(item.Item.Pay, "VED")
 			}
 		</div>
-		<div class="flex justify-center">
-			@api.Badge(item.Item.AddToExpenses) {
-				<div class="flex flex-col gap-2 justify-center">
-					<span>{ util.FormatFloat64(item.Item.Expense) }</span>
-					<span>{ fmt.Sprint(item.Item.ExpenseType) }</span>
-				</div>
-			}
+		<div class="flex flex-col gap-2 justify-center items-center text-center">
+			@api.BadgeIndicatorWithTooltip(item.Item.Active, "", api.SpanWitX_Text(fmt.Sprintf("$t('main-title-%s')", strings.ToLower(item.Item.Type))), nil)
+			@api.BadgeIndicatorWithTooltip(item.Item.AddToExpenses, "", api.SpanWitX_Text(fmt.Sprintf("$t('main-title-%s')", strings.ToLower(item.Item.ExpenseType))), nil)
 		</div>
 		@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
 	</li>
