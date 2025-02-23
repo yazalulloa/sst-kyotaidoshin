@@ -250,7 +250,10 @@ templ BadgeIndicatorWithTooltip(condition bool, tooltipId string, badge templ.Co
 				@badge
 			</span>
 		</span>
-		@tooltip
+
+		if (tooltipId != "") {
+      @tooltip
+    }
 	</div>
 }
 

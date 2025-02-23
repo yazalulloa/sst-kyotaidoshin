@@ -52,6 +52,8 @@ templ ItemView(item Item) {
 		lastSent := fmt.Sprint(*item.LastSent)
 				}}
 				@api.BadgeIndicatorWithTooltip(item.Item.Sent, tooltipId, api.SpanWitX_Text("$t('main-title-sent')"), api.Tooltip(tooltipId, api.SpanFormatDate(lastSent)))
+			} else {
+				@api.BadgeIndicatorWithTooltip(item.Item.Sent, "", api.SpanWitX_Text("$t('main-title-sent')"), nil)
 			}
 		</div>
 		<span
