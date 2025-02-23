@@ -36,10 +36,10 @@ type Keys struct {
 	ID         *int32
 	BuildingID string
 	ReceiptID  int32
-	CardId     string
+	CardId     *string
 }
 
-func keys(item model.Expenses, cardId string) Keys {
+func keys(item model.Expenses, cardId *string) Keys {
 	return Keys{
 		ID:         item.ID,
 		BuildingID: item.BuildingID,
@@ -58,5 +58,13 @@ type UpdateParams struct {
 type FormResponse struct {
 	errorStr string
 	item     *Item
-	counter  int64
+	counter  *int64
+}
+
+type FormRequest struct {
+	Key         string  `form:"key" validate:"required,notblank,max=300"`
+	Description string  `form:"description" validate:"required,notblank,max=100"`
+	Amount      float64 `form:"amount" validate:"required,ne=0"`
+	Currency    string  `form:"currency" validate:"required,oneof=USD VED"`
+	Type        string  `form:"type" validate:"required,oneof=COMMON UNCOMMON"`
 }

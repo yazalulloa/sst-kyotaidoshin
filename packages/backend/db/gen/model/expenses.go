@@ -14,6 +14,5 @@ type Expenses struct {
 	Description string
 	Amount      float64
 	Currency    string
-	ReserveFund bool
 	Type        string
 }

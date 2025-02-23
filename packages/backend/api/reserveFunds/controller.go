@@ -128,8 +128,7 @@ func reserveFundPut(w http.ResponseWriter, r *http.Request) {
 }
 
 func reserveFundDelete(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	key := vars["key"]
+	key := mux.Vars(r)["key"]
 	var keys Keys
 	err := api.Decode(key, &keys)
 	if err != nil {

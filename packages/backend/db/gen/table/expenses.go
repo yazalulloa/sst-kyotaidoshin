@@ -23,7 +23,6 @@ type expensesTable struct {
 	Description sqlite.ColumnString
 	Amount      sqlite.ColumnFloat
 	Currency    sqlite.ColumnString
-	ReserveFund sqlite.ColumnBool
 	Type        sqlite.ColumnString
 
 	AllColumns     sqlite.ColumnList
@@ -71,10 +70,9 @@ func newExpensesTableImpl(schemaName, tableName, alias string) expensesTable {
 		DescriptionColumn = sqlite.StringColumn("description")
 		AmountColumn      = sqlite.FloatColumn("amount")
 		CurrencyColumn    = sqlite.StringColumn("currency")
-		ReserveFundColumn = sqlite.BoolColumn("reserve_fund")
 		TypeColumn        = sqlite.StringColumn("type")
-		allColumns        = sqlite.ColumnList{IDColumn, BuildingIDColumn, ReceiptIDColumn, DescriptionColumn, AmountColumn, CurrencyColumn, ReserveFundColumn, TypeColumn}
-		mutableColumns    = sqlite.ColumnList{BuildingIDColumn, ReceiptIDColumn, DescriptionColumn, AmountColumn, CurrencyColumn, ReserveFundColumn, TypeColumn}
+		allColumns        = sqlite.ColumnList{IDColumn, BuildingIDColumn, ReceiptIDColumn, DescriptionColumn, AmountColumn, CurrencyColumn, TypeColumn}
+		mutableColumns    = sqlite.ColumnList{BuildingIDColumn, ReceiptIDColumn, DescriptionColumn, AmountColumn, CurrencyColumn, TypeColumn}
 	)
 
 	return expensesTable{
@@ -87,7 +85,6 @@ func newExpensesTableImpl(schemaName, tableName, alias string) expensesTable {
 		Description: DescriptionColumn,
 		Amount:      AmountColumn,
 		Currency:    CurrencyColumn,
-		ReserveFund: ReserveFundColumn,
 		Type:        TypeColumn,
 
 		AllColumns:     allColumns,

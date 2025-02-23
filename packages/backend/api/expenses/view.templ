@@ -1,0 +1,96 @@
+package expenses
+
+import (
+	"fmt"
+	"kyotaidoshin/api"
+	"strings"
+)
+
+templ FormView(dto FormDto) {
+	<div id="expenses-list" hx-swap-oob="innerHTML">
+		for _, item := range dto.Items {
+			@ItemView(item)
+		}
+		<div
+			data-restart-key={ dto.Key }
+			data-counter={ fmt.Sprint(len(dto.Items)) }
+			x-init="
+      		restartKey = $el.getAttribute('data-restart-key');
+      		key = restartKey
+      		counter = parseInt($el.getAttribute('data-counter'));
+      		$el.remove()
+      		"
+		></div>
+	</div>
+}
+
+templ ItemView(item Item) {
+	<li
+		id={ item.CardId }
+		class="fade-me-in fade-me-out hover:opacity-75"
+		if item.isUpdate != nil && *item.isUpdate {
+			hx-swap-oob="true"
+		}
+		if item.UpdateParams != nil {
+			data-update-params={ *item.UpdateParams }
+			@click="$dispatch('event-expense-form-update', { params: $el.getAttribute('data-update-params') })"
+		}
+	>
+		<span class="text-start">{ item.Item.Description }</span>
+		<div class="flex flex-row gap-2 justify-center">
+			<span>{ fmt.Sprint(item.Item.Amount) }</span>
+			<span>{ item.Item.Currency }</span>
+		</div>
+		<span x-text={ fmt.Sprintf("$t('main-title-%s')", strings.ToLower(item.Item.Type)) }></span>
+		@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
+	</li>
+}
+
+templ DeleteResponse(counter int64, key string) {
+	<div
+		id="expenses-list"
+		hx-swap-oob="beforeend"
+	>
+		<div
+			hidden="hidden"
+			data-counter={ fmt.Sprint(counter) }
+			x-init="
+        		counter = parseInt($el.getAttribute('data-counter'));
+        		$dispatch('event-expense-form-restart-after-deletion', { key: key });
+        		$el.remove()
+        		"
+		></div>
+	</div>
+}
+
+templ FormResponseView(res FormResponse) {
+	<div
+		data-response-err={ res.errorStr }
+		if res.counter != nil {
+		  data-counter={ fmt.Sprint(*res.counter) }
+		}
+
+		x-init="
+ 		  errMsg = $el.getAttribute('data-response-err');
+ 		  let dataCounter = $el.getAttribute('data-counter')
+ 		  if (dataCounter && dataCounter !== '') {
+ 		  counter = parseInt(dataCounter);
+ 		  }
+
+ 		if (errMsg === '') {
+ 		  $dispatch('event-expense-form-reset');
+ 		 }
+ 		"
+	></div>
+	if res.item != nil {
+		if res.item.isUpdate != nil {
+			if *res.item.isUpdate {
+				@ItemView(*res.item)
+			} else {
+				<div id="expenses-list" hx-swap-oob="beforeend">
+					@ItemView(*res.item)
+				</div>
+			}
+		}
+	}
+}

@@ -52,12 +52,12 @@ func countByBuilding(buildingId string) (int64, error) {
 
 func deleteById(id int32) (int64, error) {
 	stmt := ExtraCharges.DELETE().WHERE(ExtraCharges.ID.EQ(sqlite.Int32(id)))
-	result, err := stmt.Exec(db.GetDB().DB)
+	res, err := stmt.Exec(db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}
 
-	rowsAffected, err := result.RowsAffected()
+	rowsAffected, err := res.RowsAffected()
 	if err != nil {
 		return 0, err
 	}

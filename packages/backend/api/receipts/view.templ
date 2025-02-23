@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"kyotaidoshin/api"
 	"time"
+	"kyotaidoshin/expenses"
 )
 
 templ InitView(dto InitDto) {
@@ -105,6 +106,9 @@ templ FormView(dto FormDto) {
     }
 
 	</div>
+
+
+		@expenses.FormView(dto.expenseFormDto)
 }
 
 templ FormResponseView(res FormResponse) {
@@ -122,6 +126,7 @@ form.classList.remove('border', 'border-success');
 
 "
 	></div>
+
 }
 
 

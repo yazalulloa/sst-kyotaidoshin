@@ -45,7 +45,7 @@ func toItem(item *model.Expenses, oldCardId *string) (*Item, error) {
 		cardIdStr = cardId()
 	}
 
-	keys := keys(*item, cardIdStr)
+	keys := keys(*item, &cardIdStr)
 	key := *api.Encode(keys)
 
 	updateParams := UpdateParams{
@@ -65,7 +65,7 @@ func toItem(item *model.Expenses, oldCardId *string) (*Item, error) {
 	base64Str := base64.URLEncoding.EncodeToString(byteArray)
 
 	return &Item{
-		CardId:       keys.CardId,
+		CardId:       *keys.CardId,
 		Key:          key,
 		Item:         *item,
 		UpdateParams: &base64Str,

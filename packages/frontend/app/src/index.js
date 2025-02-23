@@ -81,8 +81,10 @@ window.scrollThroughParent = (element) => {
   let previousElementSibling = element.previousElementSibling;
 
   if (previousElementSibling) {
+    console.log("Previous element sibling found ", element.id);
 
     window.addEventListener('scroll', () => {
+      console.log("Scrolling ", element.id);
       const div1Rect = previousElementSibling.getBoundingClientRect();
       const div2Rect = element.getBoundingClientRect();
       const dataToShow = {}
@@ -90,11 +92,11 @@ window.scrollThroughParent = (element) => {
       dataToShow.div1RectBottom = div1Rect.bottom;
       dataToShow.div2RectTop = div2Rect.top;
 
-      // console.log("Data ", dataToShow);
+      console.log("Data ", dataToShow);
 
       if (window.scrollY > 0 && (div1Rect.bottom === 0
           || !(div1Rect.bottom < div2Rect.top))) {
-        // console.log("Scrolling ", dataToShow.id);
+        console.log("Scrolling ", dataToShow.id);
 
         let header = document.getElementsByTagName('header')[0]?.offsetHeight
             ?? 0;
@@ -107,9 +109,21 @@ window.scrollThroughParent = (element) => {
         const newTop = Math.max(0, Math.min(maxScroll, scrollYMinusParentTop));
         element.style.top = newTop + `px`;
       }
-    });
+    }, {passive: true});
+  } else {
+    console.error("Previous element sibling not found");
   }
 
+}
+
+function getComputedHeight(element) {
+  let withPaddings = element.clientHeight;
+  const elementComputedStyle = window.getComputedStyle(element, null);
+  return (
+      withPaddings -
+      parseFloat(elementComputedStyle.paddingTop) -
+      parseFloat(elementComputedStyle.paddingBottom)
+  );
 }
 
 window.isValidEmail = function (value) {
@@ -212,10 +226,10 @@ document.addEventListener('alpine-i18n:ready', function () {
 });
 
 document.addEventListener('pinecone-start', () =>
-    console.log('pinecone-start')
+    console.debug('pinecone-start')
 );
 document.addEventListener('pinecone-end', () =>
-    console.log('pinecone-end')
+    console.debug('pinecone-end')
 );
 document.addEventListener('fetch-error', (err) =>
     console.error(err)

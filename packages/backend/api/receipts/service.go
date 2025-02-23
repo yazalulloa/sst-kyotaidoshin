@@ -171,7 +171,6 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 				Description: expense.Description,
 				Amount:      expense.Amount,
 				Currency:    expense.Currency,
-				ReserveFund: expense.ReserveFund,
 				Type:        expense.Type,
 			})
 

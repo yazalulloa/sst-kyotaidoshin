@@ -173,7 +173,6 @@ CREATE TABLE IF NOT EXISTS expenses
     description  TEXT                                          NOT NULL,
     amount       DECIMAL(16, 2)                                NOT NULL,
     currency     TEXT CHECK ( currency IN ('USD', 'VED') )     NOT NULL,
-    reserve_fund BOOL                                          NOT NULL,
     type         TEXT CHECK ( type IN ('COMMON', 'UNCOMMON') ) NOT NULL
     );
 
