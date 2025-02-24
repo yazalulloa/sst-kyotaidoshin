@@ -189,7 +189,7 @@ func ItemView(item Item) templ.Component {
 	})
 }
 
-func DeleteResponse(dto ReceiptExpensesDto) templ.Component {
+func DeleteResponse(key string, dto ReceiptExpensesDto) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -210,6 +210,12 @@ func DeleteResponse(dto ReceiptExpensesDto) templ.Component {
 			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		if key != "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div id=\"expenses-list\" hx-swap-oob=\"beforeend\"><div hidden=\"hidden\" x-init=\"\n        \t\t$dispatch(&#39;event-expense-form-restart-after-deletion&#39;, { key: key });\n        \t\t$el.remove()\n        \t\t\"></div></div>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
 		if dto.IsTherePercentage {
 			templ_7745c5c3_Err = ReserveFundExpensesView(dto.ReserveFundExpenses).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
@@ -245,20 +251,20 @@ func FormResponseView(res FormResponse) templ.Component {
 			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "<div data-response-err=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "<div data-response-err=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(res.ErrorStr)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `expenses/view.templ`, Line: 60, Col: 34}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `expenses/view.templ`, Line: 74, Col: 34}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\" x-init=\"\n \t\t  errMsg = $el.getAttribute(&#39;data-response-err&#39;);\n\n \t\tif (errMsg === &#39;&#39;) {\n \t\t  $dispatch(&#39;event-expense-form-reset&#39;);\n \t\t }\n \t\t\"></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" x-init=\"\n \t\t  errMsg = $el.getAttribute(&#39;data-response-err&#39;);\n\n \t\tif (errMsg === &#39;&#39;) {\n \t\t  $dispatch(&#39;event-expense-form-reset&#39;);\n \t\t }\n \t\t\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -270,7 +276,7 @@ func FormResponseView(res FormResponse) templ.Component {
 						return templ_7745c5c3_Err
 					}
 				} else {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<div id=\"expenses-list\" hx-swap-oob=\"beforeend\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "<div id=\"expenses-list\" hx-swap-oob=\"beforeend\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -278,7 +284,7 @@ func FormResponseView(res FormResponse) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 18, "</div>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "</div>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -286,7 +292,7 @@ func FormResponseView(res FormResponse) templ.Component {
 			}
 		}
 		if res.ReceiptExpensesDto != nil {
-			templ_7745c5c3_Err = DeleteResponse(*res.ReceiptExpensesDto).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = DeleteResponse("", *res.ReceiptExpensesDto).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -316,72 +322,72 @@ func ExpenseTotalsView(dto ExpenseTotals) templ.Component {
 			templ_7745c5c3_Var11 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<div id=\"expense-totals\" hx-swap-oob=\"innerHTML\"><div data-counter=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "<div id=\"expense-totals\" hx-swap-oob=\"innerHTML\"><div data-counter=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(dto.ExpensesCounter))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `expenses/view.templ`, Line: 91, Col: 49}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `expenses/view.templ`, Line: 105, Col: 49}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 20, "\" data-total-common=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" data-total-common=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(util.FormatFloat2(dto.TotalCommon))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `expenses/view.templ`, Line: 92, Col: 57}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `expenses/view.templ`, Line: 106, Col: 57}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" data-total-un-common=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" data-total-un-common=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(util.FormatFloat2(dto.TotalUnCommon))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `expenses/view.templ`, Line: 93, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `expenses/view.templ`, Line: 107, Col: 62}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 22, "\" data-total-common-plus-reserve=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" data-total-common-plus-reserve=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(util.FormatFloat2(dto.TotalCommonPlusReserve))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `expenses/view.templ`, Line: 94, Col: 81}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `expenses/view.templ`, Line: 108, Col: 81}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" data-total-un-common-plus-reserve=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" data-total-un-common-plus-reserve=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var16 string
 		templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(util.FormatFloat2(dto.TotalUnCommonPlusReserve))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `expenses/view.templ`, Line: 95, Col: 86}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `expenses/view.templ`, Line: 109, Col: 86}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "\" x-init=\"\n          counter = parseInt($el.getAttribute(&#39;data-counter&#39;));\n      \t\ttotalCommon = $el.getAttribute(&#39;data-total-common&#39;);\n      \t\ttotalUnCommon = $el.getAttribute(&#39;data-total-un-common&#39;);\n      \t\ttotalCommonPlusReserve = $el.getAttribute(&#39;data-total-common-plus-reserve&#39;);\n      \t\ttotalUnCommonPlusReserve = $el.getAttribute(&#39;data-total-un-common-plus-reserve&#39;);\n\n      \t\t\"></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "\" x-init=\"\n          counter = parseInt($el.getAttribute(&#39;data-counter&#39;));\n      \t\ttotalCommon = $el.getAttribute(&#39;data-total-common&#39;);\n      \t\ttotalUnCommon = $el.getAttribute(&#39;data-total-un-common&#39;);\n      \t\ttotalCommonPlusReserve = $el.getAttribute(&#39;data-total-common-plus-reserve&#39;);\n      \t\ttotalUnCommonPlusReserve = $el.getAttribute(&#39;data-total-un-common-plus-reserve&#39;);\n\n      \t\t\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -410,7 +416,7 @@ func ReserveFundExpensesView(reserveFundExpenses []Item) templ.Component {
 			templ_7745c5c3_Var17 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<div id=\"expenses-reserve-funds-list\" hx-swap-oob=\"innerHTML\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<div id=\"expenses-reserve-funds-list\" hx-swap-oob=\"innerHTML\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -422,7 +428,7 @@ func ReserveFundExpensesView(reserveFundExpenses []Item) templ.Component {
 				}
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

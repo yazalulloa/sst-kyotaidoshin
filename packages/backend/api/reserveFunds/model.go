@@ -34,15 +34,15 @@ func cardId() string {
 type Keys struct {
 	BuildingId string
 	Id         *int32
-	ReceiptId  *int64
+	ReceiptId  *int32
 	CardId     string
 }
 
-func keys(item model.ReserveFunds, cardId string) Keys {
+func keys(item model.ReserveFunds, receiptId *int32, cardId string) Keys {
 	return Keys{
 		BuildingId: item.BuildingID,
 		Id:         item.ID,
-		ReceiptId:  nil,
+		ReceiptId:  receiptId,
 		CardId:     cardId,
 	}
 }
@@ -64,9 +64,10 @@ type UpdateParams struct {
 	AddToExpenses bool    `json:"addToExpenses"`
 }
 type FormResponse struct {
-	errorStr string
-	item     *Item
+	ErrorStr string
+	Item     *Item
 	counter  int64
+	Keys     *Keys
 }
 
 type FormRequest struct {

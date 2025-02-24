@@ -59,13 +59,13 @@ templ ItemView(item Item) {
 			@api.BadgeIndicatorWithTooltip(item.Item.Active, "", api.SpanWitX_Text(fmt.Sprintf("$t('main-title-%s')", strings.ToLower(item.Item.Type))), nil)
 			@api.BadgeIndicatorWithTooltip(item.Item.AddToExpenses, "", api.SpanWitX_Text(fmt.Sprintf("$t('main-title-%s')", strings.ToLower(item.Item.ExpenseType))), nil)
 		</div>
-		@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
+		@api.DeleteBtn(fmt.Sprintf(PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
 	</li>
 }
 
 templ FormResponseView(res FormResponse) {
 	<div
-		data-response-err={ res.errorStr }
+		data-response-err={ res.ErrorStr }
 		data-counter={ fmt.Sprint(res.counter) }
 		x-init="
  		errMsg = $el.getAttribute('data-response-err');
@@ -76,17 +76,19 @@ templ FormResponseView(res FormResponse) {
  		 }
  		"
 	></div>
-	if res.item != nil {
-		if res.item.isUpdate != nil {
-			if *res.item.isUpdate {
-				@ItemView(*res.item)
+	if res.Item != nil {
+		if res.Item.isUpdate != nil {
+			if *res.Item.isUpdate {
+				@ItemView(*res.Item)
 			} else {
 				<div id="reserve-funds-list" hx-swap-oob="beforeend">
-					@ItemView(*res.item)
+					@ItemView(*res.Item)
 				</div>
 			}
 		}
 	}
+
+	{ children... }
 }
 
 templ DeleteResponse(counter int64, key string) {
@@ -104,4 +106,6 @@ templ DeleteResponse(counter int64, key string) {
         		"
 		></div>
 	</div>
+
+	{ children... }
 }

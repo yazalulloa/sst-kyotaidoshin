@@ -48,7 +48,21 @@ templ ItemView(item Item) {
 	</li>
 }
 
-templ DeleteResponse(dto ReceiptExpensesDto) {
+templ DeleteResponse(key string, dto ReceiptExpensesDto) {
+	if key != "" {
+		<div
+			id="expenses-list"
+			hx-swap-oob="beforeend"
+		>
+			<div
+				hidden="hidden"
+				x-init="
+        		$dispatch('event-expense-form-restart-after-deletion', { key: key });
+        		$el.remove()
+        		"
+			></div>
+		</div>
+	}
 	if dto.IsTherePercentage {
 		@ReserveFundExpensesView(dto.ReserveFundExpenses)
 	}
@@ -78,7 +92,7 @@ templ FormResponseView(res FormResponse) {
 		}
 	}
 	if res.ReceiptExpensesDto != nil {
-		@DeleteResponse(*res.ReceiptExpensesDto)
+		@DeleteResponse("", *res.ReceiptExpensesDto)
 	}
 }
 

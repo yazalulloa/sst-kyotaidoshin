@@ -223,7 +223,7 @@ func ItemView(item Item) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = api.DeleteBtn(fmt.Sprintf(PATH+"/%s", item.Key), item.CardId, templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -261,7 +261,7 @@ func FormResponseView(res FormResponse) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(res.errorStr)
+		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(res.ErrorStr)
 		if templ_7745c5c3_Err != nil {
 			return templ.Error{Err: templ_7745c5c3_Err, FileName: `reserveFunds/view.templ`, Line: 68, Col: 34}
 		}
@@ -286,10 +286,10 @@ func FormResponseView(res FormResponse) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if res.item != nil {
-			if res.item.isUpdate != nil {
-				if *res.item.isUpdate {
-					templ_7745c5c3_Err = ItemView(*res.item).Render(ctx, templ_7745c5c3_Buffer)
+		if res.Item != nil {
+			if res.Item.isUpdate != nil {
+				if *res.Item.isUpdate {
+					templ_7745c5c3_Err = ItemView(*res.Item).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -298,7 +298,7 @@ func FormResponseView(res FormResponse) templ.Component {
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = ItemView(*res.item).Render(ctx, templ_7745c5c3_Buffer)
+					templ_7745c5c3_Err = ItemView(*res.Item).Render(ctx, templ_7745c5c3_Buffer)
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
@@ -308,6 +308,10 @@ func FormResponseView(res FormResponse) templ.Component {
 					}
 				}
 			}
+		}
+		templ_7745c5c3_Err = templ_7745c5c3_Var9.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
 		return nil
 	})
@@ -341,13 +345,17 @@ func DeleteResponse(counter int64, key string) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(counter))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `reserveFunds/view.templ`, Line: 99, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `reserveFunds/view.templ`, Line: 101, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "\" x-init=\"\n        \t\tcounter = parseInt($el.getAttribute(&#39;data-counter&#39;));\n        \t\t$dispatch(&#39;event-reserve-fund-building-restart-after-deletion&#39;, { key: key });\n        \t\t$el.remove()\n        \t\t\"></div></div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ_7745c5c3_Var12.Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

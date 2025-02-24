@@ -7,7 +7,7 @@ import (
 	"kyotaidoshin/api"
 )
 
-func GetFormDto(buildingId string) (*FormDto, error) {
+func GetFormDto(buildingId string, receiptId *int32) (*FormDto, error) {
 
 	reserveFunds, err := SelectByBuilding(buildingId)
 
@@ -19,7 +19,7 @@ func GetFormDto(buildingId string) (*FormDto, error) {
 
 	for i, item := range reserveFunds {
 
-		obj, err := toItem(&item, nil)
+		obj, err := toItem(&item, receiptId, nil)
 
 		if err != nil {
 			return nil, err
@@ -34,17 +34,17 @@ func GetFormDto(buildingId string) (*FormDto, error) {
 	}, nil
 }
 
-func getItem(id int32, oldCardId *string) (*Item, error) {
+func getItem(id int32, receiptId *int32, oldCardId *string) (*Item, error) {
 	item, err := selectById(id)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return toItem(item, oldCardId)
+	return toItem(item, receiptId, oldCardId)
 }
 
-func toItem(item *model.ReserveFunds, oldCardId *string) (*Item, error) {
+func toItem(item *model.ReserveFunds, receiptId *int32, oldCardId *string) (*Item, error) {
 	var cardIdStr string
 	if oldCardId != nil {
 		cardIdStr = *oldCardId
@@ -52,7 +52,7 @@ func toItem(item *model.ReserveFunds, oldCardId *string) (*Item, error) {
 		cardIdStr = cardId()
 	}
 
-	keys := keys(*item, cardIdStr)
+	keys := keys(*item, receiptId, cardIdStr)
 	key := *api.Encode(keys)
 
 	updateParams := UpdateParams{

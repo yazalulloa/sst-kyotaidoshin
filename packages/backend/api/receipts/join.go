@@ -27,7 +27,7 @@ func JoinExpensesAndReserveFunds(buildingId string, receiptId int32) (*expenses.
 
 	go func() {
 		defer wg.Done()
-		dto, err := reserveFunds.GetFormDto(buildingId)
+		dto, err := reserveFunds.GetFormDto(buildingId, &receiptId)
 		if err != nil {
 			handleErr(err)
 			return

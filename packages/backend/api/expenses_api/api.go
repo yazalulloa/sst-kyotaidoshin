@@ -37,7 +37,7 @@ func expensesPut(w http.ResponseWriter, r *http.Request) {
 }
 
 func expensesDelete(w http.ResponseWriter, r *http.Request) {
-	keys, err := expenses.DeleteAndReturnKeys(r)
+	key, keys, err := expenses.DeleteAndReturnKeys(r)
 	if err != nil {
 		log.Printf("Error deleting expense: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -52,7 +52,7 @@ func expensesDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = expenses.DeleteResponse(*expensesDto).Render(r.Context(), w)
+	err = expenses.DeleteResponse(key, *expensesDto).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

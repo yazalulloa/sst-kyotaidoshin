@@ -51,7 +51,7 @@ func SelectByBuilding(buildingId string) ([]model.ReserveFunds, error) {
 	return dest, nil
 }
 
-func countByBuilding(buildingId string) (int64, error) {
+func CountByBuilding(buildingId string) (int64, error) {
 	stmt := ReserveFunds.SELECT(sqlite.COUNT(ReserveFunds.ID).AS("Count")).FROM(ReserveFunds).WHERE(ReserveFunds.BuildingID.EQ(sqlite.String(buildingId)))
 	var dest struct {
 		Count int64

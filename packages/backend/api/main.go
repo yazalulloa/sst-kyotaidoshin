@@ -17,7 +17,7 @@ import (
 	"kyotaidoshin/extraCharges"
 	"kyotaidoshin/rates"
 	"kyotaidoshin/receipts"
-	"kyotaidoshin/reserveFunds"
+	"kyotaidoshin/reserveFundsApi"
 	"log"
 	"net/http"
 	"strings"
@@ -69,7 +69,7 @@ func router() http.Handler {
 	rates.Routes(newRouter)
 	bcv_bucket.Routes(newRouter)
 	buildings.Routes(newRouter)
-	reserveFunds.Routes(newRouter)
+	reserveFundsApi.Routes(newRouter)
 	apartments.Routes(newRouter)
 	extraCharges.Routes(newRouter)
 	receipts.Routes(newRouter)

@@ -439,7 +439,7 @@ func getFormDto(keys Keys) (*FormDto, error) {
 	go func() {
 		defer wg.Done()
 
-		reserveFundFormDto, err := reserveFunds.GetFormDto(keys.BuildingId)
+		reserveFundFormDto, err := reserveFunds.GetFormDto(keys.BuildingId, &keys.Id)
 		if err != nil {
 			handleErr(err)
 			return

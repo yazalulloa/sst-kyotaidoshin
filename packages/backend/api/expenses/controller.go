@@ -108,22 +108,22 @@ func Upsert(r *http.Request) FormResponse {
 	return response
 }
 
-func DeleteAndReturnKeys(r *http.Request) (Keys, error) {
+func DeleteAndReturnKeys(r *http.Request) (string, Keys, error) {
 	key := mux.Vars(r)["key"]
 	var keys Keys
 	err := api.Decode(key, &keys)
 	if err != nil {
-		return keys, err
+		return key, keys, err
 	}
 
 	if keys.ID == nil {
-		return keys, fmt.Errorf("id is required")
+		return key, keys, fmt.Errorf("id is required")
 	}
 
 	_, err = deleteById(*keys.ID)
 	if err != nil {
-		return keys, err
+		return key, keys, err
 	}
 
-	return keys, nil
+	return key, keys, nil
 }
