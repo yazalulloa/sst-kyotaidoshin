@@ -13,7 +13,7 @@ import (
 	"kyotaidoshin/api"
 	bcv_bucket "kyotaidoshin/bcv-bucket"
 	"kyotaidoshin/buildings"
-	"kyotaidoshin/expenses"
+	"kyotaidoshin/expenses_api"
 	"kyotaidoshin/extraCharges"
 	"kyotaidoshin/rates"
 	"kyotaidoshin/receipts"
@@ -73,7 +73,7 @@ func router() http.Handler {
 	apartments.Routes(newRouter)
 	extraCharges.Routes(newRouter)
 	receipts.Routes(newRouter)
-	expenses.Routes(newRouter)
+	expenses_api.Routes(newRouter)
 
 	newRouter.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 

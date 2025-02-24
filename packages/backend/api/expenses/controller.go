@@ -12,153 +12,118 @@ import (
 	"net/http"
 )
 
-const _PATH = "/api/expenses"
+const PATH = "/api/expenses"
 
-func Routes(server *mux.Router) {
+func Upsert(r *http.Request) FormResponse {
+	response := FormResponse{}
 
-	server.HandleFunc(_PATH, expensesPut).Methods("PUT")
-	server.HandleFunc(_PATH+"/{key}", expensesDelete).Methods("DELETE")
-}
-
-func expensesPut(w http.ResponseWriter, r *http.Request) {
-	upsert := func() FormResponse {
-
-		response := FormResponse{}
-
-		err := r.ParseForm()
-		if err != nil {
-			log.Printf("Error parsing form: %v", err)
-			response.errorStr = err.Error()
-			return response
-		}
-
-		decoder := form.NewDecoder()
-		var request FormRequest
-		err = decoder.Decode(&request, r.Form)
-
-		if err != nil {
-			log.Printf("Error decoding form: %v", err)
-			response.errorStr = err.Error()
-			return response
-		}
-
-		var keys Keys
-		err = api.Decode(request.Key, &keys)
-		if err != nil {
-			log.Printf("Error decoding key: %v", err)
-			response.errorStr = err.Error()
-			return response
-		}
-
-		validate, err := util.GetValidator()
-		if err != nil {
-			log.Printf("Error getting validator: %v", err)
-			response.errorStr = err.Error()
-			return response
-		}
-
-		err = validate.Struct(request)
-		if err != nil {
-			// Validation failed, handle the error
-			errors := err.(validator.ValidationErrors)
-			for _, valErr := range errors {
-				log.Printf("Validation error: %v", valErr)
-			}
-			response.errorStr = fmt.Sprintf("Validation error: %s", errors)
-			return response
-		}
-
-		expense := model.Expenses{
-			BuildingID:  keys.BuildingID,
-			ReceiptID:   keys.ReceiptID,
-			ID:          keys.ID,
-			Description: request.Description,
-			Amount:      request.Amount,
-			Currency:    request.Currency,
-			Type:        request.Type,
-		}
-
-		isUpdate := keys.ID != nil
-
-		if isUpdate {
-			_, err = update(expense)
-		} else {
-			lastInsertId, err := insert(expense)
-			if err == nil {
-				id := int32(lastInsertId)
-				keys.ID = &id
-			}
-		}
-
-		item, err := toItem(&expense, keys.CardId)
-		if err != nil {
-			log.Printf("Error converting to item: %v", err)
-			response.errorStr = err.Error()
-			return response
-		}
-
-		var counter *int64
-
-		if !isUpdate {
-			count, err := countByReceipt(keys.ReceiptID)
-			if err != nil {
-				log.Printf("Error getting count: %v", err)
-				response.errorStr = err.Error()
-				return response
-			}
-			counter = &count
-		}
-
-		response.item = item
-		response.item.isUpdate = &isUpdate
-		response.counter = counter
-
+	err := r.ParseForm()
+	if err != nil {
+		log.Printf("Error parsing form: %v", err)
+		response.ErrorStr = err.Error()
 		return response
 	}
 
-	response := upsert()
+	decoder := form.NewDecoder()
+	var request FormRequest
+	err = decoder.Decode(&request, r.Form)
 
-	err := FormResponseView(response).Render(r.Context(), w)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		log.Printf("Error decoding form: %v", err)
+		response.ErrorStr = err.Error()
+		return response
 	}
+
+	var keys Keys
+	err = api.Decode(request.Key, &keys)
+	if err != nil {
+		log.Printf("Error decoding key: %v", err)
+		response.ErrorStr = err.Error()
+		return response
+	}
+
+	validate, err := util.GetValidator()
+	if err != nil {
+		log.Printf("Error getting validator: %v", err)
+		response.ErrorStr = err.Error()
+		return response
+	}
+
+	err = validate.Struct(request)
+	if err != nil {
+		// Validation failed, handle the error
+		errors := err.(validator.ValidationErrors)
+		for _, valErr := range errors {
+			log.Printf("Validation error: %v", valErr)
+		}
+		response.ErrorStr = fmt.Sprintf("Validation error: %s", errors)
+		return response
+	}
+
+	expense := model.Expenses{
+		BuildingID:  keys.BuildingID,
+		ReceiptID:   keys.ReceiptID,
+		ID:          keys.ID,
+		Description: request.Description,
+		Amount:      request.Amount,
+		Currency:    request.Currency,
+		Type:        request.Type,
+	}
+
+	isUpdate := keys.ID != nil
+
+	if isUpdate {
+		_, err = update(expense)
+	} else {
+		lastInsertId, err := insert(expense)
+		if err == nil {
+			id := int32(lastInsertId)
+			keys.ID = &id
+		}
+	}
+
+	item, err := toItem(&expense, keys.CardId)
+	if err != nil {
+		log.Printf("Error converting to Item: %v", err)
+		response.ErrorStr = err.Error()
+		return response
+	}
+
+	var counter *int64
+
+	if !isUpdate {
+		count, err := countByReceipt(keys.ReceiptID)
+		if err != nil {
+			log.Printf("Error getting count: %v", err)
+			response.ErrorStr = err.Error()
+			return response
+		}
+		counter = &count
+	}
+
+	response.Item = item
+	response.Item.isUpdate = &isUpdate
+	response.counter = counter
+
+	return response
 }
 
-func expensesDelete(w http.ResponseWriter, r *http.Request) {
+func DeleteAndReturnKeys(r *http.Request) (Keys, error) {
 	key := mux.Vars(r)["key"]
 	var keys Keys
 	err := api.Decode(key, &keys)
 	if err != nil {
-		log.Printf("Error decoding key: %v", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return keys, err
 	}
 
 	if keys.ID == nil {
-		log.Printf("Error deleting reserveFund: %v", "id is required")
-		http.Error(w, "BadRequest", http.StatusBadRequest)
-		return
+		return keys, fmt.Errorf("id is required")
 	}
 
 	_, err = deleteById(*keys.ID)
 	if err != nil {
-		log.Printf("Error deleting reserveFund: %v", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		return keys, err
 	}
 
-	count, err := countByReceipt(keys.ReceiptID)
-
-	if err != nil {
-		log.Printf("Error getting count: %v", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	err = DeleteResponse(count, key).Render(r.Context(), w)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	return keys, nil
 }

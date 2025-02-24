@@ -8,7 +8,7 @@ import (
 	"sync"
 )
 
-func JoinExpensesAndReserveFunds(buildingId string, receiptId int32) (*ReceiptExpensesDto, error) {
+func JoinExpensesAndReserveFunds(buildingId string, receiptId int32) (*expenses.ReceiptExpensesDto, error) {
 	var oErr error
 	var wg sync.WaitGroup
 	var once sync.Once
@@ -56,8 +56,8 @@ func JoinExpensesAndReserveFunds(buildingId string, receiptId int32) (*ReceiptEx
 	return &dto, nil
 }
 
-func GetReceiptExpensesDto(receiptId int32, expenseArray []expenses.Item, reserveFundArray []reserveFunds.Item) ReceiptExpensesDto {
-	totals := ExpenseTotals{}
+func GetReceiptExpensesDto(receiptId int32, expenseArray []expenses.Item, reserveFundArray []reserveFunds.Item) expenses.ReceiptExpensesDto {
+	totals := expenses.ExpenseTotals{}
 
 	totalCommon, totalUnCommon := expenses.Totals(expenseArray)
 
@@ -65,6 +65,8 @@ func GetReceiptExpensesDto(receiptId int32, expenseArray []expenses.Item, reserv
 	totals.TotalUnCommon = totalUnCommon
 
 	reserveFundExpenses := make([]expenses.Item, 0)
+
+	isTherePercentage := false
 
 	for _, item := range reserveFundArray {
 		if item.Item.Active && item.Item.AddToExpenses {
@@ -83,6 +85,7 @@ func GetReceiptExpensesDto(receiptId int32, expenseArray []expenses.Item, reserv
 			} else {
 				amount = util.PercentageOf(item.Item.Pay, total)
 				nameSuffix = " " + util.FormatFloat2(item.Item.Pay) + "%"
+				isTherePercentage = true
 			}
 
 			expenseItem := expenses.Item{
@@ -108,8 +111,9 @@ func GetReceiptExpensesDto(receiptId int32, expenseArray []expenses.Item, reserv
 	totals.TotalUnCommonPlusReserve = totalUnCommonPlusReserve
 	totals.ExpensesCounter = len(joinArray)
 
-	return ReceiptExpensesDto{
-		reserveFundExpenses: reserveFundExpenses,
-		totals:              totals,
+	return expenses.ReceiptExpensesDto{
+		IsTherePercentage:   isTherePercentage,
+		ReserveFundExpenses: reserveFundExpenses,
+		Totals:              totals,
 	}
 }

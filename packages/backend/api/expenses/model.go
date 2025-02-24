@@ -65,9 +65,10 @@ type UpdateParams struct {
 	Type        string  `json:"type"`
 }
 type FormResponse struct {
-	errorStr string
-	item     *Item
-	counter  *int64
+	ErrorStr           string
+	Item               *Item
+	counter            *int64
+	ReceiptExpensesDto *ReceiptExpensesDto
 }
 
 type FormRequest struct {
@@ -76,4 +77,18 @@ type FormRequest struct {
 	Amount      float64 `form:"amount" validate:"required,ne=0"`
 	Currency    string  `form:"currency" validate:"required,oneof=USD VED"`
 	Type        string  `form:"type" validate:"required,oneof=COMMON UNCOMMON"`
+}
+
+type ExpenseTotals struct {
+	ExpensesCounter          int
+	TotalCommon              float64
+	TotalUnCommon            float64
+	TotalCommonPlusReserve   float64
+	TotalUnCommonPlusReserve float64
+}
+
+type ReceiptExpensesDto struct {
+	IsTherePercentage   bool
+	ReserveFundExpenses []Item
+	Totals              ExpenseTotals
 }

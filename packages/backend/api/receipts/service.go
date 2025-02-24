@@ -511,8 +511,8 @@ func getFormDto(keys Keys) (*FormDto, error) {
 
 	receiptExpensesDto := GetReceiptExpensesDto(keys.Id, formDto.expenseFormDto.Items, formDto.reserveFundFormDto.Items)
 
-	formDto.expenseTotals = receiptExpensesDto.totals
-	formDto.reserveFundExpenses = receiptExpensesDto.reserveFundExpenses
+	formDto.expenseTotals = receiptExpensesDto.Totals
+	formDto.reserveFundExpenses = receiptExpensesDto.ReserveFundExpenses
 
 	return &formDto, nil
 }

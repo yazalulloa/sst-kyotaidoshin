@@ -3,6 +3,7 @@ package expenses
 import (
 	"fmt"
 	"kyotaidoshin/api"
+	"kyotaidoshin/util"
 	"strings"
 )
 
@@ -40,57 +41,76 @@ templ ItemView(item Item) {
 		@api.SpanFormatCurrency(item.Item.Amount, item.Item.Currency)
 		<span x-text={ fmt.Sprintf("$t('main-title-%s')", strings.ToLower(item.Item.Type)) }></span>
 		if item.Key != "" {
-			@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
+			@api.DeleteBtn(fmt.Sprintf(PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
 		} else {
 			<div></div>
 		}
 	</li>
 }
 
-templ DeleteResponse(counter int64, key string) {
-	<div
-		id="expenses-list"
-		hx-swap-oob="beforeend"
-	>
-		<div
-			hidden="hidden"
-			data-counter={ fmt.Sprint(counter) }
-			x-init="
-        		counter = parseInt($el.getAttribute('data-counter'));
-        		$dispatch('event-expense-form-restart-after-deletion', { key: key });
-        		$el.remove()
-        		"
-		></div>
-	</div>
+templ DeleteResponse(dto ReceiptExpensesDto) {
+	if dto.IsTherePercentage {
+		@ReserveFundExpensesView(dto.ReserveFundExpenses)
+	}
+	@ExpenseTotalsView(dto.Totals)
 }
 
 templ FormResponseView(res FormResponse) {
 	<div
-		data-response-err={ res.errorStr }
-		if res.counter != nil {
-			data-counter={ fmt.Sprint(*res.counter) }
-		}
+		data-response-err={ res.ErrorStr }
 		x-init="
  		  errMsg = $el.getAttribute('data-response-err');
- 		  let dataCounter = $el.getAttribute('data-counter')
- 		  if (dataCounter && dataCounter !== '') {
- 		  counter = parseInt(dataCounter);
- 		  }
 
  		if (errMsg === '') {
  		  $dispatch('event-expense-form-reset');
  		 }
  		"
 	></div>
-	if res.item != nil {
-		if res.item.isUpdate != nil {
-			if *res.item.isUpdate {
-				@ItemView(*res.item)
+	if res.Item != nil {
+		if res.Item.isUpdate != nil {
+			if *res.Item.isUpdate {
+				@ItemView(*res.Item)
 			} else {
 				<div id="expenses-list" hx-swap-oob="beforeend">
-					@ItemView(*res.item)
+					@ItemView(*res.Item)
 				</div>
 			}
 		}
 	}
+	if res.ReceiptExpensesDto != nil {
+		@DeleteResponse(*res.ReceiptExpensesDto)
+	}
+}
+
+templ ExpenseTotalsView(dto ExpenseTotals) {
+	<div
+		id="expense-totals"
+		hx-swap-oob="innerHTML"
+	>
+		<div
+			data-counter={ fmt.Sprint(dto.ExpensesCounter) }
+			data-total-common={ util.FormatFloat2(dto.TotalCommon) }
+			data-total-un-common={ util.FormatFloat2(dto.TotalUnCommon) }
+			data-total-common-plus-reserve={ util.FormatFloat2(dto.TotalCommonPlusReserve) }
+			data-total-un-common-plus-reserve={ util.FormatFloat2(dto.TotalUnCommonPlusReserve) }
+			x-init="
+          counter = parseInt($el.getAttribute('data-counter'));
+      		totalCommon = $el.getAttribute('data-total-common');
+      		totalUnCommon = $el.getAttribute('data-total-un-common');
+      		totalCommonPlusReserve = $el.getAttribute('data-total-common-plus-reserve');
+      		totalUnCommonPlusReserve = $el.getAttribute('data-total-un-common-plus-reserve');
+
+      		"
+		></div>
+	</div>
+}
+
+templ ReserveFundExpensesView(reserveFundExpenses []Item) {
+	<div id="expenses-reserve-funds-list" hx-swap-oob="innerHTML">
+		for _, item := range reserveFundExpenses {
+			if item.UpdateParams == nil {
+				@ItemView(item)
+			}
+		}
+	</div>
 }

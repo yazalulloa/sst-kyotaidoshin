@@ -22,8 +22,10 @@ if (import.meta.env.VITE_IS_DEV === 'true') {
   SVGLoader.destroyCache();
 }
 
-window.USD_FORMATTER = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" })
-window.VED_FORMATTER = new Intl.NumberFormat("es-VE", { style: "currency", currency: "VES" })
+window.USD_FORMATTER = new Intl.NumberFormat("en-US",
+    {style: "currency", currency: "USD"})
+window.VED_FORMATTER = new Intl.NumberFormat("es-VE",
+    {style: "currency", currency: "VES"})
 
 window.FormatCurrency = function (value, currency) {
   if (currency === "USD") {
@@ -95,7 +97,7 @@ window.scrollThroughParent = (element) => {
   let previousElementSibling = element.previousElementSibling;
 
   if (previousElementSibling) {
-    console.log("Previous element sibling found ", element.id);
+    // console.log("Previous element sibling found ", element.id);
 
     window.addEventListener('scroll', () => {
       console.log("Scrolling ", element.id);
@@ -178,18 +180,32 @@ function formatInputCurrency(input, event) {
   }
 
   let isNegative = input.value.startsWith("-");
-  let value = input.value.replace(/[^0-9]/g, '');
-  value = padLeft(value, 3);
 
-  let idx = value.length - 2;
-  value = value.slice(0, idx) + "." + value.slice(idx);
-
-  if (value !== "0.00") {
-    let num = parseFloat(value);
-    value = num.toString();
+  if (input.value.indexOf(".") === -1) {
+    input.value = input.value + ".00"
   }
 
-  input.value = value
+  let currentValue = input.value.replace('.', '');
+  // Remove any non-numeric characters
+  currentValue = currentValue.replace(/[^0-9]/g, '');
+
+  // If the input is empty, reset to "0.00"
+  if (currentValue === '' || currentValue === '0') {
+    input.value = "0.00";
+    return;
+  }
+
+  // Format the value to two decimal places
+  if (currentValue.length > 2) {
+    // Shift the digits left and format
+    input.value = currentValue.slice(0, -2) + '.' + currentValue.slice(-2);
+  } else {
+    // If less than 3 digits, pad with zeros
+    input.value = '0.' + currentValue.padStart(2, '0');
+  }
+
+  input.value = parseFloat(input.value).toFixed(2);
+
   if (allowNegative && isNegative) {
     input.value = "-" + input.value;
   }
