@@ -107,9 +107,11 @@ type FormDto struct {
 	receipt             *model.Receipts
 	rates               []RateDto
 	expenseFormDto      expenses.FormDto
+	reserveFundExpenses []expenses.Item
 	reserveFundFormDto  reserveFunds.FormDto
 	extraChargesFormDto extraCharges.FormDto
 	debtFormDto         debts.FormDto
+	expenseTotals       ExpenseTotals
 	apts                string
 }
 
@@ -123,4 +125,17 @@ type FormRequest struct {
 
 type FormResponse struct {
 	errorStr string
+}
+
+type ExpenseTotals struct {
+	ExpensesCounter          int
+	TotalCommon              float64
+	TotalUnCommon            float64
+	TotalCommonPlusReserve   float64
+	TotalUnCommonPlusReserve float64
+}
+
+type ReceiptExpensesDto struct {
+	reserveFundExpenses []expenses.Item
+	totals              ExpenseTotals
 }

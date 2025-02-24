@@ -135,6 +135,14 @@ templ FormView(dto FormDto) {
 	@reserveFunds.FormView(dto.reserveFundFormDto)
 	@extraCharges.FormView(dto.extraChargesFormDto)
 	@debts.FormView(dto.debtFormDto)
+	<div id="expenses-reserve-funds-list" hx-swap-oob="innerHTML">
+		for _, item := range dto.reserveFundExpenses {
+			if item.UpdateParams == nil {
+				@expenses.ItemView(item)
+			}
+		}
+	</div>
+	@ExpenseTotalsView(dto.expenseTotals)
 }
 
 templ FormResponseView(res FormResponse) {
@@ -152,4 +160,27 @@ form.classList.remove('border', 'border-success');
 
 "
 	></div>
+}
+
+templ ExpenseTotalsView(dto ExpenseTotals) {
+	<div
+		id="expense-totals"
+		hx-swap-oob="innerHTML"
+	>
+		<div
+			data-counter={ fmt.Sprint(dto.ExpensesCounter) }
+			data-total-common={ util.FormatFloat2(dto.TotalCommon) }
+			data-total-un-common={ util.FormatFloat2(dto.TotalUnCommon) }
+			data-total-common-plus-reserve={ util.FormatFloat2(dto.TotalCommonPlusReserve) }
+			data-total-un-common-plus-reserve={ util.FormatFloat2(dto.TotalUnCommonPlusReserve) }
+			x-init="
+          counter = parseInt($el.getAttribute('data-counter'));
+      		totalCommon = $el.getAttribute('data-total-common');
+      		totalUnCommon = $el.getAttribute('data-total-un-common');
+      		totalCommonPlusReserve = $el.getAttribute('data-total-common-plus-reserve');
+      		totalUnCommonPlusReserve = $el.getAttribute('data-total-un-common-plus-reserve');
+
+      		"
+		></div>
+	</div>
 }

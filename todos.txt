@@ -1,0 +1,2 @@
+expense put/delete -> expenses total counter change
+                   -> reserveFunds percentage change

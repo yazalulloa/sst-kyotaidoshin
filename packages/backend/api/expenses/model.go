@@ -23,12 +23,8 @@ type ExpenseDto struct {
 }
 
 type FormDto struct {
-	Key                      string
-	Items                    []Item
-	TotalCommon              float64
-	TotalUnCommon            float64
-	TotalCommonPlusReserve   float64
-	TotalUnCommonPlusReserve float64
+	Key   string
+	Items []Item
 }
 
 type Item struct {
