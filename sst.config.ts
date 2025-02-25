@@ -13,7 +13,7 @@ export default $config({
   },
   async run() {
 
-    let isDev = Boolean($app.stage !== PROD_STAGE);
+    let isLocal = Boolean($app.stage !== PROD_STAGE);
     const bucket = new sst.aws.Bucket("bcv-bucket", {
       versioning: false,
     });
@@ -27,6 +27,7 @@ export default $config({
     const queue = new sst.aws.Queue("BcvQueue", {
       //not supported for S3 notificationsm
       fifo: false,
+      visibilityTimeout: "300 seconds",
     });
     // const vpc = new sst.aws.Vpc("MyVpc", {
     //   nat: {
@@ -117,19 +118,20 @@ export default $config({
       function: bcvFunction.arn,
     })
 
-    let allowOrigins = isDev ? ["*"] : [webUrl.value];
+    let allowedOrigins = isLocal ? ["*"] : [webUrl.value];
 
     const api = new sst.aws.ApiGatewayV2("API", {
       // domain: domain.value,
       cors: {
-        allowOrigins: allowOrigins,
-        allowMethods: ["GET", "HEAD", "PUT", "POST", "DELETE", "OPTIONS"],
-        maxAge: "1 day"
+        allowOrigins: allowedOrigins,
+        allowMethods: ["GET", "PUT", "POST", "DELETE"],
+        maxAge: isLocal ? "1 minute" : "1 day"
         // allowHeaders: ["Content-Type", "Authorization"],
         // allowHeaders: ["date", "keep-alive", "access-control-request-headers"],
         // exposeHeaders: ["date", "keep-alive", "access-control-request-headers"]
       }
     });
+
 
     const uploadBackupBucket = new sst.aws.Bucket("UploadBackup", {
       versioning: false,
@@ -150,13 +152,24 @@ export default $config({
       timeout: "60 seconds",
     });
 
-
-    api.route("$default", {
+    const mainApiFunction = new sst.aws.Function("MainApiFunction", {
       handler: "packages/backend/api",
       runtime: "go",
       link: [bucket, secretTursoUrl, bcvUrl, bcvFileStartPath, uploadBackupBucket, apiFunction],
       timeout: "60 seconds",
     });
+
+    api.route("GET /{proxy+}", mainApiFunction.arn);
+    api.route("POST /{proxy+}", mainApiFunction.arn);
+    api.route("PUT /{proxy+}", mainApiFunction.arn);
+    api.route("DELETE /{proxy+}", mainApiFunction.arn);
+
+    // api.route("$default", {
+    //   handler: "packages/backend/api",
+    //   runtime: "go",
+    //   link: [bucket, secretTursoUrl, bcvUrl, bcvFileStartPath, uploadBackupBucket, apiFunction],
+    //   timeout: "60 seconds",
+    // });
 
     // const api = new sst.aws.Function("ApiFunction", {
     //   url: true,
@@ -170,7 +183,7 @@ export default $config({
       environment: {
         // Accessible in the browser
         VITE_VAR_ENV: api.url,
-        VITE_IS_DEV: isDev.toString(),
+        VITE_IS_DEV: isLocal.toString(),
       },
       build: {
         command: "bun run build",

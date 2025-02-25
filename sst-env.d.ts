@@ -23,6 +23,10 @@ declare module "sst" {
       "type": "sst.aws.Queue"
       "url": string
     }
+    "MainApiFunction": {
+      "name": string
+      "type": "sst.aws.Function"
+    }
     "ProcessBcvFile": {
       "name": string
       "type": "sst.aws.Function"
