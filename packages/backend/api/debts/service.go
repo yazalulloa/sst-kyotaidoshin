@@ -19,7 +19,13 @@ func GetFormDto(buildingId string, receiptId int32) (*FormDto, error) {
 
 	items := make([]Item, len(list))
 
+	totals := Totals{
+		Counter: len(list),
+	}
+
 	for i, item := range list {
+		totals.TotalReceipts += item.Receipts
+		totals.TotalAmount += item.Amount
 
 		obj, err := toItem(&item, nil)
 
@@ -31,7 +37,8 @@ func GetFormDto(buildingId string, receiptId int32) (*FormDto, error) {
 	}
 
 	return &FormDto{
-		Items: items,
+		Items:  items,
+		Totals: totals,
 	}, nil
 }
 

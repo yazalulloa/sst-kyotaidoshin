@@ -17,7 +17,14 @@ type DebtDto struct {
 }
 
 type FormDto struct {
-	Items []Item
+	Items  []Item
+	Totals Totals
+}
+
+type Totals struct {
+	TotalAmount   float64
+	TotalReceipts int16
+	Counter       int
 }
 
 type Item struct {
@@ -61,5 +68,14 @@ type UpdateParams struct {
 type FormResponse struct {
 	errorStr string
 	item     *Item
-	counter  int64
+	Totals   *Totals
+}
+
+type FormRequest struct {
+	Key                           string  `form:"key" validate:"required,notblank,max=300"`
+	Receipts                      int16   `form:"receipts" validate:"gte=0"`
+	Amount                        float64 `form:"amount" validate:"gte=0"`
+	Months                        []int16 `form:"month_input" validate:"dive,gte=1,lte=12"`
+	PreviousPaymentAmount         float64 `form:"previousPaymentAmount" validate:"gte=0"`
+	PreviousPaymentAmountCurrency string  `form:"previousPaymentAmountCurrency" validate:"required,oneof=USD VED"`
 }

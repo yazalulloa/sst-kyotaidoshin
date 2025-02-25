@@ -11,14 +11,22 @@ templ FormView(dto FormDto) {
 		for _, item := range dto.Items {
 			@ItemView(item)
 		}
-		<div
-			data-counter={ fmt.Sprint(len(dto.Items)) }
-			x-init="
+		@TotalsView(dto.Totals)
+	</div>
+}
+
+templ TotalsView(totals Totals) {
+	<div
+		data-counter={ fmt.Sprint(totals.Counter) }
+		data-total-amount={ util.FormatFloat2(totals.TotalAmount) }
+		data-total-receipts={ fmt.Sprint(totals.TotalReceipts) }
+		x-init="
       		counter = parseInt($el.getAttribute('data-counter'));
+      		total = parseFloat($el.getAttribute('data-total-amount'));
+      		totalReceipts = parseInt($el.getAttribute('data-total-receipts'));
       		$el.remove()
       		"
-		></div>
-	</div>
+	></div>
 }
 
 templ ItemView(item Item) {
@@ -53,13 +61,8 @@ templ ItemView(item Item) {
 templ FormResponseView(res FormResponse) {
 	<div
 		data-response-err={ res.errorStr }
-		data-counter={ fmt.Sprint(res.counter) }
 		x-init="
  		  errMsg = $el.getAttribute('data-response-err');
- 		  let dataCounter = $el.getAttribute('data-counter')
- 		  if (dataCounter && dataCounter !== '') {
- 		  counter = parseInt(dataCounter);
- 		  }
 
  		if (errMsg === '') {
  		  $dispatch('event-debt-form-reset');
@@ -76,5 +79,8 @@ templ FormResponseView(res FormResponse) {
 				</div>
 			}
 		}
+	}
+	if res.Totals != nil {
+		@TotalsView(*res.Totals)
 	}
 }

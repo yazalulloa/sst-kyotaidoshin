@@ -62,3 +62,22 @@ func SelectByBuildingReceipt(buildingId string, receiptId int32) ([]model.Debts,
 
 	return dest, nil
 }
+
+func update(debt model.Debts) (int64, error) {
+	stmt := Debts.UPDATE(Debts.Receipts, Debts.Amount, Debts.Months, Debts.PreviousPaymentAmount, Debts.PreviousPaymentAmountCurrency).
+		WHERE(Debts.BuildingID.EQ(sqlite.String(debt.BuildingID)).AND(Debts.ReceiptID.EQ(sqlite.Int32(debt.ReceiptID))).AND(Debts.AptNumber.EQ(sqlite.String(debt.AptNumber)))).
+		SET(debt.Receipts, debt.Amount, debt.Months, debt.PreviousPaymentAmount, debt.PreviousPaymentAmountCurrency)
+
+	res, err := stmt.Exec(db.GetDB().DB)
+	if err != nil {
+		log.Printf("Error updating debt: %v\n", err)
+		return 0, err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
+}

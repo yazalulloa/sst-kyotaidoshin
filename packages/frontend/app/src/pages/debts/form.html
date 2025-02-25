@@ -2,7 +2,7 @@
      x-data="{
  counter: 0,
  total: 0,
- receipts: 0
+ totalReceipts: 0
 }">
   <div class="flex flex-row gap-3 justify-center">
     <div class="flex flex-row gap-0 justify-center font-extrabold capitalize">
@@ -10,11 +10,11 @@
     </div>
 
     <div class="flex flex-row gap-0 justify-center font-extrabold capitalize">
-      <span x-text="$t('main-title-total')"></span>:&nbsp;<span x-text="total"></span>
+      <span x-text="$t('main-title-total')"></span>:&nbsp;<span x-text="FormatCurrency(total, debtCurrency)"></span>
     </div>
 
     <div class="flex flex-row gap-0 justify-center font-extrabold capitalize">
-      <span x-text="$t('main-title-receipts')"></span>:&nbsp;<span x-text="receipts"></span>
+      <span x-text="$t('main-title-receipts')"></span>:&nbsp;<span x-text="totalReceipts"></span>
     </div>
   </div>
 
@@ -25,7 +25,7 @@
       receipts: 0,
       amount: 0,
       monthsSelected: [],
-      previousPaymentAmount: '',
+      previousPaymentAmount: 0,
       previousPaymentAmountCurrency: '',
 
       amountErr: '',
@@ -49,8 +49,9 @@
              monthsSelected = jsonObject.months;
           }
 
-          previousPaymentAmount = jsonObject.previousPaymentAmount;
-          previousPaymentAmountCurrency = jsonObject.previousPaymentAmountCurrency;
+          previousPaymentAmount = jsonObject.previous_payment_amount;
+          previousPaymentAmountCurrency = jsonObject.previous_payment_amount_currency;
+          console.log(jsonObject);
           open_form = true;
      "
        class="flex flex-col gap-4 justify-center"
@@ -130,7 +131,7 @@
             id="debtsReceiptInput"
             class="w-full rounded-radius border bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
             type="number"
-            name="amount"
+            name="receipts"
             maxlength="14"
             x-model="receipts"
             x-bind:class="receiptsErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
@@ -166,7 +167,7 @@
             id="debtsPreviousPaymentAmountInput"
             class="w-full rounded-radius border bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
             type="number"
-            name="amount"
+            name="previousPaymentAmount"
             maxlength="14"
             step=".01"
             x-model="previousPaymentAmount"
