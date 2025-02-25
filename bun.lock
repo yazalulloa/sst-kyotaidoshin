@@ -4,7 +4,7 @@
     "": {
       "name": "kyotaidoshin",
       "dependencies": {
-        "sst": "^3.9.7",
+        "sst": "^3.9.10",
       },
       "devDependencies": {
         "@tsconfig/node22": "^22.0.0",
