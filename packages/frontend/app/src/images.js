@@ -1,15 +1,15 @@
-import deleteIconUrl from './assets/images/delete-cross.svg?url';
-import processIconUrl from './assets/images/process.svg?url';
-import editIconUrl from './assets/images/edit_icon.svg?url';
-import ratesIcon from './assets/images/rates.svg?url'
-import bucketIcon from './assets/images/bucket.svg?url'
-import buildingsIcon from './assets/images/building.svg?url'
-import apartmentsIcon from './assets/images/apartments.svg?url'
-import nextPageIcon from './assets/images/chevron-double-down.svg?url'
-import backBtnIcon from './assets/images/left-arrow.svg?url'
-import crossIcon from './assets/images/cross.svg?url'
-import selectIcon from './assets/images/selectIcon.svg?url'
-import checkBoxIcon from './assets/images/checkbox-icon.svg?url'
+import deleteIconUrl from './assets/images/delete-cross.svg?no-inline';
+import processIconUrl from './assets/images/process.svg?no-inline';
+import editIconUrl from './assets/images/edit_icon.svg?no-inline';
+import ratesIcon from './assets/images/rates.svg?no-inline'
+import bucketIcon from './assets/images/bucket.svg?no-inline'
+import buildingsIcon from './assets/images/building.svg?no-inline'
+import apartmentsIcon from './assets/images/apartments.svg?no-inline'
+import nextPageIcon from './assets/images/chevron-double-down.svg?no-inline'
+import backBtnIcon from './assets/images/left-arrow.svg?no-inline'
+import crossIcon from './assets/images/cross.svg?no-inline'
+import selectIcon from './assets/images/selectIcon.svg?no-inline'
+import checkBoxIcon from './assets/images/checkbox-icon.svg?no-inline'
 
 window.deleteIconUrl = deleteIconUrl;
 window.processIconUrl = processIconUrl;
