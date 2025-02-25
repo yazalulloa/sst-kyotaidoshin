@@ -235,7 +235,6 @@ window.configureNumberInput = function (input) {
 function configureCurrencyInputs() {
   // get all input with attribute data-currency
   const inputs = document.querySelectorAll('input[data-type="currency"]')
-  console.log("inputs: ", inputs.length);
   inputs.forEach(configureCurrencyInput)
 
 }
