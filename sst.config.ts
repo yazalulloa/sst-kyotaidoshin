@@ -13,12 +13,14 @@ export default $config({
   },
   async run() {
 
+    let isDev = Boolean($app.stage !== PROD_STAGE);
     const bucket = new sst.aws.Bucket("bcv-bucket", {
       versioning: false,
     });
     const secretTursoUrl = new sst.Secret("SecretTursoUrl");
     const bcvUrl = new sst.Secret("SecretBcvUrl");
     const bcvFileStartPath = new sst.Secret("SecretBcvFileStartPath");
+    const webUrl = new sst.Secret("WebUrl");
     // const domain = new sst.Secret("Domain");
 
 
@@ -115,11 +117,15 @@ export default $config({
       function: bcvFunction.arn,
     })
 
+    let allowOrigins = isDev ? ["*"] : [webUrl.value];
+
     const api = new sst.aws.ApiGatewayV2("API", {
       // domain: domain.value,
       cors: {
-        allowOrigins: ["*"],
+        allowOrigins: allowOrigins,
         allowMethods: ["GET", "HEAD", "PUT", "POST", "DELETE", "OPTIONS"],
+        maxAge: "1 day"
+        // allowHeaders: ["Content-Type", "Authorization"],
         // allowHeaders: ["date", "keep-alive", "access-control-request-headers"],
         // exposeHeaders: ["date", "keep-alive", "access-control-request-headers"]
       }
@@ -164,7 +170,7 @@ export default $config({
       environment: {
         // Accessible in the browser
         VITE_VAR_ENV: api.url,
-        VITE_IS_DEV: Boolean($app.stage !== PROD_STAGE).toString(),
+        VITE_IS_DEV: isDev.toString(),
       },
       build: {
         command: "bun run build",
