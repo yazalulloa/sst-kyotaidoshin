@@ -29,7 +29,7 @@ func Routes(server *mux.Router) {
 
 	server.HandleFunc(_SEARCH, search).Methods("GET")
 	server.HandleFunc(_PATH, receiptPut).Methods("PUT")
-	//server.HandleFunc(_PATH+"/{key}", aptDelete).Methods("DELETE")
+	server.HandleFunc(_PATH+"/{key}", receiptDelete).Methods("DELETE")
 	server.HandleFunc(_PATH+"/init", getInit).Methods("GET")
 	server.HandleFunc(_UPLOAD_BACKUP_FORM, getUploadBackupForm).Methods("GET")
 	server.HandleFunc(_UPLOAD_BACKUP, uploadBackup).Methods("GET")
@@ -427,4 +427,28 @@ func receiptPut(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func receiptDelete(w http.ResponseWriter, r *http.Request) {
+	keyStr := mux.Vars(r)["key"]
+	if keyStr == "" {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	var keys Keys
+	err := api.Decode(keyStr, &keys)
+	if err != nil {
+		log.Printf("failed to decode key: %v", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	_, err = deleteReceipt(keys)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

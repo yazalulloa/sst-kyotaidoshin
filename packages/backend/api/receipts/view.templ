@@ -39,7 +39,9 @@ templ ItemView(item Item) {
 		if item.isUpdate {
 			hx-swap-oob="true"
 		}
-		@dblclick={ fmt.Sprintf("window.location.href = '/receipts/edit/%s'", item.Key) }
+		if false {
+			@dblclick={ fmt.Sprintf("window.location.href = '/receipts/edit/%s'", item.Key) }
+		}
 	>
 		<span>{ item.Item.BuildingID }</span>
 		<span x-text={ fmt.Sprintf("$t('main-months-%d')", item.Item.Month) }></span>
@@ -64,8 +66,18 @@ templ ItemView(item Item) {
                                          .toLocaleString()
                                          "
 		></span>
-		@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{
-			"hx-include": "[name='building_input'],[name='month_input'],[name='year_input']"})
+		<div class="flex flex-row flex-wrap gap-2 justify-center items-center">
+			<a href={ templ.URL(fmt.Sprintf("/receipts/edit/%s", item.Key)) }>
+				<button
+					type="button"
+					class="whitespace-nowrap bg-transparent rounded-full border border-success p-1 text-sm font-medium tracking-wide text-success transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-success active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-success-dark dark:text-success-dark dark:focus-visible:outline-success-dark"
+				>
+					<svg x-bind:data-src="editIconUrl" data-cache="21600" class="h-6 w-6"></svg>
+				</button>
+			</a>
+			@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{
+				"hx-include": "[name='building_input'],[name='month_input'],[name='year_input']"})
+		</div>
 	</li>
 }
 

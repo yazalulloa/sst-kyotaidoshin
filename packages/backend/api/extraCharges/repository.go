@@ -135,3 +135,18 @@ func SelectByReceipt(receiptID int32) ([]model.ExtraCharges, error) {
 	}
 	return dest, nil
 }
+
+func DeleteByReceipt(receiptID int32) (int64, error) {
+	//receiptID to string
+	parentReference := fmt.Sprint(receiptID)
+	stmt := ExtraCharges.DELETE().WHERE(ExtraCharges.ParentReference.EQ(sqlite.String(parentReference)))
+	res, err := stmt.Exec(db.GetDB().DB)
+	if err != nil {
+		return 0, err
+	}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	return rowsAffected, nil
+}

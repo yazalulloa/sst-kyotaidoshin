@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"kyotaidoshin/apartments"
 	"kyotaidoshin/api"
 	"kyotaidoshin/buildings"
@@ -13,6 +14,7 @@ import (
 	"kyotaidoshin/extraCharges"
 	"kyotaidoshin/rates"
 	"kyotaidoshin/reserveFunds"
+	"kyotaidoshin/util"
 	"log"
 	"slices"
 	"strconv"
@@ -589,4 +591,79 @@ func getRatesDtos(date *time.Time) ([]RateDto, error) {
 
 	return ratesDto, nil
 
+}
+
+func deleteReceipt(keys Keys) (int64, error) {
+	numWorkers := 4
+	var wg sync.WaitGroup
+	resultChan := make(chan int64, numWorkers)
+	errorChan := make(chan error, numWorkers)
+
+	wg.Add(numWorkers)
+
+	go func() {
+		defer wg.Done()
+		rowsAffected, err := deleteById(keys.Id)
+		if err != nil {
+			errorChan <- fmt.Errorf("error deleting receipt: %s %d -> %w", keys.BuildingId, keys.Id, err)
+			return
+		}
+
+		resultChan <- rowsAffected
+	}()
+
+	go func() {
+		defer wg.Done()
+		rowsAffected, err := extraCharges.DeleteByReceipt(keys.Id)
+		if err != nil {
+			errorChan <- fmt.Errorf("error deleting extra charges: %s %d -> %w", keys.BuildingId, keys.Id, err)
+			return
+		}
+
+		resultChan <- rowsAffected
+	}()
+
+	go func() {
+		defer wg.Done()
+		rowsAffected, err := expenses.DeleteByReceipt(keys.Id)
+		if err != nil {
+			errorChan <- fmt.Errorf("error deleting expenses: %s %d -> %w", keys.BuildingId, keys.Id, err)
+			return
+		}
+
+		resultChan <- rowsAffected
+	}()
+
+	go func() {
+		defer wg.Done()
+		rowsAffected, err := debts.DeleteByReceipt(keys.BuildingId, keys.Id)
+		if err != nil {
+			errorChan <- fmt.Errorf("error deleting debts: %s %d -> %w", keys.BuildingId, keys.Id, err)
+			return
+		}
+
+		resultChan <- rowsAffected
+	}()
+
+	wg.Wait()
+	close(resultChan)
+	close(errorChan)
+
+	multiErr := &util.MultiError{Errors: make([]error, len(errorChan))}
+	for err := range errorChan {
+		multiErr.Add(err)
+	}
+
+	if multiErr.HasErrors() {
+		return 0, multiErr
+	}
+
+	var sum int64 = 0
+	for value := range resultChan {
+		sum += value
+	}
+
+	log.Printf("Deleted %d records", sum)
+
+	return sum, nil
 }

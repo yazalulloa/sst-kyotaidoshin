@@ -171,3 +171,19 @@ func update(receipt model.Receipts) (int64, error) {
 
 	return rowsAffected, nil
 }
+
+func deleteById(id int32) (int64, error) {
+	stmt := Receipts.DELETE().WHERE(Receipts.ID.EQ(sqlite.Int32(id)))
+
+	res, err := stmt.Exec(db.GetDB().DB)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
+}

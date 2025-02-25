@@ -53,6 +53,20 @@ func SelectByReceipt(receiptID int32) ([]model.Expenses, error) {
 	return dest, nil
 }
 
+func DeleteByReceipt(receiptID int32) (int64, error) {
+	stmt := Expenses.DELETE().WHERE(Expenses.ReceiptID.EQ(sqlite.Int32(receiptID)))
+	res, err := stmt.Exec(db.GetDB().DB)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+	return rowsAffected, nil
+}
+
 func deleteById(id int32) (int64, error) {
 	stmt := Expenses.DELETE().WHERE(Expenses.ID.EQ(sqlite.Int32(id)))
 	res, err := stmt.Exec(db.GetDB().DB)
