@@ -246,6 +246,26 @@ window.FormatDate = function (date) {
   .toLocaleString()
 }
 
+window.decodeBase64Url = function (encoded) {
+
+  let base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+
+  const padding = base64.length % 4;
+  if (padding) {
+    base64 += '='.repeat(4 - padding);
+  }
+
+  const binaryString = atob(base64);
+
+  const byteNumbers = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    byteNumbers[i] = binaryString.charCodeAt(i);
+  }
+
+  const decoder = new TextDecoder('utf-8');
+  return decoder.decode(byteNumbers);
+}
+
 document.addEventListener("htmx:afterSettle", function (event) {
   // configureCurrencyInputs();
 });

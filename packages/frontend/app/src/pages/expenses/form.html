@@ -54,11 +54,12 @@
              }"
        @event-expense-form-update="
          let base64 = $event.detail.params;
-         let decodedString = atob(base64);
+         let decodedString = decodeBase64Url(base64);
          let jsonObject = JSON.parse(decodedString);
 
           is_edit = true;
           key = jsonObject.key;
+          console.log('Description ', jsonObject.description);
           description = jsonObject.description;
           amount = jsonObject.amount;
           currency = jsonObject.currency;
@@ -138,6 +139,7 @@
           trimInput($el);
           limitInputToMaxLength($el);
           "
+            x-trap.noreturn="description !== ''"
             required
         />
         <small x-model="descriptionErr"

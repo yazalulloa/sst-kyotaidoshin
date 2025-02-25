@@ -31,7 +31,7 @@
         }"
       @event-receipt-form-update="
          let base64 = $event.detail.params;
-         let decodedString = atob(base64);
+         let decodedString = decodeBase64Url(base64);
          let jsonObject = JSON.parse(decodedString);
 
          open = true;
