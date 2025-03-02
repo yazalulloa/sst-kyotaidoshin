@@ -194,3 +194,22 @@ CREATE TABLE IF NOT EXISTS debts
     previous_payment_amount_currency TEXT CHECK ( previous_payment_amount_currency IN ('USD', 'VED') ) NOT NULL,
     PRIMARY KEY (building_id, receipt_id, apt_number)
 );
+
+CREATE TABLE IF NOT EXISTS users
+(
+
+    id            VARCHAR(50)                             NOT NULL,
+    provider_id   VARCHAR(100)                            NOT NULL,
+    provider      TEXT CHECK ( provider IN ('PLATFORM', 'GOOGLE', 'GITHUB', 'MASTODON', 'MICROSOFT', 'APPLE',
+                               'FACEBOOK') ) NOT NULL,
+    email         VARCHAR(320)                            NOT NULL,
+    username      VARCHAR(100)                            NOT NULL,
+    name          VARCHAR(200)                            NOT NULL,
+    picture       VARCHAR(500)                            NOT NULL,
+    data          JSONB                                   NOT NULL,
+    created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_login_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
+);
+
+CREATE INDEX IF NOT EXISTS users_provider_id_idx ON users (provider, provider_id);

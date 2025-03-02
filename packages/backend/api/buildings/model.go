@@ -29,6 +29,7 @@ type Item struct {
 	CardId    string
 	Key       string
 	Item      model.Buildings
+	AptCount  int64
 	CreatedAt int64
 }
 

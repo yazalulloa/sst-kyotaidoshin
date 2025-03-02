@@ -18,4 +18,5 @@ func UseSchema(schema string) {
 	Rates = Rates.FromSchema(schema)
 	Receipts = Receipts.FromSchema(schema)
 	ReserveFunds = ReserveFunds.FromSchema(schema)
+	Users = Users.FromSchema(schema)
 }

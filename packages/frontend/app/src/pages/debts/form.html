@@ -35,7 +35,7 @@
   }"
        @event-debt-form-update="
          let base64 = $event.detail.params;
-         let decodedString = decodeBase64Url(base64);
+         let decodedString = decodeBase64UrlStr(base64);
          let jsonObject = JSON.parse(decodedString);
 
           apartment = jsonObject.apt;
@@ -107,7 +107,7 @@
             step=".01"
             x-model="amount"
             x-bind:class="amountErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
-            x-trap.noreturn="apartment !== ''"
+            disabled-x-trap.noreturn="apartment !== ''"
             x-init="
             limitInputToMaxLength($el)
             configureCurrencyInput($el)

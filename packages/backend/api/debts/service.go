@@ -4,7 +4,6 @@ import (
 	"db/gen/model"
 	"encoding/base64"
 	"encoding/json"
-	"kyotaidoshin/api"
 	"kyotaidoshin/util"
 	"strings"
 )
@@ -51,7 +50,7 @@ func toItem(item *model.Debts, oldCardId *string) (*Item, error) {
 	}
 
 	keys := keys(*item, cardIdStr)
-	key := *api.Encode(keys)
+	key := *util.Encode(keys)
 
 	var months []int16
 

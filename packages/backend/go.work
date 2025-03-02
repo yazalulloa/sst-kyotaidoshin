@@ -7,4 +7,6 @@ use (
 	./aws_h
 	./process-bcv-file
 	./process-rates
+	./auth_client
+	./process-user
 )

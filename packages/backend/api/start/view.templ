@@ -1,0 +1,78 @@
+package start
+
+import (
+	"db/gen/model"
+	"fmt"
+)
+
+templ Init(pages []Page, pagesStr string, user model.Users) {
+	<div
+		hidden="hidden"
+		data-pages-array={ pagesStr }
+		x-init="
+    let parts = JSON.parse($el.getAttribute('data-pages-array'));
+    parts.forEach((part) => {
+      pages.push(part);
+    })
+"
+	></div>
+	for _, page := range pages {
+		<a
+			id={ page.Id }
+			href={ templ.SafeURL(page.Path) }
+			@click={ fmt.Sprintf("saveLastNav('%s'); selected = '%s'", page.Id, page.Id) }
+			x-bind:class={ fmt.Sprintf("!('%s' === selected) || 'active bg-primary/10 dark:bg-primary-dark/10 text-on-surface-strong dark:text-on-surface-dark-strong'", page.Id) }
+			asd-class="flex items-center rounded-radius gap-2 bg-primary/10 px-2 py-1.5 text-sm font-medium text-on-surface-strong underline-offset-2 focus-visible:underline focus:outline-hidden dark:bg-primary-dark/10 dark:text-on-surface-dark-strong"
+			class="flex items-center rounded-radius gap-2 px-2 py-1.5 text-sm font-medium text-on-surface underline-offset-2 hover:bg-primary/5 hover:text-on-surface-strong focus-visible:underline focus:outline-hidden dark:text-on-surface-dark dark:hover:bg-primary-dark/5 dark:hover:text-on-surface-dark-strong"
+		>
+			<template
+				x-route={ page.Path }
+				x-handler="[(ctx) => $el.dispatchEvent(new CustomEvent('navigate')) ]"
+				x-bind:hx-get={ fmt.Sprintf("NAV_URLS.get('%s')", page.Id) }
+				hx-target="#container"
+				hx-indicator=".htmx-indicator"
+				hx-trigger="navigate"
+				hx-swap="innerHTML"
+				x-init="htmx.process($el)"
+			></template>
+			for _,subRoute := range page.SubRoutes {
+				<template
+					x-route={ subRoute.Path }
+					x-handler="[(ctx) => $el.dispatchEvent(new CustomEvent('navigate')) ]"
+					x-bind:hx-get={ fmt.Sprintf("NAV_URLS.get('%s')", subRoute.Id) }
+					hx-target="#container"
+					hx-indicator=".htmx-indicator"
+					hx-trigger="navigate"
+					hx-swap="innerHTML"
+					x-init="htmx.process($el)"
+				></template>
+			}
+			<svg
+				x-bind:data-src={ fmt.Sprintf("NAV_ICONS.get('%s')", page.Id) }
+				data-cache="21600"
+				class="size-5"
+			></svg>
+			<span x-text={ fmt.Sprintf("$t(NAV_TITLES.get('%s'))", page.Id) }></span>
+			<span x-show={ fmt.Sprintf("selected == '%s'", page.Id) } class="sr-only">active</span>
+		</a>
+	}
+	@Avatar(user)
+}
+
+templ Avatar(user model.Users) {
+	<div id="avatar-btn" hx-swap-oob="innerHTML">
+		<img
+			src={ user.Picture }
+			class="size-8 object-cover rounded-radius"
+			alt="avatar"
+			aria-hidden="true"
+		/>
+		<div class="hidden md:flex flex-col">
+			<span
+				class="text-sm font-bold text-on-surface-strong dark:text-on-surface-dark-strong"
+			>{ user.Name }</span>
+			<span class="text-xs" aria-hidden="true">{ user.Email }</span>
+			<span class="sr-only">profile settings</span>
+		</div>
+	</div>
+}

@@ -35,3 +35,16 @@ func (m *MultiError) Add(err error) {
 func (m *MultiError) HasErrors() bool {
 	return len(m.Errors) > 0
 }
+
+func HasErrors(c <-chan error) error {
+	multiErr := &MultiError{Errors: make([]error, 0)}
+	for err := range c {
+		multiErr.Add(err)
+	}
+
+	if multiErr.HasErrors() {
+		return multiErr
+	}
+
+	return nil
+}

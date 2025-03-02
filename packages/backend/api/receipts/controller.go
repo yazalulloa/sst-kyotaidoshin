@@ -67,7 +67,7 @@ func getInit(w http.ResponseWriter, r *http.Request) {
 
 	go func() {
 		defer wg.Done()
-		params, err := api.GetUploadFormParams(r.Context(), _UPLOAD_BACKUP[1:], "receipts")
+		params, err := util.GetUploadFormParams(r.Context(), _UPLOAD_BACKUP[1:], "receipts")
 		if err != nil {
 			handleErr(err)
 			return
@@ -196,10 +196,10 @@ func uploadBackup(w http.ResponseWriter, r *http.Request) {
 }
 
 func search(w http.ResponseWriter, r *http.Request) {
-	nextPage := api.GetQueryParamAsString(r, "next_page")
+	nextPage := util.GetQueryParamAsString(r, "next_page")
 	var keys Keys
 	if nextPage != "" {
-		err := api.Decode(nextPage, &keys)
+		err := util.Decode(nextPage, &keys)
 
 		if err != nil {
 			log.Printf("failed to decode nextPage: %v", err)
@@ -304,7 +304,7 @@ func formData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var keys Keys
-	err := api.Decode(keyStr, &keys)
+	err := util.Decode(keyStr, &keys)
 	if err != nil {
 		log.Printf("failed to decode key: %v", err)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
@@ -349,7 +349,7 @@ func receiptPut(w http.ResponseWriter, r *http.Request) {
 		}
 
 		var keys Keys
-		err = api.Decode(request.Key, &keys)
+		err = util.Decode(request.Key, &keys)
 		if err != nil {
 			log.Printf("Error decoding key: %v", err)
 			response.errorStr = err.Error()
@@ -382,7 +382,7 @@ func receiptPut(w http.ResponseWriter, r *http.Request) {
 		}
 
 		var rateId *int64
-		err = api.Decode(request.RateKey, &rateId)
+		err = util.Decode(request.RateKey, &rateId)
 		if err != nil {
 			log.Printf("Error decoding rateId: %v", err)
 			response.errorStr = err.Error()
@@ -437,7 +437,7 @@ func receiptDelete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var keys Keys
-	err := api.Decode(keyStr, &keys)
+	err := util.Decode(keyStr, &keys)
 	if err != nil {
 		log.Printf("failed to decode key: %v", err)
 		http.Error(w, "Bad Request", http.StatusBadRequest)

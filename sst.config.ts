@@ -1,6 +1,7 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 
-const PROD_STAGE = "production";
+const PROD_STAGE: string = "production";
+const STAG_STAGE: string = "staging";
 
 export default $config({
   app(input) {
@@ -13,7 +14,8 @@ export default $config({
   },
   async run() {
 
-    let isLocal = Boolean($app.stage !== PROD_STAGE);
+    let isLocal = Boolean($app.stage !== PROD_STAGE && $app.stage !== STAG_STAGE);
+    console.log("isLocal", isLocal);
     const bucket = new sst.aws.Bucket("bcv-bucket", {
       versioning: false,
     });
@@ -21,7 +23,28 @@ export default $config({
     const bcvUrl = new sst.Secret("SecretBcvUrl");
     const bcvFileStartPath = new sst.Secret("SecretBcvFileStartPath");
     const webUrl = new sst.Secret("WebUrl");
+    const appClientId = new sst.Secret("AppClientId")
+
+    const githubClientId = new sst.Secret("GithubClientId");
+    const githubClientSecret = new sst.Secret("GithubClientSecret");
+    const googleClientId = new sst.Secret("GoogleClientId");
+    const googleClientSecret = new sst.Secret("GoogleClientSecret");
     // const domain = new sst.Secret("Domain");
+
+
+    const processUserFunction = new sst.aws.Function("ProcessUser", {
+      link: [secretTursoUrl],
+      handler: "packages/backend/process-user/",
+      runtime: "go",
+    });
+
+
+    const auth = new sst.aws.Auth("AuthServer", {
+      issuer: {
+        handler: "packages/auth/index.handler",
+        link: [githubClientId, githubClientSecret, googleClientId, googleClientSecret, processUserFunction],
+      },
+    });
 
 
     const queue = new sst.aws.Queue("BcvQueue", {
@@ -54,6 +77,7 @@ export default $config({
     //
     //
     // processRatesQueue.subscribe(processRatesFunction.arn)
+
 
     const processBcvFileFunction = new sst.aws.Function("ProcessBcvFile", {
       link: [secretTursoUrl, bucket, queue],
@@ -118,17 +142,19 @@ export default $config({
       function: bcvFunction.arn,
     })
 
-    let allowedOrigins = isLocal ? ["*"] : [webUrl.value];
+    // let allowedOrigins = isLocal ? ["*"] : [webUrl.value];
+    let allowedOrigins = isLocal ? ["http://localhost:5173"] : [webUrl.value];
 
     const api = new sst.aws.ApiGatewayV2("API", {
+      link: [auth],
       // domain: domain.value,
       cors: {
         allowOrigins: allowedOrigins,
         allowMethods: ["GET", "PUT", "POST", "DELETE"],
-        maxAge: isLocal ? "1 minute" : "1 day"
-        // allowHeaders: ["Content-Type", "Authorization"],
-        // allowHeaders: ["date", "keep-alive", "access-control-request-headers"],
-        // exposeHeaders: ["date", "keep-alive", "access-control-request-headers"]
+        allowHeaders: ["Authorization", "Content-Type", "hx-current-url", "hx-request", "hx-trigger", "hx-target"],
+        allowCredentials: true,
+        maxAge: isLocal ? "1 minute" : "1 day",
+        exposeHeaders: ["HX-Redirect"],
       }
     });
 
@@ -152,17 +178,22 @@ export default $config({
       timeout: "60 seconds",
     });
 
+    const verifyAccessFunction = new sst.aws.Function("VerifyAccess", {
+      link: [appClientId, auth],
+      handler: "packages/backend/openauthclient/verify.handler",
+    });
+
     const mainApiFunction = new sst.aws.Function("MainApiFunction", {
       handler: "packages/backend/api",
       runtime: "go",
-      link: [bucket, secretTursoUrl, bcvUrl, bcvFileStartPath, uploadBackupBucket, apiFunction],
+      link: [bucket, secretTursoUrl, bcvUrl, bcvFileStartPath, uploadBackupBucket, apiFunction, appClientId, auth, verifyAccessFunction],
       timeout: "60 seconds",
     });
 
-    api.route("GET /{proxy+}", mainApiFunction.arn);
-    api.route("POST /{proxy+}", mainApiFunction.arn);
-    api.route("PUT /{proxy+}", mainApiFunction.arn);
-    api.route("DELETE /{proxy+}", mainApiFunction.arn);
+    api.route("GET /api/{proxy+}", mainApiFunction.arn);
+    api.route("POST /api/{proxy+}", mainApiFunction.arn);
+    api.route("PUT /api/{proxy+}", mainApiFunction.arn);
+    api.route("DELETE /api/{proxy+}", mainApiFunction.arn);
 
     // api.route("$default", {
     //   handler: "packages/backend/api",
@@ -210,12 +241,28 @@ export default $config({
     //   },
     // });
 
+
+    const authClientFunction = new sst.aws.Function("AuthClient", {
+      link: [appClientId, auth, site],
+      handler: "packages/backend/openauthclient/index.handler",
+      environment: {
+        IS_LOCAL: isLocal.toString(),
+      }
+    });
+
+
+    api.route("GET /authorize", authClientFunction.arn);
+    api.route("GET /callback", authClientFunction.arn);
+    api.route("GET /", authClientFunction.arn);
+
     return {
-      ApiFunction: apiFunction.url,
-      MyBucket: bucket.name,
-      BcvUrl: bcvUrl.value,
-      BcvFileStartPath: bcvFileStartPath.value,
+      Web_App: webUrl.value,
       SiteUrl: site.url,
+      // ApiFunction: apiFunction.url,
+      // MyBucket: bucket.name,
+      // BcvUrl: bcvUrl.value,
+      // BcvFileStartPath: bcvFileStartPath.value,
+      // SiteUrl: site.url,
       // url: router.url,
     };
   },

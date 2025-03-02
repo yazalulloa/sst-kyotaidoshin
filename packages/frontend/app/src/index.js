@@ -16,6 +16,7 @@ import './config.js';
 window.htmx = htmx;
 
 // htmx.logAll();
+htmx.config.withCredentials = true;
 htmx.config.selfRequestsOnly = false;
 
 if (import.meta.env.VITE_IS_DEV === 'true') {
@@ -75,6 +76,25 @@ window.limitInputToMaxLength = function (input) {
 
 window.sleep = function (ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+const LAST_NAV = 'lastNav';
+
+window.saveLastNav = function (nav) {
+  localStorage.setItem(LAST_NAV, nav);
+}
+
+window.getLastNav = function () {
+  return localStorage.getItem(LAST_NAV);
+}
+
+window.compareLinkToAnchor = function (anchor, link) {
+  let url = new URL(anchor.href)
+  return url.pathname === link
+}
+
+window.IsTherePathName = function () {
+  return window.location.pathname !== '/' && window.location.pathname !== '';
 }
 
 window.getLastPathSegment = function () {
@@ -245,7 +265,7 @@ window.FormatDate = function (date) {
   .toLocaleString()
 }
 
-window.decodeBase64Url = function (encoded) {
+window.decodeBase64UrlStr = function (encoded) {
 
   let base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
 
@@ -274,12 +294,14 @@ document.addEventListener('alpine-i18n:ready', function () {
   window.AlpineI18n.create(locale, JSON.parse(messages));
 });
 
-document.addEventListener('pinecone-start', () =>
-    console.debug('pinecone-start')
-);
-document.addEventListener('pinecone-end', () =>
-    console.debug('pinecone-end')
-);
+document.addEventListener('pinecone-start', () => {
+
+});
+
+document.addEventListener('pinecone-end', () => {
+
+});
+
 document.addEventListener('fetch-error', (err) =>
     console.error(err)
 );
@@ -287,6 +309,15 @@ document.addEventListener('fetch-error', (err) =>
 document.addEventListener('alpine:init', () => {
   // console.log('alpine:init');
 });
+
+window.NAV_TITLES = new Map([
+  ['nav-apartments', 'main-title-apartments'],
+  ['nav-buildings', 'main-title-buildings'],
+  ['nav-receipts', 'main-title-receipts'],
+  ['nav-rates', 'main-title-rates'],
+  ['nav-users', 'main-title-users'],
+  ['nav-bcv-files', 'main-title-bcv-files'],
+]);
 
 window.Alpine = Alpine
 Alpine.plugin(focus)

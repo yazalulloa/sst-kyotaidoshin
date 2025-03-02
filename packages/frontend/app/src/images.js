@@ -25,4 +25,11 @@ window.bucketIcon = bucketIcon;
 window.buildingsIcon = buildingsIcon;
 window.apartmentsIcon = apartmentsIcon;
 
-
+window.NAV_ICONS = new Map([
+  ['nav-apartments', apartmentsIcon],
+  ['nav-buildings', buildingsIcon],
+  ['nav-receipts', ratesIcon],
+  ['nav-rates', ratesIcon],
+  ['nav-users', bucketIcon],
+  ['nav-bcv-files', bucketIcon],
+]);

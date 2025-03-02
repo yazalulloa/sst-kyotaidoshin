@@ -2,9 +2,8 @@ package rates
 
 import (
 	"fmt"
-	"github.com/a-h/templ"
 	"github.com/gorilla/mux"
-	"kyotaidoshin/api"
+	"kyotaidoshin/util"
 	"log"
 	"net/http"
 	"strings"
@@ -15,7 +14,6 @@ const _PATH = "/api/rates"
 const _SEARCH = _PATH + "/search"
 
 func Routes(server *mux.Router) {
-	server.Handle(_PATH, templ.Handler(Init())).Methods("GET")
 
 	server.HandleFunc(_SEARCH, search).Methods("GET")
 	server.HandleFunc(_PATH+"/currencies", loadCurrencies).Methods("GET")
@@ -25,15 +23,15 @@ func Routes(server *mux.Router) {
 func search(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	currencies := query["currency_input"]
-	rateQuery := RequestQuery{
-		LastId:     api.GetQueryParamAsInt(r, "next_page"),
+	requestQuery := RequestQuery{
+		LastId:     util.GetQueryParamAsInt(r, "next_page"),
 		Limit:      31,
-		DateOfRate: api.GetQueryParamAsDate(r, "date_input"),
+		DateOfRate: util.GetQueryParamAsDate(r, "date_input"),
 		Currencies: currencies,
-		SortOrder:  api.GetQueryParamAsSortOrderType(r, "sort_order"),
+		SortOrder:  util.GetQueryParamAsSortOrderType(r, "sort_order"),
 	}
 
-	response, err := getTableResponse(rateQuery)
+	response, err := getTableResponse(requestQuery)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -43,17 +41,17 @@ func search(w http.ResponseWriter, r *http.Request) {
 	results := response.Results
 
 	var nextPageUrl string
-	if len(results) == rateQuery.Limit {
+	if len(results) == requestQuery.Limit {
 		results = results[:len(results)-1]
 		last := results[len(results)-1]
 		var sb strings.Builder
 		sb.WriteString(fmt.Sprintf(_SEARCH+"?next_page=%d", *last.Item.ID))
-		if rateQuery.DateOfRate != nil {
-			sb.WriteString(fmt.Sprintf("&date_input=%s", rateQuery.DateOfRate.Format(time.DateOnly)))
+		if requestQuery.DateOfRate != nil {
+			sb.WriteString(fmt.Sprintf("&date_input=%s", requestQuery.DateOfRate.Format(time.DateOnly)))
 		}
 
-		if len(rateQuery.Currencies) > 0 {
-			for _, currency := range rateQuery.Currencies {
+		if len(requestQuery.Currencies) > 0 {
+			for _, currency := range requestQuery.Currencies {
 				sb.WriteString(fmt.Sprintf("&currency_input=%s", currency))
 			}
 		}
@@ -98,10 +96,9 @@ func loadCurrencies(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteRate(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
+	id := mux.Vars(r)["id"]
 	var str int64
-	err := api.Decode(id, &str)
+	err := util.Decode(id, &str)
 	if err != nil {
 		log.Printf("Error decoding id: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -117,9 +114,9 @@ func deleteRate(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	currencies := query["currency_input"]
 	rateQuery := RequestQuery{
-		DateOfRate: api.GetQueryParamAsDate(r, "date_input"),
+		DateOfRate: util.GetQueryParamAsDate(r, "date_input"),
 		Currencies: currencies,
-		SortOrder:  api.GetQueryParamAsSortOrderType(r, "sort_order"),
+		SortOrder:  util.GetQueryParamAsSortOrderType(r, "sort_order"),
 	}
 
 	counters, err := deleteRateReturnCounters(str, rateQuery)

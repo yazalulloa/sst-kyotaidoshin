@@ -3,7 +3,7 @@ package rates
 import (
 	"db/gen/model"
 	"github.com/google/uuid"
-	"kyotaidoshin/api"
+	"kyotaidoshin/util"
 	"log"
 	"slices"
 	"sync"
@@ -22,7 +22,7 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 		for i, item := range array {
 
 			results[i] = Item{
-				Key:        *api.Encode(*item.ID),
+				Key:        *util.Encode(*item.ID),
 				CardId:     "rates-" + uuid.NewString(),
 				Item:       item,
 				DateOfRate: item.DateOfRate.Format(time.DateOnly),
@@ -99,7 +99,7 @@ func CheckRateInsert(ratesArr *[]model.Rates) ([]model.Rates, error) {
 	return ratesToInsert, nil
 }
 
-func deleteRateReturnCounters(id int64, rateQuery RequestQuery) (*Counters, error) {
+func deleteRateReturnCounters(id int64, requestQuery RequestQuery) (*Counters, error) {
 
 	_, err := deleteRateById(id)
 	if err != nil {
@@ -131,7 +131,7 @@ func deleteRateReturnCounters(id int64, rateQuery RequestQuery) (*Counters, erro
 
 	go func() {
 		defer wg.Done()
-		queryCount, err := getQueryCount(rateQuery)
+		queryCount, err := getQueryCount(requestQuery)
 		if err != nil {
 			handleErr(err)
 			return

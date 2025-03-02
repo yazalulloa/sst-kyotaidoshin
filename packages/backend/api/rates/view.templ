@@ -7,17 +7,6 @@ import (
 	"strings"
 )
 
-templ Init() {
-	@api.Base() {
-		<ul
-			hx-get={ _SEARCH }
-			hx-trigger="load"
-			hx-indicator=".htmx-indicator"
-			hx-swap="innerHTML"
-		></ul>
-	}
-}
-
 templ Search(res TableResponse) {
 	for _, item := range res.Results {
 		<li

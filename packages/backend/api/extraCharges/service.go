@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"kyotaidoshin/api"
+	"kyotaidoshin/util"
 	"strings"
 )
 
@@ -31,7 +31,7 @@ func GetBuildingFormDto(buildingId string) (*FormDto, error) {
 	}
 
 	return &FormDto{
-		Key: *api.Encode(Keys{
+		Key: *util.Encode(Keys{
 			BuildingID:      buildingId,
 			ParentReference: buildingId,
 			Type:            TypeBuilding,
@@ -62,7 +62,7 @@ func GetReceiptFormDto(buildingId string, receiptId int32) (*FormDto, error) {
 	}
 
 	return &FormDto{
-		Key: *api.Encode(Keys{
+		Key: *util.Encode(Keys{
 			BuildingID:      buildingId,
 			ParentReference: fmt.Sprint(receiptId),
 			Type:            TypeReceipt,
@@ -90,7 +90,7 @@ func toItem(item *model.ExtraCharges, oldCardId *string) (*Item, error) {
 	}
 
 	keys := keys(*item, cardIdStr)
-	key := *api.Encode(keys)
+	key := *util.Encode(keys)
 
 	apts := strings.Split(item.Apartments, ",")
 

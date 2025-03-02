@@ -30,7 +30,10 @@ func idExists(id string) (bool, error) {
 	return len(dest) > 0, nil
 }
 
-func selectList(req RequestQuery) ([]model.Buildings, error) {
+func selectList(req RequestQuery) ([]struct {
+	model.Buildings
+	AptCount int64
+}, error) {
 	condition := sqlite.Bool(true)
 
 	if req.LastCreatedAt != nil {
@@ -39,7 +42,12 @@ func selectList(req RequestQuery) ([]model.Buildings, error) {
 		condition = condition.AND(Buildings.CreatedAt.LT(dateTime))
 	}
 
-	stmt := Buildings.SELECT(Buildings.AllColumns, sqlite.COUNT(Apartments.BuildingID).AS("buildings.apt_count")).
+	var dest []struct {
+		model.Buildings
+		AptCount int64
+	}
+
+	stmt := Buildings.SELECT(Buildings.AllColumns, sqlite.COUNT(Apartments.BuildingID).AS("apt_count")).
 		FROM(Buildings.LEFT_JOIN(Apartments, Apartments.BuildingID.EQ(Buildings.ID))).
 		WHERE(condition).GROUP_BY(Buildings.ID)
 
@@ -53,13 +61,12 @@ func selectList(req RequestQuery) ([]model.Buildings, error) {
 		stmt = stmt.LIMIT(int64(req.Limit))
 	}
 
-	var list []model.Buildings
-	err := stmt.Query(db.GetDB().DB, &list)
+	err := stmt.Query(db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
 
-	return list, nil
+	return dest, nil
 }
 
 func deleteById(id string) (int64, error) {

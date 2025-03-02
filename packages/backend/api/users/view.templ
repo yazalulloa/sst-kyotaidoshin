@@ -1,0 +1,45 @@
+package users
+
+import (
+	"fmt"
+	"kyotaidoshin/api"
+)
+
+templ Search(res TableResponse) {
+	for _, item := range res.Results {
+		<li
+			id={ item.CardId }
+			class="fade-me-in fade-me-out"
+		>
+			<img src={ item.Item.Picture } alt="Avatar" class="h-8 w-8 rounded-full" referrerpolicy="no-referrer"/>
+			<span>{ item.Item.Provider }</span>
+			<span>{ item.Item.ProviderID }</span>
+			<span>{ item.Item.Email }</span>
+			<span>{ item.Item.Username }</span>
+			<span>{ item.Item.Name }</span>
+			@api.SpanFormatDate(fmt.Sprint(item.CreatedAt))
+			@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
+		</li>
+	}
+	if res.NextPageUrl != "" {
+		@api.NextPageLi(res.NextPageUrl, templ.Attributes{})
+	}
+	@CountersView(res.Counters)
+}
+
+
+templ CountersView(counters Counters) {
+	<div
+		id="users-counters"
+		hidden="hidden"
+		hx-swap-oob="true"
+		data-total-count={ fmt.Sprint(counters.TotalCount) }
+		if counters.QueryCount != nil {
+			data-query-count={ fmt.Sprint(*counters.QueryCount) }
+		}
+		x-init="
+	total = $el.getAttribute('data-total-count');
+	query = $el.getAttribute('data-query-count');
+	"
+	></div>
+}

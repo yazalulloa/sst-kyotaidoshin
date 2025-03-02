@@ -1,52 +1,18 @@
 package api
 
-import "log"
-import "fmt"
-
-templ Base() {
-	<!DOCTYPE html>
-	<html lang="en" data-theme="dark">
-		<head>
-			<meta charset="utf-8"/>
-			<meta name="viewport" content="width=device-width,initial-scale=1"/>
-			<title>Kyotaidoshin</title>
-			<link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.23/dist/full.min.css" rel="stylesheet" type="text/css"/>
-			<script defer src="https://cdn.tailwindcss.com"></script>
-			<script defer src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
-			<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-			<style>
-			.htmx-indicator {
-        opacity: 0;
-        transition: opacity 100ms ease-in;
-      }
-
-      .htmx-request .htmx-indicator {
-        opacity: 1
-      }
-
-      .htmx-request.htmx-indicator {
-        opacity: 1
-      }
-			</style>
-		</head>
-		<body class="bg-gray-300">
-			<header class="sticky top-0 flex flex-col gap-0 shadow z-11 bg-base-100">
-				<progress class="h-1 w-full htmx-indicator progress"></progress>
-			</header>
-			<main class="w-full mx-auto p-4">
-				{ children... }
-			</main>
-		</body>
-	</html>
-}
+import (
+	"fmt"
+	"kyotaidoshin/util"
+	"log"
+)
 
 templ CSRF() {
-	if !IsDevMode() {
+	if !util.IsDevMode() {
 		{{ token := ctx.Value("gorilla.csrf.Token") }}
 		if token == nil {
 			{{ log.Println("no csrf token") }}
 		} else {
-			<input type="hidden" name={ CsrfInputName } value={ ctx.Value("gorilla.csrf.Token").(string) }/>
+			<input type="hidden" name={ util.CsrfInputName } value={ ctx.Value("gorilla.csrf.Token").(string) }/>
 		}
 	}
 }
@@ -74,8 +40,8 @@ templ DeleteBtn(deleteUrl string, cardIdRef string, attrs templ.Attributes) {
 		<button
 			type="button"
 			class="whitespace-nowrap bg-transparent rounded-full border border-danger p-1 text-sm font-medium tracking-wide text-danger transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-danger dark:text-danger dark:focus-visible:outline-danger"
-			if !IsDevMode() {
-				hx-headers={ CrsfHeaders(ctx) }
+			if !util.IsDevMode() {
+				hx-headers={ util.CrsfHeaders(ctx) }
 			}
 			hx-delete={ deleteUrl }
 			hx-target={ "#" + cardIdRef }
@@ -104,7 +70,7 @@ templ BackBtn(backUrl string) {
 	</button>
 }
 
-templ UploadBackupForm(params UploadBackupParams) {
+templ UploadBackupForm(params util.UploadBackupParams) {
 	<form
 		id="backup-file-uploader"
 		class="whitespace-nowrap bg-transparent rounded-radius border border-secondary px-4 py-2 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-secondary-dark dark:text-secondary-dark dark:focus-visible:outline-secondary-dark disabled:opacity-75 disabled:cursor-not-allowed"

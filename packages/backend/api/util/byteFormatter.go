@@ -1,13 +1,20 @@
 package util
 
 import (
+	"bytes"
+	"encoding/base64"
+	"encoding/gob"
+	"errors"
 	"fmt"
 	"github.com/go-playground/validator/v10"
+	"log"
 	"reflect"
 	"strconv"
 	"strings"
 	"sync"
 )
+
+var ErrNoRows = errors.New("qrm: no rows in result set")
 
 const OneKb = 1024.0
 const OneMb = 1024 * OneKb
@@ -157,4 +164,32 @@ func PercentageOf(percentage float64, total float64) float64 {
 	}
 
 	return percentage * total / 100
+}
+
+func Encode(obj any) *string {
+	b := bytes.Buffer{}
+	e := gob.NewEncoder(&b)
+	err := e.Encode(obj)
+	if err != nil {
+		panic(err)
+	}
+
+	encoded := base64.URLEncoding.EncodeToString(b.Bytes())
+	return &encoded
+}
+
+func Decode(encoded string, obj any) error {
+	b, err := base64.URLEncoding.DecodeString(encoded)
+	if err != nil {
+		log.Println(`failed base64 Decode`, err)
+		return err
+	}
+	d := gob.NewDecoder(bytes.NewReader(b))
+	err = d.Decode(obj)
+	if err != nil {
+		log.Println(`failed gob Decode`, err)
+		return err
+	}
+
+	return nil
 }

@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"kyotaidoshin/apartments"
-	"kyotaidoshin/api"
 	"kyotaidoshin/buildings"
 	"kyotaidoshin/debts"
 	"kyotaidoshin/expenses"
@@ -317,7 +316,7 @@ func toItem(item *model.Receipts, oldCardId *string) (*Item, error) {
 	}
 
 	keys := keys(*item, cardIdStr)
-	key := *api.Encode(keys)
+	key := *util.Encode(keys)
 
 	//updateParams := UpdateParams{
 	//	Key:    key,
@@ -402,7 +401,7 @@ func getFormDto(keys Keys) (*FormDto, error) {
 			Id:         *receipt.ID,
 		}
 
-		newKeysStr := api.Encode(newKeys)
+		newKeysStr := util.Encode(newKeys)
 
 		updateParams := UpdateParams{
 			Key:   *newKeysStr,
@@ -573,7 +572,7 @@ func getRatesDtos(date *time.Time) ([]RateDto, error) {
 
 		ratesDto[i] = RateDto{
 			ID:         *rate.ID,
-			Key:        *api.Encode(rate.ID),
+			Key:        *util.Encode(rate.ID),
 			Rate:       rate.Rate,
 			DateOfRate: rate.DateOfRate.Format(time.DateOnly),
 		}
@@ -583,7 +582,7 @@ func getRatesDtos(date *time.Time) ([]RateDto, error) {
 
 		ratesDto[i+firstLen] = RateDto{
 			ID:         *rate.ID,
-			Key:        *api.Encode(rate.ID),
+			Key:        *util.Encode(rate.ID),
 			Rate:       rate.Rate,
 			DateOfRate: rate.DateOfRate.Format(time.DateOnly),
 		}

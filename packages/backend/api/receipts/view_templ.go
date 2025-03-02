@@ -256,7 +256,7 @@ func ItemView(item Item) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" x-init=\"\n    \t\t\t\t\t$el.innerHTML = new Date(parseInt($el.getAttribute(&#39;data-date&#39;)))\n                                          //.toLocaleDateString()\n                                         .toLocaleString()\n                                         \"></span><div class=\"flex flex-row flex-wrap gap-2 justify-center items-center\"><a href=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" x-init=\"\n    \t\t\t\t\t$el.innerHTML = new Date(parseInt($el.getAttribute(&#39;data-date&#39;)))\n                                          //.toLocaleDateString()\n                                         .toLocaleString()\n                                         \"></span><div class=\"flex flex-row flex-wrap gap-4 justify-center items-center\"><a href=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

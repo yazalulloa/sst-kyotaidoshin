@@ -5,14 +5,12 @@ import (
 	"bcv/bcv"
 	"context"
 	"fmt"
-	"github.com/a-h/templ"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	"kyotaidoshin/api"
 	"kyotaidoshin/util"
 	"log"
 	"net/http"
@@ -28,7 +26,6 @@ const _PATH = "/api/bcv-bucket"
 const _SEARCH = _PATH + "/search"
 
 func Routes(server *mux.Router) {
-	server.Handle(_PATH, templ.Handler(Init())).Methods("GET")
 
 	server.HandleFunc(_SEARCH, search).Methods("GET")
 	server.HandleFunc(_PATH+"/{id}", bcvBucketDelete).Methods("DELETE")
@@ -117,7 +114,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 					Rates:         ratesParsed,
 					ProcessedDate: processedDate,
 				},
-				Key:    *api.Encode(*item.Key),
+				Key:    *util.Encode(*item.Key),
 				CardId: "bcv-buckets-" + uuid.NewString(),
 			}
 		}(item)
@@ -159,7 +156,7 @@ func bcvBucketDelete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	var str string
-	err = api.Decode(id, &str)
+	err = util.Decode(id, &str)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -208,7 +205,7 @@ func process(w http.ResponseWriter, r *http.Request) {
 	id := vars["id"]
 
 	var str string
-	err = api.Decode(id, &str)
+	err = util.Decode(id, &str)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -6,7 +6,6 @@ import (
 	"github.com/go-playground/form"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
-	"kyotaidoshin/api"
 	"kyotaidoshin/util"
 	"log"
 	"net/http"
@@ -44,7 +43,7 @@ func extraChargesPut(w http.ResponseWriter, r *http.Request) {
 		}
 
 		var keys Keys
-		err = api.Decode(request.Key, &keys)
+		err = util.Decode(request.Key, &keys)
 		if err != nil {
 			log.Printf("Error decoding key: %v", err)
 			response.errorStr = err.Error()
@@ -138,7 +137,7 @@ func extraChargesDelete(w http.ResponseWriter, r *http.Request) {
 
 	key := mux.Vars(r)["key"]
 	var keys Keys
-	err := api.Decode(key, &keys)
+	err := util.Decode(key, &keys)
 	if err != nil {
 		log.Printf("Error decoding key: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

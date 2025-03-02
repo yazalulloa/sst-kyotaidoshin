@@ -59,127 +59,58 @@
              class="w-full border border-outline rounded-radius bg-surface px-2 py-1.5 pl-9 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark/50 dark:focus-visible:outline-primary-dark"
              name="search" aria-label="Search" placeholder="Search"/>
     </div>
-
     <!-- sidebar links  -->
-    <div class="flex flex-col gap-2 overflow-y-auto pb-6">
 
-      <a href="/apartments"
-         class="flex items-center rounded-radius gap-2 px-2 py-1.5 text-sm font-medium text-on-surface underline-offset-2 hover:bg-primary/5 hover:text-on-surface-strong focus-visible:underline focus:outline-hidden dark:text-on-surface-dark dark:hover:bg-primary-dark/5 dark:hover:text-on-surface-dark-strong">
+    <div class="flex flex-col gap-2 overflow-y-auto pb-6"
+         x-data="{
+    pages: [],
+    selected: '',
+    navEvent(path) {
+    console.log(path)
+      let page = this.pages.find(page => page.Path === path)
+      if (page) {
+        document.getElementById(page.Id).firstElementChild.dispatchEvent(new CustomEvent('navigate'))
+      }
 
-        <template x-route="/apartments"
-                  x-handler="[(ctx) => $el.dispatchEvent(new CustomEvent('navigate')) ]"
-                  x-bind:hx-get="apartmentsIndexPartialUrl"
-                  hx-target="#container"
-                  hx-indicator=".htmx-indicator"
-                  hx-trigger="navigate"
-                  hx-swap="innerHTML"
-                  x-init="htmx.process($el)">
-        </template>
+    }
+    }"
+         x-init="
+         $watch('pages', value => {
 
-        <svg x-bind:data-src="apartmentsIcon" data-cache="21600" class="size-5"></svg>
-        <span x-text="$t('main-title-apartments')"></span>
-      </a>
+         if (IsTherePathName()) {
+          let pathname = window.location.pathname;
+          let page = pages.find(page => page.Path === pathname)
+          if (page) {
+            document.getElementById(page.Id).click()
+            return
+          }
+         }
 
-      <a href="/buildings"
-         class="flex items-center rounded-radius gap-2 px-2 py-1.5 text-sm font-medium text-on-surface underline-offset-2 hover:bg-primary/5 hover:text-on-surface-strong focus-visible:underline focus:outline-hidden dark:text-on-surface-dark dark:hover:bg-primary-dark/5 dark:hover:text-on-surface-dark-strong">
+         let lastNav = getLastNav()
+         let nextNav =  lastNav && value.find(page => page.Id === lastNav) ? lastNav : value[0].Id
+         document.getElementById(nextNav).click()
+         })
 
-        <template x-route="/buildings"
-                  x-handler="[(ctx) => $el.dispatchEvent(new CustomEvent('navigate')) ]"
-                  x-bind:hx-get="buildingsIndexPartialUrl"
-                  hx-target="#container"
-                  hx-indicator=".htmx-indicator"
-                  hx-trigger="navigate"
-                  hx-swap="innerHTML"
-                  x-init="htmx.process($el)">
-        </template>
+         "
+         asd-x-handler.global="[(ctx) => {
+         console.log(ctx)
+          navEvent(ctx.path)}]"
+    >
 
-        <template x-route="/buildings/new"
-                  x-handler="[(ctx) => $el.dispatchEvent(new CustomEvent('navigate')) ]"
-                  x-bind:hx-get="buildingsNewPartialUrl"
-                  hx-target="#container"
-                  hx-indicator=".htmx-indicator"
-                  hx-trigger="navigate"
-                  hx-swap="innerHTML"
-                  x-init="htmx.process($el)">
-        </template>
-
-        <template x-route="/buildings/edit/:id"
-                  x-handler="[(ctx) => $el.dispatchEvent(new CustomEvent('navigate')) ]"
-                  x-bind:hx-get="buildingsEditPartialUrl"
-                  hx-target="#container"
-                  hx-indicator=".htmx-indicator"
-                  hx-trigger="navigate"
-                  hx-swap="innerHTML"
-                  x-init="htmx.process($el)">
-        </template>
+      <template x-route="/"
+                x-handler="[(ctx) => $el.dispatchEvent(new CustomEvent('navigate')) ]"
+                hx-get="/api/init"
+                hx-target="this"
+                hx-indicator=".htmx-indicator"
+                hx-trigger="load"
+                hx-swap="afterend"
+                x-init="htmx.process($el)">
+      </template>
 
 
-        <svg x-bind:data-src="buildingsIcon" data-cache="21600" class="size-5"></svg>
-        <span x-text="$t('main-title-buildings')"></span>
-      </a>
-
-      <a href="/rates"
-         class="flex items-center rounded-radius gap-2 px-2 py-1.5 text-sm font-medium text-on-surface underline-offset-2 hover:bg-primary/5 hover:text-on-surface-strong focus-visible:underline focus:outline-hidden dark:text-on-surface-dark dark:hover:bg-primary-dark/5 dark:hover:text-on-surface-dark-strong">
-
-        <template x-route="/rates"
-                  x-handler="[(ctx) => $el.dispatchEvent(new CustomEvent('navigate')) ]"
-                  x-bind:hx-get="ratesIndexPartialUrl"
-                  hx-target="#container"
-                  hx-indicator=".htmx-indicator"
-                  hx-trigger="navigate"
-                  hx-swap="innerHTML"
-                  x-init="htmx.process($el)">
-        </template>
-
-        <svg x-bind:data-src="ratesIcon" data-cache="21600" class="size-5"></svg>
-        <span x-text="$t('main-title-rates')"></span>
-      </a>
-
-      <a href="/bcv-bucket"
-         class="flex items-center rounded-radius gap-2 bg-primary/10 px-2 py-1.5 text-sm font-medium text-on-surface-strong underline-offset-2 focus-visible:underline focus:outline-hidden dark:bg-primary-dark/10 dark:text-on-surface-dark-strong">
-
-        <template x-route="/bcv-bucket"
-                  x-handler="[(ctx) => $el.dispatchEvent(new CustomEvent('navigate')) ]"
-                  x-bind:hx-get="bucketIndexPartialUrl"
-                  hx-target="#container"
-                  hx-indicator=".htmx-indicator"
-                  hx-trigger="navigate"
-                  hx-swap="innerHTML"
-                  x-init="htmx.process($el)">
-        </template>
-
-        <svg x-bind:data-src="bucketIcon" data-cache="21600" class="size-5"></svg>
-        <span x-text="$t('main-title-bcv-files')"></span>
-        <span class="sr-only">active</span>
-      </a>
-
-      <a href="/receipts"
-         class="flex items-center rounded-radius gap-2 px-2 py-1.5 text-sm font-medium text-on-surface underline-offset-2 hover:bg-primary/5 hover:text-on-surface-strong focus-visible:underline focus:outline-hidden dark:text-on-surface-dark dark:hover:bg-primary-dark/5 dark:hover:text-on-surface-dark-strong">
-
-        <template x-route="/receipts"
-                  x-handler="[(ctx) => $el.dispatchEvent(new CustomEvent('navigate')) ]"
-                  x-bind:hx-get="receiptsIndexPartialUrl"
-                  hx-target="#container"
-                  hx-indicator=".htmx-indicator"
-                  hx-trigger="navigate"
-                  hx-swap="innerHTML"
-                  x-init="htmx.process($el)">
-        </template>
-
-        <template x-route="/receipts/edit/:id"
-                  x-handler="[(ctx) => $el.dispatchEvent(new CustomEvent('navigate')) ]"
-                  x-bind:hx-get="receiptsEditPartialUrl"
-                  hx-target="#container"
-                  hx-indicator=".htmx-indicator"
-                  hx-trigger="navigate"
-                  hx-swap="innerHTML"
-                  x-init="htmx.process($el)">
-        </template>
-
-        <svg x-bind:data-src="ratesIcon" data-cache="21600" class="size-5"></svg>
-        <span x-text="$t('main-title-receipts')"></span>
-      </a>
     </div>
+
+
   </nav>
 
   <!-- top navbar & main content  -->
@@ -224,16 +155,18 @@
         <!-- Profile Menu  -->
         <div x-data="{ userDropdownIsOpen: false }" class="relative"
              x-on:keydown.esc.window="userDropdownIsOpen = false">
-          <button type="button"
+          <button id="avatar-btn"
+                  type="button"
                   class="flex w-full items-center rounded-radius gap-2 p-2 text-left text-on-surface hover:bg-primary/5 hover:text-on-surface-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:text-on-surface-dark dark:hover:bg-primary-dark/5 dark:hover:text-on-surface-dark-strong dark:focus-visible:outline-primary-dark"
                   x-bind:class="userDropdownIsOpen ? 'bg-primary/10 dark:bg-primary-dark/10' : ''" aria-haspopup="true"
                   x-on:click="userDropdownIsOpen = ! userDropdownIsOpen" x-bind:aria-expanded="userDropdownIsOpen">
+
             <img src="https://penguinui.s3.amazonaws.com/component-assets/avatar-7.webp"
                  class="size-8 object-cover rounded-radius" alt="avatar" aria-hidden="true"/>
             <div class="hidden md:flex flex-col">
               <span
-                  class="text-sm font-bold text-on-surface-strong dark:text-on-surface-dark-strong">Alex Martinez</span>
-              <span class="text-xs" aria-hidden="true">@alexmartinez</span>
+                  class="text-sm font-bold text-on-surface-strong dark:text-on-surface-dark-strong"></span>
+              <span class="text-xs" aria-hidden="true"></span>
               <span class="sr-only">profile settings</span>
             </div>
           </button>
@@ -284,7 +217,12 @@
             </div>
 
             <div class="flex flex-col py-1.5">
-              <a href="#"
+              <a hx-get="/api/logout"
+                 hx-trigger="click"
+                 hx-indicator=".htmx-indicator"
+                 hx-disabled-elt="this"
+                 hx-target="this"
+                 hx-swap="none"
                  class="flex items-center gap-2 px-2 py-1.5 text-sm font-medium text-on-surface underline-offset-2 hover:bg-primary/5 hover:text-on-surface-strong focus-visible:underline focus:outline-hidden dark:text-on-surface-dark dark:hover:bg-primary-dark/5 dark:hover:text-on-surface-dark-strong"
                  role="menuitem">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5 shrink-0"

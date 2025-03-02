@@ -4,7 +4,7 @@ import (
 	"db/gen/model"
 	"encoding/base64"
 	"encoding/json"
-	"kyotaidoshin/api"
+	"kyotaidoshin/util"
 	"strings"
 	"sync"
 )
@@ -81,7 +81,7 @@ func toItem(item *model.Apartments, oldCardId *string) (*Item, error) {
 	}
 
 	keys := keys(*item, cardIdStr)
-	key := *api.Encode(keys)
+	key := *util.Encode(keys)
 
 	updateParams := UpdateParams{
 		Key:      key,

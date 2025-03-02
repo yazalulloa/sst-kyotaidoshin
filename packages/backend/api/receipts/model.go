@@ -4,7 +4,6 @@ import (
 	"db/gen/model"
 	"github.com/google/uuid"
 	"golang.org/x/sync/syncmap"
-	"kyotaidoshin/api"
 	"kyotaidoshin/debts"
 	"kyotaidoshin/expenses"
 	"kyotaidoshin/extraCharges"
@@ -62,7 +61,7 @@ func keys(receipt model.Receipts, cardId string) Keys {
 
 type InitDto struct {
 	BuildingIds        string
-	UploadBackupParams *api.UploadBackupParams
+	UploadBackupParams *util.UploadBackupParams
 	TableResponse      TableResponse
 }
 

@@ -12,8 +12,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/shakinm/xlsReader/xls"
 	"io"
-	"kyotaidoshin/api"
 	"kyotaidoshin/rates"
+	"kyotaidoshin/util"
 	"log"
 	"strconv"
 	"strings"
@@ -312,7 +312,7 @@ func (info ParsingInfo) parse() (*Result, error) {
 					return nil, parsingError.err(err)
 				}
 
-				str := strings.ReplaceAll(dateOfRate.Format(time.DateOnly), "-", "") + api.ToASCII(currency)
+				str := strings.ReplaceAll(dateOfRate.Format(time.DateOnly), "-", "") + util.ToASCII(currency)
 				id, err := strconv.ParseInt(str, 10, 64)
 				if err != nil {
 					parsingError.Value = str

@@ -40,7 +40,7 @@ func Routes(server *mux.Router) {
 func search(w http.ResponseWriter, r *http.Request) {
 
 	requestQuery := RequestQuery{
-		LastCreatedAt: api.GetQueryParamAsTimestamp(r, "next_page"),
+		LastCreatedAt: util.GetQueryParamAsTimestamp(r, "next_page"),
 		Limit:         31,
 		SortOrder:     util.SortOrderTypeDESC,
 	}
@@ -74,15 +74,14 @@ func search(w http.ResponseWriter, r *http.Request) {
 }
 
 func buildingDelete(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
+	id := mux.Vars(r)["id"]
 	if id == "" {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 
 	var dest string
-	err := api.Decode(id, &dest)
+	err := util.Decode(id, &dest)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -135,7 +134,7 @@ func buildingPut(w http.ResponseWriter, r *http.Request) {
 
 		isUpdate := request.Key != nil
 		if isUpdate {
-			err := api.Decode(*request.Key, &request.Id)
+			err := util.Decode(*request.Key, &request.Id)
 			if err != nil {
 				response.errorStr = fmt.Sprintf("Error decoding key: %v", err)
 				return response
@@ -206,7 +205,7 @@ func buildingPut(w http.ResponseWriter, r *http.Request) {
 			return response
 		}
 
-		newKey := api.Encode(building.ID)
+		newKey := util.Encode(building.ID)
 		response.key = newKey
 		tmp := !isUpdate
 		response.createdNew = &tmp
@@ -280,7 +279,7 @@ func formData(w http.ResponseWriter, r *http.Request) {
 
 	if idParam != "" {
 		var id string
-		err := api.Decode(idParam, &id)
+		err := util.Decode(idParam, &id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

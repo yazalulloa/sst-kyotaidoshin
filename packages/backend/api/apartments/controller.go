@@ -33,10 +33,10 @@ func Routes(server *mux.Router) {
 }
 
 func search(w http.ResponseWriter, r *http.Request) {
-	nextPage := api.GetQueryParamAsString(r, "next_page")
+	nextPage := util.GetQueryParamAsString(r, "next_page")
 	var keys Keys
 	if nextPage != "" {
-		err := api.Decode(nextPage, &keys)
+		err := util.Decode(nextPage, &keys)
 
 		if err != nil {
 			log.Printf("failed to decode nextPage: %v", err)
@@ -49,7 +49,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 	requestQuery := RequestQuery{
 		lastBuildingId: keys.BuildingId,
 		lastNumber:     keys.Number,
-		q:              api.GetQueryParamAsString(r, "apt_search_input"),
+		q:              util.GetQueryParamAsString(r, "apt_search_input"),
 		buildings:      buildings,
 		Limit:          31,
 	}
@@ -100,7 +100,7 @@ func aptDelete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var keys Keys
-	err := api.Decode(keyStr, &keys)
+	err := util.Decode(keyStr, &keys)
 	if err != nil {
 		log.Printf("failed to decode key: %v", err)
 		http.Error(w, "Bad Request", http.StatusBadRequest)
@@ -150,7 +150,7 @@ func aptPut(w http.ResponseWriter, r *http.Request) {
 		var keys Keys
 
 		if isUpdate {
-			err = api.Decode(request.Key, &keys)
+			err = util.Decode(request.Key, &keys)
 			if err != nil {
 				log.Printf("Error decoding key: %v", err)
 				response.errorStr = err.Error()

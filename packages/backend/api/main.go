@@ -7,7 +7,6 @@ import (
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"kyotaidoshin/apartments"
-	"kyotaidoshin/api"
 	bcv_bucket "kyotaidoshin/bcv-bucket"
 	"kyotaidoshin/buildings"
 	"kyotaidoshin/debts"
@@ -16,13 +15,52 @@ import (
 	"kyotaidoshin/rates"
 	"kyotaidoshin/receipts"
 	"kyotaidoshin/reserveFundsApi"
+	"kyotaidoshin/start"
+	"kyotaidoshin/users"
+	"kyotaidoshin/util"
 	"log"
 	"net/http"
+	"time"
 )
 
 func router() http.Handler {
 	newRouter := mux.NewRouter()
 
+	newRouter.Use(loggingMiddleware)
+	newRouter.Use(authenticationMiddleware)
+
+	newRouter.HandleFunc("/api/logged_in", func(w http.ResponseWriter, r *http.Request) {
+
+		log.Printf("Logged in: %s", r.Header.Get("Authorization"))
+		w.WriteHeader(http.StatusOK)
+	}).Methods("GET")
+
+	newRouter.HandleFunc("/api/logout", func(w http.ResponseWriter, r *http.Request) {
+
+		accessTokenCookie, err := r.Cookie("access_token")
+		if err != nil {
+			http.Error(w, "Failed to get access token", http.StatusInternalServerError)
+			return
+		}
+
+		accessTokenCookie.HttpOnly = true
+		accessTokenCookie.Secure = true
+		accessTokenCookie.SameSite = http.SameSiteNoneMode
+		accessTokenCookie.Expires = time.Now().Add(-48 * time.Hour)
+		accessTokenCookie.Path = "/"
+		http.SetCookie(w, accessTokenCookie)
+		url := fmt.Sprintf("%s://%s", r.URL.Scheme, r.URL.Host)
+		w.Header().Add("HX-Redirect", url)
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("Logout"))
+		log.Printf("Logging out")
+
+		//
+		//http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+
+	}).Methods("GET")
+
+	start.Routes(newRouter)
 	rates.Routes(newRouter)
 	bcv_bucket.Routes(newRouter)
 	buildings.Routes(newRouter)
@@ -32,6 +70,7 @@ func router() http.Handler {
 	receipts.Routes(newRouter)
 	expenses_api.Routes(newRouter)
 	debts.Routes(newRouter)
+	users.Routes(newRouter)
 
 	//newRouter.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	//
@@ -41,9 +80,7 @@ func router() http.Handler {
 	//	}
 	//})
 
-	newRouter.Use(loggingMiddleware)
-
-	if api.IsDevMode() {
+	if util.IsDevMode() {
 		return newRouter
 	}
 
@@ -67,7 +104,61 @@ func router() http.Handler {
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		//referer, _ := url.Parse(r.Referer())
-		log.Printf("%s %s %s", r.Method, r.RequestURI, r.Referer())
+
+		log.Printf("%s %s", r.Method, r.URL.Path)
+		next.ServeHTTP(w, r)
+	})
+}
+
+func redirectToOrigin(w http.ResponseWriter, r *http.Request) {
+	url := fmt.Sprintf("%s://%s", r.URL.Scheme, r.URL.Host)
+	w.Header().Add("HX-Redirect", url)
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte("Unauthorized"))
+}
+
+func authenticationMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cookieAccessToken, err := r.Cookie("access_token")
+		if err != nil {
+			redirectToOrigin(w, r)
+			return
+		}
+
+		if cookieAccessToken == nil {
+			redirectToOrigin(w, r)
+			return
+		}
+
+		accessToken := cookieAccessToken.Value
+
+		if accessToken == "" {
+			redirectToOrigin(w, r)
+			return
+		}
+
+		cookieRefreshToken, err := r.Cookie("refresh_token")
+		var refreshToken string
+		if cookieRefreshToken != nil {
+			refreshToken = cookieRefreshToken.Value
+		}
+
+		newCtx, err := util.Verify(r.Context(), accessToken, refreshToken)
+		if err != nil {
+			log.Printf("Failed to verify token: %v", err)
+			redirectToOrigin(w, r)
+			return
+		}
+
+		r = r.WithContext(newCtx)
+
+		//err = auth_client.Verify(accessToken, refreshToken)
+		//if err != nil {
+		//	log.Printf("Failed to verify token: %v", err)
+		//	redirectToOrigin(w, r)
+		//	return
+		//}
+
 		next.ServeHTTP(w, r)
 	})
 }

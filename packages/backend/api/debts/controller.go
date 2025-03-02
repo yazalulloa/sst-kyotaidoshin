@@ -6,7 +6,6 @@ import (
 	"github.com/go-playground/form"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
-	"kyotaidoshin/api"
 	"kyotaidoshin/util"
 	"log"
 	"net/http"
@@ -44,7 +43,7 @@ func debtPut(w http.ResponseWriter, r *http.Request) {
 		}
 
 		var keys Keys
-		err = api.Decode(request.Key, &keys)
+		err = util.Decode(request.Key, &keys)
 		if err != nil {
 			log.Printf("Error decoding key: %v", err)
 			response.errorStr = err.Error()

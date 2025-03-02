@@ -4,7 +4,7 @@ import (
 	"db/gen/model"
 	"encoding/base64"
 	"encoding/json"
-	"kyotaidoshin/api"
+	"kyotaidoshin/util"
 )
 
 func GetFormDto(buildingId string, receiptId int32) (*FormDto, error) {
@@ -29,7 +29,7 @@ func GetFormDto(buildingId string, receiptId int32) (*FormDto, error) {
 	}
 
 	return &FormDto{
-		Key: *api.Encode(Keys{
+		Key: *util.Encode(Keys{
 			BuildingID: buildingId,
 			ReceiptID:  receiptId,
 		}),
@@ -46,7 +46,7 @@ func toItem(item *model.Expenses, oldCardId *string) (*Item, error) {
 	}
 
 	keys := keys(*item, &cardIdStr)
-	key := *api.Encode(keys)
+	key := *util.Encode(keys)
 
 	updateParams := UpdateParams{
 		Key:         key,

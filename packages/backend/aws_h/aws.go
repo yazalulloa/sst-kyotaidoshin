@@ -11,11 +11,24 @@ import (
 	"sync"
 )
 
+var configInstance *aws.Config
+var configOnce sync.Once
+
 func loadConfig(ctx context.Context) (aws.Config, error) {
-	return config.LoadDefaultConfig(ctx, func(opts *config.LoadOptions) error {
-		opts.Region = os.Getenv("AWS_REGION")
-		return nil
+	var err error
+
+	configOnce.Do(func() {
+		awsConfig, err := config.LoadDefaultConfig(ctx, func(opts *config.LoadOptions) error {
+			opts.Region = os.Getenv("AWS_REGION")
+			return nil
+		})
+
+		if err == nil {
+			configInstance = &awsConfig
+		}
 	})
+
+	return *configInstance, err
 }
 
 var s3ClientInstance *s3.Client

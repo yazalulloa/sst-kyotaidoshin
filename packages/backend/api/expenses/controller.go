@@ -6,7 +6,6 @@ import (
 	"github.com/go-playground/form"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
-	"kyotaidoshin/api"
 	"kyotaidoshin/util"
 	"log"
 	"net/http"
@@ -35,7 +34,7 @@ func Upsert(r *http.Request) FormResponse {
 	}
 
 	var keys Keys
-	err = api.Decode(request.Key, &keys)
+	err = util.Decode(request.Key, &keys)
 	if err != nil {
 		log.Printf("Error decoding key: %v", err)
 		response.ErrorStr = err.Error()
@@ -111,7 +110,7 @@ func Upsert(r *http.Request) FormResponse {
 func DeleteAndReturnKeys(r *http.Request) (string, Keys, error) {
 	key := mux.Vars(r)["key"]
 	var keys Keys
-	err := api.Decode(key, &keys)
+	err := util.Decode(key, &keys)
 	if err != nil {
 		return key, keys, err
 	}

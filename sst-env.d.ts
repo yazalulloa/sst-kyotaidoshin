@@ -14,6 +14,18 @@ declare module "sst" {
       "type": "sst.aws.Function"
       "url": string
     }
+    "AppClientId": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "AuthClient": {
+      "name": string
+      "type": "sst.aws.Function"
+    }
+    "AuthServer": {
+      "type": "sst.aws.Auth"
+      "url": string
+    }
     "BcvFunction": {
       "name": string
       "type": "sst.aws.Function"
@@ -23,11 +35,31 @@ declare module "sst" {
       "type": "sst.aws.Queue"
       "url": string
     }
+    "GithubClientId": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "GithubClientSecret": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "GoogleClientId": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "GoogleClientSecret": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "MainApiFunction": {
       "name": string
       "type": "sst.aws.Function"
     }
     "ProcessBcvFile": {
+      "name": string
+      "type": "sst.aws.Function"
+    }
+    "ProcessUser": {
       "name": string
       "type": "sst.aws.Function"
     }
@@ -46,6 +78,10 @@ declare module "sst" {
     "UploadBackup": {
       "name": string
       "type": "sst.aws.Bucket"
+    }
+    "VerifyAccess": {
+      "name": string
+      "type": "sst.aws.Function"
     }
     "WebApp": {
       "type": "sst.aws.StaticSite"

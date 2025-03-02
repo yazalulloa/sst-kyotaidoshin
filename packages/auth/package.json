@@ -1,0 +1,19 @@
+{
+  "name": "@kyotaidoshin/auth",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@aws-sdk/client-lambda": "^3.758.0",
+    "@openauthjs/openauth": "^0.4.1",
+    "axios": "^1.8.1",
+    "hono": "^4.7.2",
+    "sst": "^3.9.19",
+    "valibot": "^1.0.0-rc.2"
+  }
+}

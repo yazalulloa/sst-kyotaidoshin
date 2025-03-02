@@ -1,22 +1,12 @@
-package api
+package util
 
 import (
 	"aws_h"
-	"bytes"
-	"compress/gzip"
 	"context"
-	"encoding/base64"
-	"encoding/gob"
-	"encoding/json"
-	"errors"
 	"fmt"
-	"github.com/a-h/templ"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/google/uuid"
 	"github.com/sst/sst/v3/sdk/golang/resource"
-	"io"
-	"kyotaidoshin/util"
 	"log"
 	"net/http"
 	"strconv"
@@ -28,36 +18,6 @@ const CsrfKey = "csrf-key"
 
 // const CsrfInputName = "kyotaidogo-csrf-form"
 const CsrfInputName = "gorilla.csrf.Token"
-
-var ErrNoRows = errors.New("qrm: no rows in result set")
-
-func Encode(obj any) *string {
-	b := bytes.Buffer{}
-	e := gob.NewEncoder(&b)
-	err := e.Encode(obj)
-	if err != nil {
-		panic(err)
-	}
-
-	encoded := base64.URLEncoding.EncodeToString(b.Bytes())
-	return &encoded
-}
-
-func Decode(encoded string, obj any) error {
-	b, err := base64.URLEncoding.DecodeString(encoded)
-	if err != nil {
-		log.Println(`failed base64 Decode`, err)
-		return err
-	}
-	d := gob.NewDecoder(bytes.NewReader(b))
-	err = d.Decode(obj)
-	if err != nil {
-		log.Println(`failed gob Decode`, err)
-		return err
-	}
-
-	return nil
-}
 
 func GetQueryParamAsInt(r *http.Request, paramName string) int64 {
 	param := r.URL.Query().Get(paramName)
@@ -106,19 +66,19 @@ func GetQueryParamAsString(r *http.Request, paramName string) string {
 	return strings.TrimSpace(r.URL.Query().Get(paramName))
 }
 
-func GetQueryParamAsSortOrderType(r *http.Request, paramName string) util.SortOrderType {
+func GetQueryParamAsSortOrderType(r *http.Request, paramName string) SortOrderType {
 	param := r.URL.Query().Get(paramName)
 	if param == "" {
-		return util.SortOrderTypeDESC
+		return SortOrderTypeDESC
 	}
 
 	param = strings.ToUpper(param)
 
 	if param == "ASC" {
-		return util.SortOrderTypeASC
+		return SortOrderTypeASC
 	}
 
-	return util.SortOrderTypeDESC
+	return SortOrderTypeDESC
 }
 
 func CrsfHeaders(ctx context.Context) string {
@@ -224,87 +184,8 @@ func GetUploadFormParams(ctx context.Context, uploadPath string, filePrefix stri
 	}, nil
 }
 
-func BuildUploadForm(ctx context.Context, uploadPath string, filePrefix string) (templ.Component, error) {
-	params, err := GetUploadFormParams(ctx, uploadPath, filePrefix)
-	if err != nil {
-		return nil, err
-	}
-	return UploadBackupForm(*params), nil
-}
-
-func ProcessUploadBackup(r *http.Request, uploadBackupFormUrl string, idUpdater string, event string, processJson func(*json.Decoder) (int64, error)) (templ.Component, error) {
-	bucket := GetQueryParamAsString(r, "bucket")
-	key := GetQueryParamAsString(r, "key")
-	etag := GetQueryParamAsString(r, "etag")
-
-	if bucket == "" || key == "" || etag == "" {
-		return nil, errors.New("Bad Request")
-	}
-
-	s3Client, err := aws_h.GetS3Client(r.Context())
-	if err != nil {
-		log.Printf("Error getting s3 client: %s", err)
-		return nil, err
-	}
-
-	log.Printf("Getting object from bucket %s key %s", bucket, key)
-	outPut, err := s3Client.GetObject(r.Context(), &s3.GetObjectInput{
-		Bucket:       &bucket,
-		Key:          &key,
-		IfMatch:      &etag,
-		ChecksumMode: types.ChecksumModeEnabled,
-	})
-
-	if err != nil {
-		log.Printf("Error getting object from bucket %s key %s: %s", bucket, key, err)
-		return nil, err
-	}
-
-	deleteObj := func() {
-		log.Printf("Deleting object from bucket %s key %s", bucket, key)
-		_, err = s3Client.DeleteObject(r.Context(), &s3.DeleteObjectInput{
-			Bucket: &bucket,
-			Key:    &key,
-		})
-
-		if err != nil {
-			log.Printf("Error deleting object from bucket %s key %s: %s", bucket, key, err)
-		}
-	}
-
-	defer deleteObj()
-
-	closeBody := func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			log.Println("Error closing: ", err)
-			return
-		}
-	}
-
-	defer closeBody(outPut.Body)
-
-	gzipReader, err := gzip.NewReader(outPut.Body)
-	if err != nil {
-		log.Printf("Error creating gzip reader: %s", err)
-		return nil, err
-	}
-
-	defer closeBody(gzipReader)
-
-	decoder := json.NewDecoder(gzipReader)
-
-	var inserted int64 = 0
-	//apts := make([]ApartmentDto, 50)
-
-	for decoder.More() { // Loop through JSON objects in the stream
-
-		rowsAffected, err := processJson(decoder)
-		if err != nil {
-			return nil, err
-		}
-		inserted += rowsAffected
-	}
-
-	return UploadBackupResponse(inserted, uploadBackupFormUrl, idUpdater, event), nil
+type UploadBackupParams struct {
+	Url              string
+	Values           map[string]string
+	OutOfBandsUpdate bool
 }

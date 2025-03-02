@@ -2,8 +2,8 @@ package buildings
 
 import (
 	"github.com/google/uuid"
-	"kyotaidoshin/api"
 	"kyotaidoshin/reserveFunds"
+	"kyotaidoshin/util"
 	"sync"
 )
 
@@ -33,9 +33,10 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 			//log.Printf("ID %d aptCount %d\n", item.ID, *item.AptCount)
 
 			results[i] = Item{
-				Key:       *api.Encode(item.ID),
+				Key:       *util.Encode(item.ID),
 				CardId:    "buildings-" + uuid.NewString(),
-				Item:      item,
+				Item:      item.Buildings,
+				AptCount:  item.AptCount,
 				CreatedAt: item.CreatedAt.UnixMilli(),
 			}
 

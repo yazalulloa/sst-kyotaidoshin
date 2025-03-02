@@ -5,7 +5,7 @@ import (
 	"db/gen/model"
 	. "db/gen/table"
 	"github.com/go-jet/jet/v2/sqlite"
-	"kyotaidoshin/api"
+	"kyotaidoshin/util"
 	"time"
 )
 
@@ -31,16 +31,16 @@ func queryCondition(rateQuery *RequestQuery) (sqlite.BoolExpression, bool) {
 	return condition, justTrue
 }
 
-func SelectList(rateQuery RequestQuery) ([]model.Rates, error) {
-	condition, _ := queryCondition(&rateQuery)
+func SelectList(requestQuery RequestQuery) ([]model.Rates, error) {
+	condition, _ := queryCondition(&requestQuery)
 
-	if rateQuery.LastId > 0 {
-		condition = condition.AND(Rates.ID.LT(sqlite.Int64(rateQuery.LastId)))
+	if requestQuery.LastId > 0 {
+		condition = condition.AND(Rates.ID.LT(sqlite.Int64(requestQuery.LastId)))
 	}
 
-	stmt := Rates.SELECT(Rates.AllColumns).FROM(Rates).WHERE(condition).LIMIT(int64(rateQuery.Limit))
+	stmt := Rates.SELECT(Rates.AllColumns).FROM(Rates).WHERE(condition).LIMIT(int64(requestQuery.Limit))
 
-	if rateQuery.SortOrder == "ASC" {
+	if requestQuery.SortOrder == util.SortOrderTypeASC {
 		stmt = stmt.ORDER_BY(Rates.ID.ASC())
 	} else {
 		stmt = stmt.ORDER_BY(Rates.ID.DESC())
@@ -94,7 +94,7 @@ func CheckRateExist(id int64) (bool, error) {
 	err := stmt.Query(db.GetDB().DB, &dest)
 	if err != nil {
 
-		if api.ErrNoRows.Error() == err.Error() {
+		if util.ErrNoRows.Error() == err.Error() {
 			return false, nil
 		}
 
@@ -172,7 +172,7 @@ func GetFirstBeforeDate(fromCurrency string, date time.Time) (model.Rates, error
 	}
 
 	if len(dest) == 0 {
-		return model.Rates{}, api.ErrNoRows
+		return model.Rates{}, util.ErrNoRows
 	}
 
 	return dest[0], nil
