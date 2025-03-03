@@ -10,26 +10,26 @@
 
   </div>
   <div class="flex flex-col gap-2 font-extrabold capitalize">
-    <div class="flex flex-row gap-4 justify-center">
-    <span class="flex flex-row gap-0 justify-center">
+    <div class="flex flex-row justify-center gap-4">
+    <span class="flex flex-row justify-center gap-0">
     <span x-text="$t('main-title-expenses')"></span>:&nbsp;<span x-text="counter"></span>
   </span>
-      <span class="flex flex-row gap-0 justify-center">
+      <span class="flex flex-row justify-center gap-0">
     <span x-text="$t('main-title-total-common')"></span>:&nbsp;<span
           x-text="FormatCurrency(parseFloat(totalCommon), 'VED')"></span>
   </span>
-      <span class="flex flex-row gap-0 justify-center">
+      <span class="flex flex-row justify-center gap-0">
     <span x-text="$t('main-title-total-uncommon')"></span>:&nbsp;<span
           x-text="FormatCurrency(parseFloat(totalUnCommon), 'VED')"></span>
   </span>
     </div>
-    <div class="flex flex-row gap-4 justify-center">
-       <span class="flex flex-row gap-0 justify-center">
+    <div class="flex flex-row justify-center gap-4">
+       <span class="flex flex-row justify-center gap-0">
     <span x-text="$t('main-title-total-common')"></span>&nbsp; + &nbsp;
          <span x-text="$t('main-title-reserve-funds')"></span>:&nbsp;
          <span x-text="FormatCurrency(parseFloat(totalCommonPlusReserve), 'VED')"></span>
   </span>
-      <span class="flex flex-row gap-0 justify-center">
+      <span class="flex flex-row justify-center gap-0">
     <span x-text="$t('main-title-total-uncommon')"></span>&nbsp; + &nbsp;
          <span x-text="$t('main-title-reserve-funds')"></span>:&nbsp;
         <span
@@ -85,11 +85,11 @@
               is_edit = false;
               key = restartKey;
              "
-       class="md:grid md:grid-cols-[7fr_3fr] flex flex-col gap-4 justify-center">
+       class="flex flex-col justify-center gap-4 md:grid-cols-[7fr_3fr] md:grid">
 
     <div class="flex flex-col gap-0">
       <div
-          class="font-bold grid grid-cols-[3fr_1fr_1fr_1fr] border-b border-surface-dark dark:border-surface dark:text-surface">
+          class="grid border-b font-bold grid-cols-[3fr_1fr_1fr_1fr] border-surface-dark dark:border-surface dark:text-surface">
         <span x-text="$t('main-title-description')"></span>
         <span x-text="$t('main-title-amount')"></span>
         <span x-text="$t('main-title-type')"></span>
@@ -122,14 +122,14 @@
       <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
         <label for="expensesDescriptionInput"
                x-bind:class="descriptionErr !== '' ? 'text-danger' : ''"
-               class="flex w-fit items-center gap-1 pl-0.5 text-sm">
+               class="flex w-fit items-center gap-1 text-sm pl-0.5">
           <svg x-show="descriptionErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
           <span x-text="$t('main-title-description')"></span>
         </label>
         <input
             id="expensesDescriptionInput"
             type="text"
-            class="w-full rounded-radius border bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+            class="w-full border px-2 py-2 text-sm rounded-radius bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
             name="description"
             maxlength="100"
             x-model="description"
@@ -150,14 +150,14 @@
       <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
         <label for="expensesAmountInput"
                x-bind:class="amountErr !== '' ? 'text-danger' : ''"
-               class="flex w-fit items-center gap-1 pl-0.5 text-sm">
+               class="flex w-fit items-center gap-1 text-sm pl-0.5">
 
           <svg x-show="amountErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
           <span x-text="$t('main-title-amount')"></span>
         </label>
         <input
             id="expensesAmountInput"
-            class="w-full rounded-radius border bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+            class="w-full border px-2 py-2 text-sm rounded-radius bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
             type="number"
             name="amount"
             maxlength="14"
@@ -177,13 +177,13 @@
       </div>
 
       <div class="relative flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-        <label for="expensesCurrencySelect" class="w-fit pl-0.5 text-sm"
+        <label for="expensesCurrencySelect" class="w-fit text-sm pl-0.5"
                x-text="$t('main-title-currency')"></label>
         <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
         <select id="expensesCurrencySelect"
                 name="currency"
                 x-model="currency"
-                class="w-full appearance-none rounded-radius border border-outline bg-surface-alt px-4 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+                class="w-full appearance-none border px-4 py-2 text-sm rounded-radius border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
           <template x-for="value in currencies">
             <option x-bind:value="value" x-text="value"></option>
           </template>
@@ -192,13 +192,13 @@
       </div>
 
       <div class="relative flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-        <label for="expensesTypeSelect" class="w-fit pl-0.5 text-sm"
+        <label for="expensesTypeSelect" class="w-fit text-sm pl-0.5"
                x-text="$t('main-title-type')"></label>
         <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
         <select id="expensesTypeSelect"
                 name="type"
                 x-model="type"
-                class="w-full appearance-none rounded-radius border border-outline bg-surface-alt px-4 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+                class="w-full appearance-none border px-4 py-2 text-sm rounded-radius border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
           <template x-for="value in EXPENSES_TYPES_GLOBAL">
             <option x-bind:value="value" x-text="value"></option>
           </template>
@@ -207,15 +207,15 @@
       </div>
 
 
-      <p x-show="errMsg !== ''" x-text="errMsg" class="text-danger border border-danger"></p>
+      <p x-show="errMsg !== ''" x-text="errMsg" class="border text-danger border-danger"></p>
 
-      <div class="flex flex-row gap-2 justify-start">
+      <div class="flex flex-row justify-start gap-2">
         <button
             x-text="is_edit ? $t('main-action-update') : $t('main-action-create')"
             x-effect="
              $el.disabled=!(description?.trim()?.length > 0 && parseFloat(amount) !== 0)
             "
-            class="whitespace-nowrap rounded-radius bg-primary border border-primary px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+            class="whitespace-nowrap border px-4 py-2 text-center text-sm font-medium tracking-wide transition rounded-radius bg-primary border-primary text-on-primary hover:opacity-75 focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
             @click="
               let form = $el.closest('form');
               form.classList.remove('border', 'border-success')
@@ -223,7 +223,7 @@
             ">
         </button>
         <button type="button"
-                class="whitespace-nowrap rounded-radius bg-surface-alt border border-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface-strong transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface-alt active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark-alt"
+                class="whitespace-nowrap border px-4 py-2 text-center text-sm font-medium tracking-wide transition rounded-radius bg-surface-alt border-surface-alt text-on-surface-strong hover:opacity-75 focus-visible:outline-surface-alt focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark-alt"
                 @click.prevent="$dispatch('event-expense-form-reset')"
                 x-text="$t('main-action-clear')">
         </button>

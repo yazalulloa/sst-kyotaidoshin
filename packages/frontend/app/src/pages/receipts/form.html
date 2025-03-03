@@ -1,4 +1,4 @@
-<div class="w-full flex flex-col gap-4 items-center justify-center"
+<div class="flex w-full flex-col items-center justify-center gap-4"
      x-data="{
     open: false,
     isEdit: true,
@@ -16,7 +16,7 @@
 
   <form
       id="receipts-form"
-      class="flex flex-col gap-4 justify-center rounded-lg p-4 max-w-xs w-full"
+      class="flex w-full max-w-xs flex-col justify-center gap-4 rounded-lg p-4"
       hx-put="/api/receipts"
       hx-disabled-elt="this, #receipts-form * > input:not([disabled]), #receipts-form * > button:not([disabled]), #receipts-form * > select:not([disabled])"
       hx-indicator=".htmx-indicator"
@@ -49,17 +49,17 @@
 
     <div id="receipts-form-error" hidden="hidden"></div>
 
-    <div class="grid gap-4 w-full">
+    <div class="grid w-full gap-4">
       <div class="relative flex w-full max-w-xs flex-col gap-1 text-on-surface dark:text-on-surface-dark">
         <label for="receiptYearSelect"
-               class="w-fit pl-0.5 text-sm"
+               class="w-fit text-sm pl-0.5"
                x-text="$t('main-title-year')">
         </label>
         <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
         <select id="receiptYearSelect"
                 name="year"
                 x-model="year"
-                class="w-full appearance-none rounded-radius border border-outline bg-surface-alt px-4 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+                class="w-full appearance-none border px-4 py-2 text-sm rounded-radius border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
           <template x-for="v in years">
             <option x-bind:value="v" x-text="v"></option>
           </template>
@@ -68,14 +68,14 @@
 
       <div class="relative flex w-full max-w-xs flex-col gap-1 text-on-surface dark:text-on-surface-dark">
         <label for="receiptMonthSelect"
-               class="w-fit pl-0.5 text-sm"
+               class="w-fit text-sm pl-0.5"
                x-text="$t('main-title-month')">
         </label>
         <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
         <select id="receiptMonthSelect"
                 name="month"
                 x-model="month"
-                class="w-full appearance-none rounded-radius border border-outline bg-surface-alt px-4 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+                class="w-full appearance-none border px-4 py-2 text-sm rounded-radius border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
           <template x-for="month in months">
             <option x-bind:value="month" x-text="$t('main-months-' + month)"></option>
           </template>
@@ -83,12 +83,12 @@
       </div>
       <div class="relative flex w-full max-w-xs flex-col gap-1 text-on-surface dark:text-on-surface-dark">
         <label for="receiptDateInput"
-               class="w-fit pl-0.5 text-sm"
+               class="w-fit text-sm pl-0.5"
                x-text="$t('main-title-date')">
         </label>
         <input
             id="receiptDateInput"
-            class="w-full inline-flex items-center justify-between gap-2 whitespace-nowrap border-outline bg-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark border rounded-radius"
+            class="inline-flex w-full items-center justify-between gap-2 whitespace-nowrap border px-4 py-2 text-sm font-medium tracking-wide transition border-outline bg-surface-alt text-on-surface rounded-radius hover:opacity-75 focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark"
             type="date"
             name="date"
             placeholder="YYYY-MM-DD"
@@ -98,24 +98,24 @@
 
       <div class="relative flex w-full max-w-xs flex-col gap-1 text-on-surface dark:text-on-surface-dark">
         <label for="receiptRateSelect"
-               class="w-fit pl-0.5 text-sm"
+               class="w-fit text-sm pl-0.5"
                x-text="$t('main-title-rate')">
         </label>
         <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
         <select id="receiptRateSelect"
                 name="rate"
-                class="w-full appearance-none rounded-radius border border-outline bg-surface-alt px-4 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+                class="w-full appearance-none border px-4 py-2 text-sm rounded-radius border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
         </select>
       </div>
     </div>
 
 
-    <p x-show="errMsg !== ''" x-text="errMsg" class="text-danger border border-danger"></p>
+    <p x-show="errMsg !== ''" x-text="errMsg" class="border text-danger border-danger"></p>
 
-    <div class="flex flex-row gap-2 justify-start">
+    <div class="flex flex-row justify-start gap-2">
       <button
           x-text="isEdit ? $t('main-action-update') : $t('main-action-create')"
-          class="whitespace-nowrap rounded-radius bg-primary border border-primary px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+          class="whitespace-nowrap border px-4 py-2 text-center text-sm font-medium tracking-wide transition rounded-radius bg-primary border-primary text-on-primary hover:opacity-75 focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
           @click="
           let form = document.getElementById('receipts-form');
           form.classList.remove('border', 'border-success')
@@ -125,7 +125,7 @@
       </button>
       <a href="/receipts">
         <button type="button"
-                class="whitespace-nowrap rounded-radius bg-surface-alt border border-surface-alt px-4 py-2 text-sm font-medium tracking-wide text-on-surface-strong transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface-alt active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark-alt"
+                class="whitespace-nowrap border px-4 py-2 text-center text-sm font-medium tracking-wide transition rounded-radius bg-surface-alt border-surface-alt text-on-surface-strong hover:opacity-75 focus-visible:outline-surface-alt focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark-alt"
                 x-text="$t('main-action-cancel')">
         </button>
       </a>
