@@ -8,6 +8,7 @@ import {Select} from "@openauthjs/openauth/ui/select"
 import {THEME_OPENAUTH} from "@openauthjs/openauth/ui/theme"
 import {InvokeCommand, LambdaClient} from "@aws-sdk/client-lambda";
 import {DynamoStorage} from "@openauthjs/openauth/storage/dynamo"
+import {v4 as uuidv4} from 'uuid';
 
 const lambda = new LambdaClient({});
 
@@ -32,6 +33,9 @@ const app = issuer({
       // scopes: ["openid", "profile", "email"],
       scopes: ["openid", "user:email"],
       pkce: true,
+      query: {
+        nonce: uuidv4(),
+      }
     }),
     google: GoogleProvider({
       clientID: Resource.GoogleClientId.value,
