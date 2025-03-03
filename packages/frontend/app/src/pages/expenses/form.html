@@ -123,7 +123,7 @@
         <label for="expensesDescriptionInput"
                x-bind:class="descriptionErr !== '' ? 'text-danger' : ''"
                class="flex w-fit items-center gap-1 pl-0.5 text-sm">
-          <svg x-show="descriptionErr !== ''" x-bind:data-src="crossIcon" data-cache="21600" class="size-4"></svg>
+          <svg x-show="descriptionErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
           <span x-text="$t('main-title-description')"></span>
         </label>
         <input
@@ -152,7 +152,7 @@
                x-bind:class="amountErr !== '' ? 'text-danger' : ''"
                class="flex w-fit items-center gap-1 pl-0.5 text-sm">
 
-          <svg x-show="amountErr !== ''" x-bind:data-src="crossIcon" data-cache="21600" class="size-4"></svg>
+          <svg x-show="amountErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
           <span x-text="$t('main-title-amount')"></span>
         </label>
         <input
@@ -179,7 +179,7 @@
       <div class="relative flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
         <label for="expensesCurrencySelect" class="w-fit pl-0.5 text-sm"
                x-text="$t('main-title-currency')"></label>
-        <svg x-bind:data-src="selectIcon" data-cache="21600"></svg>
+        <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
         <select id="expensesCurrencySelect"
                 name="currency"
                 x-model="currency"
@@ -194,7 +194,7 @@
       <div class="relative flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
         <label for="expensesTypeSelect" class="w-fit pl-0.5 text-sm"
                x-text="$t('main-title-type')"></label>
-        <svg x-bind:data-src="selectIcon" data-cache="21600"></svg>
+        <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
         <select id="expensesTypeSelect"
                 name="type"
                 x-model="type"

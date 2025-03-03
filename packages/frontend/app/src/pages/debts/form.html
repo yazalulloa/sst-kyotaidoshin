@@ -95,7 +95,7 @@
                x-bind:class="amountErr !== '' ? 'text-danger' : ''"
                class="flex w-fit items-center gap-1 pl-0.5 text-sm">
 
-          <svg x-show="amountErr !== ''" x-bind:data-src="crossIcon" data-cache="21600" class="size-4"></svg>
+          <svg x-show="amountErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
           <span x-text="$t('main-title-amount')"></span>
         </label>
         <input
@@ -125,7 +125,7 @@
                x-bind:class="receiptsErr !== '' ? 'text-danger' : ''"
                class="flex w-fit items-center gap-1 pl-0.5 text-sm">
 
-          <svg x-show="receiptsErr !== ''" x-bind:data-src="crossIcon" data-cache="21600" class="size-4"></svg>
+          <svg x-show="receiptsErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
           <span x-text="$t('main-title-receipts')"></span>
         </label>
         <input
@@ -160,7 +160,7 @@
         <label for="debtsPreviousPaymentAmountInput"
                x-bind:class="previousPaymentAmountErr !== '' ? 'text-danger' : ''"
                class="flex w-fit items-center gap-1 pl-0.5 text-sm">
-          <svg x-show="previousPaymentAmountErr !== ''" x-bind:data-src="crossIcon" data-cache="21600"
+          <svg x-show="previousPaymentAmountErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600"
                class="size-4"></svg>
           <span x-text="$t('main-title-previous-payment')"></span>
         </label>
@@ -188,7 +188,7 @@
       <div class="relative flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
         <label for="debtsPreviousPaymentCurrencySelect" class="w-fit pl-0.5 text-sm"
                x-text="$t('main-title-currency')"></label>
-        <svg x-bind:data-src="selectIcon" data-cache="21600"></svg>
+        <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
         <select id="debtsPreviousPaymentCurrencySelect"
                 name="previousPaymentAmountCurrency"
                 x-model="previousPaymentAmountCurrency"

@@ -160,7 +160,7 @@ func NextPageLi(nextUrl string, attrs templ.Attributes) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "><svg x-bind:data-src=\"nextPageIcon\" data-cache=\"21600\" class=\"h-4 w-4\"></svg></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "><svg x-bind:data-src=\"nextPageIconUrl\" data-cache=\"21600\" class=\"h-4 w-4\"></svg></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -288,7 +288,7 @@ func BackBtn(backUrl string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" hx-disabled-elt=\"this\" hx-indicator=\".htmx-indicator\" hx-swap=\"none\" todo-hx-push-url=\"true\" hx-trigger=\"click\"><svg x-bind:data-src=\"backBtnIcon\" data-cache=\"21600\" class=\"h-4 w-4\"></svg></button>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "\" hx-disabled-elt=\"this\" hx-indicator=\".htmx-indicator\" hx-swap=\"none\" todo-hx-push-url=\"true\" hx-trigger=\"click\"><svg x-bind:data-src=\"backBtnIconUrl\" data-cache=\"21600\" class=\"h-4 w-4\"></svg></button>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

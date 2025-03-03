@@ -40,6 +40,7 @@ export default $config({
 
 
     const auth = new sst.aws.Auth("AuthServer", {
+      forceUpgrade: "v2",
       issuer: {
         handler: "packages/auth/index.handler",
         link: [githubClientId, githubClientSecret, googleClientId, googleClientSecret, processUserFunction],

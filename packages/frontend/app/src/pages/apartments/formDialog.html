@@ -97,7 +97,7 @@
         <div class="relative flex w-full  flex-col gap-1 text-on-surface dark:text-on-surface-dark">
           <label for="aptBuildingSelect" class="w-fit pl-0.5 text-sm" x-text="$t('main-title-building')">
           </label>
-          <svg x-bind:data-src="selectIcon" data-cache="21600"></svg>
+          <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
           <select id="aptBuildingSelect"
                   name="building"
                   x-model="building"
@@ -114,7 +114,7 @@
           <label for="aptNumberInput"
                  x-bind:class="numberErr !== '' ? 'text-danger' : ''"
                  class="flex w-fit items-center gap-1 pl-0.5 text-sm">
-            <svg x-show="numberErr !== ''" x-bind:data-src="crossIcon" data-cache="21600" class="size-4"></svg>
+            <svg x-show="numberErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
             <span x-text="$t('main-title-apt-number')"></span>
           </label>
           <input
@@ -141,7 +141,7 @@
           <label for="aptNameInput"
                  x-bind:class="nameErr !== '' ? 'text-danger' : ''"
                  class="flex w-fit items-center gap-1 pl-0.5 text-sm">
-            <svg x-show="nameErr !== ''" x-bind:data-src="crossIcon" data-cache="21600" class="size-4"></svg>
+            <svg x-show="nameErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
             <span x-text="$t('main-title-name')"></span>
           </label>
           <input
@@ -173,7 +173,7 @@
           <label for="aptAliquotInput"
                  x-bind:class="aliquotErr !== '' ? 'text-danger' : ''"
                  class="flex w-fit items-center gap-1 pl-0.5 text-sm">
-            <svg x-show="aliquotErr !== ''" x-bind:data-src="crossIcon" data-cache="21600" class="size-4"></svg>
+            <svg x-show="aliquotErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
             <span x-text="$t('main-title-aliquot')"></span>
           </label>
           <input
@@ -229,7 +229,7 @@
           <label x-bind:class="emailErr !== '' ? 'text-danger' : ''"
                  class="w-full flex flex-col items-center gap-1 pl-0.5 text-sm">
             <div class="flex flex-row gap-1 w-full justify-items-start items-start">
-              <svg x-show="emailErr !== ''" x-bind:data-src="crossIcon" data-cache="21600" class="size-4"></svg>
+              <svg x-show="emailErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
               <span x-text="$t('main-title-email')"></span>
             </div>
 
@@ -263,7 +263,7 @@
                       class="absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface dark:text-on-surface-dark"
                       aria-label="clear value"
                       @click.prevent="email = ''">
-                <svg x-bind:data-src="crossIcon" data-cache="21600" class="size-4"></svg>
+                <svg x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
               </button>
             </div>
             <small x-text="emailErr"

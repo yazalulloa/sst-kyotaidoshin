@@ -68,7 +68,7 @@ const app = issuer({
       })
     }
 
-    let msgErr = payload ?? ""
+    let msgErr = payload ?? "Empty payload"
 
     throw new Error(`Some error ${output.StatusCode}: ${msgErr}`)
   }

@@ -1,35 +1,37 @@
 import deleteIconUrl from './assets/images/delete-cross.svg?no-inline';
 import processIconUrl from './assets/images/process.svg?no-inline';
 import editIconUrl from './assets/images/edit_icon.svg?no-inline';
-import ratesIcon from './assets/images/rates.svg?no-inline'
-import bucketIcon from './assets/images/bucket.svg?no-inline'
-import buildingsIcon from './assets/images/building.svg?no-inline'
-import apartmentsIcon from './assets/images/apartments.svg?no-inline'
-import nextPageIcon from './assets/images/chevron-double-down.svg?no-inline'
-import backBtnIcon from './assets/images/left-arrow.svg?no-inline'
-import crossIcon from './assets/images/cross.svg?no-inline'
-import selectIcon from './assets/images/selectIcon.svg?no-inline'
-import checkBoxIcon from './assets/images/checkbox-icon.svg?no-inline'
+import ratesIconUrl from './assets/images/rates.svg?no-inline'
+import bucketIconUrl from './assets/images/bucket.svg?no-inline'
+import buildingsIconUrl from './assets/images/building.svg?no-inline'
+import apartmentsIconUrl from './assets/images/apartments.svg?no-inline'
+import nextPageIconUrl from './assets/images/chevron-double-down.svg?no-inline'
+import backBtnIconUrl from './assets/images/left-arrow.svg?no-inline'
+import crossIconUrl from './assets/images/cross.svg?no-inline'
+import selectIconUrl from './assets/images/selectIcon.svg?no-inline'
+import checkBoxIconUrl from './assets/images/checkbox-icon.svg?no-inline'
+import profileIconUrl from './assets/images/profile.svg?no-inline'
 
 window.deleteIconUrl = deleteIconUrl;
 window.processIconUrl = processIconUrl;
 window.editIconUrl = editIconUrl;
-window.nextPageIcon = nextPageIcon;
-window.backBtnIcon = backBtnIcon;
-window.crossIcon = crossIcon;
-window.selectIcon = selectIcon;
-window.checkBoxIcon = checkBoxIcon;
+window.nextPageIconUrl = nextPageIconUrl;
+window.backBtnIconUrl = backBtnIconUrl;
+window.crossIconUrl = crossIconUrl;
+window.selectIconUrl = selectIconUrl;
+window.checkBoxIconUrl = checkBoxIconUrl;
+window.profileIconUrl = profileIconUrl;
 
-window.ratesIcon = ratesIcon;
-window.bucketIcon = bucketIcon;
-window.buildingsIcon = buildingsIcon;
-window.apartmentsIcon = apartmentsIcon;
+window.ratesIconUrl = ratesIconUrl;
+window.bucketIconUrl = bucketIconUrl;
+window.buildingsIconUrl = buildingsIconUrl;
+window.apartmentsIconUrl = apartmentsIconUrl;
 
 window.NAV_ICONS = new Map([
-  ['nav-apartments', apartmentsIcon],
-  ['nav-buildings', buildingsIcon],
-  ['nav-receipts', ratesIcon],
-  ['nav-rates', ratesIcon],
-  ['nav-users', bucketIcon],
-  ['nav-bcv-files', bucketIcon],
+  ['nav-apartments', apartmentsIconUrl],
+  ['nav-buildings', buildingsIconUrl],
+  ['nav-receipts', ratesIconUrl],
+  ['nav-rates', ratesIconUrl],
+  ['nav-users', bucketIconUrl],
+  ['nav-bcv-files', bucketIconUrl],
 ]);

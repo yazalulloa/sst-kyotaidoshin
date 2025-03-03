@@ -24,7 +24,8 @@
        aria-hidden="true" x-on:click="sidebarIsOpen = false" x-transition.opacity></div>
 
   <nav x-cloak
-       class="fixed left-0 z-30 flex h-svh w-60 shrink-0 flex-col border-r border-outline bg-surface-alt p-4 transition-transform duration-300 md:w-64 md:translate-x-0 md:relative dark:border-outline-dark dark:bg-surface-dark-alt"
+       class="fixed left-0 z-30 flex h-svh w-46 shrink-0 flex-col border-r border-outline bg-surface-alt p-4
+       transition-transform duration-300 md:w-50 md:translate-x-0 md:relative dark:border-outline-dark dark:bg-surface-dark-alt"
        x-bind:class="sidebarIsOpen ? 'translate-x-0' : '-translate-x-60'" aria-label="sidebar navigation">
     <!-- logo  -->
     <a href="#" class="ml-2 w-fit text-2xl font-bold text-on-surface-strong dark:text-on-surface-dark-strong">
@@ -161,7 +162,7 @@
                   x-bind:class="userDropdownIsOpen ? 'bg-primary/10 dark:bg-primary-dark/10' : ''" aria-haspopup="true"
                   x-on:click="userDropdownIsOpen = ! userDropdownIsOpen" x-bind:aria-expanded="userDropdownIsOpen">
 
-            <img src="https://penguinui.s3.amazonaws.com/component-assets/avatar-7.webp"
+            <img x-bind:src="profileIconUrl"
                  class="size-8 object-cover rounded-radius" alt="avatar" aria-hidden="true"/>
             <div class="hidden md:flex flex-col">
               <span
