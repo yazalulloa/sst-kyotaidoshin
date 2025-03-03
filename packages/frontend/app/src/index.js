@@ -285,6 +285,36 @@ window.decodeBase64UrlStr = function (encoded) {
   return decoder.decode(byteNumbers);
 }
 
+function prefetchUrl(url) {
+  const link = document.createElement('link');
+  link.rel = 'prefetch';
+  link.href = url;
+  document.head.appendChild(link);
+}
+
+function getVariablesWithSuffix(suffix) {
+  const result = [];
+  for (const key in window) {
+    if (window.hasOwnProperty(key) && key.endsWith(suffix)) {
+      result.push(key);
+    }
+  }
+  return result;
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  const partialUrls = getVariablesWithSuffix("PartialUrl")
+  partialUrls.forEach(partialUrl => {
+    prefetchUrl(window[partialUrl]);
+  });
+
+  const conUrls = getVariablesWithSuffix("IconUrl")
+  conUrls.forEach(conUrl => {
+    prefetchUrl(window[conUrl]);
+  });
+});
+
 document.addEventListener("htmx:afterSettle", function (event) {
   // configureCurrencyInputs();
 });

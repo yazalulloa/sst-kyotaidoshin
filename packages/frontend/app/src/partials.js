@@ -59,3 +59,8 @@ window.NAV_URLS = new Map([
   ['nav-users', usersIndexPartialUrl],
 
 ])
+
+
+document.addEventListener("DOMContentLoaded", function() {
+
+});
