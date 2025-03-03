@@ -292,11 +292,15 @@ function prefetchUrl(url) {
   document.head.appendChild(link);
 }
 
-function getVariablesWithSuffix(suffix) {
+function getVariablesWithSuffix(suffixes) {
   const result = [];
   for (const key in window) {
-    if (window.hasOwnProperty(key) && key.endsWith(suffix)) {
-      result.push(key);
+    if (window.hasOwnProperty(key)) {
+      for (const suffix in suffixes) {
+        if (key.endsWith(suffix)) {
+          result.push(key);
+        }
+      }
     }
   }
   return result;
@@ -304,14 +308,9 @@ function getVariablesWithSuffix(suffix) {
 
 document.addEventListener("DOMContentLoaded", function () {
 
-  const partialUrls = getVariablesWithSuffix("PartialUrl")
-  partialUrls.forEach(partialUrl => {
-    prefetchUrl(window[partialUrl]);
-  });
-
-  const conUrls = getVariablesWithSuffix("IconUrl")
-  conUrls.forEach(conUrl => {
-    prefetchUrl(window[conUrl]);
+  const prefetchUrls = getVariablesWithSuffix(["PartialUrl", "IconUrl"])
+  prefetchUrls.forEach(url => {
+    prefetchUrl(window[url]);
   });
 });
 
