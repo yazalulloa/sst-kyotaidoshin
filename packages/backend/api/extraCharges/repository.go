@@ -21,7 +21,7 @@ func selectById(id int32) (*model.ExtraCharges, error) {
 	return &dest, nil
 }
 
-func selectByBuilding(buildingId string) ([]model.ExtraCharges, error) {
+func SelectByBuilding(buildingId string) ([]model.ExtraCharges, error) {
 
 	stmt := ExtraCharges.SELECT(ExtraCharges.AllColumns).FROM(ExtraCharges).
 		WHERE(ExtraCharges.BuildingID.EQ(sqlite.String(buildingId)).AND(ExtraCharges.ParentReference.EQ(sqlite.String(buildingId))))

@@ -1,0 +1,79 @@
+<div id="header-container" hx-swap-oob="true" class="flex flex-col gap-2">
+
+  <div class="flex flex-row justify-start gap-2">
+    <div x-data="{
+   url: '/receipts'
+  }">
+      <div x-bind:hx-get="backBtnPartialUrl"
+           hx-trigger="load"
+           hx-swap="outerHTML">
+      </div>
+    </div>
+
+    <button class="btn btn-primary"
+            hx-get="/api/receipts/zip"
+            hx-disabled-elt="this"
+            hx-indicator=".htmx-indicator"
+            hx-swap="none">
+      main.action.downloadZip
+    </button>
+  </div>
+
+  <div class="w-full flex flex-row gap-2 justify-center items-center text-center"
+       x-data="{
+        selected: '',
+        allVisible: true,
+        tabs: []
+        }"
+       @event-update-tabs.window="
+        JSON.parse(decodeBase64UrlStr($event.detail.tabs)).forEach((tab) => {
+          tabs.push(tab);
+        })
+
+        selected = tabs[0].id
+       "
+       x-init="
+          addEventListener('resize', () => {
+              allVisible = true;
+          });
+        "
+       x-effect="$dispatch('event-receipt-tab-selected', { selected })">
+
+    <button
+        class="whitespace-nowrap bg-transparent rounded-radius border border-surface-dark px-4 py-2 text-sm font-medium tracking-wide text-surface-dark transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface-dark active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-surface dark:text-surface dark:focus-visible:outline-surface">
+      &#10094;
+    </button>
+
+    <template x-for="tab in tabs">
+
+      <button
+          class="whitespace-nowrap bg-transparent rounded-radius border border-surface-dark px-4 py-2 text-sm font-medium tracking-wide text-surface-dark transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface-dark active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-surface dark:text-surface dark:focus-visible:outline-surface"
+          x-text="tab.name"
+          @click="selected = tab.id"
+      >
+      </button>
+
+    </template>
+
+
+    <button
+        class="whitespace-nowrap bg-transparent rounded-radius border border-surface-dark px-4 py-2 text-sm font-medium tracking-wide text-surface-dark transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface-dark active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-surface dark:text-surface dark:focus-visible:outline-surface"
+    >&#10095;
+    </button>
+
+
+  </div>
+</div>
+
+<div id="container" class="" hx-swap-oob="true"
+     x-data="{
+       selected: ''
+       }"
+     @event-receipt-tab-selected.window="selected = $event.detail?.selected;">
+  <div x-bind:hx-get="'/api/receipts/view/' + getLastPathSegment()"
+       hx-trigger="load"
+       hx-indicator=".htmx-indicator"
+       hx-target="this"
+       hx-swap="outerHTML">
+  </div>
+</div>

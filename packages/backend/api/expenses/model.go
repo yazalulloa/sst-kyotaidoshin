@@ -5,12 +5,26 @@ import (
 	"github.com/google/uuid"
 )
 
+const AliquotDifference = "DIFERENCIA DE ALIQUOTA"
+
 type ExpenseType string
 
 const (
 	COMMON   ExpenseType = "COMMON"
 	UNCOMMON ExpenseType = "UNCOMMON"
 )
+
+func (receiver ExpenseType) Name() string {
+	return string(receiver)
+}
+
+func (receiver ExpenseType) Is(str string) bool {
+	return receiver.Name() == str
+}
+
+func (receiver ExpenseType) ExpenseIs(item model.Expenses) bool {
+	return receiver.Is(item.Type)
+}
 
 type ExpenseDto struct {
 	BuildingID  string  `json:"building_id"`

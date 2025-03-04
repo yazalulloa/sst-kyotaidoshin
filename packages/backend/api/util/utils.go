@@ -14,6 +14,59 @@ import (
 	"time"
 )
 
+type AllowedCurrencies string
+
+const (
+	VED AllowedCurrencies = "VED"
+	USD AllowedCurrencies = "USD"
+)
+
+func (receiver AllowedCurrencies) Name() string {
+	return string(receiver)
+}
+
+func (receiver AllowedCurrencies) Is(str string) bool {
+	return receiver.Name() == str
+}
+
+func (receiver AllowedCurrencies) Symbol() string {
+	switch receiver {
+	case VED:
+		return "Bs."
+	case USD:
+		return "$"
+	default:
+		return ""
+	}
+}
+
+func (receiver AllowedCurrencies) Format(amount float64) string {
+	return fmt.Sprintf("%s %s", receiver.Symbol(), FormatFloat64(amount))
+}
+
+func (receiver AllowedCurrencies) Format2(amount float64) string {
+	return fmt.Sprintf("%s %s", receiver.Symbol(), FormatFloat2(amount))
+}
+
+func GetAllowedCurrency(str string) AllowedCurrencies {
+	if VED.Is(str) {
+		return VED
+	}
+
+	if USD.Is(str) {
+		return USD
+	}
+
+	panic("Currency not allowed: " + str)
+}
+
+func AllowedCurrenciesStringArray() []string {
+	return []string{
+		VED.Name(),
+		USD.Name(),
+	}
+}
+
 const CsrfKey = "csrf-key"
 
 // const CsrfInputName = "kyotaidogo-csrf-form"
@@ -105,6 +158,32 @@ func IsDevMode() bool {
 	return true
 }
 
+func MonthsToInt(months string) []int16 {
+	return StrArrayToInt16Array(strings.Split(months, ","))
+}
+
+func MonthsToString(months string) string {
+	monthMap := *GetMonths()
+	var builder strings.Builder
+	for i, v := range MonthsToInt(months) {
+		builder.WriteString(monthMap[v])
+		if i != len(months)-1 {
+			builder.WriteString(", ")
+		}
+	}
+
+	return builder.String()
+
+}
+
+func StrArrayToInt16Array(strArray []string) []int16 {
+	int16Array := make([]int16, len(strArray))
+	for i, v := range strArray {
+		int16Array[i] = StringToInt16(v)
+	}
+	return int16Array
+}
+
 //func FileHash(filepath string) (int64, error) {
 //	file, err := os.Open(filepath)
 //
@@ -144,7 +223,7 @@ func IsDevMode() bool {
 func GetUploadFormParams(ctx context.Context, uploadPath string, filePrefix string) (*UploadBackupParams, error) {
 	bucketName, err := resource.Get("UploadBackup", "name")
 	if err != nil {
-		log.Printf("Error getting bucket name: %s", err)
+		log.Printf("Error getting bucket Name: %s", err)
 		return nil, err
 	}
 

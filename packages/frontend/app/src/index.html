@@ -66,14 +66,6 @@
          x-data="{
     pages: [],
     selected: '',
-    navEvent(path) {
-    console.log(path)
-      let page = this.pages.find(page => page.Path === path)
-      if (page) {
-        document.getElementById(page.Id).firstElementChild.dispatchEvent(new CustomEvent('navigate'))
-      }
-
-    }
     }"
          x-init="
          $watch('pages', value => {
@@ -81,10 +73,20 @@
          if (IsTherePathName()) {
           let pathname = window.location.pathname;
           let page = pages.find(page => page.Path === pathname)
+
           if (page) {
             document.getElementById(page.Id).click()
             return
           }
+
+          let subRoute = pages.filter((page) => page.SubRoutes && page.SubRoutes.length > 0).flatMap((page) => page.SubRoutes)
+          .find((sub) => DoesCurrentUrlMatch(sub.Path))
+
+          if (subRoute) {
+            sendEvent(subRoute.Id, 'navigate')
+           return;
+          }
+
          }
 
          let lastNav = getLastNav()
@@ -93,9 +95,6 @@
          })
 
          "
-         asd-x-handler.global="[(ctx) => {
-         console.log(ctx)
-          navEvent(ctx.path)}]"
     >
 
       <template x-route="/"
@@ -104,7 +103,8 @@
                 hx-target="this"
                 hx-indicator=".htmx-indicator"
                 hx-trigger="load"
-                hx-swap="afterend"
+                asd-hx-swap="afterend"
+                hx-swap="outerHTML"
                 x-init="htmx.process($el)">
       </template>
 

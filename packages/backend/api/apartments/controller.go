@@ -92,8 +92,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 }
 
 func aptDelete(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	keyStr := vars["key"]
+	keyStr := mux.Vars(r)["key"]
 	if keyStr == "" {
 		w.WriteHeader(http.StatusNoContent)
 		return

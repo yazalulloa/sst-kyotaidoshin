@@ -12,8 +12,16 @@ const (
 	PERCENTAGE Type = "PERCENTAGE"
 )
 
-func IsFixedPay(str string) bool {
-	return str == "FIXED_PAY"
+func (receiver Type) Name() string {
+	return string(receiver)
+}
+
+func (receiver Type) Is(str string) bool {
+	return receiver.Name() == str
+}
+
+func (receiver Type) FundIs(item model.ReserveFunds) bool {
+	return receiver.Is(item.Type)
 }
 
 type Item struct {

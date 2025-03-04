@@ -259,6 +259,7 @@ export default $config({
     return {
       Web_App: webUrl.value,
       SiteUrl: site.url,
+      VerifyAccess: verifyAccessFunction.arn
       // ApiFunction: apiFunction.url,
       // MyBucket: bucket.name,
       // BcvUrl: bcvUrl.value,

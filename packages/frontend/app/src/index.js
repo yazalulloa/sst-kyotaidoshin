@@ -12,6 +12,7 @@ import './partials.js';
 import './flags.js';
 import './images.js';
 import './config.js';
+import {match} from './utils.js';
 
 window.htmx = htmx;
 
@@ -37,6 +38,10 @@ window.FormatCurrency = function (value, currency) {
 
   return value;
 
+}
+
+window.DoesCurrentUrlMatch = function (route) {
+  return match(window.location.pathname, route)
 }
 
 // console.log('htmx', htmx.config);

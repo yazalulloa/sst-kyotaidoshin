@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/go-playground/validator/v10"
 	"log"
+	"math"
 	"reflect"
 	"strconv"
 	"strings"
@@ -26,20 +27,6 @@ const (
 	SortOrderTypeASC  SortOrderType = "ASC"
 	SortOrderTypeDESC SortOrderType = "DESC"
 )
-
-type AllowedCurrencies string
-
-const (
-	AllowedCurrenciesVED AllowedCurrencies = "VED"
-	AllowedCurrenciesUSD AllowedCurrencies = "USD"
-)
-
-func AllowedCurrenciesStringArray() []string {
-	return []string{
-		"VED",
-		"USD",
-	}
-}
 
 func HtmlCurrencies() string {
 	return StringArrayToString(AllowedCurrenciesStringArray())
@@ -152,6 +139,11 @@ func FormatFloat64(number float64) string {
 
 func FormatFloat2(number float64) string {
 	return strconv.FormatFloat(number, 'f', 2, 64)
+}
+
+func RoundFloat(val float64, precision uint) float64 {
+	ratio := math.Pow(10, float64(precision))
+	return math.Round(val*ratio) / ratio
 }
 
 func PercentageOf(percentage float64, total float64) float64 {

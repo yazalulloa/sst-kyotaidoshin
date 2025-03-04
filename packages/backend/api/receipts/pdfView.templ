@@ -1,0 +1,211 @@
+package receipts
+
+import (
+	"fmt"
+	"kyotaidoshin/expenses"
+	"kyotaidoshin/util"
+	"slices"
+	"strings"
+	"time"
+)
+
+templ AptView(dto CalculatedReceipt, apt AptTotal) {
+	<h4 class="text-center font-bold">AVISO DE COBRO</h4>
+	<div class="flex flex-col justify-start text-start items-start">
+		<p>{ dto.Building.Name }</p>
+		<p>{ dto.Building.Rif }</p>
+		<p>MES A PAGAR: { strings.ToUpper(apt.DebtMonthStr) }</p>
+		<p>{ dto.Receipt.Date.Format(time.DateOnly) }</p>
+		<p>PROPIETARIO: { apt.Apartment.Name }</p>
+		<p>APT: { apt.Apartment.Number }</p>
+		for _,amount := range apt.Amounts {
+			if slices.Contains(dto.CurrenciesToShowAmountToPay, amount.Currency) {
+				<p>VALOR RECIBO: { amount.Currency.Format(amount.Amount) }</p>
+			}
+		}
+		if !dto.Building.FixedPay {
+			if slices.Contains(dto.CurrenciesToShowAmountToPay, util.VED) && slices.Contains(dto.CurrenciesToShowAmountToPay, util.USD) {
+				<p>
+					TASA DE CAMBIO AL DÍA { dto.Rate.DateOfRate.Format(time.DateOnly) } :
+					{ util.VED.Format(dto.Rate.Rate) }
+				</p>
+			}
+			<p>ALÍQUOTA: { util.FormatFloat64(apt.Apartment.Aliquot) }</p>
+		}
+	</div>
+	<br/>
+	<div class="break-inside-avoid">
+		<p class="text-center font-bold">GASTOS COMUNES</p>
+		<div class="grid grid-cols-[8fr_2fr] gap-x-8">
+			<span class="font-bold">DESCRIPCIÓN</span>
+			<span class="font-bold">MONTO</span>
+			for _,exp := range dto.Expenses {
+				if expenses.COMMON.ExpenseIs(exp.Expense) {
+					<span class="text-start">{ exp.Expense.Description }</span>
+					<span class="text-end px-4">{ util.GetAllowedCurrency(exp.Expense.Currency).Format(exp.Expense.Amount) }</span>
+				}
+			}
+		</div>
+		<br/>
+		<p class="font-bold text-start">TOTAL GASTOS COMUNES: { dto.TotalCommonExpensesCurrency.Format(dto.TotalCommonExpenses) }</p>
+		<br/>
+	</div>
+	<div class="break-inside-avoid">
+		<p class="text-center font-bold">GASTOS NO COMUNES</p>
+		<div class="grid grid-cols-[8fr_2fr] gap-x-8">
+			<span class="font-bold">DESCRIPCIÓN</span>
+			<span class="font-bold">MONTO</span>
+			for _,exp := range dto.Expenses {
+				if expenses.UNCOMMON.ExpenseIs(exp.Expense) {
+					<span class="text-start">{ exp.Expense.Description }</span>
+					<span class="text-end px-4">{ util.GetAllowedCurrency(exp.Expense.Currency).Format(exp.Expense.Amount) }</span>
+				}
+			}
+		</div>
+		<br/>
+		<p class="font-bold text-start">TOTAL GASTOS NO COMUNES: { dto.TotalUnCommonExpensesCurrency.Format(dto.TotalUnCommonExpenses) }</p>
+		<br/>
+	</div>
+	if len(apt.ExtraCharges) > 0 {
+		<div class="break-inside-avoid">
+			<p class="text-center font-bold">CARGOS EXTRA</p>
+			<div class="grid grid-cols-[8fr_2fr] gap-x-8">
+				<span class="font-bold">DESCRIPCIÓN</span>
+				<span class="font-bold">MONTO</span>
+				for _,extraCharge := range apt.ExtraCharges {
+					<span class="text-start">{ extraCharge.Description }</span>
+					<span class="text-end px-4">{ util.GetAllowedCurrency(extraCharge.Currency).Format(extraCharge.Amount) }</span>
+				}
+			</div>
+			<br/>
+		</div>
+	}
+	<div class="break-inside-avoid">
+		<p class="text-center font-bold">MES DE { strings.ToUpper(dto.MonthStr) }/{ fmt.Sprint(dto.Receipt.Year) }</p>
+		<div
+			class={ "grid gap-x-8",
+		templ.KV("grid-cols-4", !dto.ThereIsReserveFundExpense),
+		 templ.KV("grid-cols-5", dto.ThereIsReserveFundExpense) }
+		>
+			<span class="font-bold">PATRIMONIO</span>
+			<span class="font-bold">+FACT.MES.ANT</span>
+			if dto.ThereIsReserveFundExpense {
+				<span class="font-bold">CARGOS</span>
+			}
+			<span class="font-bold">+FAC.MES.ACT</span>
+			<span class="font-bold">SALDO/MES</span>
+			for _,fund := range dto.ReserveFunds {
+				<span class="text-start">{ fund.Fund.Name } </span>
+				<span class="text-end px-4">{ fund.FundFormatted } </span>
+				if dto.ThereIsReserveFundExpense {
+					<span class="text-end px-4">{ fund.ExpenseFormatted }</span>
+				}
+				<span class="text-end px-4">{ fund.AmountToPay } </span>
+				<span class="text-end px-4">{ fund.NewReserveFund } </span>
+			}
+		</div>
+		<br/>
+	</div>
+	<div class="break-inside-avoid">
+		<p class="text-center font-bold">DEUDAS</p>
+		{{ debtCurrency := util.GetAllowedCurrency(dto.Building.DebtCurrency) }}
+		<div class="grid grid-cols-6 gap-x-8">
+			<span class="font-bold">APTO</span>
+			<span class="font-bold">PROPIETARIO</span>
+			<span class="font-bold">RECIBOS</span>
+			<span class="font-bold">DEUDA</span>
+			<span class="font-bold">MESES</span>
+			<span class="font-bold">ABONO</span>
+			for _,apt := range dto.Apartments {
+				<span class="text-start">{ apt.Apartment.Number }</span>
+				<span class="text-start">{ apt.Apartment.Name }</span>
+				<span class="text-end px-4">{ fmt.Sprint(apt.Debt.Receipts) }</span>
+				<span class="text-end px-4">{ debtCurrency.Format(apt.Debt.Amount) }</span>
+				<span class="text-center px-4">{ apt.DebtMonthStr }</span>
+				<span class="text-end px-4">{ util.GetAllowedCurrency(apt.Debt.PreviousPaymentAmountCurrency).Format(apt.Debt.PreviousPaymentAmount) }</span>
+			}
+		</div>
+		<br/>
+		<p class="font-bold text-start">NÚMERO DE RECIBOS: { fmt.Sprint(dto.DebtReceiptsAmount) }</p>
+		<p class="font-bold text-start">DEUDA TOTAL: { debtCurrency.Format(dto.DebtTotal) }</p>
+	</div>
+}
+
+templ BuildingView(dto CalculatedReceipt) {
+	{{ multipleCurrencies := len(dto.CurrenciesToShowAmountToPay) > 1 }}
+	{{ mainCurrency := util.GetAllowedCurrency(dto.Building.MainCurrency) }}
+	<h4 class="text-center font-bold">AVISO DE COBRO</h4>
+	<div class="flex flex-col justify-start text-start items-start">
+		<p>{ dto.Building.Name }</p>
+		<p>{ dto.Building.Rif }</p>
+		<p>MES A PAGAR: { strings.ToUpper(dto.MonthStr) }</p>
+		<p>{ dto.Receipt.Date.Format(time.DateOnly) }</p>
+		if multipleCurrencies {
+			<p>TASA DE CAMBIO AL DÍA:		{ util.VED.Format(dto.Rate.Rate) }</p>
+			<p>FECHA DE TASA DE CAMBIO: { dto.Rate.DateOfRate.Format(time.DateOnly) }</p>
+		}
+	</div>
+	<br/>
+	<p class="font-bold">LISTADO A PAGAR</p>
+	<div
+		class={ "grid gap-x-8",
+  		templ.KV("grid-cols-[1fr_7fr_2fr]", !multipleCurrencies),
+  		 templ.KV("grid-cols-[1fr_7fr_1fr_1fr]", multipleCurrencies) }
+	>
+		<span class="font-bold">APTO</span>
+		<span class="font-bold">PROPIETARIO</span>
+		if multipleCurrencies {
+			for _,currency := range dto.CurrenciesToShowAmountToPay {
+				<span class="font-bold">MONTO { currency.Name() }</span>
+			}
+		} else {
+			<span class="font-bold">MONTO</span>
+		}
+		for _,aptTotal := range dto.Apartments {
+			<span class="text-start">{ aptTotal.Apartment.Number }</span>
+			<span class="text-start">{ aptTotal.Apartment.Name }</span>
+			if multipleCurrencies {
+				for _,currency := range dto.CurrenciesToShowAmountToPay {
+					for _,amount := range aptTotal.Amounts {
+						if currency == amount.Currency {
+							<span class="text-end px-4">{ amount.Currency.Format(amount.Amount) }</span>
+						}
+					}
+				}
+			} else {
+				for _,amount := range aptTotal.Amounts {
+					if mainCurrency == amount.Currency {
+						<span class="text-end px-4">{ amount.Currency.Format(amount.Amount) }</span>
+					}
+				}
+			}
+		}
+	</div>
+	<br/>
+	<p class="font-bold text-start">TOTAL: { mainCurrency.Format(dto.ApartmentsTotal) }</p>
+}
+
+templ Views(dto CalculatedReceipt, idMap map[string]string, tabs string) {
+	<div
+		data-tabs={ tabs }
+		x-init="
+		$dispatch('event-update-tabs', {tabs: $el.dataset.tabs})
+		$el.remove()
+		"
+	></div>
+	<div x-show={ fmt.Sprintf("selected === '%s'", idMap[dto.Building.ID]) } x-transition.scale.origin.bottom>
+		<div class="bg-white px-6 py-2 text-black">
+			@BuildingView(dto)
+		</div>
+	</div>
+	for _,apt := range dto.Apartments {
+		<div
+			x-show={ fmt.Sprintf("selected === '%s'", idMap[apt.Apartment.Number]) }
+			x-transition.scale.origin.bottom
+		>
+			<div class="bg-white px-6 py-2 text-black">
+				@AptView(dto, apt)
+			</div>
+		</div>
+	}
+}

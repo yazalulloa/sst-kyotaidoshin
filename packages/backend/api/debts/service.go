@@ -57,6 +57,7 @@ func toItem(item *model.Debts, oldCardId *string) (*Item, error) {
 	if item.Months == "" {
 		months = make([]int16, 0)
 	} else {
+
 		split := strings.Split(item.Months, ",")
 		months = make([]int16, len(split))
 		for i, v := range split {

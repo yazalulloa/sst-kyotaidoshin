@@ -11,7 +11,7 @@ import (
 
 func GetBuildingFormDto(buildingId string) (*FormDto, error) {
 
-	list, err := selectByBuilding(buildingId)
+	list, err := SelectByBuilding(buildingId)
 
 	if err != nil {
 		return nil, err

@@ -74,7 +74,7 @@ func loadRates(records []ReceiptRecord, ratesHolder *RatesHolder) error {
 				return
 			}
 
-			rate, err := rates.GetFirstBeforeDate("USD", parsedDate)
+			rate, err := rates.GetFirstBeforeDate(util.USD.Name(), parsedDate)
 			if err != nil {
 				handleErr(err)
 				return
@@ -536,7 +536,7 @@ func getRatesDtos(date *time.Time) ([]RateDto, error) {
 
 	go func() {
 		defer wg.Done()
-		arr, err := rates.GetFromDate("USD", *date, 5, true)
+		arr, err := rates.GetFromDate(util.USD.Name(), *date, 5, true)
 
 		if err != nil {
 			handleErr(err)
@@ -549,7 +549,7 @@ func getRatesDtos(date *time.Time) ([]RateDto, error) {
 
 	go func() {
 		defer wg.Done()
-		arr, err := rates.GetFromDate("USD", *date, 5, false)
+		arr, err := rates.GetFromDate(util.USD.Name(), *date, 5, false)
 
 		if err != nil {
 			handleErr(err)

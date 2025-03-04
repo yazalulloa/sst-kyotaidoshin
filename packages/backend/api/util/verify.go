@@ -27,8 +27,7 @@ func Verify(ctx context.Context, accessToken, refreshToken string) (context.Cont
 
 	verifyAccessFunction, err := resource.Get("VerifyAccess", "name")
 	if err != nil {
-		log.Printf("Error getting VerifyAccess resource: %v", err)
-		return nil, err
+		panic(fmt.Errorf("error getting VerifyAccess function: %v", err))
 	}
 
 	client, err := aws_h.GetLambdaClient(ctx)

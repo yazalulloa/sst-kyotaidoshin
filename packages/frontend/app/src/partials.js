@@ -17,6 +17,7 @@ import apartmentsFormDialogPartialUrl
 import receiptsIndexPartialUrl from './pages/receipts/index.html?url'
 import receiptsEditPartialUrl from './pages/receipts/edit.html?url'
 import receiptsFormPartialUrl from './pages/receipts/form.html?url'
+import receiptsViewPartialUrl from './pages/receipts/view.html?url'
 import monthsSelectorPartialUrl from './pages/receipts/monthSelector.html?url'
 import receiptYearsSelectorPartialUrl
   from './pages/receipts/yearSelector.html?url'
@@ -41,6 +42,7 @@ window.apartmentsFormDialogPartialUrl = apartmentsFormDialogPartialUrl;
 window.receiptsFormPartialUrl = receiptsFormPartialUrl;
 window.receiptsIndexPartialUrl = receiptsIndexPartialUrl;
 window.receiptsEditPartialUrl = receiptsEditPartialUrl;
+window.receiptsViewPartialUrl = receiptsViewPartialUrl;
 window.monthsSelectorPartialUrl = monthsSelectorPartialUrl;
 window.receiptYearsSelectorPartialUrl = receiptYearsSelectorPartialUrl;
 window.expensesFormPartialUrl = expensesFormPartialUrl;
@@ -54,13 +56,13 @@ window.NAV_URLS = new Map([
   ['nav-buildings-edit', buildingsEditPartialUrl],
   ['nav-receipts', receiptsIndexPartialUrl],
   ['nav-receipts-edit', receiptsEditPartialUrl],
+  ['nav-receipts-view', receiptsViewPartialUrl],
   ['nav-rates', ratesIndexPartialUrl],
   ['nav-bcv-files', bucketIndexPartialUrl],
   ['nav-users', usersIndexPartialUrl],
 
 ])
 
-
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
 
 });

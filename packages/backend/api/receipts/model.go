@@ -125,3 +125,52 @@ type FormRequest struct {
 type FormResponse struct {
 	errorStr string
 }
+
+type CalculatedReceipt struct {
+	Expenses                      []ExpenseAttr
+	TotalCommonExpenses           float64
+	TotalCommonExpensesCurrency   util.AllowedCurrencies
+	TotalUnCommonExpenses         float64
+	TotalUnCommonExpensesCurrency util.AllowedCurrencies
+	Debts                         []model.Debts
+	Apartments                    []AptTotal
+	ApartmentsTotal               float64
+	DebtReceiptsAmount            int16
+	DebtTotal                     float64
+	ExtraCharges                  []model.ExtraCharges
+	Rate                          model.Rates
+	ReserveFunds                  []ReserveFundWithCalculatedAmount
+	ThereIsReserveFundExpense     bool
+	Building                      model.Buildings
+	CurrenciesToShowAmountToPay   []util.AllowedCurrencies
+	Receipt                       model.Receipts
+	MonthStr                      string
+}
+
+type AptTotal struct {
+	Apartment    model.Apartments
+	Amounts      []AmountWithCurrency
+	ExtraCharges []model.ExtraCharges
+	Debt         model.Debts
+	DebtMonthStr string
+}
+
+type ReserveFundWithCalculatedAmount struct {
+	Fund   model.ReserveFunds
+	Amount float64
+
+	FundFormatted    string
+	ExpenseFormatted string
+	AmountToPay      string
+	NewReserveFund   string
+}
+
+type ExpenseAttr struct {
+	Expense       model.Expenses
+	IsReserveFund bool
+}
+
+type TabId struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}

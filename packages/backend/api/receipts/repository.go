@@ -154,6 +154,27 @@ func selectById(id int32) (*model.Receipts, error) {
 	return &dest, nil
 }
 
+func selectByIdWithRate(id int32) (*struct {
+	model.Receipts
+	model.Rates
+}, error) {
+
+	var dest struct {
+		model.Receipts
+		model.Rates
+	}
+
+	stmt := Receipts.SELECT(Receipts.AllColumns, Rates.AllColumns).
+		FROM(Receipts.LEFT_JOIN(Rates, Receipts.RateID.EQ(Rates.ID))).WHERE(Receipts.ID.EQ(sqlite.Int32(id)))
+
+	err := stmt.Query(db.GetDB().DB, &dest)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dest, nil
+}
+
 func update(receipt model.Receipts) (int64, error) {
 	stmt := Receipts.UPDATE(Receipts.Year, Receipts.Month, Receipts.Date, Receipts.RateID).
 		WHERE(Receipts.ID.EQ(sqlite.Int32(*receipt.ID))).

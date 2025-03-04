@@ -180,6 +180,20 @@ func SelectNumberAndNameByBuildingId(buildingId string) ([]Apt, error) {
 	return apts, nil
 }
 
+func SelectByBuilding(buildingId string) ([]model.Apartments, error) {
+	stmt := Apartments.SELECT(Apartments.AllColumns).FROM(Apartments).
+		WHERE(Apartments.BuildingID.EQ(sqlite.String(buildingId))).
+		ORDER_BY(Apartments.Number.ASC())
+
+	var dest []model.Apartments
+	err := stmt.Query(db.GetDB().DB, &dest)
+	if err != nil {
+		return nil, err
+	}
+
+	return dest, nil
+}
+
 func aptExists(buildingId, number string) (bool, error) {
 	stmt := Apartments.SELECT(sqlite.COUNT(sqlite.STAR).AS("Count")).FROM(Apartments).
 		WHERE(Apartments.BuildingID.EQ(sqlite.String(buildingId)).AND(Apartments.Number.EQ(sqlite.String(number))))

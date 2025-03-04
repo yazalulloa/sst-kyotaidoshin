@@ -5,6 +5,7 @@ import (
 	"db/gen/model"
 	. "db/gen/table"
 	"github.com/go-jet/jet/v2/sqlite"
+	"kyotaidoshin/util"
 	"log"
 )
 
@@ -28,7 +29,7 @@ func InsertBackup(array []model.Debts) (int64, error) {
 
 	for _, debt := range array {
 		if debt.PreviousPaymentAmountCurrency == "" {
-			debt.PreviousPaymentAmountCurrency = "VED"
+			debt.PreviousPaymentAmountCurrency = util.VED.Name()
 		}
 
 		stmt = stmt.VALUES(debt.BuildingID, debt.ReceiptID, debt.AptNumber, debt.Receipts, debt.Amount, debt.Months, debt.PreviousPaymentAmount, debt.PreviousPaymentAmountCurrency)

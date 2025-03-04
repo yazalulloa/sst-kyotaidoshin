@@ -47,6 +47,10 @@ func getInit(w http.ResponseWriter, r *http.Request) {
 					Id:   "nav-receipts-edit",
 					Path: "/receipts/edit/:id",
 				},
+				{
+					Id:   "nav-receipts-view",
+					Path: "/receipts/view/:id",
+				},
 			},
 		},
 		{
