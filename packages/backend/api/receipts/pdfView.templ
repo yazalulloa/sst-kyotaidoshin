@@ -109,7 +109,7 @@ templ AptView(dto CalculatedReceipt, apt AptTotal) {
 	<div class="break-inside-avoid">
 		<p class="text-center font-bold">DEUDAS</p>
 		{{ debtCurrency := util.GetAllowedCurrency(dto.Building.DebtCurrency) }}
-		<div class="grid grid-cols-6 gap-x-8">
+		<div class="grid grid-cols-[1fr_5fr_1fr_2fr_4fr_2fr] gap-x-8">
 			<span class="font-bold">APTO</span>
 			<span class="font-bold">PROPIETARIO</span>
 			<span class="font-bold">RECIBOS</span>
@@ -193,7 +193,14 @@ templ Views(dto CalculatedReceipt, idMap map[string]string, tabs string) {
 		$el.remove()
 		"
 	></div>
-	<div x-show={ fmt.Sprintf("selected === '%s'", idMap[dto.Building.ID]) } x-transition.scale.origin.bottom>
+	<div
+		x-cloak
+		x-show={ fmt.Sprintf("selected === '%s'", idMap[dto.Building.ID]) }
+		id={ fmt.Sprintf("tabpanel%s", idMap[dto.Building.ID]) }
+		role="tabpanel"
+		aria-label={ idMap[dto.Building.ID] }
+		x-transition.scale.origin.bottom
+	>
 		<div class="bg-white px-6 py-2 text-black">
 			@BuildingView(dto)
 		</div>
