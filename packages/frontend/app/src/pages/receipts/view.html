@@ -49,7 +49,8 @@
                 x-bind:tabindex="selected === tab.id ? '0' : '-1'"
                 x-bind:class="selected === tab.id ? 'font-bold text-primary border-b-2 border-primary dark:border-primary-dark dark:text-primary-dark' : 'text-on-surface font-medium dark:text-on-surface-dark dark:hover:border-b-outline-dark-strong dark:hover:text-on-surface-dark-strong hover:border-b-2 hover:border-b-outline-strong hover:text-on-surface-strong'"
                 class="h-min px-4 py-2 text-sm" type="button" role="tab" x-bind:aria-controls="'tabpanel' + tab.id"
-                x-text="tab.name">
+        >
+          <span class="whitespace-nowrap" x-text="tab.name"></span>
         </button>
 
       </template>

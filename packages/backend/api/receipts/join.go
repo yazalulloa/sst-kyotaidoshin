@@ -238,7 +238,7 @@ func calculateReceipt(buildingId string, receiptId int32) (*CalculatedReceipt, e
 		}
 
 		calculatedReceipt.DebtReceiptsAmount = receiptsAmount
-		calculatedReceipt.DebtTotal = debtTotal
+		calculatedReceipt.DebtTotal = util.RoundFloat(debtTotal, 2)
 	}()
 
 	go func() {
@@ -371,6 +371,7 @@ func calculateReceipt(buildingId string, receiptId int32) (*CalculatedReceipt, e
 	calculatedReceipt.ReserveFunds = fundWithAmounts
 
 	commonTotal := ExpenseAmountsByCurrency(calculatedReceipt.Expenses, usdRate, expenses.COMMON.ExpenseIs)
+	commonTotal.Amount = util.RoundFloat(commonTotal.Amount, 2)
 	calculatedReceipt.TotalCommonExpenses = commonTotal.Amount
 	calculatedReceipt.TotalCommonExpensesCurrency = commonTotal.Currency
 
