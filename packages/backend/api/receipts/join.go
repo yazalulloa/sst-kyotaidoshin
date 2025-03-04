@@ -520,7 +520,7 @@ func calculateReceipt(buildingId string, receiptId int32) (*CalculatedReceipt, e
 	}
 
 	calculatedReceipt.Apartments = aptTotals
-	calculatedReceipt.ApartmentsTotal = aptTotal
+	calculatedReceipt.ApartmentsTotal = util.RoundFloat(aptTotal, 2)
 
 	return &calculatedReceipt, err
 }
