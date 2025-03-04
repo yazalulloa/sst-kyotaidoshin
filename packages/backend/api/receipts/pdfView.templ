@@ -9,13 +9,17 @@ import (
 	"time"
 )
 
+templ ReceiptHeader(dto CalculatedReceipt) {
+		<p>{ dto.Building.Name }</p>
+		<p>{ dto.Building.Rif }</p>
+		<p>MES A PAGAR: { strings.ToUpper(dto.MonthStr) }</p>
+		<p>{ dto.Receipt.Date.Format(time.DateOnly) }</p>
+}
+
 templ AptView(dto CalculatedReceipt, apt AptTotal) {
 	<h4 class="text-center font-bold">AVISO DE COBRO</h4>
 	<div class="flex flex-col justify-start text-start items-start">
-		<p>{ dto.Building.Name }</p>
-		<p>{ dto.Building.Rif }</p>
-		<p>MES A PAGAR: { strings.ToUpper(apt.DebtMonthStr) }</p>
-		<p>{ dto.Receipt.Date.Format(time.DateOnly) }</p>
+	@ReceiptHeader(dto)
 		<p>PROPIETARIO: { apt.Apartment.Name }</p>
 		<p>APT: { apt.Apartment.Number }</p>
 		for _,amount := range apt.Amounts {
@@ -34,6 +38,26 @@ templ AptView(dto CalculatedReceipt, apt AptTotal) {
 		}
 	</div>
 	<br/>
+	@ExpenseView(dto)
+	if len(apt.ExtraCharges) > 0 {
+		<div class="break-inside-avoid">
+			<p class="text-center font-bold">CARGOS EXTRA</p>
+			<div class="grid grid-cols-[8fr_2fr] gap-x-8">
+				<span class="font-bold">DESCRIPCIÓN</span>
+				<span class="font-bold">MONTO</span>
+				for _,extraCharge := range apt.ExtraCharges {
+					<span class="text-start">{ extraCharge.Description }</span>
+					<span class="text-end px-4">{ util.GetAllowedCurrency(extraCharge.Currency).Format(extraCharge.Amount) }</span>
+				}
+			</div>
+			<br/>
+		</div>
+	}
+	@ReserveFundView(dto)
+	@DebtView(dto)
+}
+
+templ ExpenseView(dto CalculatedReceipt) {
 	<div class="break-inside-avoid">
 		<p class="text-center font-bold">GASTOS COMUNES</p>
 		<div class="grid grid-cols-[8fr_2fr] gap-x-8">
@@ -66,20 +90,9 @@ templ AptView(dto CalculatedReceipt, apt AptTotal) {
 		<p class="font-bold text-start">TOTAL GASTOS NO COMUNES: { dto.TotalUnCommonExpensesCurrency.Format(dto.TotalUnCommonExpenses) }</p>
 		<br/>
 	</div>
-	if len(apt.ExtraCharges) > 0 {
-		<div class="break-inside-avoid">
-			<p class="text-center font-bold">CARGOS EXTRA</p>
-			<div class="grid grid-cols-[8fr_2fr] gap-x-8">
-				<span class="font-bold">DESCRIPCIÓN</span>
-				<span class="font-bold">MONTO</span>
-				for _,extraCharge := range apt.ExtraCharges {
-					<span class="text-start">{ extraCharge.Description }</span>
-					<span class="text-end px-4">{ util.GetAllowedCurrency(extraCharge.Currency).Format(extraCharge.Amount) }</span>
-				}
-			</div>
-			<br/>
-		</div>
-	}
+}
+
+templ ReserveFundView(dto CalculatedReceipt) {
 	<div class="break-inside-avoid">
 		<p class="text-center font-bold">MES DE { strings.ToUpper(dto.MonthStr) }/{ fmt.Sprint(dto.Receipt.Year) }</p>
 		<div
@@ -106,6 +119,9 @@ templ AptView(dto CalculatedReceipt, apt AptTotal) {
 		</div>
 		<br/>
 	</div>
+}
+
+templ DebtView(dto CalculatedReceipt) {
 	<div class="break-inside-avoid">
 		<p class="text-center font-bold">DEUDAS</p>
 		{{ debtCurrency := util.GetAllowedCurrency(dto.Building.DebtCurrency) }}
