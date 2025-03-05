@@ -301,8 +301,8 @@ function getVariablesWithSuffix(suffixes) {
   const result = [];
   for (const key in window) {
     if (window.hasOwnProperty(key)) {
-      for (const suffix in suffixes) {
-        if (key.endsWith(suffix)) {
+      for (const i in suffixes) {
+        if (key.endsWith(suffixes[i])) {
           result.push(key);
         }
       }
@@ -313,10 +313,12 @@ function getVariablesWithSuffix(suffixes) {
 
 document.addEventListener("DOMContentLoaded", function () {
 
-  const prefetchUrls = getVariablesWithSuffix(["PartialUrl", "IconUrl"])
-  prefetchUrls.forEach(url => {
-    prefetchUrl(window[url]);
-  });
+  if (import.meta.env.VITE_IS_DEV !== 'true') {
+    const prefetchUrls = getVariablesWithSuffix(["PartialUrl", "IconUrl"])
+    prefetchUrls.forEach(url => {
+      prefetchUrl(window[url]);
+    });
+  }
 });
 
 document.addEventListener("htmx:afterSettle", function (event) {
