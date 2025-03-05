@@ -164,16 +164,29 @@ templ ItemView(item Item) {
 							</a>
 							<a
 								hx-get={ fmt.Sprintf(_DOWNLOAD_ZIP_FILE+"/%s", item.Key) }
-								hx-indicator=".htmx-indicator"
-								hx-disabled-elt="this"
+								todo-fix-hx-indicator=".htmx-indicator"
+								todo-fix-hx-disabled-elt="this"
 								hx-trigger="mousedown"
 								hx-target="this"
 								hx-swap="none"
 								class="flex items-center gap-2 bg-surface-alt px-4 py-2 text-sm text-on-surface hover:bg-surface-dark-alt/5 hover:text-on-surface-strong focus-visible:bg-surface-dark-alt/10 focus-visible:text-on-surface-strong focus-visible:outline-hidden dark:bg-surface-dark-alt dark:text-on-surface-dark dark:hover:bg-surface-alt/5 dark:hover:text-on-surface-dark-strong dark:focus-visible:bg-surface-alt/10 dark:focus-visible:text-on-surface-dark-strong"
+								hx-on:htmx:before-request="this.dispatchEvent(new CustomEvent('event-is-loading'))"
+								hx-on:htmx:after-request="this.dispatchEvent(new CustomEvent('event-is-not-loading'))"
+								@event-is-loading="isLoading = true"
+								@event-is-not-loading="isLoading = false"
+								x-data="{
+                			 isLoading: false,
+                			}"
+								x-bind:disabled="isLoading"
 								role="menuitem"
 							>
 								<svg x-bind:data-src="zipFileIconUrl" data-cache="21600" class="size-5"></svg>
 								<span x-text="$t('main-action-download-zip')"></span>
+								<svg
+									x-show="isLoading"
+									x-bind:data-src="loadingIconUrl"
+									class="size-5 animate-spin motion-reduce:animate-none fill-on-primary dark:fill-on-primary-dark"
+								></svg>
 							</a>
 						</div>
 						<!-- Dropdown Section -->

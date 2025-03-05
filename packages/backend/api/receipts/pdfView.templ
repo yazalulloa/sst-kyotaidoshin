@@ -220,17 +220,30 @@ templ Views(dto CalculatedReceipt, idMap map[string]string, tabs string) {
 	>
 		<button
 			hx-get={ fmt.Sprintf(_DOWNLOAD_PDF_FILE+"/%s", dto.BuildingDownloadKeys) }
-			hx-indicator=".htmx-indicator"
-			hx-disabled-elt="this"
+			todo-fix-hx-indicator=".htmx-indicator"
+			asd-hx-disabled-elt="this"
 			hx-trigger="mousedown"
 			hx-target="this"
 			hx-swap="none"
 			type="button"
 			class="w-fit inline-flex justify-center items-center gap-2 whitespace-nowrap rounded-radius bg-primary border border-primary dark:border-primary-dark px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+			hx-on:htmx:before-request="this.dispatchEvent(new CustomEvent('event-is-loading'))"
+			hx-on:htmx:after-request="this.dispatchEvent(new CustomEvent('event-is-not-loading'))"
+			@event-is-loading="isLoading = true"
+			@event-is-not-loading="isLoading = false"
+			x-data="{
+			 isLoading: false,
+			}"
+			x-bind:disabled="isLoading"
 		>
 			<svg x-bind:data-src="pdfIconUrl" data-cache="21600" class="size-5"></svg>
 			<span class="uppercase" x-text="$t('main-action-download')"></span>
 			<span>{ dto.Building.ID }</span>
+			<svg
+				x-show="isLoading"
+				x-bind:data-src="loadingIconUrl"
+				class="size-5 animate-spin motion-reduce:animate-none fill-on-primary dark:fill-on-primary-dark"
+			></svg>
 		</button>
 		<div class="bg-white px-6 py-2 text-black">
 			@BuildingView(dto)
@@ -244,17 +257,30 @@ templ Views(dto CalculatedReceipt, idMap map[string]string, tabs string) {
 		>
 			<button
 				hx-get={ fmt.Sprintf(_DOWNLOAD_PDF_FILE+"/%s", apt.DownloadKeys) }
-				hx-indicator=".htmx-indicator"
-				hx-disabled-elt="this"
+				todo-fix-hx-indicator=".htmx-indicator"
+				asd-hx-disabled-elt="this"
 				hx-trigger="mousedown"
 				hx-target="this"
 				hx-swap="none"
 				type="button"
 				class="w-fit inline-flex justify-center items-center gap-2 whitespace-nowrap rounded-radius bg-primary border border-primary dark:border-primary-dark px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+				hx-on:htmx:before-request="this.dispatchEvent(new CustomEvent('event-is-loading'))"
+				hx-on:htmx:after-request="this.dispatchEvent(new CustomEvent('event-is-not-loading'))"
+				@event-is-loading="isLoading = true"
+				@event-is-not-loading="isLoading = false"
+				x-data="{
+        			 isLoading: false,
+        			}"
+				x-bind:disabled="isLoading"
 			>
 				<svg x-bind:data-src="pdfIconUrl" data-cache="21600" class="size-5"></svg>
 				<span class="uppercase" x-text="$t('main-action-download')"></span>
 				<span>{ apt.Apartment.Number }</span>
+				<svg
+					x-show="isLoading"
+					x-bind:data-src="loadingIconUrl"
+					class="size-5 animate-spin motion-reduce:animate-none fill-on-primary dark:fill-on-primary-dark"
+				></svg>
 			</button>
 			<div class="bg-white px-6 py-2 text-black">
 				@AptView(dto, apt)

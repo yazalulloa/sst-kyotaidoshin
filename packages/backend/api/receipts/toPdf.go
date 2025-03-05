@@ -16,6 +16,7 @@ import (
 	"github.com/sst/sst/v3/sdk/golang/resource"
 	"io"
 	"kyotaidoshin/util"
+	"log"
 	"strings"
 	"sync"
 	"time"
@@ -31,8 +32,97 @@ type PartInfoUpload struct {
 	Component templ.Component
 }
 
-func getParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKeys) ([]PartInfoUpload, error) {
+func checkOrBuild(ctx context.Context, parts []PartInfoUpload) ([]PdfItem, error) {
+	bucketName, err := resource.Get("ReceiptsBucket", "name")
+	if err != nil {
+		return nil, err
+	}
 
+	if len(parts) == 1 {
+		pdfItems := make([]PdfItem, 0)
+		part := parts[0]
+		exists, err := aws_h.FileExistsS3(ctx, bucketName.(string), part.ObjectKey)
+		if err != nil {
+			return nil, err
+		}
+
+		if exists {
+			log.Printf("Skipping %s", part.ObjectKey)
+			return pdfItems, err
+		}
+
+		var buf bytes.Buffer
+		err = part.Component.Render(ctx, &buf)
+
+		if err != nil {
+			return nil, err
+		}
+
+		base64Str := base64.URLEncoding.EncodeToString(buf.Bytes())
+
+		pdfItems = append(pdfItems, PdfItem{
+			ObjectKey: part.ObjectKey,
+			Html:      base64Str,
+		})
+		return pdfItems, err
+	}
+
+	numOfWorkers := len(parts)
+	var wg sync.WaitGroup
+	wg.Add(numOfWorkers)
+	itemChan := make(chan PdfItem, numOfWorkers)
+	errorChan := make(chan error, numOfWorkers)
+
+	for _, part := range parts {
+
+		go func() {
+			defer wg.Done()
+
+			exists, err := aws_h.FileExistsS3(ctx, bucketName.(string), part.ObjectKey)
+			if err != nil {
+				errorChan <- err
+				return
+			}
+
+			if exists {
+				log.Printf("Skipping %s", part.ObjectKey)
+				return
+			}
+
+			var buf bytes.Buffer
+			err = part.Component.Render(ctx, &buf)
+
+			if err != nil {
+				errorChan <- err
+				return
+			}
+
+			base64Str := base64.URLEncoding.EncodeToString(buf.Bytes())
+			itemChan <- PdfItem{
+				ObjectKey: part.ObjectKey,
+				Html:      base64Str,
+			}
+		}()
+	}
+	wg.Wait()
+	close(errorChan)
+	close(itemChan)
+
+	err = util.HasErrors(errorChan)
+	if err != nil {
+		return nil, err
+	}
+
+	pdfItems := make([]PdfItem, 0)
+
+	for item := range itemChan {
+		pdfItems = append(pdfItems, item)
+	}
+
+	return pdfItems, err
+}
+
+func getParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKeys) ([]PartInfoUpload, error) {
 	functionName, err := resource.Get("HtmlToPdf", "name")
 	if err != nil {
 		return nil, err
@@ -50,78 +140,69 @@ func getParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKey
 		numOfWorkers = 1
 	}
 
-	buildFileName := func(str string) string {
-		return fmt.Sprintf("%s_%s_%s_%s.pdf", receipt.Building.ID, strings.ToUpper(receipt.MonthStr), receipt.Receipt.Date.Format(time.DateOnly), str)
+	buildObjectKey := func(str string) string {
+		date := receipt.Receipt.Date.Format(time.DateOnly)
+		return fmt.Sprintf("%s/%s/%d/%s_%s_%s_%s.pdf", receipt.Building.ID, date, *receipt.Receipt.ID,
+			receipt.Building.ID, strings.ToUpper(receipt.MonthStr), date, str)
 	}
 
 	parts := make([]PartInfoUpload, numOfWorkers)
 	if keys == nil || (!keys.IsApt && keys.Part == receipt.Building.ID) {
 		parts[0] = PartInfoUpload{
 			FileName:  fmt.Sprintf("%s.pdf", receipt.Building.ID),
-			ObjectKey: buildFileName(receipt.Building.ID),
+			ObjectKey: buildObjectKey(receipt.Building.ID),
 			Component: PrintView(receipt.Building.ID, BuildingView(*receipt)),
 		}
 	}
 
 	if keys == nil || keys.IsApt {
 		for i, apt := range receipt.Apartments {
+			index := -1
 			if keys == nil {
-
-				parts[i+1] = PartInfoUpload{
-					FileName:  fmt.Sprintf("%s.pdf", apt.Apartment.Number),
-					ObjectKey: buildFileName(apt.Apartment.Number),
-					Component: PrintView(apt.Apartment.Number, AptView(*receipt, apt)),
-				}
+				index = i + 1
 			} else {
 				if apt.Apartment.Number == keys.Part {
-					parts[0] = PartInfoUpload{
-						FileName:  fmt.Sprintf("%s.pdf", apt.Apartment.Number),
-						ObjectKey: buildFileName(apt.Apartment.Number),
-						Component: PrintView(apt.Apartment.Number, AptView(*receipt, apt)),
-					}
-					break
+					index = 0
+				}
+			}
+
+			if index >= 0 {
+				parts[index] = PartInfoUpload{
+					FileName:  fmt.Sprintf("%s.pdf", apt.Apartment.Number),
+					ObjectKey: buildObjectKey(apt.Apartment.Number),
+					Component: PrintView(apt.Apartment.Number, AptView(*receipt, apt)),
 				}
 			}
 		}
 
 	}
 
-	pdfItems := make([]PdfItem, numOfWorkers)
-	for i, part := range parts {
-		var buf bytes.Buffer
-		err = part.Component.Render(ctx, &buf)
+	pdfItems, err := checkOrBuild(ctx, parts)
+	if err != nil {
+		return nil, err
+	}
 
+	if len(pdfItems) > 0 {
+		jsonBytes, err := json.Marshal(pdfItems)
 		if err != nil {
 			return nil, err
 		}
 
-		base64Str := base64.URLEncoding.EncodeToString(buf.Bytes())
+		_, err = lambdaClient.Invoke(ctx, &lambda.InvokeInput{
+			FunctionName:   aws.String(functionName.(string)),
+			InvocationType: types.InvocationTypeRequestResponse,
+			Payload:        jsonBytes,
+		})
 
-		pdfItems[i] = PdfItem{
-			ObjectKey: part.ObjectKey,
-			Html:      base64Str,
+		if err != nil {
+			return nil, err
 		}
-	}
-
-	jsonBytes, err := json.Marshal(pdfItems)
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = lambdaClient.Invoke(ctx, &lambda.InvokeInput{
-		FunctionName:   aws.String(functionName.(string)),
-		InvocationType: types.InvocationTypeRequestResponse,
-		Payload:        jsonBytes,
-	})
-
-	if err != nil {
-		return nil, err
 	}
 
 	return parts, nil
 }
 
-func toPdf(receipt *CalculatedReceipt, ctx context.Context) (*bytes.Buffer, error) {
+func toZip(receipt *CalculatedReceipt, ctx context.Context) (*bytes.Buffer, error) {
 	bucketName, err := resource.Get("ReceiptsBucket", "name")
 	if err != nil {
 		return nil, err

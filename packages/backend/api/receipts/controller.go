@@ -558,38 +558,49 @@ func getZip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	buf, err := toPdf(receipt, r.Context())
+	date := receipt.Receipt.Date.Format(time.DateOnly)
+	objectKey := fmt.Sprintf("%s/%s/%d/%s_%s_%s.zip", receipt.Building.ID, date, *receipt.Receipt.ID,
+		receipt.Building.ID, strings.ToUpper(receipt.MonthStr), date)
 
+	exists, err := aws_h.FileExistsS3(r.Context(), bucketName.(string), objectKey)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	s3Client, err := aws_h.GetS3Client(r.Context())
+	if !exists {
+		buf, err := toZip(receipt, r.Context())
 
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
-	objectKey := fmt.Sprintf("%s_%s_%s.zip", receipt.Building.ID, strings.ToUpper(receipt.MonthStr), receipt.Receipt.Date.Format(time.DateOnly))
-	contentLength := int64(buf.Len())
-	_, err = s3Client.PutObject(r.Context(), &s3.PutObjectInput{
-		Bucket:            aws.String(bucketName.(string)),
-		Key:               aws.String(objectKey),
-		Body:              buf,
-		ChecksumAlgorithm: types.ChecksumAlgorithmCrc64nvme,
-		//ChecksumCRC32:             nil,
-		//ChecksumCRC32C:            nil,
-		//ChecksumSHA1:              nil,
-		//ChecksumSHA256:            nil,
-		ContentLength: &contentLength,
-		ContentType:   aws.String("application/zip"),
-	})
+		s3Client, err := aws_h.GetS3Client(r.Context())
 
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		contentLength := int64(buf.Len())
+		_, err = s3Client.PutObject(r.Context(), &s3.PutObjectInput{
+			Bucket:            aws.String(bucketName.(string)),
+			Key:               aws.String(objectKey),
+			Body:              buf,
+			ChecksumAlgorithm: types.ChecksumAlgorithmCrc64nvme,
+			//ChecksumCRC32:             nil,
+			//ChecksumCRC32C:            nil,
+			//ChecksumSHA1:              nil,
+			//ChecksumSHA256:            nil,
+			ContentLength: &contentLength,
+			ContentType:   aws.String("application/zip"),
+		})
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 
 	presignClient, err := aws_h.GetPresignClient(r.Context())

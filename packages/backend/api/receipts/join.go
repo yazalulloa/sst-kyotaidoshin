@@ -129,6 +129,7 @@ func GetReceiptExpensesDto(receiptId int32, expenseArray []expenses.Item, reserv
 }
 
 func calculateReceipt(buildingId string, receiptId int32) (*CalculatedReceipt, error) {
+
 	var wg sync.WaitGroup
 	wg.Add(8)
 	errorChan := make(chan error, 8)

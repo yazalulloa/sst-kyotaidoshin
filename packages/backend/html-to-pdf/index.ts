@@ -31,7 +31,7 @@ export const handler: Handler = async (event: PdfItem[], context) => {
 
   let browser: Browser | null = null
   try {
-    console.log('Launching browser')
+    // console.log('Launching browser')
     browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
@@ -42,7 +42,7 @@ export const handler: Handler = async (event: PdfItem[], context) => {
       // acceptInsecureCerts: true,
     })
 
-    console.log('Browser launched')
+    // console.log('Browser launched')
 
 
     const promises = [];
@@ -59,7 +59,7 @@ export const handler: Handler = async (event: PdfItem[], context) => {
           return
         }
 
-        console.log("Starting %s", key)
+        // console.log("Starting %s", key)
         const page = await browser.newPage()
 
         await page.setContent(html, {
@@ -70,7 +70,7 @@ export const handler: Handler = async (event: PdfItem[], context) => {
 
         const result = await page.pdf({format: 'a4', printBackground: true})
 
-        console.log("PDF %s", key)
+        // console.log("PDF %s", key)
         const command = new PutObjectCommand({
           Key: key,
           Bucket: Resource.ReceiptsBucket.name,
@@ -78,7 +78,7 @@ export const handler: Handler = async (event: PdfItem[], context) => {
         });
 
         await s3.send(command);
-        console.log("UPLOADED %s", key)
+        // console.log("UPLOADED %s", key)
         resolve(key)
       })
 
@@ -95,24 +95,7 @@ export const handler: Handler = async (event: PdfItem[], context) => {
     }
   }
 
-
-  // const pdfBuffer = await generatePdfBuffer(html)
-  //
-  // if (!pdfBuffer) {
-  //   throw new Error('Failed to created PDF buffer from HTML')
-  // }
-  //
-  // const command = new PutObjectCommand({
-  //   Key: key,
-  //   Bucket: Resource.ReceiptsBucket.name,
-  //   Body: pdfBuffer,
-  // });
-  //
-  // const response = await s3.send(command);
-
-  // return JSON.stringify(response)
-
-  console.log("SUCCESS")
+  // console.log("SUCCESS")
   return {
     statusCode: 200,
     body: "OK",
@@ -137,39 +120,4 @@ function decodeBase64UrlStr(encoded: string) {
 
   const decoder = new TextDecoder('utf-8');
   return decoder.decode(byteNumbers);
-}
-
-async function generatePdfBuffer(html: string): Promise<Uint8Array | undefined> {
-  let result = undefined
-  let browser = null
-  try {
-    console.log('Launching browser')
-    browser = await puppeteer.launch({
-      args: chromium.args,
-      defaultViewport: chromium.defaultViewport,
-      executablePath: process.env.SST_DEV
-          ? YOUR_LOCAL_CHROMIUM_PATH
-          : await chromium.executablePath(),
-      headless: chromium.headless,
-      // acceptInsecureCerts: true,
-    })
-
-    console.log('Browser launched')
-    const page = await browser.newPage()
-
-    await page.setContent(html, {
-      waitUntil: ['domcontentloaded', 'networkidle0', 'load'],
-    })
-
-    await page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
-
-    result = await page.pdf({format: 'a4', printBackground: true})
-  } catch (e) {
-    console.log('Chromium error', {e})
-  } finally {
-    if (browser !== null) {
-      await browser.close()
-    }
-  }
-  return result
 }

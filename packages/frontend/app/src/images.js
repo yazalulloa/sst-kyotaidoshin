@@ -14,6 +14,7 @@ import profileIconUrl from './assets/images/profile.svg?no-inline'
 import zipFileIconUrl from './assets/images/zip-file.svg?no-inline'
 import receiptIconUrl from './assets/images/receipt.svg?no-inline'
 import pdfIconUrl from './assets/images/pdf-logo.svg?no-inline'
+import loadingIconUrl from './assets/images/loading.svg?no-inline'
 
 window.deleteIconUrl = deleteIconUrl;
 window.processIconUrl = processIconUrl;
@@ -27,6 +28,7 @@ window.profileIconUrl = profileIconUrl;
 window.zipFileIconUrl = zipFileIconUrl;
 window.receiptIconUrl = receiptIconUrl
 window.pdfIconUrl = pdfIconUrl
+window.loadingIconUrl = loadingIconUrl
 
 window.ratesIconUrl = ratesIconUrl;
 window.bucketIconUrl = bucketIconUrl;
