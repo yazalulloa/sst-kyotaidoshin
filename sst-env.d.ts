@@ -51,6 +51,10 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
+    "HtmlToPdf": {
+      "name": string
+      "type": "sst.aws.Function"
+    }
     "MainApiFunction": {
       "name": string
       "type": "sst.aws.Function"
@@ -62,6 +66,10 @@ declare module "sst" {
     "ProcessUser": {
       "name": string
       "type": "sst.aws.Function"
+    }
+    "ReceiptsBucket": {
+      "name": string
+      "type": "sst.aws.Bucket"
     }
     "SecretBcvFileStartPath": {
       "type": "sst.sst.Secret"

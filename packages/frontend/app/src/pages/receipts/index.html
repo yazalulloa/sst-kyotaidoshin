@@ -84,6 +84,19 @@
          hx-sync="this:replace"
          hx-indicator=".htmx-indicator">
     </div>
+
+    <a hidden="hidden"
+       data-todo-this-indicator-does-not-stop
+       hx-get="/api/receipts/download/zip/Mn8DAQEES2V5cwH_gAABAwEKQnVpbGRpbmdJZAEMAAECSWQBBAABBkNhcmRJZAEMAAAAPf-AAQVNRU5ESQH-B4gBLXJlY2VpcHRzLWI2NWExNzg0LTlkOTAtNDE5OS1hMzQ5LTdiOWM2YjBiYTk0MAA="
+       hx-indicator=".htmx-indicator"
+       hx-disabled-elt="this"
+       hx-trigger="click"
+       hx-target="this"
+       hx-swap="none"
+       class="flex items-center gap-2 bg-surface-alt px-4 py-2 text-sm text-on-surface hover:bg-surface-dark-alt/5 hover:text-on-surface-strong focus-visible:bg-surface-dark-alt/10 focus-visible:text-on-surface-strong focus-visible:outline-hidden dark:bg-surface-dark-alt dark:text-on-surface-dark dark:hover:bg-surface-alt/5 dark:hover:text-on-surface-dark-strong dark:focus-visible:bg-surface-alt/10 dark:focus-visible:text-on-surface-dark-strong"
+       role="menuitem">
+      <svg x-bind:data-src="zipFileIconUrl" data-cache="21600" class="size-4"></svg>
+      <span x-text="$t('main-action-download-zip')">Download Zip</span></a>
   </div>
 </div>
 

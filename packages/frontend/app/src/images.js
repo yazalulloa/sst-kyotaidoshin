@@ -11,6 +11,9 @@ import crossIconUrl from './assets/images/cross.svg?no-inline'
 import selectIconUrl from './assets/images/selectIcon.svg?no-inline'
 import checkBoxIconUrl from './assets/images/checkbox-icon.svg?no-inline'
 import profileIconUrl from './assets/images/profile.svg?no-inline'
+import zipFileIconUrl from './assets/images/zip-file.svg?no-inline'
+import receiptIconUrl from './assets/images/receipt.svg?no-inline'
+import pdfIconUrl from './assets/images/pdf-logo.svg?no-inline'
 
 window.deleteIconUrl = deleteIconUrl;
 window.processIconUrl = processIconUrl;
@@ -21,6 +24,9 @@ window.crossIconUrl = crossIconUrl;
 window.selectIconUrl = selectIconUrl;
 window.checkBoxIconUrl = checkBoxIconUrl;
 window.profileIconUrl = profileIconUrl;
+window.zipFileIconUrl = zipFileIconUrl;
+window.receiptIconUrl = receiptIconUrl
+window.pdfIconUrl = pdfIconUrl
 
 window.ratesIconUrl = ratesIconUrl;
 window.bucketIconUrl = bucketIconUrl;

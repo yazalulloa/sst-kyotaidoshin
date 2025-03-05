@@ -184,10 +184,23 @@ export default $config({
       handler: "packages/backend/openauthclient/verify.handler",
     });
 
+    const receiptsBucket = new sst.aws.Bucket("ReceiptsBucket", {
+      versioning: false,
+    });
+
+    const htmlToPdf = new sst.aws.Function("HtmlToPdf", {
+      link: [receiptsBucket],
+      handler: "packages/backend/html-to-pdf/index.handler",
+      nodejs: {
+        install: ["@sparticuz/chromium"],
+      },
+      timeout: "60 seconds",
+    });
+
     const mainApiFunction = new sst.aws.Function("MainApiFunction", {
       handler: "packages/backend/api",
       runtime: "go",
-      link: [bucket, secretTursoUrl, bcvUrl, bcvFileStartPath, uploadBackupBucket, apiFunction, appClientId, auth, verifyAccessFunction],
+      link: [bucket, secretTursoUrl, bcvUrl, bcvFileStartPath, uploadBackupBucket, apiFunction, appClientId, auth, verifyAccessFunction, receiptsBucket, htmlToPdf],
       timeout: "60 seconds",
     });
 

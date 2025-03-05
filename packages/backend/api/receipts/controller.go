@@ -1,14 +1,19 @@
 package receipts
 
 import (
+	"aws_h"
 	"db/gen/model"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/go-playground/form"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/sst/sst/v3/sdk/golang/resource"
 	"golang.org/x/sync/syncmap"
 	"kyotaidoshin/api"
 	"kyotaidoshin/buildings"
@@ -26,6 +31,8 @@ const _PATH = "/api/receipts"
 const _SEARCH = _PATH + "/search"
 const _UPLOAD_BACKUP_FORM = _PATH + "/uploadBackupForm"
 const _UPLOAD_BACKUP = _PATH + "/upload/backup"
+const _DOWNLOAD_ZIP_FILE = _PATH + "/download/zip"
+const _DOWNLOAD_PDF_FILE = _PATH + "/download/pdf"
 
 func Routes(server *mux.Router) {
 
@@ -38,7 +45,9 @@ func Routes(server *mux.Router) {
 	server.HandleFunc(_PATH+"/years", getYears).Methods("GET")
 	//server.HandleFunc(_PATH+"/buildingsIds", getBuildingIds).Methods("GET")
 	server.HandleFunc(_PATH+"/formData/{key}", formData).Methods("GET")
-	server.HandleFunc(_PATH+"/view/{key}", getCalculateReceipt).Methods("GET")
+	server.HandleFunc(_PATH+"/view/{key}", getReceiptView).Methods("GET")
+	server.HandleFunc(_DOWNLOAD_ZIP_FILE+"/{key}", getZip).Methods("GET")
+	server.HandleFunc(_DOWNLOAD_PDF_FILE+"/{key}", getPdf).Methods("GET")
 }
 
 func getInit(w http.ResponseWriter, r *http.Request) {
@@ -456,7 +465,7 @@ func receiptDelete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func getCalculateReceipt(w http.ResponseWriter, r *http.Request) {
+func getReceiptView(w http.ResponseWriter, r *http.Request) {
 
 	keyStr := mux.Vars(r)["key"]
 	if keyStr == "" {
@@ -478,14 +487,33 @@ func getCalculateReceipt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	buildingDownloadKeys := util.Encode(DownloadKeys{
+		BuildingId: receipt.Building.ID,
+		Id:         *receipt.Receipt.ID,
+		Part:       receipt.Building.ID,
+		IsApt:      false,
+	})
+
+	receipt.BuildingDownloadKeys = *buildingDownloadKeys
+
 	idMap := make(map[string]string, len(receipt.Apartments)+1)
 	tabs := make([]TabId, len(receipt.Apartments)+1)
 	idMap[receipt.Building.ID] = "building-" + uuid.NewString()
 	tabs[0] = TabId{ID: idMap[receipt.Building.ID], Name: receipt.Building.ID}
 
-	for i, apt := range receipt.Apartments {
+	for i := range receipt.Apartments {
+		apt := &receipt.Apartments[i]
 		idMap[apt.Apartment.Number] = "apartment-" + uuid.NewString()
 		tabs[i+1] = TabId{ID: idMap[apt.Apartment.Number], Name: apt.Apartment.Number}
+
+		downloadKeys := util.Encode(DownloadKeys{
+			BuildingId: receipt.Building.ID,
+			Id:         *receipt.Receipt.ID,
+			Part:       apt.Apartment.Number,
+			IsApt:      true,
+		})
+
+		apt.DownloadKeys = *downloadKeys
 	}
 
 	bytes, err := json.Marshal(tabs)
@@ -501,4 +529,139 @@ func getCalculateReceipt(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func getZip(w http.ResponseWriter, r *http.Request) {
+	keyStr := mux.Vars(r)["key"]
+	if keyStr == "" {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	var keys Keys
+	err := util.Decode(keyStr, &keys)
+	if err != nil {
+		log.Printf("failed to decode key: %v", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	bucketName, err := resource.Get("ReceiptsBucket", "name")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	receipt, err := calculateReceipt(keys.BuildingId, keys.Id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	buf, err := toPdf(receipt, r.Context())
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	s3Client, err := aws_h.GetS3Client(r.Context())
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	objectKey := fmt.Sprintf("%s_%s_%s.zip", receipt.Building.ID, strings.ToUpper(receipt.MonthStr), receipt.Receipt.Date.Format(time.DateOnly))
+	contentLength := int64(buf.Len())
+	_, err = s3Client.PutObject(r.Context(), &s3.PutObjectInput{
+		Bucket:            aws.String(bucketName.(string)),
+		Key:               aws.String(objectKey),
+		Body:              buf,
+		ChecksumAlgorithm: types.ChecksumAlgorithmCrc64nvme,
+		//ChecksumCRC32:             nil,
+		//ChecksumCRC32C:            nil,
+		//ChecksumSHA1:              nil,
+		//ChecksumSHA256:            nil,
+		ContentLength: &contentLength,
+		ContentType:   aws.String("application/zip"),
+	})
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	presignClient, err := aws_h.GetPresignClient(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	presignedHTTPRequest, err := presignClient.PresignGetObject(r.Context(), &s3.GetObjectInput{
+		Bucket: aws.String(bucketName.(string)),
+		Key:    aws.String(objectKey),
+	}, func(options *s3.PresignOptions) {
+		options.Expires = time.Minute
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Add("HX-Redirect", presignedHTTPRequest.URL)
+	w.WriteHeader(http.StatusOK)
+}
+
+func getPdf(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	keyStr := vars["key"]
+	if keyStr == "" {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	var keys DownloadKeys
+	err := util.Decode(keyStr, &keys)
+	if err != nil {
+		log.Printf("failed to decode key: %v", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	bucketName, err := resource.Get("ReceiptsBucket", "name")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	receipt, err := calculateReceipt(keys.BuildingId, keys.Id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	parts, err := getParts(receipt, r.Context(), &keys)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	presignClient, err := aws_h.GetPresignClient(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	presignedHTTPRequest, err := presignClient.PresignGetObject(r.Context(), &s3.GetObjectInput{
+		Bucket: aws.String(bucketName.(string)),
+		Key:    aws.String(parts[0].ObjectKey),
+	}, func(options *s3.PresignOptions) {
+		options.Expires = time.Minute
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Add("HX-Redirect", presignedHTTPRequest.URL)
+	w.WriteHeader(http.StatusNoContent)
 }

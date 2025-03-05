@@ -59,6 +59,13 @@ func keys(receipt model.Receipts, cardId string) Keys {
 	}
 }
 
+type DownloadKeys struct {
+	BuildingId string
+	Id         int32
+	Part       string
+	IsApt      bool
+}
+
 type InitDto struct {
 	BuildingIds        string
 	UploadBackupParams *util.UploadBackupParams
@@ -132,12 +139,10 @@ type CalculatedReceipt struct {
 	TotalCommonExpensesCurrency   util.AllowedCurrencies
 	TotalUnCommonExpenses         float64
 	TotalUnCommonExpensesCurrency util.AllowedCurrencies
-	Debts                         []model.Debts
 	Apartments                    []AptTotal
 	ApartmentsTotal               float64
 	DebtReceiptsAmount            int16
 	DebtTotal                     float64
-	ExtraCharges                  []model.ExtraCharges
 	Rate                          model.Rates
 	ReserveFunds                  []ReserveFundWithCalculatedAmount
 	ThereIsReserveFundExpense     bool
@@ -145,6 +150,7 @@ type CalculatedReceipt struct {
 	CurrenciesToShowAmountToPay   []util.AllowedCurrencies
 	Receipt                       model.Receipts
 	MonthStr                      string
+	BuildingDownloadKeys          string
 }
 
 type AptTotal struct {
@@ -153,6 +159,7 @@ type AptTotal struct {
 	ExtraCharges []model.ExtraCharges
 	Debt         model.Debts
 	DebtMonthStr string
+	DownloadKeys string
 }
 
 type ReserveFundWithCalculatedAmount struct {

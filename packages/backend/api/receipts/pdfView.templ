@@ -10,16 +10,16 @@ import (
 )
 
 templ ReceiptHeader(dto CalculatedReceipt) {
-		<p>{ dto.Building.Name }</p>
-		<p>{ dto.Building.Rif }</p>
-		<p>MES A PAGAR: { strings.ToUpper(dto.MonthStr) }</p>
-		<p>{ dto.Receipt.Date.Format(time.DateOnly) }</p>
+	<p>{ dto.Building.Name }</p>
+	<p>{ dto.Building.Rif }</p>
+	<p>MES A PAGAR: { strings.ToUpper(dto.MonthStr) }</p>
+	<p>{ dto.Receipt.Date.Format(time.DateOnly) }</p>
 }
 
 templ AptView(dto CalculatedReceipt, apt AptTotal) {
 	<h4 class="text-center font-bold">AVISO DE COBRO</h4>
 	<div class="flex flex-col justify-start text-start items-start">
-	@ReceiptHeader(dto)
+		@ReceiptHeader(dto)
 		<p>PROPIETARIO: { apt.Apartment.Name }</p>
 		<p>APT: { apt.Apartment.Number }</p>
 		for _,amount := range apt.Amounts {
@@ -42,7 +42,7 @@ templ AptView(dto CalculatedReceipt, apt AptTotal) {
 	if len(apt.ExtraCharges) > 0 {
 		<div class="break-inside-avoid">
 			<p class="text-center font-bold">CARGOS EXTRA</p>
-			<div class="grid grid-cols-[8fr_2fr] gap-x-8">
+			<div class="grid grid-cols-[8fr_2fr] gap-x-3">
 				<span class="font-bold">DESCRIPCIÓN</span>
 				<span class="font-bold">MONTO</span>
 				for _,extraCharge := range apt.ExtraCharges {
@@ -60,7 +60,7 @@ templ AptView(dto CalculatedReceipt, apt AptTotal) {
 templ ExpenseView(dto CalculatedReceipt) {
 	<div class="break-inside-avoid">
 		<p class="text-center font-bold">GASTOS COMUNES</p>
-		<div class="grid grid-cols-[8fr_2fr] gap-x-8">
+		<div class="grid grid-cols-[8fr_2fr] gap-x-3">
 			<span class="font-bold">DESCRIPCIÓN</span>
 			<span class="font-bold">MONTO</span>
 			for _,exp := range dto.Expenses {
@@ -76,7 +76,7 @@ templ ExpenseView(dto CalculatedReceipt) {
 	</div>
 	<div class="break-inside-avoid">
 		<p class="text-center font-bold">GASTOS NO COMUNES</p>
-		<div class="grid grid-cols-[8fr_2fr] gap-x-8">
+		<div class="grid grid-cols-[8fr_2fr] gap-x-3">
 			<span class="font-bold">DESCRIPCIÓN</span>
 			<span class="font-bold">MONTO</span>
 			for _,exp := range dto.Expenses {
@@ -93,10 +93,10 @@ templ ExpenseView(dto CalculatedReceipt) {
 }
 
 templ ReserveFundView(dto CalculatedReceipt) {
-	<div class="break-inside-avoid">
+	<div class="break-inside-avoid whitespace-nowrap">
 		<p class="text-center font-bold">MES DE { strings.ToUpper(dto.MonthStr) }/{ fmt.Sprint(dto.Receipt.Year) }</p>
 		<div
-			class={ "grid gap-x-8",
+			class={ "grid gap-x-2",
 		templ.KV("grid-cols-4", !dto.ThereIsReserveFundExpense),
 		 templ.KV("grid-cols-5", dto.ThereIsReserveFundExpense) }
 		>
@@ -109,12 +109,12 @@ templ ReserveFundView(dto CalculatedReceipt) {
 			<span class="font-bold">SALDO/MES</span>
 			for _,fund := range dto.ReserveFunds {
 				<span class="text-start">{ fund.Fund.Name } </span>
-				<span class="text-end px-4">{ fund.FundFormatted } </span>
+				<span class="text-end">{ fund.FundFormatted } </span>
 				if dto.ThereIsReserveFundExpense {
-					<span class="text-end px-4">{ fund.ExpenseFormatted }</span>
+					<span class="text-end">{ fund.ExpenseFormatted }</span>
 				}
-				<span class="text-end px-4">{ fund.AmountToPay } </span>
-				<span class="text-end px-4">{ fund.NewReserveFund } </span>
+				<span class="text-end">{ fund.AmountToPay } </span>
+				<span class="text-end">{ fund.NewReserveFund } </span>
 			}
 		</div>
 		<br/>
@@ -122,23 +122,23 @@ templ ReserveFundView(dto CalculatedReceipt) {
 }
 
 templ DebtView(dto CalculatedReceipt) {
-	<div class="break-inside-avoid">
+	<div class="break-inside-avoid whitespace-nowrap">
 		<p class="text-center font-bold">DEUDAS</p>
 		{{ debtCurrency := util.GetAllowedCurrency(dto.Building.DebtCurrency) }}
-		<div class="grid grid-cols-[1fr_5fr_1fr_2fr_4fr_2fr] gap-x-8">
+		<div class="grid grid-cols-[1fr_4fr_1fr_2fr_3fr_2fr] gap-x-2">
 			<span class="font-bold">APTO</span>
 			<span class="font-bold">PROPIETARIO</span>
 			<span class="font-bold">RECIBOS</span>
-			<span class="font-bold">DEUDA</span>
-			<span class="font-bold">MESES</span>
+			<span class="font-bold text-end">DEUDA</span>
+			<span class="font-bold text-center">MESES</span>
 			<span class="font-bold">ABONO</span>
 			for _,apt := range dto.Apartments {
 				<span class="text-start">{ apt.Apartment.Number }</span>
 				<span class="text-start">{ apt.Apartment.Name }</span>
-				<span class="text-end px-4">{ fmt.Sprint(apt.Debt.Receipts) }</span>
-				<span class="text-end px-4">{ debtCurrency.Format(apt.Debt.Amount) }</span>
-				<span class="text-center px-4">{ apt.DebtMonthStr }</span>
-				<span class="text-end px-4">{ util.GetAllowedCurrency(apt.Debt.PreviousPaymentAmountCurrency).Format(apt.Debt.PreviousPaymentAmount) }</span>
+				<span class="text-end">{ fmt.Sprint(apt.Debt.Receipts) }</span>
+				<span class="text-end">{ debtCurrency.Format(apt.Debt.Amount) }</span>
+				<span class="text-center">{ apt.DebtMonthStr }</span>
+				<span class="text-end">{ util.GetAllowedCurrency(apt.Debt.PreviousPaymentAmountCurrency).Format(apt.Debt.PreviousPaymentAmount) }</span>
 			}
 		</div>
 		<br/>
@@ -164,7 +164,7 @@ templ BuildingView(dto CalculatedReceipt) {
 	<br/>
 	<p class="font-bold">LISTADO A PAGAR</p>
 	<div
-		class={ "grid gap-x-8",
+		class={ "grid gap-x-3",
   		templ.KV("grid-cols-[1fr_7fr_2fr]", !multipleCurrencies),
   		 templ.KV("grid-cols-[1fr_7fr_1fr_1fr]", multipleCurrencies) }
 	>
@@ -216,7 +216,22 @@ templ Views(dto CalculatedReceipt, idMap map[string]string, tabs string) {
 		role="tabpanel"
 		aria-label={ idMap[dto.Building.ID] }
 		x-transition.scale.origin.bottom
+		class="flex flex-col gap-2"
 	>
+		<button
+			hx-get={ fmt.Sprintf(_DOWNLOAD_PDF_FILE+"/%s", dto.BuildingDownloadKeys) }
+			hx-indicator=".htmx-indicator"
+			hx-disabled-elt="this"
+			hx-trigger="mousedown"
+			hx-target="this"
+			hx-swap="none"
+			type="button"
+			class="w-fit inline-flex justify-center items-center gap-2 whitespace-nowrap rounded-radius bg-primary border border-primary dark:border-primary-dark px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+		>
+			<svg x-bind:data-src="pdfIconUrl" data-cache="21600" class="size-5"></svg>
+			<span class="uppercase" x-text="$t('main-action-download')"></span>
+			<span>{ dto.Building.ID }</span>
+		</button>
 		<div class="bg-white px-6 py-2 text-black">
 			@BuildingView(dto)
 		</div>
@@ -225,10 +240,49 @@ templ Views(dto CalculatedReceipt, idMap map[string]string, tabs string) {
 		<div
 			x-show={ fmt.Sprintf("selected === '%s'", idMap[apt.Apartment.Number]) }
 			x-transition.scale.origin.bottom
+			class="flex flex-col gap-2"
 		>
+			<button
+				hx-get={ fmt.Sprintf(_DOWNLOAD_PDF_FILE+"/%s", apt.DownloadKeys) }
+				hx-indicator=".htmx-indicator"
+				hx-disabled-elt="this"
+				hx-trigger="mousedown"
+				hx-target="this"
+				hx-swap="none"
+				type="button"
+				class="w-fit inline-flex justify-center items-center gap-2 whitespace-nowrap rounded-radius bg-primary border border-primary dark:border-primary-dark px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+			>
+				<svg x-bind:data-src="pdfIconUrl" data-cache="21600" class="size-5"></svg>
+				<span class="uppercase" x-text="$t('main-action-download')"></span>
+				<span>{ apt.Apartment.Number }</span>
+			</button>
 			<div class="bg-white px-6 py-2 text-black">
 				@AptView(dto, apt)
 			</div>
 		</div>
 	}
+}
+
+templ PrintView(title string, component templ.Component) {
+	<!DOCTYPE html>
+	<html lang="es">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+			<title>AVISO DE COBRO { title }</title>
+			<style>
+			    @page {
+            margin: 1cm;
+          }
+
+          @media print {
+            font-size: 10pt;
+          }
+			</style>
+		</head>
+		<body class="bg-white px-2 py-2 text-black">
+			@component
+		</body>
+	</html>
 }
