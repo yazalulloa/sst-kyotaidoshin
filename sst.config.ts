@@ -194,7 +194,8 @@ export default $config({
       nodejs: {
         install: ["@sparticuz/chromium"],
       },
-      timeout: "60 seconds",
+      timeout: "80 seconds",
+      memory: "2 GB",
     });
 
     const mainApiFunction = new sst.aws.Function("MainApiFunction", {

@@ -7,6 +7,10 @@ import (
 )
 
 func FileExistsS3(ctx context.Context, bucketName string, objectKey string) (bool, error) {
+	if true {
+		return false, nil
+	}
+
 	s3Client, err := GetS3Client(ctx)
 	if err != nil {
 		return false, err

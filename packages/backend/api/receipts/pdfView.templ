@@ -298,16 +298,19 @@ templ PrintView(title string, component templ.Component) {
 			<script src="https://unpkg.com/@tailwindcss/browser@4"></script>
 			<title>AVISO DE COBRO { title }</title>
 			<style>
-			    @page {
-            margin: 1cm;
-          }
 
           @media print {
-            font-size: 10pt;
+            @page {
+              margin: 0.25cm;
+            }
+
+             html, body {
+               font-size: 12pt;
+             }
           }
 			</style>
 		</head>
-		<body class="bg-white px-2 py-2 text-black">
+		<body class="bg-white px-1 py-1 text-black">
 			@component
 		</body>
 	</html>
