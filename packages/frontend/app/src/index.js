@@ -17,7 +17,7 @@ import {match} from './utils.js';
 window.htmx = htmx;
 
 // htmx.logAll();
-htmx.config.withCredentials = true;
+// htmx.config.withCredentials = true;
 htmx.config.selfRequestsOnly = false;
 
 if (import.meta.env.VITE_IS_DEV === 'true') {
@@ -55,6 +55,7 @@ window.addEventListener("popstate", (event) => {
 document.body.addEventListener('htmx:configRequest', function (evt) {
 
   if (evt.detail.path.includes("/api/")) {
+    evt.detail.withCredentials = true;
     evt.detail.path = import.meta.env.VITE_VAR_ENV + evt.detail.path;
   }
 });
