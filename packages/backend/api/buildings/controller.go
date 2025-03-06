@@ -377,7 +377,7 @@ func formData(w http.ResponseWriter, r *http.Request) {
 
 func getUploadBackupForm(w http.ResponseWriter, r *http.Request) {
 
-	component, err := api.BuildUploadForm(r.Context(), _UPLOAD_BACKUP[1:], "buildings")
+	component, err := api.BuildUploadForm(r, _UPLOAD_BACKUP[1:], "buildings")
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -424,85 +424,7 @@ type reserveFundDto struct {
 
 func uploadBackup(w http.ResponseWriter, r *http.Request) {
 
-	component, err := api.ProcessUploadBackup(r, _UPLOAD_BACKUP_FORM, "buildings-updater", "update-buildings",
-		func(decoder *json.Decoder) (int64, error) {
-			var dto []BuildingRecord
-			err := decoder.Decode(&dto)
-			if err != nil {
-				log.Printf("Error decoding json: %s", err)
-				return 0, err
-			}
-
-			buildings := make([]model.Buildings, len(dto))
-			var reserveFundArray []model.ReserveFunds
-			var extraChargeArray []model.ExtraCharges
-			for i, record := range dto {
-				buildings[i] = model.Buildings{
-					ID:                          record.Building.Id,
-					Name:                        record.Building.Name,
-					Rif:                         record.Building.Rif,
-					MainCurrency:                record.Building.MainCurrency,
-					DebtCurrency:                record.Building.DebtCurrency,
-					CurrenciesToShowAmountToPay: strings.Join(record.Building.CurrenciesToShowAmountToPay, ","),
-					FixedPay:                    record.Building.FixedPay,
-					FixedPayAmount:              record.Building.FixedPayAmount,
-					RoundUpPayments:             record.Building.RoundUpPayments,
-					EmailConfig:                 "test",
-				}
-
-				for _, reserveFund := range record.ReserveFunds {
-					reserveFundArray = append(reserveFundArray, model.ReserveFunds{
-						BuildingID:    reserveFund.BuildingID,
-						Name:          reserveFund.Name,
-						Fund:          reserveFund.Fund,
-						Expense:       reserveFund.Expense,
-						Pay:           reserveFund.Pay,
-						Active:        reserveFund.Active,
-						Type:          reserveFund.Type,
-						ExpenseType:   reserveFund.ExpenseType,
-						AddToExpenses: reserveFund.AddToExpenses,
-					})
-				}
-
-				for _, extraCharge := range record.ExtraCharges {
-					var builder strings.Builder
-					for idx, apt := range extraCharge.Apartments {
-						builder.WriteString(apt.Number)
-						if idx < len(extraCharge.Apartments)-1 {
-							builder.WriteString(",")
-						}
-					}
-
-					extraChargeArray = append(extraChargeArray, model.ExtraCharges{
-						BuildingID:      extraCharge.BuildingID,
-						ParentReference: extraCharge.ParentReference,
-						Type:            extraCharge.Type,
-						Description:     extraCharge.Description,
-						Amount:          extraCharge.Amount,
-						Currency:        extraCharge.Currency,
-						Active:          extraCharge.Active,
-						Apartments:      builder.String(),
-					})
-				}
-			}
-
-			rowsAffected, err := insertBackup(buildings)
-			if err != nil {
-				return 0, err
-			}
-
-			_, err = reserveFunds.InsertBackup(reserveFundArray)
-			if err != nil {
-				return 0, err
-			}
-
-			_, err = extraCharges.InsertBackup(extraChargeArray)
-			if err != nil {
-				return 0, err
-			}
-
-			return rowsAffected, nil
-		})
+	component, err := api.ProcessUploadBackup(r, _UPLOAD_BACKUP_FORM, "buildings-updater", "update-buildings", ProcessDecoder)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -515,4 +437,83 @@ func uploadBackup(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func ProcessDecoder(decoder *json.Decoder) (int64, error) {
+	var dto []BuildingRecord
+	err := decoder.Decode(&dto)
+	if err != nil {
+		log.Printf("Error decoding json: %s", err)
+		return 0, err
+	}
+
+	buildings := make([]model.Buildings, len(dto))
+	var reserveFundArray []model.ReserveFunds
+	var extraChargeArray []model.ExtraCharges
+	for i, record := range dto {
+		buildings[i] = model.Buildings{
+			ID:                          record.Building.Id,
+			Name:                        record.Building.Name,
+			Rif:                         record.Building.Rif,
+			MainCurrency:                record.Building.MainCurrency,
+			DebtCurrency:                record.Building.DebtCurrency,
+			CurrenciesToShowAmountToPay: strings.Join(record.Building.CurrenciesToShowAmountToPay, ","),
+			FixedPay:                    record.Building.FixedPay,
+			FixedPayAmount:              record.Building.FixedPayAmount,
+			RoundUpPayments:             record.Building.RoundUpPayments,
+			EmailConfig:                 "test",
+		}
+
+		for _, reserveFund := range record.ReserveFunds {
+			reserveFundArray = append(reserveFundArray, model.ReserveFunds{
+				BuildingID:    reserveFund.BuildingID,
+				Name:          reserveFund.Name,
+				Fund:          reserveFund.Fund,
+				Expense:       reserveFund.Expense,
+				Pay:           reserveFund.Pay,
+				Active:        reserveFund.Active,
+				Type:          reserveFund.Type,
+				ExpenseType:   reserveFund.ExpenseType,
+				AddToExpenses: reserveFund.AddToExpenses,
+			})
+		}
+
+		for _, extraCharge := range record.ExtraCharges {
+			var builder strings.Builder
+			for idx, apt := range extraCharge.Apartments {
+				builder.WriteString(apt.Number)
+				if idx < len(extraCharge.Apartments)-1 {
+					builder.WriteString(",")
+				}
+			}
+
+			extraChargeArray = append(extraChargeArray, model.ExtraCharges{
+				BuildingID:      extraCharge.BuildingID,
+				ParentReference: extraCharge.ParentReference,
+				Type:            extraCharge.Type,
+				Description:     extraCharge.Description,
+				Amount:          extraCharge.Amount,
+				Currency:        extraCharge.Currency,
+				Active:          extraCharge.Active,
+				Apartments:      builder.String(),
+			})
+		}
+	}
+
+	rowsAffected, err := insertBackup(buildings)
+	if err != nil {
+		return 0, err
+	}
+
+	_, err = reserveFunds.InsertBackup(reserveFundArray)
+	if err != nil {
+		return 0, err
+	}
+
+	_, err = extraCharges.InsertBackup(extraChargeArray)
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
 }

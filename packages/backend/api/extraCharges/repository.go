@@ -24,7 +24,8 @@ func selectById(id int32) (*model.ExtraCharges, error) {
 func SelectByBuilding(buildingId string) ([]model.ExtraCharges, error) {
 
 	stmt := ExtraCharges.SELECT(ExtraCharges.AllColumns).FROM(ExtraCharges).
-		WHERE(ExtraCharges.BuildingID.EQ(sqlite.String(buildingId)).AND(ExtraCharges.ParentReference.EQ(sqlite.String(buildingId))))
+		WHERE(ExtraCharges.BuildingID.EQ(sqlite.String(buildingId)).
+			AND(ExtraCharges.ParentReference.EQ(sqlite.String(buildingId))))
 
 	var dest []model.ExtraCharges
 	err := stmt.Query(db.GetDB().DB, &dest)
@@ -52,6 +53,22 @@ func countByBuilding(buildingId string) (int64, error) {
 
 func deleteById(id int32) (int64, error) {
 	stmt := ExtraCharges.DELETE().WHERE(ExtraCharges.ID.EQ(sqlite.Int32(id)))
+	res, err := stmt.Exec(db.GetDB().DB)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
+}
+
+func DeleteByBuilding(buildingId string) (int64, error) {
+	stmt := ExtraCharges.DELETE().WHERE(ExtraCharges.BuildingID.EQ(sqlite.String(buildingId)).
+		AND(ExtraCharges.ParentReference.EQ(sqlite.String(buildingId))))
 	res, err := stmt.Exec(db.GetDB().DB)
 	if err != nil {
 		return 0, err

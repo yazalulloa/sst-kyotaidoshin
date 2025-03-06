@@ -9,11 +9,6 @@ declare module "sst" {
       "type": "sst.aws.ApiGatewayV2"
       "url": string
     }
-    "ApiFunction": {
-      "name": string
-      "type": "sst.aws.Function"
-      "url": string
-    }
     "AppClientId": {
       "type": "sst.sst.Secret"
       "value": string
@@ -83,9 +78,13 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
-    "UploadBackup": {
+    "UploadBackupBucket": {
       "name": string
       "type": "sst.aws.Bucket"
+    }
+    "UploadBackupQueue": {
+      "type": "sst.aws.Queue"
+      "url": string
     }
     "VerifyAccess": {
       "name": string

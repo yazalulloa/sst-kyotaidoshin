@@ -330,7 +330,7 @@ func UploadBackupForm(params util.UploadBackupParams) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" hx-encoding=\"multipart/form-data\" hx-disabled-elt=\"this, #backup-file-uploader * &gt; input:not([disabled]), #backup-file-uploader * &gt; label:not([disabled])\" hx-swap=\"outerHTML\" hx-trigger=\"send-file\" hx-indicator=\".htmx-indicator\" x-data=\"{ file: &#39;&#39;}\" x-init=\"$watch(&#39;file&#39;, (value) =&gt; {\n            if (value) {\n              $el.dispatchEvent(new CustomEvent(&#39;send-file&#39;));\n            }\n          })\n     \">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "\" hx-encoding=\"multipart/form-data\" hx-disabled-elt=\"this, #backup-file-uploader * &gt; input:not([disabled]), #backup-file-uploader * &gt; label:not([disabled])\" hx-swap=\"outerHTML\" hx-trigger=\"send-file\" hx-indicator=\".htmx-indicator\" x-data=\"{ file: &#39;&#39;}\" x-init=\"$watch(&#39;file&#39;, (value) =&gt; {\n            if (value) {\n              $el.dispatchEvent(new CustomEvent(&#39;send-file&#39;));\n            }\n          })\n     \" hx-on:htmx:after-request=\"console.log(event)\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -342,7 +342,7 @@ func UploadBackupForm(params util.UploadBackupParams) templ.Component {
 			var templ_7745c5c3_Var16 string
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(k)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 92, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 93, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -355,7 +355,7 @@ func UploadBackupForm(params util.UploadBackupParams) templ.Component {
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(v)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 92, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 93, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -402,7 +402,7 @@ func UploadBackupResponse(inserted int64, formUrl string, idUpdater string, even
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(formUrl)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 127, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 128, Col: 18}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
@@ -420,7 +420,7 @@ func UploadBackupResponse(inserted int64, formUrl string, idUpdater string, even
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("sendEvent('%s', '%s')", idUpdater, event))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 131, Col: 66}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 132, Col: 66}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -438,7 +438,7 @@ func UploadBackupResponse(inserted int64, formUrl string, idUpdater string, even
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(inserted))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 141, Col: 31}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 142, Col: 31}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -505,7 +505,7 @@ func RefreshView(url string) templ.Component {
 		var templ_7745c5c3_Var24 string
 		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("0; url=%s", url))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 150, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 151, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 		if templ_7745c5c3_Err != nil {
@@ -678,7 +678,7 @@ func BadgeIndicator(condition bool, badge string) templ.Component {
 		var templ_7745c5c3_Var35 string
 		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinStringErrs(badge)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 185, Col: 10}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 186, Col: 10}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 		if templ_7745c5c3_Err != nil {
@@ -738,7 +738,7 @@ func BadgeIndicatorWithTooltip(condition bool, tooltipId string, badge templ.Com
 			var templ_7745c5c3_Var38 string
 			templ_7745c5c3_Var38, templ_7745c5c3_Err = templ.JoinStringErrs(tooltipId)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 194, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 195, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var38))
 			if templ_7745c5c3_Err != nil {
@@ -868,7 +868,7 @@ func Tooltip(id string, value templ.Component) templ.Component {
 		var templ_7745c5c3_Var45 string
 		templ_7745c5c3_Var45, templ_7745c5c3_Err = templ.JoinStringErrs(id)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 227, Col: 9}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 228, Col: 9}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var45))
 		if templ_7745c5c3_Err != nil {
@@ -918,7 +918,7 @@ func SpanFormatDate(dataDate string) templ.Component {
 		var templ_7745c5c3_Var47 string
 		templ_7745c5c3_Var47, templ_7745c5c3_Err = templ.JoinStringErrs(dataDate)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 237, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 238, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var47))
 		if templ_7745c5c3_Err != nil {
@@ -961,7 +961,7 @@ func SpanWitX_Text(text string) templ.Component {
 			var templ_7745c5c3_Var49 string
 			templ_7745c5c3_Var49, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 244, Col: 21}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 245, Col: 21}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var49))
 			if templ_7745c5c3_Err != nil {
@@ -1033,7 +1033,7 @@ func SpanFormatCurrency(amount float64, currency string) templ.Component {
 		var templ_7745c5c3_Var52 string
 		templ_7745c5c3_Var52, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("FormatCurrency(parseFloat(%f), '%s')", amount, currency))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 253, Col: 102}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `api/base.templ`, Line: 254, Col: 102}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var52))
 		if templ_7745c5c3_Err != nil {

@@ -87,6 +87,12 @@ templ UploadBackupForm(params util.UploadBackupParams) {
             }
           })
      "
+		hx-on:htmx:after-request="
+		  if (event.detail.xhr.status === 200 || event.detail.xhr.status === 204) {
+        $el.reset();
+      }
+
+		"
 	>
 		for k, v := range params.Values {
 			<input type="hidden" name={ k } value={ v }/>

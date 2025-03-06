@@ -9,4 +9,5 @@ use (
 	./process-rates
 	./auth_client
 	./process-user
+	./process-backup
 )

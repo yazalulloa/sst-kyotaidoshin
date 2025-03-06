@@ -55,6 +55,7 @@ window.addEventListener("popstate", (event) => {
 document.body.addEventListener('htmx:configRequest', function (evt) {
 
   if (evt.detail.path.includes("/api/")) {
+    console.log("API REQUEST")
     evt.detail.withCredentials = true;
     evt.detail.path = import.meta.env.VITE_VAR_ENV + evt.detail.path;
   }

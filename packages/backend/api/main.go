@@ -50,6 +50,7 @@ func router() http.Handler {
 		accessTokenCookie.Path = "/"
 		http.SetCookie(w, accessTokenCookie)
 		url := fmt.Sprintf("%s://%s", r.URL.Scheme, r.URL.Host)
+		// TODO handle non htmx requests
 		w.Header().Add("HX-Redirect", url)
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("Logout"))
@@ -110,7 +111,7 @@ func loggingMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func redirectToOrigin(w http.ResponseWriter, r *http.Request) {
+func redirectToAuthServer(w http.ResponseWriter, r *http.Request) {
 	url := fmt.Sprintf("%s://%s", r.URL.Scheme, r.URL.Host)
 	w.Header().Add("HX-Redirect", url)
 	w.WriteHeader(http.StatusOK)
@@ -121,19 +122,19 @@ func authenticationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookieAccessToken, err := r.Cookie("access_token")
 		if err != nil {
-			redirectToOrigin(w, r)
+			redirectToAuthServer(w, r)
 			return
 		}
 
 		if cookieAccessToken == nil {
-			redirectToOrigin(w, r)
+			redirectToAuthServer(w, r)
 			return
 		}
 
 		accessToken := cookieAccessToken.Value
 
 		if accessToken == "" {
-			redirectToOrigin(w, r)
+			redirectToAuthServer(w, r)
 			return
 		}
 
@@ -146,7 +147,7 @@ func authenticationMiddleware(next http.Handler) http.Handler {
 		newCtx, err := util.Verify(r.Context(), accessToken, refreshToken)
 		if err != nil {
 			log.Printf("Failed to verify token: %v", err)
-			redirectToOrigin(w, r)
+			redirectToAuthServer(w, r)
 			return
 		}
 
@@ -155,7 +156,7 @@ func authenticationMiddleware(next http.Handler) http.Handler {
 		//err = auth_client.Verify(accessToken, refreshToken)
 		//if err != nil {
 		//	log.Printf("Failed to verify token: %v", err)
-		//	redirectToOrigin(w, r)
+		//	redirectToAuthServer(w, r)
 		//	return
 		//}
 

@@ -79,7 +79,7 @@ func getInit(w http.ResponseWriter, r *http.Request) {
 
 	go func() {
 		defer wg.Done()
-		params, err := util.GetUploadFormParams(r.Context(), _UPLOAD_BACKUP[1:], "receipts")
+		params, err := util.GetUploadFormParams(r, _UPLOAD_BACKUP[1:], "receipts")
 		if err != nil {
 			handleErr(err)
 			return
@@ -124,7 +124,7 @@ func getInit(w http.ResponseWriter, r *http.Request) {
 
 func getUploadBackupForm(w http.ResponseWriter, r *http.Request) {
 
-	component, err := api.BuildUploadForm(r.Context(), _UPLOAD_BACKUP[1:], "receipts")
+	component, err := api.BuildUploadForm(r, _UPLOAD_BACKUP[1:], "receipts")
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -141,58 +141,7 @@ func getUploadBackupForm(w http.ResponseWriter, r *http.Request) {
 
 func uploadBackup(w http.ResponseWriter, r *http.Request) {
 
-	component, err := api.ProcessUploadBackup(r, _UPLOAD_BACKUP_FORM, "receipts-updater", "update-receipts",
-		func(decoder *json.Decoder) (int64, error) {
-			var records []ReceiptRecord
-			err := decoder.Decode(&records)
-			if err != nil {
-				log.Printf("Error decoding json: %s", err)
-				return 0, err
-			}
-
-			slices.SortFunc(records, func(a, b ReceiptRecord) int {
-
-				lhs, err := time.Parse(time.DateOnly, a.Receipt.Date)
-				if err != nil {
-					//panic(err)
-					log.Printf("Error parsing date: %s %v", a.Receipt.Date, err)
-					return 0
-				}
-
-				rhs, err := time.Parse(time.DateOnly, b.Receipt.Date)
-				if err != nil {
-					//panic(err)
-					log.Printf("Error parsing date: %s %v", b.Receipt.Date, err)
-					return 0
-				}
-
-				return lhs.Compare(rhs)
-			})
-
-			//for _, rec := range records {
-			//	log.Printf("Date: %s", rec.Receipt.Date)
-			//}
-
-			array := util.SplitArray(records, 10)
-
-			//for i, chunk := range array {
-			//	for _, rec := range chunk {
-			//		log.Printf("Chunk %d: Date: %s", i, rec.Receipt.Date)
-			//	}
-			//}
-
-			var total int64
-			ratesHolder := RatesHolder{Rates: syncmap.Map{}}
-			for _, chunk := range array {
-				rowsAffected, err := insertRecord(chunk, &ratesHolder)
-				if err != nil {
-					return 0, err
-				}
-				total += rowsAffected
-			}
-
-			return total, nil
-		})
+	component, err := api.ProcessUploadBackup(r, _UPLOAD_BACKUP_FORM, "receipts-updater", "update-receipts", ProcessDecoder)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -205,6 +154,58 @@ func uploadBackup(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func ProcessDecoder(decoder *json.Decoder) (int64, error) {
+	var records []ReceiptRecord
+	err := decoder.Decode(&records)
+	if err != nil {
+		log.Printf("Error decoding json: %s", err)
+		return 0, err
+	}
+
+	slices.SortFunc(records, func(a, b ReceiptRecord) int {
+
+		lhs, err := time.Parse(time.DateOnly, a.Receipt.Date)
+		if err != nil {
+			//panic(err)
+			log.Printf("Error parsing date: %s %v", a.Receipt.Date, err)
+			return 0
+		}
+
+		rhs, err := time.Parse(time.DateOnly, b.Receipt.Date)
+		if err != nil {
+			//panic(err)
+			log.Printf("Error parsing date: %s %v", b.Receipt.Date, err)
+			return 0
+		}
+
+		return lhs.Compare(rhs)
+	})
+
+	//for _, rec := range records {
+	//	log.Printf("Date: %s", rec.Receipt.Date)
+	//}
+
+	array := util.SplitArray(records, 10)
+
+	//for i, chunk := range array {
+	//	for _, rec := range chunk {
+	//		log.Printf("Chunk %d: Date: %s", i, rec.Receipt.Date)
+	//	}
+	//}
+
+	var total int64
+	ratesHolder := RatesHolder{Rates: syncmap.Map{}}
+	for _, chunk := range array {
+		rowsAffected, err := insertRecord(chunk, &ratesHolder)
+		if err != nil {
+			return 0, err
+		}
+		total += rowsAffected
+	}
+
+	return total, nil
 }
 
 func search(w http.ResponseWriter, r *http.Request) {

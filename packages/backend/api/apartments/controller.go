@@ -250,7 +250,7 @@ func aptPut(w http.ResponseWriter, r *http.Request) {
 
 func getUploadBackupForm(w http.ResponseWriter, r *http.Request) {
 
-	component, err := api.BuildUploadForm(r.Context(), _UPLOAD_BACKUP[1:], "apartments")
+	component, err := api.BuildUploadForm(r, _UPLOAD_BACKUP[1:], "apartments")
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -265,19 +265,20 @@ func getUploadBackupForm(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func ProcessDecoder(decoder *json.Decoder) (int64, error) {
+	var dto []ApartmentDto
+	err := decoder.Decode(&dto)
+	if err != nil {
+		log.Printf("Error decoding json: %s", err)
+		return 0, err
+	}
+
+	return insertDtos(dto)
+}
+
 func uploadBackup(w http.ResponseWriter, r *http.Request) {
 
-	component, err := api.ProcessUploadBackup(r, _UPLOAD_BACKUP_FORM, "apartments-updater", "update-apartments",
-		func(decoder *json.Decoder) (int64, error) {
-			var dto []ApartmentDto
-			err := decoder.Decode(&dto)
-			if err != nil {
-				log.Printf("Error decoding json: %s", err)
-				return 0, err
-			}
-
-			return insertDtos(dto)
-		})
+	component, err := api.ProcessUploadBackup(r, _UPLOAD_BACKUP_FORM, "apartments-updater", "update-apartments", ProcessDecoder)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -184,56 +184,21 @@ func StrArrayToInt16Array(strArray []string) []int16 {
 	return int16Array
 }
 
-//func FileHash(filepath string) (int64, error) {
-//	file, err := os.Open(filepath)
-//
-//	if err != nil {
-//		return 0, err
-//	}
-//	defer func(file *os.File) {
-//		err := file.Close()
-//		if err != nil {
-//			log.Println("Error closing file:", err)
-//			return
-//		}
-//	}(file)
-//
-//	buf := make([]byte, 1024*1024)
-//	hash := xxhash.New()
-//	if _, err := io.CopyBuffer(hash, file, buf); err != nil {
-//		return 0, err
-//	}
-//	bytesSum := hash.Sum(nil)
-//	fileHash := int64(xxhash.Sum64(bytesSum))
-//	return fileHash, nil
-//}
-
-//func Render(ctx echo.Context, statusCode int, t templ.Component) error {
-//	buf := templ.GetBuffer()
-//	defer templ.ReleaseBuffer(buf)
-//	reqCtx := ctx.Request().Context()
-//	reqCtx = context.WithValue(reqCtx, CsrfKey, ctx.Get(CsrfKey))
-//	if err := t.Render(reqCtx, buf); err != nil {
-//		return err
-//	}
-//
-//	return ctx.HTML(statusCode, buf.String())
-//}
-
-func GetUploadFormParams(ctx context.Context, uploadPath string, filePrefix string) (*UploadBackupParams, error) {
-	bucketName, err := resource.Get("UploadBackup", "name")
+func GetUploadFormParams(r *http.Request, uploadPath string, filePrefix string) (*UploadBackupParams, error) {
+	bucketName, err := resource.Get("UploadBackupBucket", "name")
 	if err != nil {
 		log.Printf("Error getting bucket Name: %s", err)
 		return nil, err
 	}
 
-	functionUrl, err := resource.Get("ApiFunction", "url")
-	if err != nil {
-		log.Printf("Error getting function url: %s", err)
-		return nil, err
-	}
+	//url := r.Header.Get("origin")
+	//if url == "" {
+	//	return nil, fmt.Errorf("origin header not found")
+	//}
 
-	redirectUrl := fmt.Sprintf("%s%s", functionUrl.(string), uploadPath)
+	url := fmt.Sprintf("%s://%s/", r.URL.Scheme, r.URL.Host)
+
+	redirectUrl := fmt.Sprintf("%s/%s", url, uploadPath)
 	metaUuid := uuid.New().String()
 
 	conditions := []interface{}{
@@ -249,7 +214,7 @@ func GetUploadFormParams(ctx context.Context, uploadPath string, filePrefix stri
 		options.Conditions = conditions
 	}
 
-	presignedPostRequest, err := aws_h.PresignPostObject(ctx, bucketName.(string), fmt.Sprintf("%s_%s", filePrefix, uuid.New().String()), optionFn)
+	presignedPostRequest, err := aws_h.PresignPostObject(r.Context(), bucketName.(string), fmt.Sprintf("%s_%s", filePrefix, uuid.New().String()), optionFn)
 	if err != nil {
 		return nil, err
 	}

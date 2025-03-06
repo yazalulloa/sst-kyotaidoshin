@@ -48,7 +48,7 @@ export default $config({
     });
 
 
-    const queue = new sst.aws.Queue("BcvQueue", {
+    const bcvQueue = new sst.aws.Queue("BcvQueue", {
       //not supported for S3 notificationsm
       fifo: false,
       visibilityTimeout: "300 seconds",
@@ -81,7 +81,7 @@ export default $config({
 
 
     const processBcvFileFunction = new sst.aws.Function("ProcessBcvFile", {
-      link: [secretTursoUrl, bucket, queue],
+      link: [secretTursoUrl, bucket, bcvQueue],
       runtime: "go",
       handler: "packages/backend/process-bcv-file/",
       timeout: "90 seconds",
@@ -105,7 +105,7 @@ export default $config({
     //   // name: "process-file-js",
     //   // handler: "subscriber.handler",
     // })
-    queue.subscribe(processBcvFileFunction.arn);
+    bcvQueue.subscribe(processBcvFileFunction.arn);
 
     // const subscriber = new sst.aws.Function("MyFunction", {
     //   handler: "subscriber.handler"
@@ -117,12 +117,8 @@ export default $config({
     bucket.notify({
       notifications: [
         {
-          // function: {
-          //   runtime: "go",
-          //   handler: "packages/backend/process-bcv-file/",
-          // },
           name: "ProcessFileSubscriber",
-          queue: queue,
+          queue: bcvQueue,
           events: ["s3:ObjectCreated:Put", "s3:ObjectCreated:Post"],
         },
       ],
@@ -159,24 +155,38 @@ export default $config({
       }
     });
 
-
-    const uploadBackupBucket = new sst.aws.Bucket("UploadBackup", {
+    const uploadBackupBucket = new sst.aws.Bucket("UploadBackupBucket", {
       versioning: false,
       cors: {
-        allowHeaders: ["*"],
-        allowOrigins: ["*"],
-        allowMethods: ["DELETE", "GET", "HEAD", "POST", "PUT"],
+        allowHeaders: ["Content-Type", "hx-current-url", "hx-request", "hx-trigger", "hx-target"],
+        allowOrigins: allowedOrigins,
+        allowMethods: ["GET", "POST", "PUT"],
         exposeHeaders: [],
-        maxAge: "0 seconds"
+        maxAge: isLocal ? "1 minute" : "1 day",
       }
     });
 
-    const apiFunction = new sst.aws.Function("ApiFunction", {
-      url: true,
-      handler: "packages/backend/api",
+    const uploadBackupQueue = new sst.aws.Queue("UploadBackupQueue", {
+      //not supported for S3 notificationsm
+      fifo: false,
+      visibilityTimeout: "300 seconds",
+    });
+
+    uploadBackupQueue.subscribe({
+      link: [secretTursoUrl, uploadBackupBucket, uploadBackupQueue],
       runtime: "go",
-      link: [bucket, secretTursoUrl, bcvUrl, bcvFileStartPath, uploadBackupBucket],
-      timeout: "60 seconds",
+      handler: "packages/backend/process-backup/",
+      timeout: "90 seconds",
+    });
+
+    uploadBackupBucket.notify({
+      notifications: [
+        {
+          name: "ProcessBackupSubscriber",
+          queue: uploadBackupQueue,
+          events: [ "s3:ObjectCreated:Post"],
+        },
+      ],
     });
 
     const verifyAccessFunction = new sst.aws.Function("VerifyAccess", {
@@ -201,7 +211,7 @@ export default $config({
     const mainApiFunction = new sst.aws.Function("MainApiFunction", {
       handler: "packages/backend/api",
       runtime: "go",
-      link: [bucket, secretTursoUrl, bcvUrl, bcvFileStartPath, uploadBackupBucket, apiFunction, appClientId, auth, verifyAccessFunction, receiptsBucket, htmlToPdf],
+      link: [bucket, secretTursoUrl, bcvUrl, bcvFileStartPath, uploadBackupBucket, appClientId, auth, verifyAccessFunction, receiptsBucket, htmlToPdf],
       timeout: "60 seconds",
     });
 
@@ -216,13 +226,6 @@ export default $config({
     //   link: [bucket, secretTursoUrl, bcvUrl, bcvFileStartPath, uploadBackupBucket, apiFunction],
     //   timeout: "60 seconds",
     // });
-
-    // const api = new sst.aws.Function("ApiFunction", {
-    //   url: true,
-    //   handler: "packages/backend/api",
-    //   runtime: "go",
-    //   link: [bucket, secretTursoUrl]
-    // })
 
     const site = new sst.aws.StaticSite("WebApp", {
       path: "packages/frontend/app",
@@ -273,7 +276,7 @@ export default $config({
     return {
       Web_App: webUrl.value,
       SiteUrl: site.url,
-      VerifyAccess: verifyAccessFunction.arn
+      VerifyAccess: verifyAccessFunction.arn,
       // ApiFunction: apiFunction.url,
       // MyBucket: bucket.name,
       // BcvUrl: bcvUrl.value,

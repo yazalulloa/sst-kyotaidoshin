@@ -2,6 +2,7 @@ package buildings
 
 import (
 	"github.com/google/uuid"
+	"kyotaidoshin/extraCharges"
 	"kyotaidoshin/reserveFunds"
 	"kyotaidoshin/util"
 	"sync"
@@ -60,45 +61,52 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 
 func deleteAndReturnCounters(id string) (*Counters, error) {
 	counters := Counters{}
-	var rowsDeleted int64 = 0
-	var oErr error
-	var once sync.Once
-	handleErr := func(e error) {
-		if e != nil {
-			once.Do(func() {
-				oErr = e
-			})
-		}
-	}
+
 	var wg sync.WaitGroup
-	wg.Add(3)
+	workers := 3
+	wg.Add(workers)
+	errorChan := make(chan error, workers)
 
 	go func() {
 		defer wg.Done()
-		rowsAffected, err := deleteById(id)
-		handleErr(err)
-		rowsDeleted = rowsAffected
-	}()
-
-	go func() {
-		defer wg.Done()
-		totalCount, err := getTotalCount()
-		counters.TotalCount = totalCount
-		handleErr(err)
+		_, err := deleteById(id)
+		if err != nil {
+			errorChan <- err
+			return
+		}
 	}()
 
 	go func() {
 		defer wg.Done()
 		_, err := reserveFunds.DeleteByBuilding(id)
-		handleErr(err)
+		if err != nil {
+			errorChan <- err
+			return
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		_, err := extraCharges.DeleteByBuilding(id)
+		if err != nil {
+			errorChan <- err
+			return
+		}
 	}()
 
 	wg.Wait()
+	close(errorChan)
 
-	if oErr != nil {
-		return nil, oErr
+	err := util.HasErrors(errorChan)
+	if err != nil {
+		return nil, err
 	}
 
-	counters.TotalCount -= rowsDeleted
+	totalCount, err := getTotalCount()
+	if err != nil {
+		return nil, err
+	}
+
+	counters.TotalCount = totalCount
 	return &counters, nil
 }
