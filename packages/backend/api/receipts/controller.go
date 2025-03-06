@@ -524,7 +524,7 @@ func getReceiptView(w http.ResponseWriter, r *http.Request) {
 
 	base64Str := base64.URLEncoding.EncodeToString(bytes)
 
-	err = Views(*receipt, idMap, base64Str).Render(r.Context(), w)
+	err = Views(keyStr, *receipt, idMap, base64Str).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

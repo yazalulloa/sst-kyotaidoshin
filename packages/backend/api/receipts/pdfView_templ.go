@@ -1009,7 +1009,7 @@ func BuildingView(dto CalculatedReceipt) templ.Component {
 	})
 }
 
-func Views(dto CalculatedReceipt, idMap map[string]string, tabs string) templ.Component {
+func Views(key string, dto CalculatedReceipt, idMap map[string]string, tabs string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -1030,85 +1030,98 @@ func Views(dto CalculatedReceipt, idMap map[string]string, tabs string) templ.Co
 			templ_7745c5c3_Var56 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 85, "<div data-tabs=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 85, "<div id=\"pdf-header\" hx-swap-oob=\"beforeend\"><button type=\"button\" hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var57 string
-		templ_7745c5c3_Var57, templ_7745c5c3_Err = templ.JoinStringErrs(tabs)
+		templ_7745c5c3_Var57, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(_DOWNLOAD_ZIP_FILE+"/%s", key))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 206, Col: 18}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 208, Col: 54}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var57))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 86, "\" x-init=\"\n\t\t$dispatch(&#39;event-update-tabs&#39;, {tabs: $el.dataset.tabs})\n\t\t$el.remove()\n\t\t\"></div><div x-cloak x-show=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 86, "\" hx-trigger=\"mousedown\" hx-target=\"this\" hx-swap=\"none\" hx-on:htmx:before-request=\"this.dispatchEvent(new CustomEvent(&#39;event-is-loading&#39;))\" hx-on:htmx:after-request=\"this.dispatchEvent(new CustomEvent(&#39;event-is-not-loading&#39;))\" @event-is-loading=\"isLoading = true\" @event-is-not-loading=\"isLoading = false\" x-data=\"{isLoading: false}\" x-bind:disabled=\"isLoading\" class=\"w-fit inline-flex justify-center items-center gap-2 whitespace-nowrap rounded-radius bg-primary border border-primary dark:border-primary-dark px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark\"><svg x-bind:data-src=\"zipFileIconUrl\" data-cache=\"21600\" class=\"size-5\"></svg> <span x-text=\"$t(&#39;main-action-download-zip&#39;)\"></span> <svg x-show=\"isLoading\" x-bind:data-src=\"loadingIconUrl\" class=\"size-5 animate-spin motion-reduce:animate-none fill-on-primary dark:fill-on-primary-dark\"></svg></button><div data-tabs=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var58 string
-		templ_7745c5c3_Var58, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("selected === '%s'", idMap[dto.Building.ID]))
+		templ_7745c5c3_Var58, templ_7745c5c3_Err = templ.JoinStringErrs(tabs)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 214, Col: 67}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 229, Col: 19}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var58))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 87, "\" id=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 87, "\" x-init=\"\n  \t\t$dispatch(&#39;event-update-tabs&#39;, {tabs: $el.dataset.tabs})\n  \t\t$el.remove()\n  \t\t\"></div></div><div x-cloak x-show=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var59 string
-		templ_7745c5c3_Var59, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("tabpanel%s", idMap[dto.Building.ID]))
+		templ_7745c5c3_Var59, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("selected === '%s'", idMap[dto.Building.ID]))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 215, Col: 56}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 238, Col: 67}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var59))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 88, "\" role=\"tabpanel\" aria-label=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 88, "\" id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var60 string
-		templ_7745c5c3_Var60, templ_7745c5c3_Err = templ.JoinStringErrs(idMap[dto.Building.ID])
+		templ_7745c5c3_Var60, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("tabpanel%s", idMap[dto.Building.ID]))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 217, Col: 37}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 239, Col: 56}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var60))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 89, "\" x-transition.scale.origin.bottom class=\"flex flex-col gap-2\"><button hx-get=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 89, "\" role=\"tabpanel\" aria-label=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var61 string
-		templ_7745c5c3_Var61, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(_DOWNLOAD_PDF_FILE+"/%s", dto.BuildingDownloadKeys))
+		templ_7745c5c3_Var61, templ_7745c5c3_Err = templ.JoinStringErrs(idMap[dto.Building.ID])
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 222, Col: 75}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 241, Col: 37}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var61))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 90, "\" todo-fix-hx-indicator=\".htmx-indicator\" asd-hx-disabled-elt=\"this\" hx-trigger=\"mousedown\" hx-target=\"this\" hx-swap=\"none\" type=\"button\" class=\"w-fit inline-flex justify-center items-center gap-2 whitespace-nowrap rounded-radius bg-primary border border-primary dark:border-primary-dark px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark\" hx-on:htmx:before-request=\"this.dispatchEvent(new CustomEvent(&#39;event-is-loading&#39;))\" hx-on:htmx:after-request=\"this.dispatchEvent(new CustomEvent(&#39;event-is-not-loading&#39;))\" @event-is-loading=\"isLoading = true\" @event-is-not-loading=\"isLoading = false\" x-data=\"{\n\t\t\t isLoading: false,\n\t\t\t}\" x-bind:disabled=\"isLoading\"><svg x-bind:data-src=\"pdfIconUrl\" data-cache=\"21600\" class=\"size-5\"></svg> <span class=\"uppercase\" x-text=\"$t(&#39;main-action-download&#39;)\"></span> <span>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 90, "\" x-transition.scale.origin.bottom class=\"flex flex-col gap-2\"><button hx-get=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var62 string
-		templ_7745c5c3_Var62, templ_7745c5c3_Err = templ.JoinStringErrs(dto.Building.ID)
+		templ_7745c5c3_Var62, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(_DOWNLOAD_PDF_FILE+"/%s", dto.BuildingDownloadKeys))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 241, Col: 26}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 246, Col: 75}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var62))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 91, "</span> <svg x-show=\"isLoading\" x-bind:data-src=\"loadingIconUrl\" class=\"size-5 animate-spin motion-reduce:animate-none fill-on-primary dark:fill-on-primary-dark\"></svg></button><div class=\"bg-white px-6 py-2 text-black\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 91, "\" todo-fix-hx-indicator=\".htmx-indicator\" asd-hx-disabled-elt=\"this\" hx-trigger=\"mousedown\" hx-target=\"this\" hx-swap=\"none\" type=\"button\" class=\"w-fit inline-flex justify-center items-center gap-2 whitespace-nowrap rounded-radius bg-primary border border-primary dark:border-primary-dark px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark\" hx-on:htmx:before-request=\"this.dispatchEvent(new CustomEvent(&#39;event-is-loading&#39;))\" hx-on:htmx:after-request=\"this.dispatchEvent(new CustomEvent(&#39;event-is-not-loading&#39;))\" @event-is-loading=\"isLoading = true\" @event-is-not-loading=\"isLoading = false\" x-data=\"{isLoading: false}\" x-bind:disabled=\"isLoading\"><svg x-bind:data-src=\"pdfIconUrl\" data-cache=\"21600\" class=\"size-5\"></svg> <span class=\"uppercase\" x-text=\"$t(&#39;main-action-download&#39;)\"></span> <span>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var63 string
+		templ_7745c5c3_Var63, templ_7745c5c3_Err = templ.JoinStringErrs(dto.Building.ID)
+		if templ_7745c5c3_Err != nil {
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 263, Col: 26}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var63))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 92, "</span> <svg x-show=\"isLoading\" x-bind:data-src=\"loadingIconUrl\" class=\"size-5 animate-spin motion-reduce:animate-none fill-on-primary dark:fill-on-primary-dark\"></svg></button><div class=\"bg-white px-6 py-2 text-black\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1116,51 +1129,51 @@ func Views(dto CalculatedReceipt, idMap map[string]string, tabs string) templ.Co
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 92, "</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 93, "</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		for _, apt := range dto.Apartments {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 93, "<div x-show=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var63 string
-			templ_7745c5c3_Var63, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("selected === '%s'", idMap[apt.Apartment.Number]))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 254, Col: 73}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var63))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 94, "\" x-transition.scale.origin.bottom class=\"flex flex-col gap-2\"><button hx-get=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 94, "<div x-show=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var64 string
-			templ_7745c5c3_Var64, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(_DOWNLOAD_PDF_FILE+"/%s", apt.DownloadKeys))
+			templ_7745c5c3_Var64, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("selected === '%s'", idMap[apt.Apartment.Number]))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 259, Col: 68}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 276, Col: 73}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var64))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 95, "\" todo-fix-hx-indicator=\".htmx-indicator\" asd-hx-disabled-elt=\"this\" hx-trigger=\"mousedown\" hx-target=\"this\" hx-swap=\"none\" type=\"button\" class=\"w-fit inline-flex justify-center items-center gap-2 whitespace-nowrap rounded-radius bg-primary border border-primary dark:border-primary-dark px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark\" hx-on:htmx:before-request=\"this.dispatchEvent(new CustomEvent(&#39;event-is-loading&#39;))\" hx-on:htmx:after-request=\"this.dispatchEvent(new CustomEvent(&#39;event-is-not-loading&#39;))\" @event-is-loading=\"isLoading = true\" @event-is-not-loading=\"isLoading = false\" x-data=\"{\n        \t\t\t isLoading: false,\n        \t\t\t}\" x-bind:disabled=\"isLoading\"><svg x-bind:data-src=\"pdfIconUrl\" data-cache=\"21600\" class=\"size-5\"></svg> <span class=\"uppercase\" x-text=\"$t(&#39;main-action-download&#39;)\"></span> <span>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 95, "\" x-transition.scale.origin.bottom class=\"flex flex-col gap-2\"><button hx-get=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var65 string
-			templ_7745c5c3_Var65, templ_7745c5c3_Err = templ.JoinStringErrs(apt.Apartment.Number)
+			templ_7745c5c3_Var65, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf(_DOWNLOAD_PDF_FILE+"/%s", apt.DownloadKeys))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 278, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 281, Col: 68}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var65))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 96, "</span> <svg x-show=\"isLoading\" x-bind:data-src=\"loadingIconUrl\" class=\"size-5 animate-spin motion-reduce:animate-none fill-on-primary dark:fill-on-primary-dark\"></svg></button><div class=\"bg-white px-6 py-2 text-black\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 96, "\" todo-fix-hx-indicator=\".htmx-indicator\" asd-hx-disabled-elt=\"this\" hx-trigger=\"mousedown\" hx-target=\"this\" hx-swap=\"none\" type=\"button\" class=\"w-fit inline-flex justify-center items-center gap-2 whitespace-nowrap rounded-radius bg-primary border border-primary dark:border-primary-dark px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark\" hx-on:htmx:before-request=\"this.dispatchEvent(new CustomEvent(&#39;event-is-loading&#39;))\" hx-on:htmx:after-request=\"this.dispatchEvent(new CustomEvent(&#39;event-is-not-loading&#39;))\" @event-is-loading=\"isLoading = true\" @event-is-not-loading=\"isLoading = false\" x-data=\"{isLoading: false}\" x-bind:disabled=\"isLoading\"><svg x-bind:data-src=\"pdfIconUrl\" data-cache=\"21600\" class=\"size-5\"></svg> <span class=\"uppercase\" x-text=\"$t(&#39;main-action-download&#39;)\"></span> <span>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var66 string
+			templ_7745c5c3_Var66, templ_7745c5c3_Err = templ.JoinStringErrs(apt.Apartment.Number)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 298, Col: 32}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var66))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 97, "</span> <svg x-show=\"isLoading\" x-bind:data-src=\"loadingIconUrl\" class=\"size-5 animate-spin motion-reduce:animate-none fill-on-primary dark:fill-on-primary-dark\"></svg></button><div class=\"bg-white px-6 py-2 text-black\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1168,7 +1181,7 @@ func Views(dto CalculatedReceipt, idMap map[string]string, tabs string) templ.Co
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 97, "</div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 98, "</div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1193,25 +1206,25 @@ func PrintView(title string, component templ.Component) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var66 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var66 == nil {
-			templ_7745c5c3_Var66 = templ.NopComponent
+		templ_7745c5c3_Var67 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var67 == nil {
+			templ_7745c5c3_Var67 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 98, "<!doctype html><html lang=\"es\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><script src=\"https://unpkg.com/@tailwindcss/browser@4\"></script><title>AVISO DE COBRO ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 99, "<!doctype html><html lang=\"es\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><script src=\"https://unpkg.com/@tailwindcss/browser@4\"></script><title>AVISO DE COBRO ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var67 string
-		templ_7745c5c3_Var67, templ_7745c5c3_Err = templ.JoinStringErrs(title)
+		var templ_7745c5c3_Var68 string
+		templ_7745c5c3_Var68, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 299, Col: 32}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 319, Col: 32}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var67))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var68))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 99, "</title><style>\n\n          @media print {\n            @page {\n              margin: 0.25cm;\n            }\n\n             html, body {\n               font-size: 12pt;\n             }\n          }\n\t\t\t</style></head><body class=\"bg-white px-1 py-1 text-black\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, "</title><style>\n\n          @media print {\n            @page {\n              margin: 0.25cm;\n            }\n\n             html, body {\n               font-size: 12pt;\n             }\n          }\n\t\t\t</style></head><body class=\"bg-white px-1 py-1 text-black\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1219,7 +1232,7 @@ func PrintView(title string, component templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, "</body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 101, "</body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
