@@ -31,10 +31,6 @@ export default $config({
     const googleClientSecret = new sst.Secret("GoogleClientSecret");
     // const domain = new sst.Secret("Domain");
 
-    const email = new sst.aws.Email("Email1", {
-      sender: "yazalulloa@gmail.com",
-    });
-
     const processUserFunction = new sst.aws.Function("ProcessUser", {
       link: [secretTursoUrl],
       handler: "packages/backend/process-user/",
