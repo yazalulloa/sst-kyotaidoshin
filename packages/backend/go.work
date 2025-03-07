@@ -10,4 +10,5 @@ use (
 	./auth_client
 	./process-user
 	./process-backup
+	./delete-pdf-objects
 )

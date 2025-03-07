@@ -95,6 +95,8 @@ func buildingDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	defer receiptPdf.PublishBuilding(r.Context(), dest)
+
 	err = CountersView(*counters).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -198,11 +200,7 @@ func buildingPut(w http.ResponseWriter, r *http.Request) {
 		if isUpdate {
 			err = update(building)
 			if err == nil {
-				err = receiptPdf.DeleteByBuilding(r.Context(), building.ID)
-				if err != nil {
-					response.errorStr = err.Error()
-					return response
-				}
+				defer receiptPdf.PublishBuilding(r.Context(), building.ID)
 			}
 
 		} else {

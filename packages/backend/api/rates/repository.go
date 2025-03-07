@@ -59,7 +59,10 @@ func getTotalCount() (int64, error) {
 	var dest struct {
 		Count int64
 	}
-	err := Rates.SELECT(sqlite.COUNT(Rates.ID).AS("Count")).FROM(Rates).Query(db.GetDB().DB, &dest)
+	err := Rates.SELECT(
+		//sqlite.COUNT(Rates.ID).
+		sqlite.COUNT(sqlite.STAR).
+			AS("Count")).FROM(Rates).Query(db.GetDB().DB, &dest)
 	if err != nil {
 		return 0, err
 	}
@@ -72,7 +75,7 @@ func getQueryCount(rateQuery RequestQuery) (*int64, error) {
 		return nil, nil
 	}
 
-	stmt := Rates.SELECT(sqlite.COUNT(Rates.ID).AS("Count")).FROM(Rates).WHERE(condition)
+	stmt := Rates.SELECT(sqlite.COUNT(sqlite.STAR).AS("Count")).FROM(Rates).WHERE(condition)
 	var dest struct {
 		Count int64
 	}

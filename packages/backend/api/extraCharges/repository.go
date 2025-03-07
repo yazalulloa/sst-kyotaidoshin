@@ -36,7 +36,7 @@ func SelectByBuilding(buildingId string) ([]model.ExtraCharges, error) {
 }
 
 func countByBuilding(buildingId string) (int64, error) {
-	stmt := ExtraCharges.SELECT(sqlite.COUNT(ExtraCharges.ID).AS("Count")).FROM(ExtraCharges).
+	stmt := ExtraCharges.SELECT(sqlite.COUNT(sqlite.STAR).AS("Count")).FROM(ExtraCharges).
 		WHERE(ExtraCharges.BuildingID.EQ(sqlite.String(buildingId)).AND(ExtraCharges.ParentReference.EQ(sqlite.String(buildingId))))
 
 	var dest struct {

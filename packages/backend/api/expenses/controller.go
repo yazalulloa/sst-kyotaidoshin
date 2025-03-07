@@ -6,6 +6,7 @@ import (
 	"github.com/go-playground/form"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
+	"kyotaidoshin/receiptPdf"
 	"kyotaidoshin/util"
 	"log"
 	"net/http"
@@ -81,6 +82,14 @@ func Upsert(r *http.Request) FormResponse {
 		}
 	}
 
+	if err != nil {
+		log.Printf("Error upserting: %v", err)
+		response.ErrorStr = err.Error()
+		return response
+	}
+
+	defer receiptPdf.PublishReceipt(r.Context(), keys.BuildingID, keys.ReceiptID)
+
 	item, err := toItem(&expense, keys.CardId)
 	if err != nil {
 		log.Printf("Error converting to Item: %v", err)
@@ -123,6 +132,8 @@ func DeleteAndReturnKeys(r *http.Request) (string, Keys, error) {
 	if err != nil {
 		return key, keys, err
 	}
+
+	defer receiptPdf.PublishReceipt(r.Context(), keys.BuildingID, keys.ReceiptID)
 
 	return key, keys, nil
 }

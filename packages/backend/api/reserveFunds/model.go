@@ -80,7 +80,7 @@ type FormResponse struct {
 
 type FormRequest struct {
 	Key           string  `form:"key" validate:"required"`
-	Name          string  `form:"name" validate:"required,min=3,max=100"`
+	Name          string  `form:"name" validate:"required,min=3,max=200"`
 	Fund          float64 `form:"fund"`
 	Expense       float64 `form:"expense"`
 	Pay           float64 `form:"pay" validate:"required,gt=0"`

@@ -183,7 +183,7 @@ export default $config({
         {
           name: "ProcessBackupSubscriber",
           queue: uploadBackupQueue,
-          events: [ "s3:ObjectCreated:Post"],
+          events: ["s3:ObjectCreated:Post"],
         },
       ],
     });
@@ -195,6 +195,18 @@ export default $config({
 
     const receiptsBucket = new sst.aws.Bucket("ReceiptsBucket", {
       versioning: false,
+    });
+
+    const receiptPdfChangesQueue = new sst.aws.Queue("ReceiptPdfChangesQueue", {
+      //not supported for S3 notificationsm
+      fifo: true,
+      visibilityTimeout: "300 seconds",
+    });
+
+    receiptPdfChangesQueue.subscribe({
+      link: [receiptsBucket],
+      runtime: "go",
+      handler: "packages/backend/delete-pdf-objects/",
     });
 
     const htmlToPdf = new sst.aws.Function("HtmlToPdf", {
@@ -210,7 +222,7 @@ export default $config({
     const mainApiFunction = new sst.aws.Function("MainApiFunction", {
       handler: "packages/backend/api",
       runtime: "go",
-      link: [bucket, secretTursoUrl, bcvUrl, bcvFileStartPath, uploadBackupBucket, appClientId, auth, verifyAccessFunction, receiptsBucket, htmlToPdf],
+      link: [bucket, secretTursoUrl, bcvUrl, bcvFileStartPath, uploadBackupBucket, appClientId, auth, verifyAccessFunction, receiptsBucket, htmlToPdf, receiptPdfChangesQueue],
       timeout: "60 seconds",
     });
 

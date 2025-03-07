@@ -62,6 +62,10 @@ declare module "sst" {
       "name": string
       "type": "sst.aws.Function"
     }
+    "ReceiptPdfChangesQueue": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
     "ReceiptsBucket": {
       "name": string
       "type": "sst.aws.Bucket"

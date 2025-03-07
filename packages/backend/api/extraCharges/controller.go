@@ -6,6 +6,7 @@ import (
 	"github.com/go-playground/form"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
+	"kyotaidoshin/receiptPdf"
 	"kyotaidoshin/util"
 	"log"
 	"net/http"
@@ -102,6 +103,12 @@ func extraChargesPut(w http.ResponseWriter, r *http.Request) {
 			return response
 		}
 
+		if keys.Type == TypeReceipt {
+			defer receiptPdf.PublishReceipt(r.Context(), keys.BuildingID, keys.ParentReference)
+		} else {
+			defer receiptPdf.PublishBuilding(r.Context(), keys.BuildingID)
+		}
+
 		item, err := getItem(idToLookup, cardIdStr)
 		if err != nil {
 			log.Printf("Error getting item: %v", err)
@@ -163,6 +170,12 @@ func extraChargesDelete(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Error getting count: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	if keys.Type == TypeReceipt {
+		defer receiptPdf.PublishReceipt(r.Context(), keys.BuildingID, keys.ParentReference)
+	} else {
+		defer receiptPdf.PublishBuilding(r.Context(), keys.BuildingID)
 	}
 
 	err = DeleteResponse(count, key).Render(r.Context(), w)

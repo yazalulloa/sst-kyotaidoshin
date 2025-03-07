@@ -8,6 +8,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"kyotaidoshin/api"
+	"kyotaidoshin/receiptPdf"
 	"kyotaidoshin/util"
 	"log"
 	"net/http"
@@ -112,6 +113,8 @@ func aptDelete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	defer receiptPdf.PublishBuilding(r.Context(), keys.BuildingId)
 
 	err = CountersView(*counters).Render(r.Context(), w)
 	if err != nil {
@@ -223,6 +226,8 @@ func aptPut(w http.ResponseWriter, r *http.Request) {
 			response.errorStr = err.Error()
 			return response
 		}
+
+		defer receiptPdf.PublishBuilding(r.Context(), keys.BuildingId)
 
 		if isUpdate {
 			item, err := toItem(&apartment, &keys.CardId)

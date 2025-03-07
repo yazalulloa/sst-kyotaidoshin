@@ -320,21 +320,6 @@ func toItem(item *model.Receipts, oldCardId *string) (*Item, error) {
 	keys := keys(*item, cardIdStr)
 	key := *util.Encode(keys)
 
-	//updateParams := UpdateParams{
-	//	Key:    key,
-	//	Year:   item.Year,
-	//	Month:  item.Month,
-	//	Date:   item.Date.Format(time.DateOnly),
-	//}
-
-	//byteArray, err := json.Marshal(updateParams)
-	//
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//base64Str := base64.URLEncoding.EncodeToString(byteArray)
-
 	var lastSent *int64
 	if item.LastSent != nil {
 		tmp := item.LastSent.UnixMilli()
@@ -346,8 +331,7 @@ func toItem(item *model.Receipts, oldCardId *string) (*Item, error) {
 		Key:       key,
 		Item:      *item,
 		CreatedAt: item.CreatedAt.UnixMilli(),
-		//UpdateParams: &base64Str,
-		LastSent: lastSent,
+		LastSent:  lastSent,
 	}, nil
 }
 

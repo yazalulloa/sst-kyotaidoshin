@@ -83,7 +83,10 @@ func deleteById(id int32) (int64, error) {
 }
 
 func countByReceipt(receiptID string) (int64, error) {
-	stmt := Expenses.SELECT(sqlite.COUNT(Expenses.ID).AS("Count")).FROM(Expenses).
+	stmt := Expenses.SELECT(
+		sqlite.COUNT(sqlite.STAR).
+			//Expenses.ID).
+			AS("Count")).FROM(Expenses).
 		WHERE(Expenses.ReceiptID.EQ(sqlite.String(receiptID)))
 
 	var dest struct {

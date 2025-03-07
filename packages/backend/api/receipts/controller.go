@@ -432,7 +432,7 @@ func receiptPut(w http.ResponseWriter, r *http.Request) {
 			return response
 		}
 
-		err = receiptPdf.DeleteByReceipt(r.Context(), keys.BuildingId, keys.Id)
+		defer receiptPdf.PublishReceipt(r.Context(), keys.BuildingId, keys.Id)
 		if err != nil {
 			log.Printf("Error deleting pdf: %v", err)
 			response.errorStr = err.Error()
@@ -471,6 +471,8 @@ func receiptDelete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	defer receiptPdf.PublishReceipt(r.Context(), keys.BuildingId, keys.Id)
 
 	w.WriteHeader(http.StatusOK)
 }
@@ -569,7 +571,7 @@ func getZip(w http.ResponseWriter, r *http.Request) {
 	}
 
 	date := receipt.Receipt.Date.Format(time.DateOnly)
-	objectKey := fmt.Sprintf("%s/%s/%d/%s_%s_%s.zip", receipt.Building.ID, date, receipt.Receipt.ID,
+	objectKey := fmt.Sprintf("%s/%s/%s_%s_%s.zip", receipt.Building.ID, receipt.Receipt.ID,
 		receipt.Building.ID, strings.ToUpper(receipt.MonthStr), date)
 
 	exists, err := aws_h.FileExistsS3(r.Context(), bucketName.(string), objectKey)
@@ -689,69 +691,11 @@ func getPdf(w http.ResponseWriter, r *http.Request) {
 
 func clearPdfs(w http.ResponseWriter, r *http.Request) {
 
-	bucket, err := resource.Get("ReceiptsBucket", "name")
+	err := receiptPdf.DeleteObjects(r.Context(), nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	bucketName := bucket.(string)
-
-	s3Client, err := aws_h.GetS3Client(r.Context())
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	s3List, err := s3Client.ListObjectsV2(r.Context(), &s3.ListObjectsV2Input{
-		Bucket: aws.String(bucketName),
-	})
-	if err != nil {
-		log.Printf("Error getting objects from bucket %s: %s", bucketName, err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if len(s3List.Contents) == 0 {
-		w.WriteHeader(http.StatusNoContent)
-		return
-	}
-
-	list := make([]types.ObjectIdentifier, len(s3List.Contents))
-	for i, item := range s3List.Contents {
-
-		list[i] = types.ObjectIdentifier{
-			Key: item.Key,
-			//ETag:             item.ETag,
-			//LastModifiedTime: item.LastModified,
-			//Size:             item.Size,
-		}
-	}
-
-	delOut, err := s3Client.DeleteObjects(r.Context(), &s3.DeleteObjectsInput{
-		Bucket: aws.String(bucketName),
-		Delete: &types.Delete{
-			Objects: list,
-			Quiet:   aws.Bool(true),
-		},
-	})
-
-	if err != nil {
-		log.Printf("Error deleting objects from bucket %s: %s", bucketName, err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if len(delOut.Errors) > 0 {
-		multiErr := &util.MultiError{Errors: make([]error, len(delOut.Errors))}
-		for _, outErr := range delOut.Errors {
-			multiErr.Add(fmt.Errorf("%s: %s\n", *outErr.Key, *outErr.Message))
-		}
-
-		http.Error(w, multiErr.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	//_, _ = w.Write([]byte(fmt.Sprintf("Deleted %d objects", len(delOut.Deleted))))
 	w.WriteHeader(http.StatusOK)
 }

@@ -120,9 +120,8 @@ type FormDto struct {
 	expenseTotals       expenses.ExpenseTotals
 	apts                string
 }
-
 type FormRequest struct {
-	Key     string `form:"key" validate:"required,min=3,max=100"`
+	Key     string `form:"key" validate:"required,min=3,max=200"`
 	Year    int16  `form:"year" validate:"required,gt=2015,lte=2100"`
 	Month   int16  `form:"month" validate:"required,gte=1,lte=12"`
 	Date    string `form:"date" validate:"required,min=10,max=10"`

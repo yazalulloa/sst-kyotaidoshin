@@ -117,7 +117,7 @@ func getTotalCount() (int64, error) {
 	var dest struct {
 		Count int64
 	}
-	err := Users.SELECT(sqlite.COUNT(Users.ID).AS("Count")).FROM(Users).Query(db.GetDB().DB, &dest)
+	err := Users.SELECT(sqlite.COUNT(sqlite.STAR).AS("Count")).FROM(Users).Query(db.GetDB().DB, &dest)
 	if err != nil {
 		return 0, err
 	}

@@ -6,6 +6,7 @@ import (
 	"github.com/go-playground/form"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
+	"kyotaidoshin/receiptPdf"
 	"kyotaidoshin/util"
 	"log"
 	"net/http"
@@ -93,6 +94,8 @@ func debtPut(w http.ResponseWriter, r *http.Request) {
 			response.errorStr = err.Error()
 			return response
 		}
+
+		defer receiptPdf.PublishReceipt(r.Context(), keys.BuildingID, keys.ReceiptID)
 
 		item, err := toItem(&debt, &keys.CardId)
 		tmp := true

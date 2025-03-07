@@ -12,7 +12,7 @@ func getTotalCount() (int64, error) {
 	var dest struct {
 		Count int64
 	}
-	err := Buildings.SELECT(sqlite.COUNT(Buildings.ID).AS("Count")).FROM(Buildings).Query(db.GetDB().DB, &dest)
+	err := Buildings.SELECT(sqlite.COUNT(sqlite.STAR).AS("Count")).FROM(Buildings).Query(db.GetDB().DB, &dest)
 	if err != nil {
 		return 0, err
 	}
@@ -47,7 +47,7 @@ func selectList(req RequestQuery) ([]struct {
 		AptCount int64
 	}
 
-	stmt := Buildings.SELECT(Buildings.AllColumns, sqlite.COUNT(Apartments.BuildingID).AS("apt_count")).
+	stmt := Buildings.SELECT(Buildings.AllColumns, sqlite.COUNT(sqlite.STAR).AS("apt_count")).
 		FROM(Buildings.LEFT_JOIN(Apartments, Apartments.BuildingID.EQ(Buildings.ID))).
 		WHERE(condition).GROUP_BY(Buildings.ID)
 
