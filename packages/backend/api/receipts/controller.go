@@ -38,6 +38,7 @@ func Routes(server *mux.Router) {
 
 	server.HandleFunc(_SEARCH, search).Methods("GET")
 	server.HandleFunc(_PATH, receiptPut).Methods("PUT")
+	server.HandleFunc(_PATH+"/clear_pdfs", clearPdfs).Methods("DELETE")
 	server.HandleFunc(_PATH+"/{key}", receiptDelete).Methods("DELETE")
 	server.HandleFunc(_PATH+"/init", getInit).Methods("GET")
 	server.HandleFunc(_UPLOAD_BACKUP_FORM, getUploadBackupForm).Methods("GET")
@@ -676,4 +677,70 @@ func getPdf(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Add("HX-Redirect", presignedHTTPRequest.URL)
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func clearPdfs(w http.ResponseWriter, r *http.Request) {
+
+	s3Client, err := aws_h.GetS3Client(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	bucket, err := resource.Get("ReceiptsBucket", "name")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	bucketName := bucket.(string)
+
+	s3List, err := s3Client.ListObjectsV2(r.Context(), &s3.ListObjectsV2Input{Bucket: aws.String(bucketName)})
+	if err != nil {
+		log.Printf("Error getting objects from bucket %s: %s", bucketName, err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(s3List.Contents) == 0 {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	list := make([]types.ObjectIdentifier, len(s3List.Contents))
+	for i, item := range s3List.Contents {
+
+		list[i] = types.ObjectIdentifier{
+			Key: item.Key,
+			//ETag:             item.ETag,
+			//LastModifiedTime: item.LastModified,
+			//Size:             item.Size,
+		}
+	}
+
+	delOut, err := s3Client.DeleteObjects(r.Context(), &s3.DeleteObjectsInput{
+		Bucket: aws.String(bucketName),
+		Delete: &types.Delete{
+			Objects: list,
+			Quiet:   aws.Bool(true),
+		},
+	})
+
+	if err != nil {
+		log.Printf("Error deleting objects from bucket %s: %s", bucketName, err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if len(delOut.Errors) > 0 {
+		multiErr := &util.MultiError{Errors: make([]error, len(delOut.Errors))}
+		for _, outErr := range delOut.Errors {
+			multiErr.Add(fmt.Errorf("%s: %s\n", *outErr.Key, *outErr.Message))
+		}
+
+		http.Error(w, multiErr.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_, _ = w.Write([]byte(fmt.Sprintf("Deleted %d objects", len(delOut.Deleted))))
 }
