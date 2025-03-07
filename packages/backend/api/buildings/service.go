@@ -60,7 +60,6 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 }
 
 func deleteAndReturnCounters(id string) (*Counters, error) {
-	counters := Counters{}
 
 	var wg sync.WaitGroup
 	workers := 3
@@ -107,6 +106,7 @@ func deleteAndReturnCounters(id string) (*Counters, error) {
 		return nil, err
 	}
 
+	counters := Counters{}
 	counters.TotalCount = totalCount
 	return &counters, nil
 }
