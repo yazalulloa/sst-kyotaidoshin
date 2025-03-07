@@ -14,59 +14,6 @@ import (
 	"time"
 )
 
-type AllowedCurrencies string
-
-const (
-	VED AllowedCurrencies = "VED"
-	USD AllowedCurrencies = "USD"
-)
-
-func (receiver AllowedCurrencies) Name() string {
-	return string(receiver)
-}
-
-func (receiver AllowedCurrencies) Is(str string) bool {
-	return receiver.Name() == str
-}
-
-func (receiver AllowedCurrencies) Symbol() string {
-	switch receiver {
-	case VED:
-		return "Bs."
-	case USD:
-		return "$"
-	default:
-		return ""
-	}
-}
-
-func (receiver AllowedCurrencies) Format(amount float64) string {
-	return fmt.Sprintf("%s %s", receiver.Symbol(), FormatFloat64(amount))
-}
-
-func (receiver AllowedCurrencies) Format2(amount float64) string {
-	return fmt.Sprintf("%s %s", receiver.Symbol(), FormatFloat2(amount))
-}
-
-func GetAllowedCurrency(str string) AllowedCurrencies {
-	if VED.Is(str) {
-		return VED
-	}
-
-	if USD.Is(str) {
-		return USD
-	}
-
-	panic("Currency not allowed: " + str)
-}
-
-func AllowedCurrenciesStringArray() []string {
-	return []string{
-		VED.Name(),
-		USD.Name(),
-	}
-}
-
 const CsrfKey = "csrf-key"
 
 // const CsrfInputName = "kyotaidogo-csrf-form"

@@ -30,6 +30,11 @@ declare module "sst" {
       "type": "sst.aws.Queue"
       "url": string
     }
+    "Email1": {
+      "configSet": string
+      "sender": string
+      "type": "sst.aws.Email"
+    }
     "GithubClientId": {
       "type": "sst.sst.Secret"
       "value": string
