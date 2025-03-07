@@ -216,12 +216,9 @@ func buildingPut(w http.ResponseWriter, r *http.Request) {
 
 	if response.createdNew != nil && *response.createdNew && response.key != nil {
 		redirectUrl := "/buildings/edit/" + *response.key
-		w.Header().Add("HX-Redirect", redirectUrl)
-		err := api.RefreshView(redirectUrl).Render(r.Context(), w)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
+
+		w.Header().Add("HX-Location", redirectUrl)
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 

@@ -151,7 +151,7 @@ export default $config({
         allowHeaders: ["Authorization", "Content-Type", "hx-current-url", "hx-request", "hx-trigger", "hx-target"],
         allowCredentials: true,
         maxAge: isLocal ? "1 minute" : "1 day",
-        exposeHeaders: ["HX-Redirect"],
+        exposeHeaders: ["HX-Redirect", "hx-location"],
       }
     });
 
