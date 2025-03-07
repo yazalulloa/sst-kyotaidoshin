@@ -18,6 +18,7 @@ import (
 	"kyotaidoshin/api"
 	"kyotaidoshin/buildings"
 	"kyotaidoshin/rates"
+	"kyotaidoshin/receiptPdf"
 	"kyotaidoshin/util"
 	"log"
 	"net/http"
@@ -431,6 +432,13 @@ func receiptPut(w http.ResponseWriter, r *http.Request) {
 			return response
 		}
 
+		err = receiptPdf.DeleteByReceipt(r.Context(), keys.BuildingId, keys.Id, date)
+		if err != nil {
+			log.Printf("Error deleting pdf: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
 		return response
 	}
 
@@ -681,12 +689,6 @@ func getPdf(w http.ResponseWriter, r *http.Request) {
 
 func clearPdfs(w http.ResponseWriter, r *http.Request) {
 
-	s3Client, err := aws_h.GetS3Client(r.Context())
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 	bucket, err := resource.Get("ReceiptsBucket", "name")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -695,7 +697,15 @@ func clearPdfs(w http.ResponseWriter, r *http.Request) {
 
 	bucketName := bucket.(string)
 
-	s3List, err := s3Client.ListObjectsV2(r.Context(), &s3.ListObjectsV2Input{Bucket: aws.String(bucketName)})
+	s3Client, err := aws_h.GetS3Client(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	s3List, err := s3Client.ListObjectsV2(r.Context(), &s3.ListObjectsV2Input{
+		Bucket: aws.String(bucketName),
+	})
 	if err != nil {
 		log.Printf("Error getting objects from bucket %s: %s", bucketName, err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -742,5 +752,6 @@ func clearPdfs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, _ = w.Write([]byte(fmt.Sprintf("Deleted %d objects", len(delOut.Deleted))))
+	//_, _ = w.Write([]byte(fmt.Sprintf("Deleted %d objects", len(delOut.Deleted))))
+	w.WriteHeader(http.StatusOK)
 }

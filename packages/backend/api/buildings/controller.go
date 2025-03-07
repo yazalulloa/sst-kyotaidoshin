@@ -12,6 +12,7 @@ import (
 	"kyotaidoshin/apartments"
 	"kyotaidoshin/api"
 	"kyotaidoshin/extraCharges"
+	"kyotaidoshin/receiptPdf"
 	"kyotaidoshin/reserveFunds"
 	"kyotaidoshin/util"
 	"log"
@@ -196,6 +197,14 @@ func buildingPut(w http.ResponseWriter, r *http.Request) {
 
 		if isUpdate {
 			err = update(building)
+			if err == nil {
+				err = receiptPdf.DeleteByBuilding(r.Context(), building.ID)
+				if err != nil {
+					response.errorStr = err.Error()
+					return response
+				}
+			}
+
 		} else {
 			err = insert(building)
 		}

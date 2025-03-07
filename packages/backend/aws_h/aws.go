@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"log"
 	"os"
 	"sync"
@@ -120,4 +121,28 @@ func PresignPostObject(ctx context.Context, bucketName string, objectKey string,
 		return nil, err
 	}
 	return request, nil
+}
+
+var sqsClientInstance *sqs.Client
+var sqsClientOnce sync.Once
+
+func GetSqsClient(ctx context.Context) (*sqs.Client, error) {
+	var err error
+	sqsClientOnce.Do(func() {
+		sqsClientInstance, err = sqsclient(ctx)
+	})
+
+	return sqsClientInstance, err
+}
+
+func sqsclient(ctx context.Context) (*sqs.Client, error) {
+
+	cfg, err := loadConfig(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+	client := sqs.NewFromConfig(cfg)
+
+	return client, nil
 }
