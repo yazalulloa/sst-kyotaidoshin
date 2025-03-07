@@ -20,20 +20,20 @@ func getTotalCount() (int64, error) {
 }
 
 func insertBackup(receipt model.Receipts) (int64, error) {
-	stmt := Receipts.INSERT(Receipts.BuildingID, Receipts.Year, Receipts.Month, Receipts.Date, Receipts.RateID, Receipts.Sent, Receipts.LastSent, Receipts.CreatedAt).
-		VALUES(receipt.BuildingID, receipt.Year, receipt.Month, receipt.Date, receipt.RateID, receipt.Sent, receipt.LastSent, receipt.CreatedAt)
+	stmt := Receipts.INSERT(Receipts.ID, Receipts.BuildingID, Receipts.Year, Receipts.Month, Receipts.Date, Receipts.RateID, Receipts.Sent, Receipts.LastSent, Receipts.CreatedAt).
+		VALUES(receipt.ID, receipt.BuildingID, receipt.Year, receipt.Month, receipt.Date, receipt.RateID, receipt.Sent, receipt.LastSent, receipt.CreatedAt)
 
 	res, err := stmt.Exec(db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}
 
-	lastInsertId, err := res.LastInsertId()
+	rowsAffected, err := res.RowsAffected()
 	if err != nil {
 		return 0, err
 	}
 
-	return lastInsertId, nil
+	return rowsAffected, nil
 }
 
 func getQueryCount(requestQuery RequestQuery) (*int64, error) {
@@ -107,8 +107,8 @@ func queryCondition(requestQuery RequestQuery) *sqlite.BoolExpression {
 func selectList(requestQuery RequestQuery) ([]model.Receipts, error) {
 	condition := sqlite.Bool(true)
 
-	if requestQuery.LastId != 0 {
-		condition = condition.AND(Receipts.ID.LT(sqlite.Int32(requestQuery.LastId)))
+	if requestQuery.LastId != "" {
+		condition = condition.AND(Receipts.ID.LT(sqlite.String(requestQuery.LastId)))
 	}
 
 	commonQueryCondition := queryCondition(requestQuery)
@@ -142,8 +142,8 @@ func selectYears() ([]int16, error) {
 	return years, nil
 }
 
-func selectById(id int32) (*model.Receipts, error) {
-	stmt := Receipts.SELECT(Receipts.AllColumns).FROM(Receipts).WHERE(Receipts.ID.EQ(sqlite.Int32(id)))
+func selectById(id string) (*model.Receipts, error) {
+	stmt := Receipts.SELECT(Receipts.AllColumns).FROM(Receipts).WHERE(Receipts.ID.EQ(sqlite.String(id)))
 
 	var dest model.Receipts
 	err := stmt.Query(db.GetDB().DB, &dest)
@@ -154,7 +154,7 @@ func selectById(id int32) (*model.Receipts, error) {
 	return &dest, nil
 }
 
-func selectByIdWithRate(id int32) (*struct {
+func selectByIdWithRate(id string) (*struct {
 	model.Receipts
 	model.Rates
 }, error) {
@@ -165,7 +165,7 @@ func selectByIdWithRate(id int32) (*struct {
 	}
 
 	stmt := Receipts.SELECT(Receipts.AllColumns, Rates.AllColumns).
-		FROM(Receipts.LEFT_JOIN(Rates, Receipts.RateID.EQ(Rates.ID))).WHERE(Receipts.ID.EQ(sqlite.Int32(id)))
+		FROM(Receipts.LEFT_JOIN(Rates, Receipts.RateID.EQ(Rates.ID))).WHERE(Receipts.ID.EQ(sqlite.String(id)))
 
 	err := stmt.Query(db.GetDB().DB, &dest)
 	if err != nil {
@@ -177,7 +177,7 @@ func selectByIdWithRate(id int32) (*struct {
 
 func update(receipt model.Receipts) (int64, error) {
 	stmt := Receipts.UPDATE(Receipts.Year, Receipts.Month, Receipts.Date, Receipts.RateID).
-		WHERE(Receipts.ID.EQ(sqlite.Int32(*receipt.ID))).
+		WHERE(Receipts.ID.EQ(sqlite.String(receipt.ID))).
 		SET(receipt.Year, receipt.Month, receipt.Date, receipt.RateID)
 
 	res, err := stmt.Exec(db.GetDB().DB)
@@ -193,8 +193,8 @@ func update(receipt model.Receipts) (int64, error) {
 	return rowsAffected, nil
 }
 
-func deleteById(id int32) (int64, error) {
-	stmt := Receipts.DELETE().WHERE(Receipts.ID.EQ(sqlite.Int32(id)))
+func deleteById(id string) (int64, error) {
+	stmt := Receipts.DELETE().WHERE(Receipts.ID.EQ(sqlite.String(id)))
 
 	res, err := stmt.Exec(db.GetDB().DB)
 	if err != nil {

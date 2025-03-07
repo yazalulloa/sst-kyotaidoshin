@@ -417,7 +417,7 @@ func receiptPut(w http.ResponseWriter, r *http.Request) {
 		}
 
 		receipt := model.Receipts{
-			ID:         &keys.Id,
+			ID:         keys.Id,
 			BuildingID: keys.BuildingId,
 			Year:       request.Year,
 			Month:      request.Month,
@@ -432,7 +432,7 @@ func receiptPut(w http.ResponseWriter, r *http.Request) {
 			return response
 		}
 
-		err = receiptPdf.DeleteByReceipt(r.Context(), keys.BuildingId, keys.Id, date)
+		err = receiptPdf.DeleteByReceipt(r.Context(), keys.BuildingId, keys.Id)
 		if err != nil {
 			log.Printf("Error deleting pdf: %v", err)
 			response.errorStr = err.Error()
@@ -499,7 +499,7 @@ func getReceiptView(w http.ResponseWriter, r *http.Request) {
 
 	buildingDownloadKeys := util.Encode(DownloadKeys{
 		BuildingId: receipt.Building.ID,
-		Id:         *receipt.Receipt.ID,
+		Id:         receipt.Receipt.ID,
 		Part:       receipt.Building.ID,
 		IsApt:      false,
 	})
@@ -518,7 +518,7 @@ func getReceiptView(w http.ResponseWriter, r *http.Request) {
 
 		downloadKeys := util.Encode(DownloadKeys{
 			BuildingId: receipt.Building.ID,
-			Id:         *receipt.Receipt.ID,
+			Id:         receipt.Receipt.ID,
 			Part:       apt.Apartment.Number,
 			IsApt:      true,
 		})
@@ -569,7 +569,7 @@ func getZip(w http.ResponseWriter, r *http.Request) {
 	}
 
 	date := receipt.Receipt.Date.Format(time.DateOnly)
-	objectKey := fmt.Sprintf("%s/%s/%d/%s_%s_%s.zip", receipt.Building.ID, date, *receipt.Receipt.ID,
+	objectKey := fmt.Sprintf("%s/%s/%d/%s_%s_%s.zip", receipt.Building.ID, date, receipt.Receipt.ID,
 		receipt.Building.ID, strings.ToUpper(receipt.MonthStr), date)
 
 	exists, err := aws_h.FileExistsS3(r.Context(), bucketName.(string), objectKey)

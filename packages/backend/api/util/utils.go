@@ -81,6 +81,15 @@ func GetQueryParamAsSortOrderType(r *http.Request, paramName string) SortOrderTy
 	return SortOrderTypeDESC
 }
 
+func UuidV7() string {
+	id, err := uuid.NewV7()
+	if err != nil {
+		panic(err)
+	}
+
+	return id.String()
+}
+
 func CrsfHeaders(ctx context.Context) string {
 	token := ctx.Value("gorilla.csrf.Token").(string)
 	return fmt.Sprintf("{\"%s\":\"%s\"}", "X-CSRF-Token", token)

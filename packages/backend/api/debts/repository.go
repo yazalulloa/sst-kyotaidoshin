@@ -49,11 +49,11 @@ func InsertBackup(array []model.Debts) (int64, error) {
 	return rowsAffected, nil
 }
 
-func SelectByBuildingReceipt(buildingId string, receiptId int32) ([]model.Debts, error) {
+func SelectByBuildingReceipt(buildingId string, receiptId string) ([]model.Debts, error) {
 
 	stmt := Debts.SELECT(Debts.AllColumns).
 		WHERE(Debts.BuildingID.EQ(sqlite.String(buildingId)).
-			AND(Debts.ReceiptID.EQ(sqlite.Int32(receiptId))))
+			AND(Debts.ReceiptID.EQ(sqlite.String(receiptId))))
 
 	var dest []model.Debts
 	err := stmt.Query(db.GetDB().DB, &dest)
@@ -64,8 +64,8 @@ func SelectByBuildingReceipt(buildingId string, receiptId int32) ([]model.Debts,
 	return dest, nil
 }
 
-func DeleteByReceipt(buildingId string, receiptId int32) (int64, error) {
-	stmt := Debts.DELETE().WHERE(Debts.BuildingID.EQ(sqlite.String(buildingId)).AND(Debts.ReceiptID.EQ(sqlite.Int32(receiptId))))
+func DeleteByReceipt(buildingId string, receiptId string) (int64, error) {
+	stmt := Debts.DELETE().WHERE(Debts.BuildingID.EQ(sqlite.String(buildingId)).AND(Debts.ReceiptID.EQ(sqlite.String(receiptId))))
 	res, err := stmt.Exec(db.GetDB().DB)
 	if err != nil {
 		return 0, err
@@ -80,7 +80,7 @@ func DeleteByReceipt(buildingId string, receiptId int32) (int64, error) {
 
 func update(debt model.Debts) (int64, error) {
 	stmt := Debts.UPDATE(Debts.Receipts, Debts.Amount, Debts.Months, Debts.PreviousPaymentAmount, Debts.PreviousPaymentAmountCurrency).
-		WHERE(Debts.BuildingID.EQ(sqlite.String(debt.BuildingID)).AND(Debts.ReceiptID.EQ(sqlite.Int32(debt.ReceiptID))).AND(Debts.AptNumber.EQ(sqlite.String(debt.AptNumber)))).
+		WHERE(Debts.BuildingID.EQ(sqlite.String(debt.BuildingID)).AND(Debts.ReceiptID.EQ(sqlite.String(debt.ReceiptID))).AND(Debts.AptNumber.EQ(sqlite.String(debt.AptNumber)))).
 		SET(debt.Receipts, debt.Amount, debt.Months, debt.PreviousPaymentAmount, debt.PreviousPaymentAmountCurrency)
 
 	res, err := stmt.Exec(db.GetDB().DB)

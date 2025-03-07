@@ -58,7 +58,7 @@ func CardId() string {
 type Keys struct {
 	ID         *int32
 	BuildingID string
-	ReceiptID  int32
+	ReceiptID  string
 	CardId     *string
 }
 

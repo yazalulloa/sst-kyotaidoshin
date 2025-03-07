@@ -4,7 +4,6 @@ import (
 	"db"
 	"db/gen/model"
 	. "db/gen/table"
-	"fmt"
 	"github.com/go-jet/jet/v2/sqlite"
 	"log"
 )
@@ -141,10 +140,9 @@ func update(extraCharge model.ExtraCharges) (int64, error) {
 	return rowsAffected, nil
 }
 
-func SelectByReceipt(receiptID int32) ([]model.ExtraCharges, error) {
-	//receiptID to string
-	parentReference := fmt.Sprint(receiptID)
-	stmt := ExtraCharges.SELECT(ExtraCharges.AllColumns).WHERE(ExtraCharges.ParentReference.EQ(sqlite.String(parentReference)))
+func SelectByReceipt(receiptID string) ([]model.ExtraCharges, error) {
+
+	stmt := ExtraCharges.SELECT(ExtraCharges.AllColumns).WHERE(ExtraCharges.ParentReference.EQ(sqlite.String(receiptID)))
 	var dest []model.ExtraCharges
 	err := stmt.Query(db.GetDB().DB, &dest)
 	if err != nil {
@@ -153,10 +151,9 @@ func SelectByReceipt(receiptID int32) ([]model.ExtraCharges, error) {
 	return dest, nil
 }
 
-func DeleteByReceipt(receiptID int32) (int64, error) {
-	//receiptID to string
-	parentReference := fmt.Sprint(receiptID)
-	stmt := ExtraCharges.DELETE().WHERE(ExtraCharges.ParentReference.EQ(sqlite.String(parentReference)))
+func DeleteByReceipt(receiptID string) (int64, error) {
+
+	stmt := ExtraCharges.DELETE().WHERE(ExtraCharges.ParentReference.EQ(sqlite.String(receiptID)))
 	res, err := stmt.Exec(db.GetDB().DB)
 	if err != nil {
 		return 0, err

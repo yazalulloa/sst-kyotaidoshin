@@ -44,17 +44,17 @@ func InsertBackup(array []model.Expenses) (int64, error) {
 	return rowsAffected, nil
 }
 
-func SelectByReceipt(receiptID int32) ([]model.Expenses, error) {
+func SelectByReceipt(receiptID string) ([]model.Expenses, error) {
 	var dest []model.Expenses
-	err := Expenses.SELECT(Expenses.AllColumns).WHERE(Expenses.ReceiptID.EQ(sqlite.Int32(receiptID))).Query(db.GetDB().DB, &dest)
+	err := Expenses.SELECT(Expenses.AllColumns).WHERE(Expenses.ReceiptID.EQ(sqlite.String(receiptID))).Query(db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
 	return dest, nil
 }
 
-func DeleteByReceipt(receiptID int32) (int64, error) {
-	stmt := Expenses.DELETE().WHERE(Expenses.ReceiptID.EQ(sqlite.Int32(receiptID)))
+func DeleteByReceipt(receiptID string) (int64, error) {
+	stmt := Expenses.DELETE().WHERE(Expenses.ReceiptID.EQ(sqlite.String(receiptID)))
 	res, err := stmt.Exec(db.GetDB().DB)
 	if err != nil {
 		return 0, err
@@ -82,9 +82,9 @@ func deleteById(id int32) (int64, error) {
 	return rowsAffected, nil
 }
 
-func countByReceipt(receiptID int32) (int64, error) {
+func countByReceipt(receiptID string) (int64, error) {
 	stmt := Expenses.SELECT(sqlite.COUNT(Expenses.ID).AS("Count")).FROM(Expenses).
-		WHERE(Expenses.ReceiptID.EQ(sqlite.Int32(receiptID)))
+		WHERE(Expenses.ReceiptID.EQ(sqlite.String(receiptID)))
 
 	var dest struct {
 		Count int64

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func GetFormDto(buildingId string, receiptId int32) (*FormDto, error) {
+func GetFormDto(buildingId string, receiptId string) (*FormDto, error) {
 
 	list, err := SelectByBuildingReceipt(buildingId, receiptId)
 

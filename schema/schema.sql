@@ -136,7 +136,7 @@ END;
 -- DROP TABLE IF EXISTS receipts;
 CREATE TABLE IF NOT EXISTS receipts
 (
-    id          INTEGER  PRIMARY KEY,
+    id          VARCHAR(50)         NOT NULL,
     building_id CHAR(20)            NOT NULL,
     year        SMALLINT            NOT NULL,
     month       SMALLINT            NOT NULL,
@@ -169,7 +169,7 @@ CREATE TABLE IF NOT EXISTS expenses
 (
     id           INTEGER PRIMARY KEY,
     building_id  CHAR(20)                                      NOT NULL,
-    receipt_id   INTEGER                                       NOT NULL,
+    receipt_id   VARCHAR(50)                                   NOT NULL,
     description  TEXT                                          NOT NULL,
     amount       DECIMAL(16, 2)                                NOT NULL,
     currency     TEXT CHECK ( currency IN ('USD', 'VED') )     NOT NULL,
@@ -185,7 +185,7 @@ CREATE INDEX IF NOT EXISTS expenses_receipt_id_idx ON expenses (receipt_id);
 CREATE TABLE IF NOT EXISTS debts
 (
     building_id                      CHAR(20)       NOT NULL,
-    receipt_id                       INTEGER        NOT NULL,
+    receipt_id                       VARCHAR(50)    NOT NULL,
     apt_number                       CHAR(20)       NOT NULL,
     receipts                         SMALLINT       NOT NULL,
     amount                           DECIMAL(16, 2) NOT NULL,

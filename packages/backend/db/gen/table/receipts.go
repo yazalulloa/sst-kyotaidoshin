@@ -17,7 +17,7 @@ type receiptsTable struct {
 	sqlite.Table
 
 	// Columns
-	ID         sqlite.ColumnInteger
+	ID         sqlite.ColumnString
 	BuildingID sqlite.ColumnString
 	Year       sqlite.ColumnInteger
 	Month      sqlite.ColumnInteger
@@ -67,7 +67,7 @@ func newReceiptsTable(schemaName, tableName, alias string) *ReceiptsTable {
 
 func newReceiptsTableImpl(schemaName, tableName, alias string) receiptsTable {
 	var (
-		IDColumn         = sqlite.IntegerColumn("id")
+		IDColumn         = sqlite.StringColumn("id")
 		BuildingIDColumn = sqlite.StringColumn("building_id")
 		YearColumn       = sqlite.IntegerColumn("year")
 		MonthColumn      = sqlite.IntegerColumn("month")
@@ -78,7 +78,7 @@ func newReceiptsTableImpl(schemaName, tableName, alias string) receiptsTable {
 		CreatedAtColumn  = sqlite.TimestampColumn("created_at")
 		UpdatedAtColumn  = sqlite.TimestampColumn("updated_at")
 		allColumns       = sqlite.ColumnList{IDColumn, BuildingIDColumn, YearColumn, MonthColumn, DateColumn, RateIDColumn, SentColumn, LastSentColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns   = sqlite.ColumnList{BuildingIDColumn, YearColumn, MonthColumn, DateColumn, RateIDColumn, SentColumn, LastSentColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns   = sqlite.ColumnList{IDColumn, BuildingIDColumn, YearColumn, MonthColumn, DateColumn, RateIDColumn, SentColumn, LastSentColumn, CreatedAtColumn, UpdatedAtColumn}
 	)
 
 	return receiptsTable{

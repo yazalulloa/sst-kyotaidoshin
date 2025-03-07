@@ -17,7 +17,7 @@ import (
 	"sync"
 )
 
-func JoinExpensesAndReserveFunds(buildingId string, receiptId int32) (*expenses.ReceiptExpensesDto, error) {
+func JoinExpensesAndReserveFunds(buildingId string, receiptId string) (*expenses.ReceiptExpensesDto, error) {
 	var oErr error
 	var wg sync.WaitGroup
 	var once sync.Once
@@ -36,7 +36,7 @@ func JoinExpensesAndReserveFunds(buildingId string, receiptId int32) (*expenses.
 
 	go func() {
 		defer wg.Done()
-		dto, err := reserveFunds.GetFormDto(buildingId, &receiptId)
+		dto, err := reserveFunds.GetFormDto(buildingId, receiptId)
 		if err != nil {
 			handleErr(err)
 			return
@@ -65,7 +65,7 @@ func JoinExpensesAndReserveFunds(buildingId string, receiptId int32) (*expenses.
 	return &dto, nil
 }
 
-func GetReceiptExpensesDto(receiptId int32, expenseArray []expenses.Item, reserveFundArray []reserveFunds.Item) expenses.ReceiptExpensesDto {
+func GetReceiptExpensesDto(receiptId string, expenseArray []expenses.Item, reserveFundArray []reserveFunds.Item) expenses.ReceiptExpensesDto {
 	totals := expenses.ExpenseTotals{}
 
 	totalCommon, totalUnCommon := expenses.Totals(expenseArray)
@@ -128,7 +128,7 @@ func GetReceiptExpensesDto(receiptId int32, expenseArray []expenses.Item, reserv
 	}
 }
 
-func calculateReceipt(buildingId string, receiptId int32) (*CalculatedReceipt, error) {
+func calculateReceipt(buildingId string, receiptId string) (*CalculatedReceipt, error) {
 
 	var wg sync.WaitGroup
 	wg.Add(8)

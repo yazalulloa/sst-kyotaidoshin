@@ -9,7 +9,7 @@ package model
 
 type Debts struct {
 	BuildingID                    string `sql:"primary_key"`
-	ReceiptID                     int32  `sql:"primary_key"`
+	ReceiptID                     string `sql:"primary_key"`
 	AptNumber                     string `sql:"primary_key"`
 	Receipts                      int16
 	Amount                        float64

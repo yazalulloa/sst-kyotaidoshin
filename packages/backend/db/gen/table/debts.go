@@ -18,7 +18,7 @@ type debtsTable struct {
 
 	// Columns
 	BuildingID                    sqlite.ColumnString
-	ReceiptID                     sqlite.ColumnInteger
+	ReceiptID                     sqlite.ColumnString
 	AptNumber                     sqlite.ColumnString
 	Receipts                      sqlite.ColumnInteger
 	Amount                        sqlite.ColumnFloat
@@ -66,7 +66,7 @@ func newDebtsTable(schemaName, tableName, alias string) *DebtsTable {
 func newDebtsTableImpl(schemaName, tableName, alias string) debtsTable {
 	var (
 		BuildingIDColumn                    = sqlite.StringColumn("building_id")
-		ReceiptIDColumn                     = sqlite.IntegerColumn("receipt_id")
+		ReceiptIDColumn                     = sqlite.StringColumn("receipt_id")
 		AptNumberColumn                     = sqlite.StringColumn("apt_number")
 		ReceiptsColumn                      = sqlite.IntegerColumn("receipts")
 		AmountColumn                        = sqlite.FloatColumn("amount")

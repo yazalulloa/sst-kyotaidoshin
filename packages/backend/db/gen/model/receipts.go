@@ -12,7 +12,7 @@ import (
 )
 
 type Receipts struct {
-	ID         *int32 `sql:"primary_key"`
+	ID         string
 	BuildingID string
 	Year       int16
 	Month      int16

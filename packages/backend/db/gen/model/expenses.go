@@ -10,7 +10,7 @@ package model
 type Expenses struct {
 	ID          *int32 `sql:"primary_key"`
 	BuildingID  string
-	ReceiptID   int32
+	ReceiptID   string
 	Description string
 	Amount      float64
 	Currency    string

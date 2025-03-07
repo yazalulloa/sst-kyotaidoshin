@@ -42,7 +42,7 @@ func cardId() string {
 
 type Keys struct {
 	BuildingID string
-	ReceiptID  int32
+	ReceiptID  string
 	AptNumber  string
 	CardId     string
 }

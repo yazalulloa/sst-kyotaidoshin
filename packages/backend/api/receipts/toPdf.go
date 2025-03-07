@@ -142,7 +142,7 @@ func getParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKey
 
 	buildObjectKey := func(str string) string {
 		date := receipt.Receipt.Date.Format(time.DateOnly)
-		return fmt.Sprintf("%s/%s/%d/%s_%s_%s_%s.pdf", receipt.Building.ID, date, *receipt.Receipt.ID,
+		return fmt.Sprintf("%s/%s/%s_%s_%s_%s.pdf", receipt.Building.ID, receipt.Receipt.ID,
 			receipt.Building.ID, strings.ToUpper(receipt.MonthStr), date, str)
 	}
 

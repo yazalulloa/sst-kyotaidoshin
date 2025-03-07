@@ -19,7 +19,7 @@ type expensesTable struct {
 	// Columns
 	ID          sqlite.ColumnInteger
 	BuildingID  sqlite.ColumnString
-	ReceiptID   sqlite.ColumnInteger
+	ReceiptID   sqlite.ColumnString
 	Description sqlite.ColumnString
 	Amount      sqlite.ColumnFloat
 	Currency    sqlite.ColumnString
@@ -66,7 +66,7 @@ func newExpensesTableImpl(schemaName, tableName, alias string) expensesTable {
 	var (
 		IDColumn          = sqlite.IntegerColumn("id")
 		BuildingIDColumn  = sqlite.StringColumn("building_id")
-		ReceiptIDColumn   = sqlite.IntegerColumn("receipt_id")
+		ReceiptIDColumn   = sqlite.StringColumn("receipt_id")
 		DescriptionColumn = sqlite.StringColumn("description")
 		AmountColumn      = sqlite.FloatColumn("amount")
 		CurrencyColumn    = sqlite.StringColumn("currency")

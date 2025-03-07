@@ -42,11 +42,11 @@ func cardId() string {
 type Keys struct {
 	BuildingId string
 	Id         *int32
-	ReceiptId  *int32
+	ReceiptId  string
 	CardId     string
 }
 
-func keys(item model.ReserveFunds, receiptId *int32, cardId string) Keys {
+func keys(item model.ReserveFunds, receiptId string, cardId string) Keys {
 	return Keys{
 		BuildingId: item.BuildingID,
 		Id:         item.ID,

@@ -320,7 +320,7 @@ func formData(w http.ResponseWriter, r *http.Request) {
 
 		go func() {
 			defer wg.Done()
-			reserveFundFormDto, err := reserveFunds.GetFormDto(id, nil)
+			reserveFundFormDto, err := reserveFunds.GetFormDto(id, "")
 			if err != nil {
 				handleErr(err)
 				return

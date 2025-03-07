@@ -8,7 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/sst/sst/v3/sdk/golang/resource"
 	"log"
-	"time"
 )
 
 func publishBuildingChange(ctx context.Context, buildingId string) error {
@@ -21,10 +20,9 @@ func DeleteByBuilding(ctx context.Context, buildingId string) error {
 	return DeleteObjects(ctx, &prefix)
 }
 
-func DeleteByReceipt(ctx context.Context, buildingId string, receiptId int32, dateTime time.Time) error {
+func DeleteByReceipt(ctx context.Context, buildingId string, receiptId string) error {
 
-	date := dateTime.Format(time.DateOnly)
-	prefix := fmt.Sprintf("%s/%s/%d/", buildingId, date, receiptId)
+	prefix := fmt.Sprintf("%s/%s/", buildingId, receiptId)
 	return DeleteObjects(ctx, &prefix)
 }
 

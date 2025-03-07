@@ -126,7 +126,10 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 
 		createdAt := time.Date(date.Year(), date.Month(), date.Day(), 12, 0, 0, 0, time.UTC)
 
+		receiptId := util.UuidV7()
+
 		receipt := model.Receipts{
+			ID:         receiptId,
 			BuildingID: record.Receipt.BuildingID,
 			Year:       record.Receipt.Year,
 			Month:      record.Receipt.Month,
@@ -137,7 +140,7 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 			CreatedAt:  &createdAt,
 		}
 
-		receiptId, err := insertBackup(receipt)
+		_, err = insertBackup(receipt)
 		if err != nil {
 			return 0, err
 		}
@@ -152,10 +155,9 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 				}
 			}
 
-			parentReference := strconv.FormatInt(receiptId, 10)
 			extraChargeArray = append(extraChargeArray, model.ExtraCharges{
 				BuildingID:      extraCharge.BuildingID,
-				ParentReference: parentReference,
+				ParentReference: receiptId,
 				Type:            extraCharges.TypeReceipt,
 				Description:     extraCharge.Description,
 				Amount:          extraCharge.Amount,
@@ -169,7 +171,7 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 
 			expensesArray = append(expensesArray, model.Expenses{
 				BuildingID:  expense.BuildingID,
-				ReceiptID:   int32(receiptId),
+				ReceiptID:   receiptId,
 				Description: expense.Description,
 				Amount:      expense.Amount,
 				Currency:    expense.Currency,
@@ -188,7 +190,7 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 
 			debtsArray = append(debtsArray, model.Debts{
 				BuildingID:                    debt.BuildingID,
-				ReceiptID:                     int32(receiptId),
+				ReceiptID:                     receiptId,
 				AptNumber:                     debt.AptNumber,
 				Receipts:                      debt.Receipts,
 				Amount:                        debt.Amount,
@@ -398,7 +400,7 @@ func getFormDto(keys Keys) (*FormDto, error) {
 
 		newKeys := Keys{
 			BuildingId: receipt.BuildingID,
-			Id:         *receipt.ID,
+			Id:         receipt.ID,
 		}
 
 		newKeysStr := util.Encode(newKeys)
@@ -440,7 +442,7 @@ func getFormDto(keys Keys) (*FormDto, error) {
 	go func() {
 		defer wg.Done()
 
-		reserveFundFormDto, err := reserveFunds.GetFormDto(keys.BuildingId, &keys.Id)
+		reserveFundFormDto, err := reserveFunds.GetFormDto(keys.BuildingId, keys.Id)
 		if err != nil {
 			handleErr(err)
 			return

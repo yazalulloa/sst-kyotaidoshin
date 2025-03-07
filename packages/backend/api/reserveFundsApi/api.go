@@ -22,8 +22,8 @@ func reserveFundPut(w http.ResponseWriter, r *http.Request) {
 	response := reserveFunds.Upsert(r)
 
 	var ctx context.Context
-	if response.Keys.ReceiptId != nil && response.ErrorStr == "" {
-		expensesDto, err := receipts.JoinExpensesAndReserveFunds(response.Item.Item.BuildingID, *response.Keys.ReceiptId)
+	if response.Keys.ReceiptId != "" && response.ErrorStr == "" {
+		expensesDto, err := receipts.JoinExpensesAndReserveFunds(response.Item.Item.BuildingID, response.Keys.ReceiptId)
 		if err != nil {
 			log.Printf("Error joining expenses and reserve funds: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -55,8 +55,8 @@ func reserveFundDelete(w http.ResponseWriter, r *http.Request) {
 
 	var ctx context.Context
 
-	if keys.ReceiptId != nil {
-		expensesDto, err := receipts.JoinExpensesAndReserveFunds(keys.BuildingId, *keys.ReceiptId)
+	if keys.ReceiptId != "" {
+		expensesDto, err := receipts.JoinExpensesAndReserveFunds(keys.BuildingId, keys.ReceiptId)
 		if err != nil {
 			log.Printf("Error joining expenses and reserve funds: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)

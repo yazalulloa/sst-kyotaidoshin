@@ -40,7 +40,7 @@ func GetBuildingFormDto(buildingId string) (*FormDto, error) {
 	}, nil
 }
 
-func GetReceiptFormDto(buildingId string, receiptId int32) (*FormDto, error) {
+func GetReceiptFormDto(buildingId string, receiptId string) (*FormDto, error) {
 
 	list, err := SelectByReceipt(receiptId)
 

@@ -7,7 +7,7 @@ import (
 	"kyotaidoshin/util"
 )
 
-func GetFormDto(buildingId string, receiptId *int32) (*FormDto, error) {
+func GetFormDto(buildingId string, receiptId string) (*FormDto, error) {
 
 	reserveFunds, err := SelectByBuilding(buildingId)
 
@@ -34,7 +34,7 @@ func GetFormDto(buildingId string, receiptId *int32) (*FormDto, error) {
 	}, nil
 }
 
-func getItem(id int32, receiptId *int32, oldCardId *string) (*Item, error) {
+func getItem(id int32, receiptId string, oldCardId *string) (*Item, error) {
 	item, err := selectById(id)
 
 	if err != nil {
@@ -44,7 +44,7 @@ func getItem(id int32, receiptId *int32, oldCardId *string) (*Item, error) {
 	return toItem(item, receiptId, oldCardId)
 }
 
-func toItem(item *model.ReserveFunds, receiptId *int32, oldCardId *string) (*Item, error) {
+func toItem(item *model.ReserveFunds, receiptId string, oldCardId *string) (*Item, error) {
 	var cardIdStr string
 	if oldCardId != nil {
 		cardIdStr = *oldCardId

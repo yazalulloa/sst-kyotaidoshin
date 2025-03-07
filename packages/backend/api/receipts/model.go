@@ -12,7 +12,7 @@ import (
 )
 
 type RequestQuery struct {
-	LastId    int32
+	LastId    string
 	Limit     int64
 	Buildings []string
 	Months    []int16
@@ -47,21 +47,21 @@ func cardId() string {
 
 type Keys struct {
 	BuildingId string
-	Id         int32
+	Id         string
 	CardId     string
 }
 
 func keys(receipt model.Receipts, cardId string) Keys {
 	return Keys{
 		BuildingId: receipt.BuildingID,
-		Id:         *receipt.ID,
+		Id:         receipt.ID,
 		CardId:     cardId,
 	}
 }
 
 type DownloadKeys struct {
 	BuildingId string
-	Id         int32
+	Id         string
 	Part       string
 	IsApt      bool
 }
