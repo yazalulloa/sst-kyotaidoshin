@@ -1,0 +1,131 @@
+<div x-data="{
+  years: [2025, 2024, 2023, 2022, 2021, 2020],
+  monthsSelected: [],
+  yearSelected: 2025,
+  debtMonthsTotalErr : '',
+  setMonths(value) {
+   value = parseInt(value)
+        let yearMonth = this.yearMonths.find(y => {
+        return y.year === value
+         })
+        if (yearMonth) {
+          this.monthsSelected = yearMonth.months
+        } else {
+          this.monthsSelected = []
+        }
+  }
+}"
+
+     x-init="
+     $watch('yearSelected', value => setMonths(value))
+     $nextTick(() => setMonths(yearSelected))
+     "
+     class="flex flex-col gap-1"
+>
+
+  <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+    <label for="debtMonthsTotalInput"
+           x-bind:class="debtMonthsTotalErr !== '' ? 'text-danger' : ''"
+           class="flex w-fit items-center gap-1 text-sm pl-0.5">
+
+      <svg x-show="debtMonthsTotalErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
+      <span x-text="$t('main-month-totals')"></span>
+    </label>
+    <input
+        id="debtMonthsTotalInput"
+        class="w-full border px-2 py-2 text-sm rounded-radius bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+        type="number"
+        name="debtMonthsTotal"
+        maxlength="5"
+        x-model="debtMonthsTotal"
+        x-bind:class="debtMonthsTotalErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
+        x-init="
+            configureNumberInput($el)
+            limitInputToMaxLength($el)
+            "
+        required
+    />
+    <small x-model="debtMonthsTotalErr"
+           x-bind:class="debtMonthsTotalErr !== '' ? 'text-danger' : ''"
+           class="text-start pl-0.5">
+    </small>
+  </div>
+
+  <div class="flex flex-col">
+    <template x-for="yearMonth in yearMonths">
+      <div
+          class="grid grid-cols-[1fr_1fr_5fr_1fr] gap-2 p-1.5 px-2 justify-between hover:rounded-radius hover:border-outline hover:border hover:dark:border-outline-dark">
+        <span x-text="yearMonth.year"></span>
+        <div class="flex flex-row">
+          <span>(</span>
+          <span x-text="yearMonth.months.length"></span>
+          <span>)</span>
+        </div>
+        <div class="flex flex-row flex-wrap gap-1 justify-center">
+          <template x-for="m in yearMonth.months">
+            <span x-text="$t('main-months-short-' + m)"></span>
+          </template>
+        </div>
+        <input name="debtMonths" x-bind:value="JSON.stringify(yearMonth)" hidden="hidden">
+        <div class="flex w-full justify-end">
+          <button type="button"
+                  class="whitespace-nowrap bg-transparent rounded-full border border-danger p-1 text-sm font-medium tracking-wide text-danger transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-danger dark:text-danger dark:focus-visible:outline-danger"
+                  aria-label="clear value"
+                  @click.prevent="
+                yearMonths = yearMonths.filter(y => y !== yearMonth)
+                ">
+            <svg x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
+          </button>
+        </div>
+      </div>
+    </template>
+
+  </div>
+
+
+  <div class="flex flex-row gap-2 justify-between">
+    <div class="relative flex w-fit max-w-xs flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+      <label for="os" class="w-fit hidden"></label>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+           class="absolute pointer-events-none right-0.25 top-2 size-5">
+        <path fill-rule="evenodd"
+              d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+              clip-rule="evenodd"/>
+      </svg>
+      <select id="os" name="os"
+              x-model="yearSelected"
+              class="w-full appearance-none rounded-radius border border-outline bg-surface-alt px-4 pr-6 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+        <template x-for="y in years">
+          <option x-text="y"></option>
+        </template>
+      </select>
+    </div>
+
+
+    <div x-bind:hx-get="monthsSelectorPartialUrl"
+         hx-trigger="load"
+         hx-disabled-elt="this"
+         hx-swap="outerHTML"
+         hx-target="this"
+         hidden="hidden">
+    </div>
+
+    <button type="button"
+            class="whitespace-nowrap bg-transparent rounded-radius border border-surface-dark px-4 py-2 text-sm font-medium tracking-wide text-surface-dark transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface-dark active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-surface dark:text-surface dark:focus-visible:outline-surface"
+            x-text="$t('main-action-add')"
+            x-bind:disabled="monthsSelected.length === 0"
+            @click="
+             array = []
+             monthsSelected.forEach((option) => {
+               array.push(option)
+             })
+
+             yearMonths = yearMonths.filter(y => y.year !== yearSelected)
+             yearMonths.push({ year: parseInt(yearSelected), months: array })
+    "
+    >
+    </button>
+  </div>
+
+
+</div>

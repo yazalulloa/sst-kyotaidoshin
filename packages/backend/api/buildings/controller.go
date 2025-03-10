@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"kyotaidoshin/apartments"
 	"kyotaidoshin/api"
+	"kyotaidoshin/email_h"
 	"kyotaidoshin/extraCharges"
 	"kyotaidoshin/receiptPdf"
 	"kyotaidoshin/reserveFunds"
@@ -262,20 +263,27 @@ type FormRequest struct {
 func formData(w http.ResponseWriter, r *http.Request) {
 	idParam := r.URL.Query().Get("id")
 
+	emailMap, err := email_h.GetConfigs()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	emailConfigs := make([]EmailConfig, 0)
+	for key := range emailMap {
+		emailConfigs = append(emailConfigs, EmailConfig{
+			key:   key,
+			email: emailMap[key].Username,
+		})
+	}
+
+	slices.SortFunc(emailConfigs, func(a, b EmailConfig) int {
+		return strings.Compare(a.email, b.email)
+	})
+
 	formDto := FormDto{
-		isEdit: false,
-		emailConfigs: []EmailConfig{
-			{
-				id:    "test",
-				key:   "test",
-				email: "test@gmail.com",
-			},
-			{
-				id:    "test2",
-				key:   "test2",
-				email: "test2@gmail.com",
-			},
-		},
+		isEdit:                      false,
+		emailConfigs:                emailConfigs,
 		currencies:                  util.HtmlCurrencies(),
 		currenciesToShowAmountToPay: "[]",
 		reserveFundFormDto:          reserveFunds.FormDto{},
@@ -372,7 +380,7 @@ func formData(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	w.Header().Add("Content-Type", "text/html")
-	err := FormView(formDto).Render(r.Context(), w)
+	err = FormView(formDto).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

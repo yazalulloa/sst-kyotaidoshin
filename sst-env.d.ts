@@ -50,6 +50,10 @@ declare module "sst" {
       "name": string
       "type": "sst.aws.Function"
     }
+    "MailerConfigs": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "MainApiFunction": {
       "name": string
       "type": "sst.aws.Function"
@@ -62,7 +66,7 @@ declare module "sst" {
       "name": string
       "type": "sst.aws.Function"
     }
-    "ReceiptPdfChangesQueue": {
+    "ReceiptPdfQueue": {
       "type": "sst.aws.Queue"
       "url": string
     }

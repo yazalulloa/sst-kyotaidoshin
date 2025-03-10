@@ -3,89 +3,14 @@ package receiptPdf
 import (
 	"aws_h"
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
-	"github.com/aws/aws-sdk-go-v2/service/sqs"
-	"github.com/google/uuid"
 	"github.com/sst/sst/v3/sdk/golang/resource"
 	"kyotaidoshin/util"
 	"log"
 )
-
-type Type string
-
-const (
-	BUILDING Type = "BUILDING"
-	RECEIPT  Type = "RECEIPT"
-)
-
-type PublishEvent struct {
-	Type       Type   `json:"type"`
-	BuildingId string `json:"buildingId"`
-	ReceiptId  string `json:"receiptId"`
-}
-
-func PublishBuilding(ctx context.Context, buildingId string) {
-	event := PublishEvent{
-		Type:       RECEIPT,
-		BuildingId: buildingId,
-		ReceiptId:  "",
-	}
-
-	err := publishEvent(ctx, event)
-	if err != nil {
-		log.Printf("Error publishing building: %v", err)
-	}
-}
-
-func PublishReceipt(ctx context.Context, buildingId string, receiptId string) {
-	event := PublishEvent{
-		Type:       BUILDING,
-		BuildingId: buildingId,
-		ReceiptId:  receiptId,
-	}
-
-	err := publishEvent(ctx, event)
-	if err != nil {
-		log.Printf("Error publishing receipt: %v", err)
-	}
-}
-
-const messageGroupId = "receiptPdfEvent"
-
-func publishEvent(ctx context.Context, event PublishEvent) error {
-
-	bytes, err := json.Marshal(event)
-	if err != nil {
-		return err
-	}
-
-	queue, err := resource.Get("ReceiptPdfChangesQueue", "url")
-	if err != nil {
-		return err
-	}
-
-	client, err := aws_h.GetSqsClient(ctx)
-	if err != nil {
-		return err
-	}
-
-	_, err = client.SendMessage(ctx, &sqs.SendMessageInput{
-		QueueUrl:               aws.String(queue.(string)),
-		MessageBody:            aws.String(string(bytes)),
-		MessageGroupId:         aws.String(messageGroupId),
-		MessageDeduplicationId: aws.String(uuid.NewString()),
-	})
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
 
 func DeleteByBuilding(ctx context.Context, buildingId string) error {
 
@@ -99,9 +24,9 @@ func DeleteByReceipt(ctx context.Context, buildingId string, receiptId string) e
 	return DeleteObjects(ctx, &prefix)
 }
 
-func DeleteByEvent(ctx context.Context, event PublishEvent) error {
+func DeleteByEvent(ctx context.Context, event QueueEvent) error {
 
-	if event.Type == BUILDING {
+	if event.Type == BuildingChanges {
 		return DeleteByBuilding(ctx, event.BuildingId)
 	}
 

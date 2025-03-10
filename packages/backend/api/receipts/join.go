@@ -2,6 +2,7 @@ package receipts
 
 import (
 	"db/gen/model"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"kyotaidoshin/apartments"
@@ -128,7 +129,7 @@ func GetReceiptExpensesDto(receiptId string, expenseArray []expenses.Item, reser
 	}
 }
 
-func calculateReceipt(buildingId string, receiptId string) (*CalculatedReceipt, error) {
+func CalculateReceipt(buildingId string, receiptId string) (*CalculatedReceipt, error) {
 
 	var wg sync.WaitGroup
 	wg.Add(8)
@@ -491,7 +492,33 @@ func calculateReceipt(buildingId string, receiptId string) (*CalculatedReceipt, 
 
 		debtMonthStr := "SOLVENTE"
 		if debt.Months != "" {
-			debtMonthStr = util.MonthsToString(debt.Months)
+			var monthlyDebt debts.MonthlyDebt
+			err := json.Unmarshal([]byte(debt.Months), &monthlyDebt)
+			if err != nil {
+				return nil, err
+			}
+
+			if monthlyDebt.Amount > 0 {
+				debtMonthStr = fmt.Sprintf("%d MESES", monthlyDebt.Amount)
+			} else if len(monthlyDebt.Years) > 0 {
+				monthsMap := *util.GetMonths()
+				var builder strings.Builder
+				for i, year := range monthlyDebt.Years {
+					builder.WriteString(fmt.Sprintf("%d: ", year.Year))
+					for j, month := range year.Months {
+
+						builder.WriteString(monthsMap[month])
+						if j != len(year.Months)-1 {
+							builder.WriteString(", ")
+						}
+					}
+					if i != len(monthlyDebt.Years)-1 {
+						builder.WriteString(" - ")
+					}
+				}
+
+				debtMonthStr = builder.String()
+			}
 		}
 
 		amounts := []AmountWithCurrency{

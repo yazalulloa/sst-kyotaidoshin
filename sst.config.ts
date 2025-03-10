@@ -29,6 +29,7 @@ export default $config({
     const githubClientSecret = new sst.Secret("GithubClientSecret");
     const googleClientId = new sst.Secret("GoogleClientId");
     const googleClientSecret = new sst.Secret("GoogleClientSecret");
+    const mailerConfigsSecret = new sst.Secret("MailerConfigs");
     // const domain = new sst.Secret("Domain");
 
     const processUserFunction = new sst.aws.Function("ProcessUser", {
@@ -197,18 +198,6 @@ export default $config({
       versioning: false,
     });
 
-    const receiptPdfChangesQueue = new sst.aws.Queue("ReceiptPdfChangesQueue", {
-      //not supported for S3 notificationsm
-      fifo: true,
-      visibilityTimeout: "300 seconds",
-    });
-
-    receiptPdfChangesQueue.subscribe({
-      link: [receiptsBucket],
-      runtime: "go",
-      handler: "packages/backend/delete-pdf-objects/",
-    });
-
     const htmlToPdf = new sst.aws.Function("HtmlToPdf", {
       link: [receiptsBucket],
       handler: "packages/backend/html-to-pdf/index.handler",
@@ -219,10 +208,27 @@ export default $config({
       memory: "2 GB",
     });
 
+
+
+    const receiptPdfQueue = new sst.aws.Queue("ReceiptPdfQueue", {
+      //not supported for S3 notificationsm
+      fifo: {
+        contentBasedDeduplication: true
+      },
+      visibilityTimeout: "160 seconds",
+    });
+
+    receiptPdfQueue.subscribe({
+      link: [secretTursoUrl, receiptsBucket, mailerConfigsSecret, htmlToPdf],
+      runtime: "go",
+      handler: "packages/backend/delete-pdf-objects/",
+      timeout: "160 seconds",
+    });
+
     const mainApiFunction = new sst.aws.Function("MainApiFunction", {
       handler: "packages/backend/api",
       runtime: "go",
-      link: [bucket, secretTursoUrl, bcvUrl, bcvFileStartPath, uploadBackupBucket, appClientId, auth, verifyAccessFunction, receiptsBucket, htmlToPdf, receiptPdfChangesQueue],
+      link: [bucket, secretTursoUrl, bcvUrl, bcvFileStartPath, uploadBackupBucket, appClientId, auth, verifyAccessFunction, receiptsBucket, htmlToPdf, receiptPdfQueue, mailerConfigsSecret],
       timeout: "60 seconds",
     });
 

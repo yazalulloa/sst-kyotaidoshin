@@ -5,6 +5,7 @@ import (
 	"aws_h"
 	"bytes"
 	"context"
+	"db/gen/model"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -29,6 +30,7 @@ type PdfItem struct {
 type PartInfoUpload struct {
 	FileName  string
 	ObjectKey string
+	Apt       model.Apartments
 	Component templ.Component
 }
 
@@ -122,7 +124,7 @@ func checkOrBuild(ctx context.Context, parts []PartInfoUpload) ([]PdfItem, error
 	return pdfItems, err
 }
 
-func getParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKeys) ([]PartInfoUpload, error) {
+func GetParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKeys) ([]PartInfoUpload, error) {
 	functionName, err := resource.Get("HtmlToPdf", "name")
 	if err != nil {
 		return nil, err
@@ -136,6 +138,8 @@ func getParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKey
 	var numOfWorkers int
 	if keys == nil {
 		numOfWorkers = len(receipt.Apartments) + 1
+	} else if keys.IsApt && keys.Part == "" {
+		numOfWorkers = len(receipt.Apartments)
 	} else {
 		numOfWorkers = 1
 	}
@@ -163,6 +167,8 @@ func getParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKey
 			} else {
 				if apt.Apartment.Number == keys.Part {
 					index = 0
+				} else if keys.IsApt {
+					index = i
 				}
 			}
 
@@ -171,6 +177,7 @@ func getParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKey
 					FileName:  fmt.Sprintf("%s.pdf", apt.Apartment.Number),
 					ObjectKey: buildObjectKey(apt.Apartment.Number),
 					Component: PrintView(apt.Apartment.Number, AptView(*receipt, apt)),
+					Apt:       apt.Apartment,
 				}
 			}
 		}
@@ -213,7 +220,7 @@ func toZip(receipt *CalculatedReceipt, ctx context.Context) (*bytes.Buffer, erro
 		return nil, err
 	}
 
-	parts, err := getParts(receipt, ctx, nil)
+	parts, err := GetParts(receipt, ctx, nil)
 	if err != nil {
 		return nil, err
 	}

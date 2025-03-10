@@ -16,7 +16,6 @@ import (
 	"kyotaidoshin/util"
 	"log"
 	"slices"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -181,12 +180,25 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 		}
 
 		for _, debt := range record.Debts {
-			stringArray := make([]string, len(debt.Months))
 
-			for i, num := range debt.Months {
-				stringArray[i] = strconv.Itoa(int(num))
+			years := make([]debts.YearWithMonths, 0)
+
+			if len(debt.Months) > 0 {
+				years = append(years, debts.YearWithMonths{
+					Year:   record.Receipt.Year,
+					Months: debt.Months,
+				})
 			}
-			months := strings.Join(stringArray, ",")
+
+			monthlyDebt := debts.MonthlyDebt{
+				Amount: 0,
+				Years:  years,
+			}
+
+			bytes, err := json.Marshal(monthlyDebt)
+			if err != nil {
+				return 0, err
+			}
 
 			debtsArray = append(debtsArray, model.Debts{
 				BuildingID:                    debt.BuildingID,
@@ -194,7 +206,7 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 				AptNumber:                     debt.AptNumber,
 				Receipts:                      debt.Receipts,
 				Amount:                        debt.Amount,
-				Months:                        months,
+				Months:                        string(bytes),
 				PreviousPaymentAmount:         debt.PreviousPaymentAmount,
 				PreviousPaymentAmountCurrency: debt.PreviousPaymentAmountCurrency,
 			})

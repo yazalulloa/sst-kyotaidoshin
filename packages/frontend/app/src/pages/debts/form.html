@@ -24,7 +24,8 @@
       apartment: '',
       receipts: 0,
       amount: 0,
-      monthsSelected: [],
+      yearMonths: [],
+      debtMonthsTotal: 0,
       previousPaymentAmount: 0,
       previousPaymentAmountCurrency: '',
 
@@ -44,9 +45,11 @@
           amount = jsonObject.amount;
 
           if (jsonObject.months === null) {
-             monthsSelected = [];
+             yearMonths = [];
+             debtMonthsTotal = 0;
           } else {
-             monthsSelected = jsonObject.months;
+             debtMonthsTotal = jsonObject.months.amount;
+             yearMonths = jsonObject.months.years;
           }
 
           previousPaymentAmount = jsonObject.previous_payment_amount;
@@ -60,7 +63,7 @@
 
     <div class="flex flex-col gap-0">
       <div
-          class="grid border-b font-bold grid-cols-[2fr_1fr_1fr_1fr_1fr] border-surface-dark dark:border-surface dark:text-surface">
+          class="grid border-b font-bold grid-cols-[6fr_1fr_2fr_3fr_2fr] border-surface-dark dark:border-surface dark:text-surface">
         <span x-text="$t('main-title-apartment')"></span>
         <span x-text="$t('main-title-receipts')"></span>
         <span x-text="$t('main-title-amount')"></span>
@@ -68,7 +71,7 @@
         <span x-text="$t('main-title-previous-payment')"></span>
       </div>
       <ol id="debts-list"
-          class="*:grid *:grid-cols-[2fr_1fr_1fr_1fr_1fr] *:gap-2 *:p-2 *:items-center *:text-center *:border-b *:border-surface-dark *:dark:border-surface *:dark:text-surface *:hover:text-on-surface-strong *:dark:hover:bg-primary-dark/5 *:dark:hover:text-on-surface-dark-strong">
+          class="*:grid *:grid-cols-[6fr_1fr_2fr_3fr_2fr] *:gap-2 *:p-2 *:items-center *:text-center *:border-b *:border-surface-dark *:dark:border-surface *:dark:text-surface *:hover:text-on-surface-strong *:dark:hover:bg-primary-dark/5 *:dark:hover:text-on-surface-dark-strong">
 
       </ol>
     </div>
@@ -148,7 +151,7 @@
         </small>
       </div>
 
-      <div x-bind:hx-get="monthsSelectorPartialUrl"
+      <div x-bind:hx-get="debtMonthsPartialUrl"
            hx-trigger="load"
            hx-disabled-elt="this"
            hx-swap="outerHTML"

@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"kyotaidoshin/util"
-	"strings"
 )
 
 func GetFormDto(buildingId string, receiptId string) (*FormDto, error) {
@@ -52,16 +51,13 @@ func toItem(item *model.Debts, oldCardId *string) (*Item, error) {
 	keys := keys(*item, cardIdStr)
 	key := *util.Encode(keys)
 
-	var months []int16
+	var months MonthlyDebt
 
-	if item.Months == "" {
-		months = make([]int16, 0)
-	} else {
+	if item.Months != "" {
 
-		split := strings.Split(item.Months, ",")
-		months = make([]int16, len(split))
-		for i, v := range split {
-			months[i] = util.StringToInt16(v)
+		err := json.Unmarshal([]byte(item.Months), &months)
+		if err != nil {
+			return nil, err
 		}
 	}
 

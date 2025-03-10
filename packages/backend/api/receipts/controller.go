@@ -34,6 +34,7 @@ const _UPLOAD_BACKUP_FORM = _PATH + "/uploadBackupForm"
 const _UPLOAD_BACKUP = _PATH + "/upload/backup"
 const _DOWNLOAD_ZIP_FILE = _PATH + "/download/zip"
 const _DOWNLOAD_PDF_FILE = _PATH + "/download/pdf"
+const _SEND_PDFS = _PATH + "/send_pdfs"
 
 func Routes(server *mux.Router) {
 
@@ -50,6 +51,7 @@ func Routes(server *mux.Router) {
 	server.HandleFunc(_PATH+"/view/{key}", getReceiptView).Methods("GET")
 	server.HandleFunc(_DOWNLOAD_ZIP_FILE+"/{key}", getZip).Methods("GET")
 	server.HandleFunc(_DOWNLOAD_PDF_FILE+"/{key}", getPdf).Methods("GET")
+	server.HandleFunc(_SEND_PDFS+"/{key}", sendPdfs).Methods("GET")
 }
 
 func getInit(w http.ResponseWriter, r *http.Request) {
@@ -493,7 +495,7 @@ func getReceiptView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	receipt, err := calculateReceipt(keys.BuildingId, keys.Id)
+	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -564,7 +566,7 @@ func getZip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	receipt, err := calculateReceipt(keys.BuildingId, keys.Id)
+	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -657,13 +659,13 @@ func getPdf(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	receipt, err := calculateReceipt(keys.BuildingId, keys.Id)
+	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	parts, err := getParts(receipt, r.Context(), &keys)
+	parts, err := GetParts(receipt, r.Context(), &keys)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -692,6 +694,30 @@ func getPdf(w http.ResponseWriter, r *http.Request) {
 func clearPdfs(w http.ResponseWriter, r *http.Request) {
 
 	err := receiptPdf.DeleteObjects(r.Context(), nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func sendPdfs(w http.ResponseWriter, r *http.Request) {
+	keyStr := mux.Vars(r)["key"]
+	if keyStr == "" {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	var keys Keys
+	err := util.Decode(keyStr, &keys)
+	if err != nil {
+		log.Printf("failed to decode key: %v", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	err = receiptPdf.PublishBuildPdfs(r.Context(), keys.BuildingId, keys.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

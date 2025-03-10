@@ -46,7 +46,6 @@ type FormDto struct {
 }
 
 type EmailConfig struct {
-	id    string
 	key   string
 	email string
 }

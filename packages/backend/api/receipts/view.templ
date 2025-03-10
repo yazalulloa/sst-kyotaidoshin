@@ -188,6 +188,18 @@ templ ItemView(item Item) {
 									class="size-5 animate-spin motion-reduce:animate-none fill-on-primary dark:fill-on-primary-dark"
 								></svg>
 							</a>
+							<a
+								hx-get={ fmt.Sprintf(_SEND_PDFS+"/%s", item.Key) }
+								hx-indicator=".htmx-indicator"
+								hx-disabled-elt="this"
+								hx-trigger="mousedown"
+								hx-swap="none"
+								class="flex items-center gap-2 bg-surface-alt px-4 py-2 text-sm text-on-surface hover:bg-surface-dark-alt/5 hover:text-on-surface-strong focus-visible:bg-surface-dark-alt/10 focus-visible:text-on-surface-strong focus-visible:outline-hidden dark:bg-surface-dark-alt dark:text-on-surface-dark dark:hover:bg-surface-alt/5 dark:hover:text-on-surface-dark-strong dark:focus-visible:bg-surface-alt/10 dark:focus-visible:text-on-surface-dark-strong"
+								role="menuitem"
+							>
+								<svg x-bind:data-src="sendMailIconUrl" data-cache="21600" class="size-5"></svg>
+								<span x-text="$t('main-action-send-pdfs-now')"></span>
+							</a>
 						</div>
 						<!-- Dropdown Section -->
 						<div class="flex flex-col py-1.5">

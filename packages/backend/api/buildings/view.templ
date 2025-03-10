@@ -153,7 +153,7 @@ templ FormView(dto FormDto) {
 	}
 	<div id="emailConfigSelect" hx-swap-oob="innerHTML">
 		for _,emailConfig := range dto.emailConfigs {
-			<option value={ emailConfig.key }>{ emailConfig.id } { emailConfig.email }</option>
+			<option value={ emailConfig.key }>{ emailConfig.email }</option>
 		}
 	</div>
 }

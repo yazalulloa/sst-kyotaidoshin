@@ -16,6 +16,16 @@ type DebtDto struct {
 	PreviousPaymentAmountCurrency string  `json:"previous_payment_amount_currency"`
 }
 
+type MonthlyDebt struct {
+	Amount int              `json:"amount"`
+	Years  []YearWithMonths `json:"years"`
+}
+
+type YearWithMonths struct {
+	Year   int16   `json:"year" validate:"gte=2020,lte=2100"`
+	Months []int16 `json:"months" validate:"gte=1,lte-12,dive,required,gte=1,lte=12"`
+}
+
 type FormDto struct {
 	Items  []Item
 	Totals Totals
@@ -31,7 +41,7 @@ type Item struct {
 	CardId       string
 	Key          string
 	Item         model.Debts
-	Months       []int16
+	Months       MonthlyDebt
 	UpdateParams *string
 	isUpdate     *bool
 }
@@ -57,13 +67,13 @@ func keys(item model.Debts, cardId string) Keys {
 }
 
 type UpdateParams struct {
-	Key                           string  `json:"key"`
-	Apt                           string  `json:"apt"`
-	Receipts                      int16   `json:"receipts"`
-	Amount                        float64 `json:"amount"`
-	Months                        []int16 `json:"months"`
-	PreviousPaymentAmount         float64 `json:"previous_payment_amount"`
-	PreviousPaymentAmountCurrency string  `json:"previous_payment_amount_currency"`
+	Key                           string      `json:"key"`
+	Apt                           string      `json:"apt"`
+	Receipts                      int16       `json:"receipts"`
+	Amount                        float64     `json:"amount"`
+	Months                        MonthlyDebt `json:"months"`
+	PreviousPaymentAmount         float64     `json:"previous_payment_amount"`
+	PreviousPaymentAmountCurrency string      `json:"previous_payment_amount_currency"`
 }
 type FormResponse struct {
 	errorStr string
@@ -72,10 +82,11 @@ type FormResponse struct {
 }
 
 type FormRequest struct {
-	Key                           string  `form:"key" validate:"required,notblank,max=300"`
-	Receipts                      int16   `form:"receipts" validate:"gte=0"`
-	Amount                        float64 `form:"amount" validate:"gte=0"`
-	Months                        []int16 `form:"month_input" validate:"dive,gte=1,lte=12"`
-	PreviousPaymentAmount         float64 `form:"previousPaymentAmount" validate:"gte=0"`
-	PreviousPaymentAmountCurrency string  `form:"previousPaymentAmountCurrency" validate:"required,oneof=USD VED"`
+	Key                           string   `form:"key" validate:"required,notblank,max=300"`
+	Receipts                      int16    `form:"receipts" validate:"gte=0"`
+	Amount                        float64  `form:"amount" validate:"gte=0"`
+	DebtMonthsTotal               int      `form:"debtMonthsTotal" validate:"gte=0"`
+	DebtMonths                    []string `form:"debtMonths" validate:""`
+	PreviousPaymentAmount         float64  `form:"previousPaymentAmount" validate:"gte=0"`
+	PreviousPaymentAmountCurrency string   `form:"previousPaymentAmountCurrency" validate:"required,oneof=USD VED"`
 }

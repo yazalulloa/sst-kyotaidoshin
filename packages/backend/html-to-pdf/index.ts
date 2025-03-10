@@ -63,7 +63,7 @@ export const handler: Handler = async (event: PdfItem[], context) => {
         const page = await browser.newPage()
         await page.setContent(html)
         const pdf = await page.pdf({
-          format: 'A4',
+          format: 'A3',
           printBackground: true,
           // displayHeaderFooter: true,
           // margin: { top: '1.8cm', right: '1cm', bottom: '1cm', left: '1cm' },

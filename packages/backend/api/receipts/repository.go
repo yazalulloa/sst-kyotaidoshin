@@ -193,6 +193,23 @@ func update(receipt model.Receipts) (int64, error) {
 	return rowsAffected, nil
 }
 
+func UpdateLastSent(id string) (int64, error) {
+	stmt := Receipts.UPDATE(Receipts.Sent, Receipts.LastSent).WHERE(Receipts.ID.EQ(sqlite.String(id))).
+		SET(sqlite.Bool(true), sqlite.DATETIME("now"))
+
+	res, err := stmt.Exec(db.GetDB().DB)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
+}
+
 func deleteById(id string) (int64, error) {
 	stmt := Receipts.DELETE().WHERE(Receipts.ID.EQ(sqlite.String(id)))
 

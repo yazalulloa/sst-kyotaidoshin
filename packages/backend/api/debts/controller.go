@@ -2,6 +2,7 @@ package debts
 
 import (
 	"db/gen/model"
+	"encoding/json"
 	"fmt"
 	"github.com/go-playground/form"
 	"github.com/go-playground/validator/v10"
@@ -10,7 +11,6 @@ import (
 	"kyotaidoshin/util"
 	"log"
 	"net/http"
-	"strings"
 )
 
 const _PATH = "/api/debts"
@@ -68,12 +68,30 @@ func debtPut(w http.ResponseWriter, r *http.Request) {
 			response.errorStr = fmt.Sprintf("Validation error: %s", errors)
 			return response
 		}
-		var monthBuilder strings.Builder
-		for i, v := range request.Months {
-			monthBuilder.WriteString(fmt.Sprint(v))
-			if i < len(request.Months)-1 {
-				monthBuilder.WriteString(",")
+
+		years := make([]YearWithMonths, len(request.DebtMonths))
+
+		for i, debtMonth := range request.DebtMonths {
+			var year YearWithMonths
+			err := json.Unmarshal([]byte(debtMonth), &year)
+			if err != nil {
+				log.Printf("Error decoding debt month: %s %v", debtMonth, err)
+				response.errorStr = err.Error()
+				return response
 			}
+			years[i] = year
+		}
+
+		monthlyDebt := MonthlyDebt{
+			Amount: request.DebtMonthsTotal,
+			Years:  years,
+		}
+
+		months, err := json.Marshal(monthlyDebt)
+		if err != nil {
+			log.Printf("Error encoding monthly debt: %v", err)
+			response.errorStr = err.Error()
+			return response
 		}
 
 		debt := model.Debts{
@@ -82,7 +100,7 @@ func debtPut(w http.ResponseWriter, r *http.Request) {
 			AptNumber:                     keys.AptNumber,
 			Receipts:                      request.Receipts,
 			Amount:                        request.Amount,
-			Months:                        monthBuilder.String(),
+			Months:                        string(months),
 			PreviousPaymentAmount:         request.PreviousPaymentAmount,
 			PreviousPaymentAmountCurrency: request.PreviousPaymentAmountCurrency,
 		}
