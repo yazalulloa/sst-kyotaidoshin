@@ -350,14 +350,14 @@ func ExpenseView(dto CalculatedReceipt) templ.Component {
 				}
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</div><br><p class=\"font-bold text-start\">TOTAL GASTOS COMUNES: ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "</div><br><p class=\"font-bold text-end\">TOTAL GASTOS COMUNES: ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(dto.TotalCommonExpensesCurrency.Format(dto.TotalCommonExpenses))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 74, Col: 121}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 74, Col: 119}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -401,14 +401,14 @@ func ExpenseView(dto CalculatedReceipt) templ.Component {
 				}
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</div><br><p class=\"font-bold text-start\">TOTAL GASTOS NO COMUNES: ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</div><br><p class=\"font-bold text-end\">TOTAL GASTOS NO COMUNES: ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var21 string
 		templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(dto.TotalUnCommonExpensesCurrency.Format(dto.TotalUnCommonExpenses))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 90, Col: 128}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 90, Col: 126}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 		if templ_7745c5c3_Err != nil {
@@ -710,27 +710,27 @@ func DebtView(dto CalculatedReceipt) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 59, "</div><br><p class=\"font-bold text-start\">NÚMERO DE RECIBOS: ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 59, "</div><br><p class=\"font-bold text-end\">NÚMERO DE RECIBOS: ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var39 string
 		templ_7745c5c3_Var39, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprint(dto.DebtReceiptsAmount))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 145, Col: 90}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 145, Col: 88}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var39))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "</p><p class=\"font-bold text-start\">DEUDA TOTAL: ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 60, "</p><p class=\"font-bold text-end\">DEUDA TOTAL: ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var40 string
 		templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(debtCurrency.Format(dto.DebtTotal))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 146, Col: 83}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 146, Col: 81}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 		if templ_7745c5c3_Err != nil {
@@ -988,14 +988,14 @@ func BuildingView(dto CalculatedReceipt) templ.Component {
 				}
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "</div><br><p class=\"font-bold text-start\">TOTAL: ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 83, "</div><br><p class=\"font-bold text-end\">TOTAL: ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var55 string
 		templ_7745c5c3_Var55, templ_7745c5c3_Err = templ.JoinStringErrs(mainCurrency.Format(dto.ApartmentsTotal))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 201, Col: 82}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `receipts/pdfView.templ`, Line: 201, Col: 80}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var55))
 		if templ_7745c5c3_Err != nil {

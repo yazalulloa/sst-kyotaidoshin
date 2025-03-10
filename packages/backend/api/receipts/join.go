@@ -82,7 +82,8 @@ func GetReceiptExpensesDto(receiptId string, expenseArray []expenses.Item, reser
 		if item.Item.Active && item.Item.AddToExpenses {
 
 			var total float64
-			if item.Item.Type == "COMMON" {
+
+			if expenses.COMMON.Is(item.Item.ExpenseType) {
 				total = totalCommon
 			} else {
 				total = totalUnCommon
@@ -330,7 +331,7 @@ func CalculateReceipt(buildingId string, receiptId string) (*CalculatedReceipt, 
 
 			var amountToPay string
 			if reserveFunds.PERCENTAGE.FundIs(fund) {
-				amountToPay = fmt.Sprintf("%s%s", util.FormatFloat64(newAmount), "%")
+				amountToPay = fmt.Sprintf("%s %s%s", util.VED.Format(newAmount), util.FormatFloat64(fund.Pay), "%")
 			} else {
 				amountToPay = util.VED.Format(newAmount)
 			}

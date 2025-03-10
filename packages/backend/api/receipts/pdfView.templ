@@ -71,7 +71,7 @@ templ ExpenseView(dto CalculatedReceipt) {
 			}
 		</div>
 		<br/>
-		<p class="font-bold text-start">TOTAL GASTOS COMUNES: { dto.TotalCommonExpensesCurrency.Format(dto.TotalCommonExpenses) }</p>
+		<p class="font-bold text-end">TOTAL GASTOS COMUNES: { dto.TotalCommonExpensesCurrency.Format(dto.TotalCommonExpenses) }</p>
 		<br/>
 	</div>
 	<div class="break-inside-avoid">
@@ -87,7 +87,7 @@ templ ExpenseView(dto CalculatedReceipt) {
 			}
 		</div>
 		<br/>
-		<p class="font-bold text-start">TOTAL GASTOS NO COMUNES: { dto.TotalUnCommonExpensesCurrency.Format(dto.TotalUnCommonExpenses) }</p>
+		<p class="font-bold text-end">TOTAL GASTOS NO COMUNES: { dto.TotalUnCommonExpensesCurrency.Format(dto.TotalUnCommonExpenses) }</p>
 		<br/>
 	</div>
 }
@@ -142,8 +142,8 @@ templ DebtView(dto CalculatedReceipt) {
 			}
 		</div>
 		<br/>
-		<p class="font-bold text-start">NÚMERO DE RECIBOS: { fmt.Sprint(dto.DebtReceiptsAmount) }</p>
-		<p class="font-bold text-start">DEUDA TOTAL: { debtCurrency.Format(dto.DebtTotal) }</p>
+		<p class="font-bold text-end">NÚMERO DE RECIBOS: { fmt.Sprint(dto.DebtReceiptsAmount) }</p>
+		<p class="font-bold text-end">DEUDA TOTAL: { debtCurrency.Format(dto.DebtTotal) }</p>
 	</div>
 }
 
@@ -198,7 +198,7 @@ templ BuildingView(dto CalculatedReceipt) {
 		}
 	</div>
 	<br/>
-	<p class="font-bold text-start">TOTAL: { mainCurrency.Format(dto.ApartmentsTotal) }</p>
+	<p class="font-bold text-end">TOTAL: { mainCurrency.Format(dto.ApartmentsTotal) }</p>
 }
 
 templ Views(key string, dto CalculatedReceipt, idMap map[string]string, tabs string) {

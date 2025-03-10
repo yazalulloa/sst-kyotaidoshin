@@ -55,16 +55,8 @@ func search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var wg sync.WaitGroup
-	var once sync.Once
-	handleErr := func(e error) {
-		if e != nil {
-			once.Do(func() {
-				err = e
-			})
-		}
-	}
-
 	wg.Add(len(s3List.Contents))
+	errorChan := make(chan error, len(s3List.Contents))
 
 	results := make([]Item, len(s3List.Contents))
 	for i, item := range s3List.Contents {
@@ -77,7 +69,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 			})
 
 			if err != nil {
-				handleErr(err)
+				errorChan <- err
 				return
 			}
 
@@ -120,8 +112,11 @@ func search(w http.ResponseWriter, r *http.Request) {
 		}(item)
 
 	}
-	wg.Wait()
 
+	wg.Wait()
+	close(errorChan)
+
+	err = util.HasErrors(errorChan)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
