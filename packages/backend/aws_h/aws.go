@@ -36,6 +36,7 @@ var s3ClientInstance *s3.Client
 var s3ClientOnce sync.Once
 
 func GetS3Client(ctx context.Context) (*s3.Client, error) {
+
 	var err error
 	s3ClientOnce.Do(func() {
 		s3ClientInstance, err = s3client(ctx)

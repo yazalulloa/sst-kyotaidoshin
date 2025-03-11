@@ -1,0 +1,94 @@
+<div
+    class="flex flex-col gap-1 w-[80%] bg-surface-alt dark:bg-surface-dark-alt transition-opacity duration-2000 ease-out"
+    x-bind:class="finished ? 'opacity-0' : 'opacity-100'"
+    x-data="{
+            building: '',
+            month: '',
+            date: '',
+            counter: '',
+            size: '',
+            error: '',
+            apt: '',
+            aptName: '',
+            from: '',
+            to: '',
+            finished: false
+        }"
+    x-init="
+        $watch('finished', async value => {
+            if (value) {
+                await sleep(2000);
+                $el.parentElement.remove()
+            }
+        })
+        "
+>
+  <div
+      hidden="hidden"
+      x-bind:hx-get="url"
+      hx-trigger="every 1s"
+      hx-swap="innerHTML"
+      @event-update-params="
+        jsonObject = JSON.parse(decodeBase64UrlStr($event.detail.params))
+	      building = jsonObject.building
+	      month = jsonObject.month
+	      date = jsonObject.date
+	      counter = jsonObject.counter
+	      size = jsonObject.size
+	      error = jsonObject.errMsg
+	      apt = jsonObject.apt
+	      aptName = jsonObject.aptName
+	      from = jsonObject.from
+	      to = jsonObject.to
+	      finished = jsonObject.finished
+
+	      if (finished) {
+	          $el.remove()
+	      }
+
+      "
+  >
+  </div>
+  <template x-if="building && building !== ''">
+    <div class="flex w-full flex-row justify-center gap-2">
+      <span x-text="building"></span>
+      <span x-text="month"></span>
+      <span x-text="date"></span>
+      <div>
+        <span x-text="counter"></span>
+        <span>/</span>
+        <span x-text="size"></span>
+      </div>
+    </div>
+  </template>
+  <template x-if="error !== ''">
+    <span class="text-center" x-text="error"></span>
+  </template>
+  <template x-if="apt && apt !== ''">
+    <div class="flex w-full flex-row justify-center gap-2">
+      <div>
+        <span>APT: </span>
+        <span x-text="apt"></span>
+        <span x-text="aptName"></span>
+      </div>
+      <div>
+        <span x-text="from"></span>
+        <span>-> </span>
+        <span x-text="to"></span>
+      </div>
+    </div>
+  </template>
+  <template x-if="counter !== ''">
+    <progress
+        class="m-0 h-2 w-full p-0 progress duration-500 transition-[width]"
+        x-bind:value="counter"
+        x-bind:max="size"
+    ></progress>
+  </template>
+  <template x-if="counter === ''">
+    <div class="flex flex-col items-center gap-2 w-full">
+      <span x-text="$t('main-title-searching-data')"></span>
+      <progress class="m-0 h-2 w-full p-0 progress"></progress>
+    </div>
+  </template>
+</div>

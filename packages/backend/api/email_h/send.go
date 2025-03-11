@@ -8,6 +8,7 @@ import (
 	"github.com/sst/sst/v3/sdk/golang/resource"
 	"github.com/wneessen/go-mail"
 	"sync"
+	"time"
 )
 
 var configMap map[string]MailerConfig
@@ -61,7 +62,27 @@ func loadConfigMap() (map[string]MailerConfig, error) {
 	return configMap, outErr
 }
 
-func SendEmail(ctx context.Context, emailKey string, msg *mail.Msg) error {
+type MsgWithCallBack struct {
+	Msg      *mail.Msg
+	Callback func()
+}
+
+func GetFromEmail(emailKey string) (string, error) {
+
+	configMap, err := loadConfigMap()
+	if err != nil {
+		return "", err
+	}
+
+	config, ok := configMap[emailKey]
+	if !ok {
+		return "", fmt.Errorf("email key %s not found", emailKey)
+	}
+
+	return config.Username, nil
+}
+
+func SendEmail(ctx context.Context, emailKey string, messages []*MsgWithCallBack) error {
 
 	configMap, err := loadConfigMap()
 	if err != nil {
@@ -73,8 +94,22 @@ func SendEmail(ctx context.Context, emailKey string, msg *mail.Msg) error {
 		return fmt.Errorf("email key %s not found", emailKey)
 	}
 
-	if err := msg.From(config.Username); err != nil {
-		return err
+	for _, msg := range messages {
+
+		if err := msg.Msg.From(config.Username); err != nil {
+			return err
+		}
+	}
+
+
+	// todo remove this
+	if true {
+		for _, m := range messages {
+			time.Sleep(1 * time.Second)
+			m.Callback()
+		}
+
+		return nil
 	}
 
 	client, err := mail.NewClient(config.Host, mail.WithTLSPortPolicy(mail.TLSMandatory),
@@ -84,58 +119,32 @@ func SendEmail(ctx context.Context, emailKey string, msg *mail.Msg) error {
 		return fmt.Errorf("failed to create mail client: %v", err)
 	}
 
-	if err := client.DialAndSendWithContext(ctx, msg); err != nil {
+	if err := clientSend(client, ctx, messages); err != nil {
 		return fmt.Errorf("failed to send mail: %s", err)
 	}
 
 	return nil
 }
 
-//func SendEmail(ctx context.Context, emailKey string, msg *mail.Msg) error {
-//
-//	jsonStr, err := base64.URLEncoding.DecodeString(encoded)
-//
-//	if err != nil {
-//		return err
-//	}
-//
-//	var configs []MailerConfig
-//	err = json.Unmarshal(jsonStr, &configs)
-//	if err != nil {
-//		return err
-//	}
-//
-//	config := configs[0]
-//	log.Printf("Sending email with config: %v", config)
-//
-//	message := mail.NewMsg()
-//	if err := message.From(config.Username); err != nil {
-//		return err
-//	}
-//	if err := message.To("yzlup2@gmail.com"); err != nil {
-//		return err
-//	}
-//
-//	message.Subject("This is my first mail with go-mail!")
-//	message.SetBodyString(mail.TypeTextPlain, "Do you like this mail? I certainly do!")
-//
-//	client, err := mail.NewClient(config.Host, mail.WithTLSPortPolicy(mail.TLSMandatory),
-//		mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(config.Username), mail.WithPassword(config.Password))
-//	//authMethod := mail.SMTPAuthLogin
-//	//
-//	//log.Printf("With auth method: %v", authMethod)
-//	//
-//	//client, err := mail.NewClient(config.Host, mail.WithSMTPAuth(authMethod),
-//	//	mail.WithPort(config.Port), mail.WithUsername(config.Username), mail.WithPassword(config.Password))
-//	if err != nil {
-//		log.Printf("Failed to create mail client: %v", err)
-//		return fmt.Errorf("failed to create mail client: %v", err)
-//	}
-//
-//	if err := client.DialAndSendWithContext(ctx, message); err != nil {
-//		log.Printf("Failed to send mail: %v", err)
-//		return fmt.Errorf("failed to send mail: %s", err)
-//	}
-//
-//	return nil
-//}
+func clientSend(c *mail.Client, ctx context.Context, messages []*MsgWithCallBack) error {
+	client, err := c.DialToSMTPClientWithContext(ctx)
+	if err != nil {
+		return fmt.Errorf("dial failed: %w", err)
+	}
+	defer func() {
+		_ = c.CloseWithSMTPClient(client)
+	}()
+
+	for _, msg := range messages {
+		if err = c.SendWithSMTPClient(client, msg.Msg); err != nil {
+			return fmt.Errorf("send failed: %w", err)
+		}
+
+		msg.Callback()
+	}
+
+	if err = c.CloseWithSMTPClient(client); err != nil {
+		return fmt.Errorf("failed to close connection: %w", err)
+	}
+	return nil
+}

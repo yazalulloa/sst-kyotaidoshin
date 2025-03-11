@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/sst/sst/v3/sdk/golang/resource"
 	"github.com/wneessen/go-mail"
+	"kyotaidoshin/util"
 	"strings"
 )
 
@@ -23,8 +23,8 @@ type SendPdfRequest struct {
 	EmailKey      string
 }
 
-func SendPdf(ctx context.Context, req SendPdfRequest) (*mail.Msg, error) {
-	bucketName, err := resource.Get("ReceiptsBucket", "name")
+func BuildMsg(ctx context.Context, req SendPdfRequest) (*mail.Msg, error) {
+	bucketName, err := util.GetReceiptsBucket()
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func SendPdf(ctx context.Context, req SendPdfRequest) (*mail.Msg, error) {
 	}
 
 	res, err := s3Client.GetObject(ctx, &s3.GetObjectInput{
-		Bucket: aws.String(bucketName.(string)),
+		Bucket: aws.String(bucketName),
 		Key:    aws.String(req.ObjectKey),
 	})
 	if err != nil {

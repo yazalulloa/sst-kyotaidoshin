@@ -13,7 +13,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	"github.com/sst/sst/v3/sdk/golang/resource"
 	"golang.org/x/sync/syncmap"
 	"kyotaidoshin/api"
 	"kyotaidoshin/buildings"
@@ -35,6 +34,7 @@ const _UPLOAD_BACKUP = _PATH + "/upload/backup"
 const _DOWNLOAD_ZIP_FILE = _PATH + "/download/zip"
 const _DOWNLOAD_PDF_FILE = _PATH + "/download/pdf"
 const _SEND_PDFS = _PATH + "/send_pdfs"
+const _SEND_PDFS_PROGRESS = _SEND_PDFS + "/progress"
 
 func Routes(server *mux.Router) {
 
@@ -52,6 +52,7 @@ func Routes(server *mux.Router) {
 	server.HandleFunc(_DOWNLOAD_ZIP_FILE+"/{key}", getZip).Methods("GET")
 	server.HandleFunc(_DOWNLOAD_PDF_FILE+"/{key}", getPdf).Methods("GET")
 	server.HandleFunc(_SEND_PDFS+"/{key}", sendPdfs).Methods("GET")
+	server.HandleFunc(_SEND_PDFS_PROGRESS+"/{key}", sendPdfsProgress).Methods("GET")
 }
 
 func getInit(w http.ResponseWriter, r *http.Request) {
@@ -560,7 +561,7 @@ func getZip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bucketName, err := resource.Get("ReceiptsBucket", "name")
+	bucketName, err := util.GetReceiptsBucket()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -576,7 +577,7 @@ func getZip(w http.ResponseWriter, r *http.Request) {
 	objectKey := fmt.Sprintf("%s/%s/%s_%s_%s.zip", receipt.Building.ID, receipt.Receipt.ID,
 		receipt.Building.ID, strings.ToUpper(receipt.MonthStr), date)
 
-	exists, err := aws_h.FileExistsS3(r.Context(), bucketName.(string), objectKey)
+	exists, err := aws_h.FileExistsS3(r.Context(), bucketName, objectKey)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -599,7 +600,7 @@ func getZip(w http.ResponseWriter, r *http.Request) {
 
 		contentLength := int64(buf.Len())
 		_, err = s3Client.PutObject(r.Context(), &s3.PutObjectInput{
-			Bucket:            aws.String(bucketName.(string)),
+			Bucket:            aws.String(bucketName),
 			Key:               aws.String(objectKey),
 			Body:              buf,
 			ChecksumAlgorithm: types.ChecksumAlgorithmCrc64nvme,
@@ -624,7 +625,7 @@ func getZip(w http.ResponseWriter, r *http.Request) {
 	}
 
 	presignedHTTPRequest, err := presignClient.PresignGetObject(r.Context(), &s3.GetObjectInput{
-		Bucket: aws.String(bucketName.(string)),
+		Bucket: aws.String(bucketName),
 		Key:    aws.String(objectKey),
 	}, func(options *s3.PresignOptions) {
 		options.Expires = time.Minute
@@ -653,7 +654,7 @@ func getPdf(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bucketName, err := resource.Get("ReceiptsBucket", "name")
+	bucketName, err := util.GetReceiptsBucket()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -678,7 +679,7 @@ func getPdf(w http.ResponseWriter, r *http.Request) {
 	}
 
 	presignedHTTPRequest, err := presignClient.PresignGetObject(r.Context(), &s3.GetObjectInput{
-		Bucket: aws.String(bucketName.(string)),
+		Bucket: aws.String(bucketName),
 		Key:    aws.String(parts[0].ObjectKey),
 	}, func(options *s3.PresignOptions) {
 		options.Expires = time.Minute
@@ -717,11 +718,54 @@ func sendPdfs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = receiptPdf.PublishBuildPdfs(r.Context(), keys.BuildingId, keys.Id)
+	clientId, err := receiptPdf.PublishSendPdfs(r.Context(), keys.BuildingId, keys.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	progressId := util.Encode(clientId)
+
+	err = SendPdfsView(*progressId).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func sendPdfsProgress(w http.ResponseWriter, r *http.Request) {
+	keyStr := mux.Vars(r)["key"]
+	if keyStr == "" {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	var progressId string
+	err := util.Decode(keyStr, &progressId)
+	if err != nil {
+		log.Printf("failed to decode key: %v", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	progress, err := receiptPdf.GetProgress(r.Context(), progressId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	byteArray, err := json.Marshal(progress)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	encoded := base64.URLEncoding.EncodeToString(byteArray)
+
+	err = SendPdfsProgressView(encoded).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 }

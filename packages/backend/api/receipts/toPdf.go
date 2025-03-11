@@ -35,7 +35,7 @@ type PartInfoUpload struct {
 }
 
 func checkOrBuild(ctx context.Context, parts []PartInfoUpload) ([]PdfItem, error) {
-	bucketName, err := resource.Get("ReceiptsBucket", "name")
+	bucketName, err := util.GetReceiptsBucket()
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func checkOrBuild(ctx context.Context, parts []PartInfoUpload) ([]PdfItem, error
 	if len(parts) == 1 {
 		pdfItems := make([]PdfItem, 0)
 		part := parts[0]
-		exists, err := aws_h.FileExistsS3(ctx, bucketName.(string), part.ObjectKey)
+		exists, err := aws_h.FileExistsS3(ctx, bucketName, part.ObjectKey)
 		if err != nil {
 			return nil, err
 		}
@@ -80,7 +80,7 @@ func checkOrBuild(ctx context.Context, parts []PartInfoUpload) ([]PdfItem, error
 		go func() {
 			defer wg.Done()
 
-			exists, err := aws_h.FileExistsS3(ctx, bucketName.(string), part.ObjectKey)
+			exists, err := aws_h.FileExistsS3(ctx, bucketName, part.ObjectKey)
 			if err != nil {
 				errorChan <- err
 				return
@@ -210,7 +210,7 @@ func GetParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKey
 }
 
 func toZip(receipt *CalculatedReceipt, ctx context.Context) (*bytes.Buffer, error) {
-	bucketName, err := resource.Get("ReceiptsBucket", "name")
+	bucketName, err := util.GetReceiptsBucket()
 	if err != nil {
 		return nil, err
 	}
@@ -236,7 +236,7 @@ func toZip(receipt *CalculatedReceipt, ctx context.Context) (*bytes.Buffer, erro
 			defer wg.Done()
 
 			res, err := s3Client.GetObject(ctx, &s3.GetObjectInput{
-				Bucket: aws.String(bucketName.(string)),
+				Bucket: aws.String(bucketName),
 				Key:    aws.String(part.ObjectKey),
 			})
 			if err != nil {

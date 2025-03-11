@@ -16,13 +16,14 @@ type Type string
 const (
 	BuildingChanges Type = "BuildingChanges"
 	ReceiptChanges  Type = "ReceiptChanges"
-	BuildPdfs       Type = "BuildPdfs"
+	SendPdfs        Type = "SendPdfs"
 )
 
 type QueueEvent struct {
 	Type       Type   `json:"type"`
 	BuildingId string `json:"buildingId"`
 	ReceiptId  string `json:"receiptId"`
+	ProgressId string `json:"progressId"`
 }
 
 func (receiver QueueEvent) IsChanges() bool {
@@ -30,7 +31,7 @@ func (receiver QueueEvent) IsChanges() bool {
 }
 
 const pdfChangesMessageGroupId = "PdfChanges"
-const buildPdfsMessageGroupId = "BuildPdfs"
+const sendPdfsMessageGroupId = "SendPdfs"
 
 func PublishBuilding(ctx context.Context, buildingId string) {
 	event := QueueEvent{
@@ -89,18 +90,27 @@ func publishEvent(ctx context.Context, event QueueEvent, messageGroupId string, 
 	return nil
 }
 
-func PublishBuildPdfs(ctx context.Context, buildingId string, receiptId string) error {
+func PublishSendPdfs(ctx context.Context, buildingId string, receiptId string) (string, error) {
+	deduplicationId := uuid.NewString()
 	event := QueueEvent{
-		Type:       BuildPdfs,
+		Type:       SendPdfs,
 		BuildingId: buildingId,
 		ReceiptId:  receiptId,
+		ProgressId: deduplicationId,
 	}
 
-	deduplicationId := uuid.NewString()
-	err := publishEvent(ctx, event, buildPdfsMessageGroupId, &deduplicationId)
+	update := ProgressUpdate{ObjectKey: deduplicationId}
+	err := PutProgress(ctx, update)
 	if err != nil {
-		log.Printf("Error publishing build pdfs: %v", err)
+		log.Printf("Error putting progress: %v", err)
+		return "", err
 	}
 
-	return err
+	err = publishEvent(ctx, event, sendPdfsMessageGroupId+deduplicationId, &deduplicationId)
+	if err != nil {
+		log.Printf("Error publishing send pdfs: %v", err)
+		return "", err
+	}
+
+	return deduplicationId, nil
 }

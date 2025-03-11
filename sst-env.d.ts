@@ -9,6 +9,10 @@ declare module "sst" {
       "type": "sst.aws.ApiGatewayV2"
       "url": string
     }
+    "AltEmailsRecipient": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "AppClientId": {
       "type": "sst.sst.Secret"
       "value": string

@@ -319,3 +319,25 @@ form.classList.remove('border', 'border-success');
 "
 	></div>
 }
+
+templ SendPdfsView(progressId string) {
+	<div id="receipts-email-progress" hx-swap-oob="beforeend">
+		<div
+			class="pb-2 w-full flex justify-center"
+			x-data={ fmt.Sprintf("{ url: '%s/%s' }", _SEND_PDFS_PROGRESS, progressId) }
+		>
+			<div
+				x-bind:hx-get="receiptSendProgressPartialUrl"
+				hx-trigger="load"
+				hx-swap="outerHTML"
+			></div>
+		</div>
+	</div>
+}
+
+templ SendPdfsProgressView(update string) {
+	<div
+		data-progress-update={ update }
+		x-init="$dispatch('event-update-params', { params: $el.getAttribute('data-progress-update') });"
+	></div>
+}
