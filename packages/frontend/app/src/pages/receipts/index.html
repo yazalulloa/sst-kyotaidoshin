@@ -24,6 +24,7 @@
       </div>
     </div>
 
+
     <div x-data="{
         formId: 'receipt-upload-backup',
         uploadFormPath: '/api/receipts/uploadBackupForm',
@@ -116,104 +117,20 @@
             hx-swap="none">
     </button>
 
-
-    <form
-        x-data="{
-            url: '',
-            file: '',
-          }"
-        x-init="
-            $watch('file', (value) => {
-              if (value && value !== '') {
-               if (false) {
-               $el.firstElementChild.dispatchEvent(new CustomEvent('get_form'))
-               }
-
-              }
-            })
-            $watch('url', (value) => {
-              htmx.process($el)
-              if (value) {
-                $el.dispatchEvent(new CustomEvent('send_file'));
-              }
-            })
-          "
-        @event-handle-request="
-          file = ''
-          url = ''
-
-          if ($event.detail.status === 204) {
-          $el.children[1].dispatchEvent(new CustomEvent('upload'))
-          } else {
-           //todo show toast
-          console.log('Response', $event.detail)
-          }
-
-          $el.firstElementChild.innerHTML = ''
-
-        "
-        id="uploader-receipt"
-        class="whitespace-nowrap bg-transparent rounded-radius border border-secondary px-4 py-2 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-secondary-dark dark:text-secondary-dark dark:focus-visible:outline-secondary-dark"
-        x-bind:hx-post="url"
-        hx-encoding="multipart/form-data"
-        hx-disabled-elt="this, #uploader-receipt * > input:not([disabled]), #uploader-receipt * > label:not([disabled])"
-        hx-swap="outerHTML"
-        hx-trigger="send_file"
-        hx-indicator=".htmx-indicator"
-        hx-params="not filename"
-        hx-on::after-request="
-        if (event.srcElement.id === this.id) {
-         this.dispatchEvent(new CustomEvent('event-handle-request', { detail: event.detail.xhr}))
-        }
-        "
-    >
-
-
-      <div
-          hx-get="/api/receipts/upload_form"
-          hx-trigger="get_form"
-          hx-disabled-elt="this, #uploader-receipt * > input:not([disabled]), #uploader-receipt * > label:not([disabled])"
-          hx-vals="js:{ name: event.detail}"
-          hx-swap="innerHTML"
-          hidden="hidden">
+    <div x-data="{
+        formId: 'receipts-new-upload',
+        uploadFormPath: '/api/receipts/upload_form',
+        uploadFileCallback: '/api/receipts/new_from_file',
+        callBackSwap: 'none',
+        btnText: 'main-action-upload-receipt',
+        fileAccept: '.xlsx'
+       }">
+      <div hidden="hidden"
+           x-bind:hx-get="uploadFormPartialUrl"
+           hx-trigger="load"
+           hx-swap="outerHTML">
       </div>
-
-      <div hx-post="/api/receipts/new_from_file"
-           hx-trigger="upload"
-           hx-disabled-elt="this, #uploader-receipt * > input:not([disabled]), #uploader-receipt * > label:not([disabled])"
-           hx-params="key"
-           hx-swap="none"
-           hidden="hidden">
-      </div>
-
-      <label
-          class="flex flex-row gap-0"
-          x-data="{ filename: ''}"
-      >
-        <span x-text="$t('main-action-upload-receipt')"></span>
-        <span x-show="filename !== ''">:&nbsp;</span>
-        <span
-            x-bind:class="filename === '' ? 'hidden' : ''"
-            x-text="filename"
-            x-init="$watch('file', (value) => {
-            if (value && value.length > 0) {
-              filename = $el.nextElementSibling.files[0].name;
-              $el.parentElement.parentElement.firstElementChild.dispatchEvent(new CustomEvent('get_form', { detail: filename}))
-             } else {
-              filename = '';
-             }
-          })"
-        ></span>
-        <input
-            class="hidden"
-            type="file"
-            accept=".xlsx"
-            name="file"
-            x-model="file"
-        />
-      </label>
-
-    </form>
+    </div>
 
   </div>
 

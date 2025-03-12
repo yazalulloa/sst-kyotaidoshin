@@ -3,6 +3,7 @@ package util
 import (
 	"aws_h"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/uuid"
@@ -133,7 +134,13 @@ func StrArrayToInt16Array(strArray []string) []int16 {
 	return int16Array
 }
 
-func GetUploadFormParams(r *http.Request, filePrefix, filename string) (*UploadBackupParams, error) {
+func GetUploadFormParams(r *http.Request, filePrefix string) (*UploadBackupParams, error) {
+
+	filename := GetQueryParamAsString(r, "name")
+
+	if filename == "" {
+		return nil, errors.New("BAD REQUEST")
+	}
 
 	bucketName, err := GetReceiptsBucket()
 	if err != nil {

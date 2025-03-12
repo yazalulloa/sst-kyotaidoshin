@@ -142,7 +142,7 @@ func ProcessDecoder(decoder *json.Decoder) (int64, error) {
 		return lhs.Compare(rhs)
 	})
 
-	array := util.SplitArray(records, 10)
+	array := util.SplitArray(records, 15)
 
 	var total int64
 	ratesHolder := RatesHolder{Rates: syncmap.Map{}}
@@ -923,20 +923,14 @@ func sendPdfsProgress(w http.ResponseWriter, r *http.Request) {
 }
 
 func getUploadForm(w http.ResponseWriter, r *http.Request) {
-	filename := util.GetQueryParamAsString(r, "name")
 
-	if filename == "" {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-
-	params, err := util.GetUploadFormParams(r, "NEW_RECEIPTS/", filename)
+	component, err := api.BuildUploadForm(r, "NEW_RECEIPTS/")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	err = api.UploadFormView(*params).Render(r.Context(), w)
+	err = component.Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
