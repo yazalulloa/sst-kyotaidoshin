@@ -505,16 +505,21 @@ func CalculateReceipt(buildingId string, receiptId string) (*CalculatedReceipt, 
 
 				var builder strings.Builder
 				for i, year := range monthlyDebt.Years {
-					builder.WriteString(fmt.Sprintf("%d: ", year.Year))
-					for j, month := range year.Months {
 
-						builder.WriteString(util.FromInt16ToMonth(month))
-						if j != len(year.Months)-1 {
-							builder.WriteString(", ")
+					if len(year.Months) > 0 {
+						if year.Year > 0 {
+							builder.WriteString(fmt.Sprintf("%d: ", year.Year))
 						}
-					}
-					if i != len(monthlyDebt.Years)-1 {
-						builder.WriteString(" - ")
+						for j, month := range year.Months {
+
+							builder.WriteString(util.FromInt16ToMonth(month))
+							if j != len(year.Months)-1 {
+								builder.WriteString(", ")
+							}
+						}
+						if i != len(monthlyDebt.Years)-1 {
+							builder.WriteString(" - ")
+						}
 					}
 				}
 

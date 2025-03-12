@@ -427,12 +427,12 @@ func parseDebts(rows *[][]string) ([]model.Debts, error) {
 				//
 				//now := time.Now().In(location)
 
-				log.Printf("Months: %v", months)
-
-				years = append(years, debts.YearWithMonths{
-					Year:   0,
-					Months: months,
-				})
+				if len(months) > 0 {
+					years = append(years, debts.YearWithMonths{
+						Year:   0,
+						Months: months,
+					})
+				}
 			}
 
 			monthlyDebt.Years = years
@@ -441,8 +441,6 @@ func parseDebts(rows *[][]string) ([]model.Debts, error) {
 			if err != nil {
 				return nil, err
 			}
-
-			log.Printf("Monthly Debt: %s", string(byteArray))
 
 			debt := model.Debts{
 				AptNumber:                     apt,
