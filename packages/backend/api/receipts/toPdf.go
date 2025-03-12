@@ -146,11 +146,8 @@ func GetParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKey
 
 	buildObjectKey := func(str string) string {
 		date := receipt.Receipt.Date.Format(time.DateOnly)
-		//return fmt.Sprintf("RECEIPS/%s/%s_%s/%s_%s_%s_%s.pdf", receipt.Building.ID, receipt.Building.ID, receipt.Receipt.ID,
-		//	receipt.Building.ID, strings.ToUpper(receipt.MonthStr), date, str)
-
-		return fmt.Sprintf("RECEIPT_%s_%s_%s_%s_%s.pdf", receipt.Building.ID, receipt.Receipt.ID,
-			strings.ToUpper(receipt.MonthStr), date, str)
+		return fmt.Sprintf("RECEIPTS/%s/%s/%s_%s_%s_%s.pdf", receipt.Building.ID, receipt.Receipt.ID,
+			receipt.Building.ID, strings.ToUpper(receipt.MonthStr), date, str)
 	}
 
 	parts := make([]PartInfoUpload, numOfWorkers)

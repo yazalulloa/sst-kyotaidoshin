@@ -726,7 +726,7 @@ func getZip(w http.ResponseWriter, r *http.Request) {
 	}
 
 	date := receipt.Receipt.Date.Format(time.DateOnly)
-	objectKey := fmt.Sprintf("RECEIPS/%s/%s_%s/%s_%s_%s.zip", receipt.Building.ID, receipt.Building.ID, receipt.Receipt.ID,
+	objectKey := fmt.Sprintf("RECEIPS/%s/%s/%s_%s_%s.zip", receipt.Building.ID, receipt.Receipt.ID,
 		receipt.Building.ID, strings.ToUpper(receipt.MonthStr), date)
 
 	exists, err := aws_h.FileExistsS3(r.Context(), bucketName, objectKey)
