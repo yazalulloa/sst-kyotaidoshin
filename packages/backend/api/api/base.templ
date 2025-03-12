@@ -156,6 +156,15 @@ templ RefreshView(url string) {
 	<meta http-equiv="refresh" content={ fmt.Sprintf("0; url=%s", url) }/>
 }
 
+templ AnchorClickInitView(url string) {
+	<div>
+		<a
+			href={ templ.SafeURL(url) }
+			x-init="$el.click()"
+		></a>
+	</div>
+}
+
 templ Badge(condition bool) {
 	<div
 		class={ "peer rounded-radius w-fit border px-2 py-1 text-xs font-medium tracking-wide ",

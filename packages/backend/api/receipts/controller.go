@@ -2,6 +2,8 @@ package receipts
 
 import (
 	"aws_h"
+	"bytes"
+	"compress/flate"
 	"db/gen/model"
 	"encoding/base64"
 	"encoding/json"
@@ -14,8 +16,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"golang.org/x/sync/syncmap"
+	"io"
 	"kyotaidoshin/api"
 	"kyotaidoshin/buildings"
+	"kyotaidoshin/debts"
+	"kyotaidoshin/expenses"
+	"kyotaidoshin/extraCharges"
 	"kyotaidoshin/rates"
 	"kyotaidoshin/receiptPdf"
 	"kyotaidoshin/util"
@@ -39,6 +45,7 @@ const _SEND_PDFS_PROGRESS = _SEND_PDFS + "/progress"
 func Routes(server *mux.Router) {
 
 	server.HandleFunc(_SEARCH, search).Methods("GET")
+	server.HandleFunc(_PATH, receiptPost).Methods("POST")
 	server.HandleFunc(_PATH, receiptPut).Methods("PUT")
 	server.HandleFunc(_PATH+"/clear_pdfs", clearPdfs).Methods("DELETE")
 	server.HandleFunc(_PATH+"/{key}", receiptDelete).Methods("DELETE")
@@ -53,6 +60,8 @@ func Routes(server *mux.Router) {
 	server.HandleFunc(_DOWNLOAD_PDF_FILE+"/{key}", getPdf).Methods("GET")
 	server.HandleFunc(_SEND_PDFS+"/{key}", sendPdfs).Methods("GET")
 	server.HandleFunc(_SEND_PDFS_PROGRESS+"/{key}", sendPdfsProgress).Methods("GET")
+	server.HandleFunc(_PATH+"/upload_form", getUploadForm).Methods("GET")
+	server.HandleFunc(_PATH+"/new_from_file", newFromFile).Methods("POST")
 }
 
 func getInit(w http.ResponseWriter, r *http.Request) {
@@ -84,7 +93,7 @@ func getInit(w http.ResponseWriter, r *http.Request) {
 
 	go func() {
 		defer wg.Done()
-		params, err := util.GetUploadFormParams(r, _UPLOAD_BACKUP[1:], "receipts")
+		params, err := util.GetUploadFormParams(r, _UPLOAD_BACKUP[1:], "receipts", "")
 		if err != nil {
 			handleErr(err)
 			return
@@ -343,9 +352,217 @@ func formData(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func receiptPost(w http.ResponseWriter, r *http.Request) {
+
+	createReceipt := func() FormResponse {
+
+		response := FormResponse{}
+
+		err := r.ParseForm()
+		if err != nil {
+			log.Printf("Error parsing form: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		decoder := form.NewDecoder()
+		var request ReceiptNewFormRequest
+		err = decoder.Decode(&request, r.Form)
+
+		validate, err := util.GetValidator()
+		if err != nil {
+			log.Printf("Error getting validator: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		err = validate.Struct(request)
+		if err != nil {
+			// Validation failed, handle the error
+			errors := err.(validator.ValidationErrors)
+			for _, valErr := range errors {
+				log.Printf("Validation error: %v", valErr)
+			}
+			response.errorStr = fmt.Sprintf("Validation error: %s", errors)
+			return response
+		}
+
+		date, err := time.Parse(time.DateOnly, request.Date)
+		if err != nil {
+			log.Printf("Error parsing date: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		decoded, err := base64.URLEncoding.DecodeString(request.Data)
+		if err != nil {
+			log.Printf("Error decoding data: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		reader := bytes.NewReader(decoded)
+		compressionReader := flate.NewReader(reader)
+		defer func(compressionReader io.ReadCloser) {
+			_ = compressionReader.Close()
+		}(compressionReader)
+
+		got, err := io.ReadAll(compressionReader)
+
+		if err != nil {
+			log.Printf("Error reading all: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		var parsedReceipt ParsedReceipt
+		err = json.Unmarshal(got, &parsedReceipt)
+		if err != nil {
+			log.Printf("Error unmarshalling: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		if len(parsedReceipt.Debts) == 0 {
+			log.Printf("No debts found")
+			response.errorStr = "Invalid Data"
+			return response
+		}
+
+		if len(parsedReceipt.Expenses) == 0 {
+			log.Printf("No expenses found")
+			response.errorStr = "Invalid Data"
+			return response
+		}
+
+		var rateId *int64
+		err = util.Decode(request.Rate, &rateId)
+		if err != nil {
+			log.Printf("Error decoding rateId: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		exist, err := rates.CheckRateExist(*rateId)
+		if err != nil {
+			log.Printf("Error checking rate: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		if !exist {
+			response.errorStr = "Rate does not exist"
+			return response
+		}
+
+		receiptId := util.UuidV7()
+
+		receipt := model.Receipts{
+			ID:         receiptId,
+			BuildingID: request.Building,
+			Year:       request.Year,
+			Month:      request.Month,
+			Date:       date,
+			RateID:     *rateId,
+		}
+
+		for i := range parsedReceipt.Debts {
+			parsedReceipt.Debts[i].BuildingID = receipt.BuildingID
+			parsedReceipt.Debts[i].ReceiptID = receipt.ID
+		}
+
+		for i := range parsedReceipt.Expenses {
+			parsedReceipt.Expenses[i].BuildingID = receipt.BuildingID
+			parsedReceipt.Expenses[i].ReceiptID = receipt.ID
+		}
+
+		for i := range parsedReceipt.ExtraCharges {
+			parsedReceipt.ExtraCharges[i].BuildingID = receipt.BuildingID
+			parsedReceipt.ExtraCharges[i].ParentReference = receipt.ID
+		}
+
+		var wg sync.WaitGroup
+		wg.Add(4)
+		errorChan := make(chan error, 4)
+
+		go func() {
+			defer wg.Done()
+			_, err = insert(receipt)
+			if err != nil {
+				errorChan <- err
+				return
+			}
+		}()
+
+		go func() {
+			defer wg.Done()
+			_, err = debts.InsertBulk(parsedReceipt.Debts)
+			if err != nil {
+				errorChan <- err
+				return
+			}
+		}()
+
+		go func() {
+			defer wg.Done()
+			_, err = expenses.InsertBulk(parsedReceipt.Expenses)
+			if err != nil {
+				errorChan <- err
+				return
+			}
+		}()
+
+		go func() {
+			defer wg.Done()
+			_, err = extraCharges.InsertBulk(parsedReceipt.ExtraCharges)
+			if err != nil {
+				errorChan <- err
+				return
+			}
+		}()
+
+		wg.Wait()
+		close(errorChan)
+
+		err = util.HasErrors(errorChan)
+		if err != nil {
+			response.errorStr = err.Error()
+			return response
+		}
+
+		keys := keys(receipt, "")
+		response.Key = util.Encode(keys)
+
+		return response
+	}
+
+	response := createReceipt()
+
+	if response.errorStr == "" {
+
+		//w.Header().Add("HX-Location", fmt.Sprintf("/receipts/edit/%s", *response.Key))
+		//w.WriteHeader(http.StatusOK)
+
+		err := api.AnchorClickInitView(fmt.Sprintf("/receipts/edit/%s", *response.Key)).Render(r.Context(), w)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		return
+	}
+
+	err := FormResponseView(response).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+}
+
 func receiptPut(w http.ResponseWriter, r *http.Request) {
 
-	upsert := func() FormResponse {
+	updateReceipt := func() FormResponse {
 
 		response := FormResponse{}
 
@@ -445,7 +662,7 @@ func receiptPut(w http.ResponseWriter, r *http.Request) {
 		return response
 	}
 
-	response := upsert()
+	response := updateReceipt()
 
 	err := FormResponseView(response).Render(r.Context(), w)
 	if err != nil {
@@ -531,13 +748,13 @@ func getReceiptView(w http.ResponseWriter, r *http.Request) {
 		apt.DownloadKeys = *downloadKeys
 	}
 
-	bytes, err := json.Marshal(tabs)
+	byteArray, err := json.Marshal(tabs)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	base64Str := base64.URLEncoding.EncodeToString(bytes)
+	base64Str := base64.URLEncoding.EncodeToString(byteArray)
 
 	err = Views(keyStr, *receipt, idMap, base64Str).Render(r.Context(), w)
 	if err != nil {
@@ -768,4 +985,56 @@ func sendPdfsProgress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+
+func getUploadForm(w http.ResponseWriter, r *http.Request) {
+	filename := util.GetQueryParamAsString(r, "name")
+
+	if filename == "" {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	params, err := util.GetUploadFormParams(r, "", "NEW_RECEIPTS/", filename)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = UploadFormView(*params).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func newFromFile(w http.ResponseWriter, r *http.Request) {
+
+	key := r.FormValue("key")
+	if key == "" {
+		log.Printf("key is empty")
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	dto, err := parseNewReceipt(r.Context(), key)
+	if err != nil {
+		log.Printf("Error parsing new receipt: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	byteArray, err := json.Marshal(*dto)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	encoded := base64.URLEncoding.EncodeToString(byteArray)
+
+	err = ShowNewReceiptsDialog(encoded).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }

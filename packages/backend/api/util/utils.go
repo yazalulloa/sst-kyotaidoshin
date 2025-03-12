@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/uuid"
-	"github.com/sst/sst/v3/sdk/golang/resource"
 	"log"
 	"net/http"
 	"strconv"
@@ -118,18 +117,12 @@ func MonthsToInt(months string) []int16 {
 	return StrArrayToInt16Array(strings.Split(months, ","))
 }
 
-func MonthsToString(months string) string {
-	monthMap := *GetMonths()
-	var builder strings.Builder
-	for i, v := range MonthsToInt(months) {
-		builder.WriteString(monthMap[v])
-		if i != len(months)-1 {
-			builder.WriteString(", ")
-		}
+func Int16ArrayToString(int16Array []int16) string {
+	strArray := make([]string, len(int16Array))
+	for i, v := range int16Array {
+		strArray[i] = strconv.Itoa(int(v))
 	}
-
-	return builder.String()
-
+	return strings.Join(strArray, ",")
 }
 
 func StrArrayToInt16Array(strArray []string) []int16 {
@@ -140,8 +133,11 @@ func StrArrayToInt16Array(strArray []string) []int16 {
 	return int16Array
 }
 
-func GetUploadFormParams(r *http.Request, uploadPath string, filePrefix string) (*UploadBackupParams, error) {
-	bucketName, err := resource.Get("UploadBackupBucket", "name")
+func GetUploadFormParams(r *http.Request, uploadPath, filePrefix, filename string) (*UploadBackupParams, error) {
+
+	bucketName, err := GetReceiptsBucket()
+	// TODO change this
+	//bucketName, err := resource.Get("UploadBackupBucket", "name")
 	if err != nil {
 		log.Printf("Error getting bucket Name: %s", err)
 		return nil, err
@@ -152,31 +148,34 @@ func GetUploadFormParams(r *http.Request, uploadPath string, filePrefix string) 
 	//	return nil, fmt.Errorf("origin header not found")
 	//}
 
-	url := fmt.Sprintf("%s://%s/", r.URL.Scheme, r.URL.Host)
-
-	redirectUrl := fmt.Sprintf("%s/%s", url, uploadPath)
+	//url := fmt.Sprintf("%s://%s/", r.URL.Scheme, r.URL.Host)
+	//redirectUrl := fmt.Sprintf("%s/%s", url, uploadPath)
 	metaUuid := uuid.New().String()
 
 	conditions := []interface{}{
-		map[string]string{"success_action_redirect": redirectUrl},
+		//map[string]string{"success_action_redirect": redirectUrl},
 		//[]interface{}{"starts-with", "$Content-Type", "application/gzip"},
 		map[string]string{"x-amz-meta-uuid": metaUuid},
+		map[string]string{"x-amz-meta-filename": filename},
+		map[string]string{"success_action_status": "204"},
 		//[]interface{}{"starts-with", "$x-amz-meta-tag", ""},
 		[]interface{}{"content-length-range", 1, 2048576},
 	}
 
 	optionFn := func(options *s3.PresignPostOptions) {
-		//options.Expires = time.Hour
+		options.Expires = time.Minute
 		options.Conditions = conditions
 	}
 
-	presignedPostRequest, err := aws_h.PresignPostObject(r.Context(), bucketName.(string), fmt.Sprintf("%s_%s", filePrefix, uuid.New().String()), optionFn)
+	presignedPostRequest, err := aws_h.PresignPostObject(r.Context(), bucketName, fmt.Sprintf("%s_%s", filePrefix, uuid.New().String()), optionFn)
 	if err != nil {
 		return nil, err
 	}
 
-	presignedPostRequest.Values["success_action_redirect"] = redirectUrl
+	//presignedPostRequest.Values["success_action_redirect"] = redirectUrl
 	presignedPostRequest.Values["x-amz-meta-uuid"] = metaUuid
+	presignedPostRequest.Values["success_action_status"] = "204"
+	presignedPostRequest.Values["x-amz-meta-filename"] = filename
 
 	return &UploadBackupParams{
 		Url:    presignedPostRequest.URL,

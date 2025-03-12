@@ -3,6 +3,6 @@ module process-pdf-objects
 go 1.23.4
 
 require (
-	github.com/valkey-io/valkey-go v1.0.55 // indirect
-	golang.org/x/sys v0.30.0 // indirect
+	github.com/aws/aws-lambda-go v1.47.0
+	github.com/sst/sst/v3 v3.9.36
 )

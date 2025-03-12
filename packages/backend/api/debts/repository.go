@@ -20,7 +20,7 @@ func count() (int64, error) {
 	return dest.Count, nil
 }
 
-func InsertBackup(array []model.Debts) (int64, error) {
+func InsertBulk(array []model.Debts) (int64, error) {
 	if len(array) == 0 {
 		return 0, nil
 	}
@@ -37,7 +37,7 @@ func InsertBackup(array []model.Debts) (int64, error) {
 
 	res, err := stmt.Exec(db.GetDB().DB)
 	if err != nil {
-		log.Printf("Error inserting array: %v\n", err)
+		log.Printf("Error inserting array: %v\n%s", err, stmt.DebugSql())
 		return 0, err
 	}
 

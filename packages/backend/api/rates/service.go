@@ -10,6 +10,17 @@ import (
 	"time"
 )
 
+func ToItem(rate model.Rates) Item {
+	return Item{
+		Key:        *util.Encode(*rate.ID),
+		CardId:     "rates-" + uuid.NewString(),
+		Item:       rate,
+		DateOfRate: rate.DateOfRate.Format(time.DateOnly),
+		DateOfFile: rate.DateOfFile.UnixMilli(),
+		CreatedAt:  rate.CreatedAt.UnixMilli(),
+	}
+}
+
 func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 	var tableResponse TableResponse
 	var oErr error
@@ -20,16 +31,7 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 		array, err := SelectList(requestQuery)
 		results := make([]Item, len(array))
 		for i, item := range array {
-
-			results[i] = Item{
-				Key:        *util.Encode(*item.ID),
-				CardId:     "rates-" + uuid.NewString(),
-				Item:       item,
-				DateOfRate: item.DateOfRate.Format(time.DateOnly),
-				DateOfFile: item.DateOfFile.UnixMilli(),
-				CreatedAt:  item.CreatedAt.UnixMilli(),
-			}
-
+			results[i] = ToItem(item)
 		}
 		tableResponse.Results = results
 		oErr = err

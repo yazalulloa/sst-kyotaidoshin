@@ -103,27 +103,12 @@ export default $config({
       // schedule: "cron(0/15 * * * ? *)",
       function: bcvFunction.arn,
     });
-    // let allowedOrigins = isLocal ? ["*"] : [webUrl.value];
-    let allowedOrigins = isLocal ? ["http://localhost:5173"] : [webUrl.value];
-    const api = new sst.aws.ApiGatewayV2("API", {
-      link: [auth],
-      // domain: domain.value,
-      cors: {
-        allowOrigins: allowedOrigins,
-        allowMethods: ["GET", "PUT", "POST", "DELETE"],
-        allowHeaders: [
-          "Authorization",
-          "Content-Type",
-          "hx-current-url",
-          "hx-request",
-          "hx-trigger",
-          "hx-target",
-        ],
-        allowCredentials: true,
-        maxAge: isLocal ? "1 minute" : "1 day",
-        exposeHeaders: ["HX-Redirect", "hx-location"],
-      },
-    });
+
+    const domain = process.env.DOMAIN;
+    const currentWebUrl = `${$app.stage}.${domain}`
+    console.log("currentWebUrl", currentWebUrl);
+    const apiDomain = `api.${currentWebUrl}`
+
     const uploadBackupBucket = new sst.aws.Bucket("UploadBackupBucket", {
       versioning: false,
       cors: {
@@ -134,10 +119,38 @@ export default $config({
           "hx-trigger",
           "hx-target",
         ],
-        allowOrigins: allowedOrigins,
+        allowOrigins: isLocal ? ["http://localhost:5173"] : [`https://${currentWebUrl}`],
         allowMethods: ["GET", "POST", "PUT"],
         exposeHeaders: [],
         maxAge: isLocal ? "1 minute" : "1 day",
+      },
+    });
+
+
+    // let allowedOrigins = isLocal ? ["*"] : [webUrl.value];
+//  uploadBackupBucket.domain.apply(v => `https://${v}`)
+    const allowedOrigins = isLocal ? ["http://localhost:5173"] : [`https://${currentWebUrl}`];
+
+    const api = new sst.aws.ApiGatewayV2("API", {
+      link: [auth],
+      domain: {
+        name: apiDomain
+      },
+      cors: {
+        allowOrigins: allowedOrigins,
+        allowMethods: ["GET", "PUT", "POST", "DELETE"],
+        allowHeaders: [
+          "Authorization",
+          "Content-Type",
+          "hx-current-url",
+          "hx-request",
+          "hx-trigger",
+          "hx-target",
+          "Location",
+        ],
+        allowCredentials: true,
+        maxAge: isLocal ? "1 minute" : "1 day",
+        exposeHeaders: ["HX-Redirect", "hx-location"],
       },
     });
     const uploadBackupQueue = new sst.aws.Queue("UploadBackupQueue", {
@@ -221,9 +234,12 @@ export default $config({
     api.route("DELETE /api/{proxy+}", mainApiFunction.arn);
     const site = new sst.aws.StaticSite("WebApp", {
       path: "packages/frontend/app",
+      domain: {
+        name: currentWebUrl
+      },
       environment: {
         // Accessible in the browser
-        VITE_VAR_ENV: api.url,
+        VITE_VAR_ENV: `https://${apiDomain}`,
         VITE_IS_DEV: isLocal.toString(),
       },
       build: {

@@ -33,3 +33,9 @@ type Item struct {
 	DateOfFile int64
 	CreatedAt  int64
 }
+
+type Option struct {
+	Key        string  `json:"key"`
+	DateOfRate string  `json:"dateOfRate"`
+	Rate       float64 `json:"rate"`
+}

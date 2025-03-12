@@ -229,14 +229,14 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 
 	go func() {
 		defer wg.Done()
-		rows, err := extraCharges.InsertBackup(extraChargeArray)
+		rows, err := extraCharges.InsertBulk(extraChargeArray)
 		handleErr(err)
 		log.Printf("Inserted %d/%d extra charges", len(extraChargeArray), rows)
 	}()
 
 	go func() {
 		defer wg.Done()
-		rows, err := expenses.InsertBackup(expensesArray)
+		rows, err := expenses.InsertBulk(expensesArray)
 		handleErr(err)
 		log.Printf("Inserted %d/%d expenses", len(expensesArray), rows)
 	}()
@@ -244,7 +244,7 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 	go func() {
 		defer wg.Done()
 
-		rows, err := debts.InsertBackup(debtsArray)
+		rows, err := debts.InsertBulk(debtsArray)
 		handleErr(err)
 		log.Printf("Inserted %d/%d debts", len(debtsArray), rows)
 	}()
@@ -602,7 +602,7 @@ func deleteReceipt(keys Keys) (int64, error) {
 		defer wg.Done()
 		rowsAffected, err := deleteById(keys.Id)
 		if err != nil {
-			errorChan <- fmt.Errorf("error deleting receipt: %s %d -> %w", keys.BuildingId, keys.Id, err)
+			errorChan <- fmt.Errorf("error deleting receipt: %s %s -> %w", keys.BuildingId, keys.Id, err)
 			return
 		}
 
@@ -613,7 +613,7 @@ func deleteReceipt(keys Keys) (int64, error) {
 		defer wg.Done()
 		rowsAffected, err := extraCharges.DeleteByReceipt(keys.Id)
 		if err != nil {
-			errorChan <- fmt.Errorf("error deleting extra charges: %s %d -> %w", keys.BuildingId, keys.Id, err)
+			errorChan <- fmt.Errorf("error deleting extra charges: %s %s -> %w", keys.BuildingId, keys.Id, err)
 			return
 		}
 
@@ -624,7 +624,7 @@ func deleteReceipt(keys Keys) (int64, error) {
 		defer wg.Done()
 		rowsAffected, err := expenses.DeleteByReceipt(keys.Id)
 		if err != nil {
-			errorChan <- fmt.Errorf("error deleting expenses: %s %d -> %w", keys.BuildingId, keys.Id, err)
+			errorChan <- fmt.Errorf("error deleting expenses: %s %s -> %w", keys.BuildingId, keys.Id, err)
 			return
 		}
 
@@ -635,7 +635,7 @@ func deleteReceipt(keys Keys) (int64, error) {
 		defer wg.Done()
 		rowsAffected, err := debts.DeleteByReceipt(keys.BuildingId, keys.Id)
 		if err != nil {
-			errorChan <- fmt.Errorf("error deleting debts: %s %d -> %w", keys.BuildingId, keys.Id, err)
+			errorChan <- fmt.Errorf("error deleting debts: %s %s -> %w", keys.BuildingId, keys.Id, err)
 			return
 		}
 

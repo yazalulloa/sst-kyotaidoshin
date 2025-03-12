@@ -341,3 +341,25 @@ templ SendPdfsProgressView(update string) {
 		x-init="$dispatch('event-update-params', { params: $el.getAttribute('data-progress-update') });"
 	></div>
 }
+
+templ UploadFormView(params util.UploadBackupParams) {
+	<div
+		hidden="hidden"
+		data-url={ params.Url }
+		x-init="url = $el.dataset.url"
+	></div>
+	for k, v := range params.Values {
+		<input type="hidden" name={ k } value={ v }/>
+	}
+}
+
+templ ShowNewReceiptsDialog(encoded string) {
+	<div id="receipts-dialog-content" hx-swap-oob="innerHTML">
+		<div
+			data-params={ encoded }
+			x-init="$dispatch('event-receipt-form-update', { params: $el.dataset.params })
+		  $el.remove()
+		"
+		></div>
+	</div>
+}

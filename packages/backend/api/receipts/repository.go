@@ -225,3 +225,20 @@ func deleteById(id string) (int64, error) {
 
 	return rowsAffected, nil
 }
+
+func insert(receipt model.Receipts) (int64, error) {
+	stmt := Receipts.INSERT(Receipts.ID, Receipts.BuildingID, Receipts.Year, Receipts.Month, Receipts.Date, Receipts.RateID, Receipts.Sent).
+		VALUES(receipt.ID, receipt.BuildingID, receipt.Year, receipt.Month, receipt.Date, receipt.RateID, receipt.Sent)
+
+	res, err := stmt.Exec(db.GetDB().DB)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
+}

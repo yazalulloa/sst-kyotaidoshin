@@ -81,7 +81,7 @@ func DeleteByBuilding(buildingId string) (int64, error) {
 	return rowsAffected, nil
 }
 
-func InsertBackup(array []model.ExtraCharges) (int64, error) {
+func InsertBulk(array []model.ExtraCharges) (int64, error) {
 	if len(array) == 0 {
 		return 0, nil
 	}

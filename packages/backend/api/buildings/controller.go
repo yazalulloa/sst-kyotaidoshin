@@ -225,8 +225,14 @@ func buildingPut(w http.ResponseWriter, r *http.Request) {
 	if response.createdNew != nil && *response.createdNew && response.key != nil {
 		redirectUrl := "/buildings/edit/" + *response.key
 
-		w.Header().Add("HX-Location", redirectUrl)
-		w.WriteHeader(http.StatusOK)
+		err := api.AnchorClickInitView(redirectUrl).Render(r.Context(), w)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		//w.Header().Add("HX-Location", redirectUrl)
+		//w.WriteHeader(http.StatusOK)
 		return
 	}
 
@@ -522,7 +528,7 @@ func ProcessDecoder(decoder *json.Decoder) (int64, error) {
 		return 0, err
 	}
 
-	_, err = extraCharges.InsertBackup(extraChargeArray)
+	_, err = extraCharges.InsertBulk(extraChargeArray)
 	if err != nil {
 		return 0, err
 	}

@@ -16,7 +16,7 @@ import (
 )
 
 func BuildUploadForm(r *http.Request, uploadPath string, filePrefix string) (templ.Component, error) {
-	params, err := util.GetUploadFormParams(r, uploadPath, filePrefix)
+	params, err := util.GetUploadFormParams(r, uploadPath, filePrefix, "")
 	if err != nil {
 		return nil, err
 	}

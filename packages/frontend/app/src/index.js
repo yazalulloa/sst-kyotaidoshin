@@ -19,6 +19,8 @@ window.htmx = htmx;
 // htmx.logAll();
 // htmx.config.withCredentials = true;
 htmx.config.selfRequestsOnly = false;
+htmx.config.historyCacheSize = 0;
+htmx.config.refreshOnHistoryMiss = true;
 
 if (import.meta.env.VITE_IS_DEV === 'true') {
   SVGLoader.destroyCache();

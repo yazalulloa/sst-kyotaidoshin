@@ -7,6 +7,7 @@ import (
 	"kyotaidoshin/debts"
 	"kyotaidoshin/expenses"
 	"kyotaidoshin/extraCharges"
+	"kyotaidoshin/rates"
 	"kyotaidoshin/reserveFunds"
 	"kyotaidoshin/util"
 )
@@ -129,6 +130,7 @@ type FormRequest struct {
 }
 
 type FormResponse struct {
+	Key      *string
 	errorStr string
 }
 
@@ -180,4 +182,25 @@ type ExpenseAttr struct {
 type TabId struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+}
+
+type ReceiptFileFormDto struct {
+	Month     int16          `json:"month"`
+	Year      int16          `json:"year"`
+	Years     []int16        `json:"years"`
+	Building  string         `json:"building"`
+	Buildings []string       `json:"buildings"`
+	Filename  string         `json:"filename"`
+	Date      string         `json:"date"`
+	Rates     []rates.Option `json:"rates"`
+	Data      string         `json:"data"`
+}
+
+type ReceiptNewFormRequest struct {
+	Month    int16  `form:"month" validate:"required,gte=1,lte=12"`
+	Year     int16  `form:"year" validate:"required,gte=2020,lte=2100"`
+	Building string `form:"building" validate:"required,notblank,min=3,max=100"`
+	Date     string `form:"date" validate:"required,notblank,min=10,max=10"`
+	Rate     string `form:"rate" validate:"required,notblank,min=3,max=20"`
+	Data     string `form:"data" validate:"required,notblank,min=3,max=10000"`
 }

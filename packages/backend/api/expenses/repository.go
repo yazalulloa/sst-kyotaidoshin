@@ -19,7 +19,7 @@ func count() (int64, error) {
 	return dest.Count, nil
 }
 
-func InsertBackup(array []model.Expenses) (int64, error) {
+func InsertBulk(array []model.Expenses) (int64, error) {
 	if len(array) == 0 {
 		return 0, nil
 	}
