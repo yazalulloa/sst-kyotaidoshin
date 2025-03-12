@@ -2,14 +2,14 @@ package aws_h
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"strings"
 )
 
 func FileExistsS3(ctx context.Context, bucketName string, objectKey string) (bool, error) {
-	if true {
-		return false, nil
-	}
 
 	s3Client, err := GetS3Client(ctx)
 	if err != nil {
@@ -22,6 +22,12 @@ func FileExistsS3(ctx context.Context, bucketName string, objectKey string) (boo
 	})
 
 	if err != nil {
+
+		var notFound *types.NoSuchKey
+		if ok := errors.As(err, &notFound); ok {
+			fmt.Printf("Object %s does not exist in bucket %s\n", objectKey, bucketName)
+		}
+
 		is404 := strings.Contains(err.Error(), "response error StatusCode: 404")
 		if !is404 {
 			return false, err

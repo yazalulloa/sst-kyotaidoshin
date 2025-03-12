@@ -146,8 +146,11 @@ func GetParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKey
 
 	buildObjectKey := func(str string) string {
 		date := receipt.Receipt.Date.Format(time.DateOnly)
-		return fmt.Sprintf("%s/%s/%s_%s_%s_%s.pdf", receipt.Building.ID, receipt.Receipt.ID,
-			receipt.Building.ID, strings.ToUpper(receipt.MonthStr), date, str)
+		//return fmt.Sprintf("RECEIPS/%s/%s_%s/%s_%s_%s_%s.pdf", receipt.Building.ID, receipt.Building.ID, receipt.Receipt.ID,
+		//	receipt.Building.ID, strings.ToUpper(receipt.MonthStr), date, str)
+
+		return fmt.Sprintf("RECEIPT_%s_%s_%s_%s_%s.pdf", receipt.Building.ID, receipt.Receipt.ID,
+			strings.ToUpper(receipt.MonthStr), date, str)
 	}
 
 	parts := make([]PartInfoUpload, numOfWorkers)
@@ -167,7 +170,7 @@ func GetParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKey
 			} else {
 				if apt.Apartment.Number == keys.Part {
 					index = 0
-				} else if keys.IsApt {
+				} else if keys.IsApt && keys.Part == "" {
 					index = i
 				}
 			}
