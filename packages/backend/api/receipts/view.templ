@@ -21,6 +21,12 @@ templ InitView(dto InitDto) {
 	></div>
 }
 
+templ BuildingIdsView(ids string) {
+	<div
+		x-init={ fmt.Sprintf("buildings = %s; $el.remove()", ids) }
+	></div>
+}
+
 templ Search(res TableResponse) {
 	for _, item := range res.Results {
 		@ItemView(item)
@@ -342,16 +348,6 @@ templ SendPdfsProgressView(update string) {
 	></div>
 }
 
-templ UploadFormView(params util.UploadBackupParams) {
-	<div
-		hidden="hidden"
-		data-url={ params.Url }
-		x-init="url = $el.dataset.url"
-	></div>
-	for k, v := range params.Values {
-		<input type="hidden" name={ k } value={ v }/>
-	}
-}
 
 templ ShowNewReceiptsDialog(encoded string) {
 	<div id="receipts-dialog-content" hx-swap-oob="innerHTML">

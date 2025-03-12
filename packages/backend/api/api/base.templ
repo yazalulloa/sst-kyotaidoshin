@@ -70,6 +70,17 @@ templ BackBtn(backUrl string) {
 	</button>
 }
 
+templ UploadFormView(params util.UploadBackupParams) {
+	<div
+		hidden="hidden"
+		data-url={ params.Url }
+		x-init="url = $el.dataset.url"
+	></div>
+	for k, v := range params.Values {
+		<input type="hidden" name={ k } value={ v }/>
+	}
+}
+
 templ UploadBackupForm(params util.UploadBackupParams) {
 	<form
 		id="backup-file-uploader"

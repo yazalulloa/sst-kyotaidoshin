@@ -27,7 +27,7 @@ func Routes(server *mux.Router) {
 	server.HandleFunc(_PATH, aptPut).Methods("PUT")
 	server.HandleFunc(_PATH+"/{key}", aptDelete).Methods("DELETE")
 	server.HandleFunc(_UPLOAD_BACKUP_FORM, getUploadBackupForm).Methods("GET")
-	server.HandleFunc(_UPLOAD_BACKUP, uploadBackup).Methods("GET")
+	server.HandleFunc(_UPLOAD_BACKUP, uploadBackup).Methods("POST")
 	server.HandleFunc(_PATH+"/buildingsIds", getBuildingIds).Methods("GET")
 	//server.HandleFunc(_PATH+"/upload/backup", uploadBackupUrl).Methods("GET")
 	//server.HandleFunc(_PATH+"/formData", formData).Methods("GET")
@@ -255,7 +255,7 @@ func aptPut(w http.ResponseWriter, r *http.Request) {
 
 func getUploadBackupForm(w http.ResponseWriter, r *http.Request) {
 
-	component, err := api.BuildUploadForm(r, _UPLOAD_BACKUP[1:], "apartments")
+	component, err := api.BuildUploadForm(r, "BACKUPS/APARTMENTS/")
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -283,7 +283,7 @@ func ProcessDecoder(decoder *json.Decoder) (int64, error) {
 
 func uploadBackup(w http.ResponseWriter, r *http.Request) {
 
-	component, err := api.ProcessUploadBackup(r, _UPLOAD_BACKUP_FORM, "apartments-updater", "update-apartments", ProcessDecoder)
+	component, err := api.ProcessUploadBackup(r, "/apartments", ProcessDecoder)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

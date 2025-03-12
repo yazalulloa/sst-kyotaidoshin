@@ -15,12 +15,18 @@ import (
 	"net/http"
 )
 
-func BuildUploadForm(r *http.Request, uploadPath string, filePrefix string) (templ.Component, error) {
-	params, err := util.GetUploadFormParams(r, uploadPath, filePrefix, "")
+func BuildUploadForm(r *http.Request, filePrefix string) (templ.Component, error) {
+	filename := util.GetQueryParamAsString(r, "name")
+
+	if filename == "" {
+		return nil, errors.New("BAD REQUEST")
+	}
+
+	params, err := util.GetUploadFormParams(r, filePrefix, filename)
 	if err != nil {
 		return nil, err
 	}
-	return UploadBackupForm(*params), nil
+	return UploadFormView(*params), nil
 }
 
 func ProcessBackup(ctx context.Context, bucket, key, etag *string,
@@ -91,7 +97,28 @@ func ProcessBackup(ctx context.Context, bucket, key, etag *string,
 	return inserted, nil
 }
 
-func ProcessUploadBackup(r *http.Request, uploadBackupFormUrl string, idUpdater string, event string, processJson func(*json.Decoder) (int64, error)) (templ.Component, error) {
+func ProcessUploadBackup(r *http.Request, redirecUrl string, processJson func(*json.Decoder) (int64, error)) (templ.Component, error) {
+	key := r.FormValue("key")
+	if key == "" {
+		log.Printf("key is empty")
+		return nil, errors.New("BAD REQUEST")
+	}
+
+	bucket, err := util.GetReceiptsBucket()
+	if err != nil {
+		log.Printf("Error getting bucket Name: %s", err)
+		return nil, err
+	}
+
+	_, err = ProcessBackup(r.Context(), &bucket, &key, nil, processJson)
+	if err != nil {
+		return nil, err
+	}
+
+	return AnchorClickInitView(redirecUrl), nil
+}
+
+func OLD_ProcessUploadBackup(r *http.Request, uploadBackupFormUrl string, idUpdater string, event string, processJson func(*json.Decoder) (int64, error)) (templ.Component, error) {
 	bucket := util.GetQueryParamAsString(r, "bucket")
 	key := util.GetQueryParamAsString(r, "key")
 	etag := util.GetQueryParamAsString(r, "etag")

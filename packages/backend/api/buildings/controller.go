@@ -36,7 +36,7 @@ func Routes(server *mux.Router) {
 	server.HandleFunc(_PATH, buildingPut).Methods("PUT")
 	server.HandleFunc(_PATH+"/formData", formData).Methods("GET")
 	server.HandleFunc(_UPLOAD_BACKUP_FORM, getUploadBackupForm).Methods("GET")
-	server.HandleFunc(_UPLOAD_BACKUP, uploadBackup).Methods("GET")
+	server.HandleFunc(_UPLOAD_BACKUP, uploadBackup).Methods("POST")
 }
 
 func search(w http.ResponseWriter, r *http.Request) {
@@ -395,7 +395,7 @@ func formData(w http.ResponseWriter, r *http.Request) {
 
 func getUploadBackupForm(w http.ResponseWriter, r *http.Request) {
 
-	component, err := api.BuildUploadForm(r, _UPLOAD_BACKUP[1:], "buildings")
+	component, err := api.BuildUploadForm(r, "BACKUPS/BUILDINGS/")
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -442,7 +442,7 @@ type reserveFundDto struct {
 
 func uploadBackup(w http.ResponseWriter, r *http.Request) {
 
-	component, err := api.ProcessUploadBackup(r, _UPLOAD_BACKUP_FORM, "buildings-updater", "update-buildings", ProcessDecoder)
+	component, err := api.ProcessUploadBackup(r, "/buildings", ProcessDecoder)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

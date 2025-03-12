@@ -100,12 +100,13 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 		return 0, err
 	}
 
+	receiptsArray := make([]model.Receipts, len(records))
 	var extraChargeArray []model.ExtraCharges
 	var expensesArray []model.Expenses
 	var debtsArray []model.Debts
 
-	var counter int64
-	for _, record := range records {
+	counter := int64(len(records))
+	for i, record := range records {
 
 		date, err := time.Parse(time.DateOnly, record.Receipt.Date)
 		if err != nil {
@@ -139,11 +140,7 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 			CreatedAt:  &createdAt,
 		}
 
-		_, err = insertBackup(receipt)
-		if err != nil {
-			return 0, err
-		}
-		counter++
+		receiptsArray[i] = receipt
 
 		for _, extraCharge := range record.ExtraCharges {
 			var builder strings.Builder
@@ -214,30 +211,36 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 
 	}
 
-	var oErr error
 	var wg sync.WaitGroup
-	var once sync.Once
-	handleErr := func(e error) {
-		if e != nil {
-			once.Do(func() {
-				oErr = e
-			})
-		}
-	}
+	wg.Add(4)
+	errorChan := make(chan error, 4)
 
-	wg.Add(3)
+	go func() {
+		defer wg.Done()
+		_, err := InsertBulk(receiptsArray)
+		if err != nil {
+			errorChan <- err
+			return
+		}
+	}()
 
 	go func() {
 		defer wg.Done()
 		rows, err := extraCharges.InsertBulk(extraChargeArray)
-		handleErr(err)
+		if err != nil {
+			errorChan <- err
+			return
+		}
 		log.Printf("Inserted %d/%d extra charges", len(extraChargeArray), rows)
 	}()
 
 	go func() {
 		defer wg.Done()
 		rows, err := expenses.InsertBulk(expensesArray)
-		handleErr(err)
+		if err != nil {
+			errorChan <- err
+			return
+		}
 		log.Printf("Inserted %d/%d expenses", len(expensesArray), rows)
 	}()
 
@@ -245,14 +248,19 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 		defer wg.Done()
 
 		rows, err := debts.InsertBulk(debtsArray)
-		handleErr(err)
+		if err != nil {
+			errorChan <- err
+			return
+		}
 		log.Printf("Inserted %d/%d debts", len(debtsArray), rows)
 	}()
 
 	wg.Wait()
+	close(errorChan)
 
-	if oErr != nil {
-		return 0, oErr
+	err = util.HasErrors(errorChan)
+	if err != nil {
+		return 0, err
 	}
 
 	return counter, nil

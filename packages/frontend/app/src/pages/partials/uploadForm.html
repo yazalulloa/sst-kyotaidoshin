@@ -1,0 +1,98 @@
+<form
+    x-data="{
+            url: '',
+            file: '',
+          }"
+    x-init="
+            $watch('file', (value) => {
+              if (value && value !== '') {
+               if (false) {
+               $el.firstElementChild.dispatchEvent(new CustomEvent('get_form'))
+               }
+
+              }
+            })
+            $watch('url', (value) => {
+              htmx.process($el)
+              if (value) {
+                $el.dispatchEvent(new CustomEvent('send_file'));
+              }
+            })
+          "
+    @event-handle-request="
+          file = ''
+          url = ''
+
+          if ($event.detail.status === 204) {
+          $el.children[1].dispatchEvent(new CustomEvent('upload'))
+          } else {
+           //todo show toast
+          console.log('Response', $event.detail)
+          }
+
+          $el.firstElementChild.innerHTML = ''
+
+        "
+    x-bind:id="formId"
+    class="whitespace-nowrap bg-transparent rounded-radius border border-secondary px-4 py-2 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-secondary-dark dark:text-secondary-dark dark:focus-visible:outline-secondary-dark"
+    x-bind:hx-post="url"
+    hx-encoding="multipart/form-data"
+    x-bind:hx-disabled-elt="`#${formId}, this, #${formId} * > input:not([disabled]), #${formId} * > label:not([disabled])`"
+    hx-swap="outerHTML"
+    hx-trigger="send_file"
+    hx-indicator=".htmx-indicator"
+    hx-params="not filename"
+    hx-on::after-request="
+        if (event.srcElement.id === this.id) {
+         this.dispatchEvent(new CustomEvent('event-handle-request', { detail: event.detail.xhr}))
+        }
+        "
+>
+
+
+  <div
+      x-bind:hx-get="uploadFormPath"
+      hx-trigger="get_form"
+      x-bind:hx-disabled-elt="`#${formId}, this, #${formId} * > input:not([disabled]), #${formId} * > label:not([disabled])`"
+      hx-vals="js:{ name: event.detail}"
+      hx-swap="innerHTML"
+      hidden="hidden">
+  </div>
+
+  <div
+      x-bind:hx-post="uploadFileCallback"
+      hx-trigger="upload"
+      x-bind:hx-disabled-elt="`#${formId}, this, #${formId} * > input:not([disabled]), #${formId} * > label:not([disabled])`"
+      hx-params="key"
+      x-bind:hx-swap="callBackSwap"
+      hidden="hidden">
+  </div>
+
+  <label
+      class="flex flex-row gap-0"
+      x-data="{ filename: ''}"
+  >
+    <span x-text="$t(btnText)"></span>
+    <span x-show="filename !== ''">:&nbsp;</span>
+    <span
+        x-bind:class="filename === '' ? 'hidden' : ''"
+        x-text="filename"
+        x-init="$watch('file', (value) => {
+            if (value && value.length > 0) {
+              filename = $el.nextElementSibling.files[0].name;
+              $el.parentElement.parentElement.firstElementChild.dispatchEvent(new CustomEvent('get_form', { detail: filename}))
+             } else {
+              filename = '';
+             }
+          })"
+    ></span>
+    <input
+        class="hidden"
+        type="file"
+        x-bind:accept="fileAccept"
+        name="file"
+        x-model="file"
+    />
+  </label>
+
+</form>

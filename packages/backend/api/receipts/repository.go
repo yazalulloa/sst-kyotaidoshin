@@ -19,9 +19,12 @@ func getTotalCount() (int64, error) {
 	return dest.Count, nil
 }
 
-func insertBackup(receipt model.Receipts) (int64, error) {
-	stmt := Receipts.INSERT(Receipts.ID, Receipts.BuildingID, Receipts.Year, Receipts.Month, Receipts.Date, Receipts.RateID, Receipts.Sent, Receipts.LastSent, Receipts.CreatedAt).
-		VALUES(receipt.ID, receipt.BuildingID, receipt.Year, receipt.Month, receipt.Date, receipt.RateID, receipt.Sent, receipt.LastSent, receipt.CreatedAt)
+func InsertBulk(receipt []model.Receipts) (int64, error) {
+	stmt := Receipts.INSERT(Receipts.ID, Receipts.BuildingID, Receipts.Year, Receipts.Month, Receipts.Date, Receipts.RateID, Receipts.Sent, Receipts.LastSent, Receipts.CreatedAt)
+
+	for _, r := range receipt {
+		stmt = stmt.VALUES(r.ID, r.BuildingID, r.Year, r.Month, r.Date, r.RateID, r.Sent, r.LastSent, r.CreatedAt)
+	}
 
 	res, err := stmt.Exec(db.GetDB().DB)
 	if err != nil {

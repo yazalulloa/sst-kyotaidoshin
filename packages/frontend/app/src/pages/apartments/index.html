@@ -2,7 +2,7 @@
      class="flex flex-col items-center gap-2 text-center fade-me-out fade-me-in">
 
   <div class="flex w-full flex-row flex-wrap items-center justify-start gap-2 text-center"
-  x-data="{
+       x-data="{
   buildings: []
   }">
     <div class="flex flex-row gap-2 justify-center min-w-[8rem]"
@@ -32,13 +32,20 @@
          hidden="hidden">
     </div>
 
-    <button disabled type="button"
-            class="whitespace-nowrap border bg-transparent px-4 py-2 text-center text-sm font-medium tracking-wide transition rounded-radius border-secondary text-secondary hover:opacity-75 focus-visible:outline-secondary focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:border-secondary-dark dark:text-secondary-dark dark:focus-visible:outline-secondary-dark"
-            x-text="$t('main-action-upload-backup')"
-            hx-get="/api/apartments/uploadBackupForm"
-            hx-trigger="load"
-            hx-swap="outerHTML">
-    </button>
+    <div x-data="{
+        formId: 'apartments-upload-backup',
+        uploadFormPath: '/api/apartments/uploadBackupForm',
+        uploadFileCallback: '/api/apartments/upload/backup',
+        callBackSwap: 'innerHTML',
+        btnText: 'main-action-upload-backup',
+        fileAccept: '.json.gz'
+       }">
+      <div hidden="hidden"
+           x-bind:hx-get="uploadFormPartialUrl"
+           hx-trigger="load"
+           hx-swap="outerHTML">
+      </div>
+    </div>
 
     <div x-bind:hx-get="apartmentsFormDialogPartialUrl"
          hx-trigger="load"

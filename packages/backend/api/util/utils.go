@@ -133,11 +133,9 @@ func StrArrayToInt16Array(strArray []string) []int16 {
 	return int16Array
 }
 
-func GetUploadFormParams(r *http.Request, uploadPath, filePrefix, filename string) (*UploadBackupParams, error) {
+func GetUploadFormParams(r *http.Request, filePrefix, filename string) (*UploadBackupParams, error) {
 
 	bucketName, err := GetReceiptsBucket()
-	// TODO change this
-	//bucketName, err := resource.Get("UploadBackupBucket", "name")
 	if err != nil {
 		log.Printf("Error getting bucket Name: %s", err)
 		return nil, err

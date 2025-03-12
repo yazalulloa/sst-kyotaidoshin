@@ -49,9 +49,10 @@ func Routes(server *mux.Router) {
 	server.HandleFunc(_PATH, receiptPut).Methods("PUT")
 	server.HandleFunc(_PATH+"/clear_pdfs", clearPdfs).Methods("DELETE")
 	server.HandleFunc(_PATH+"/{key}", receiptDelete).Methods("DELETE")
-	server.HandleFunc(_PATH+"/init", getInit).Methods("GET")
+	server.HandleFunc(_PATH+"/buildingsIds", getBuildingIds).Methods("GET")
+	//server.HandleFunc(_PATH+"/init", getInit).Methods("GET")
 	server.HandleFunc(_UPLOAD_BACKUP_FORM, getUploadBackupForm).Methods("GET")
-	server.HandleFunc(_UPLOAD_BACKUP, uploadBackup).Methods("GET")
+	server.HandleFunc(_UPLOAD_BACKUP, uploadBackup).Methods("POST")
 	server.HandleFunc(_PATH+"/years", getYears).Methods("GET")
 	//server.HandleFunc(_PATH+"/buildingsIds", getBuildingIds).Methods("GET")
 	server.HandleFunc(_PATH+"/formData/{key}", formData).Methods("GET")
@@ -64,72 +65,16 @@ func Routes(server *mux.Router) {
 	server.HandleFunc(_PATH+"/new_from_file", newFromFile).Methods("POST")
 }
 
-func getInit(w http.ResponseWriter, r *http.Request) {
-
-	var oErr error
-	var wg sync.WaitGroup
-	var once sync.Once
-	handleErr := func(e error) {
-		if e != nil {
-			once.Do(func() {
-				oErr = e
-			})
-		}
-	}
-	wg.Add(2)
-
-	var initDto InitDto
-
-	go func() {
-		defer wg.Done()
-		ids, err := buildings.SelectIds()
-		if err != nil {
-			handleErr(err)
-			return
-		}
-		str := util.StringArrayToString(ids)
-		initDto.BuildingIds = str
-	}()
-
-	go func() {
-		defer wg.Done()
-		params, err := util.GetUploadFormParams(r, _UPLOAD_BACKUP[1:], "receipts", "")
-		if err != nil {
-			handleErr(err)
-			return
-		}
-
-		params.OutOfBandsUpdate = true
-		initDto.UploadBackupParams = params
-	}()
-
-	//go func() {
-	//	defer wg.Done()
-	//
-	//	requestQuery := RequestQuery{
-	//		LastId:    0,
-	//		Limit:     31,
-	//		Buildings: nil,
-	//		SortOrder: util.SortOrderTypeDESC,
-	//	}
-	//
-	//	res, err := getTableResponse(requestQuery)
-	//	if err != nil {
-	//		handleErr(err)
-	//		return
-	//	}
-	//
-	//	initDto.TableResponse = res
-	//}()
-
-	wg.Wait()
-
-	if oErr != nil {
-		http.Error(w, oErr.Error(), http.StatusInternalServerError)
+func getBuildingIds(w http.ResponseWriter, r *http.Request) {
+	buildingIds, err := buildings.SelectIds()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	err := InitView(initDto).Render(r.Context(), w)
+	str := util.StringArrayToString(buildingIds)
+
+	err = BuildingIdsView(str).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -138,7 +83,7 @@ func getInit(w http.ResponseWriter, r *http.Request) {
 
 func getUploadBackupForm(w http.ResponseWriter, r *http.Request) {
 
-	component, err := api.BuildUploadForm(r, _UPLOAD_BACKUP[1:], "receipts")
+	component, err := api.BuildUploadForm(r, "BACKUPS/RECEIPTS/")
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -155,7 +100,7 @@ func getUploadBackupForm(w http.ResponseWriter, r *http.Request) {
 
 func uploadBackup(w http.ResponseWriter, r *http.Request) {
 
-	component, err := api.ProcessUploadBackup(r, _UPLOAD_BACKUP_FORM, "receipts-updater", "update-receipts", ProcessDecoder)
+	component, err := api.ProcessUploadBackup(r, "/receipts", ProcessDecoder)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -197,17 +142,7 @@ func ProcessDecoder(decoder *json.Decoder) (int64, error) {
 		return lhs.Compare(rhs)
 	})
 
-	//for _, rec := range records {
-	//	log.Printf("Date: %s", rec.Receipt.Date)
-	//}
-
 	array := util.SplitArray(records, 10)
-
-	//for i, chunk := range array {
-	//	for _, rec := range chunk {
-	//		log.Printf("Chunk %d: Date: %s", i, rec.Receipt.Date)
-	//	}
-	//}
 
 	var total int64
 	ratesHolder := RatesHolder{Rates: syncmap.Map{}}
@@ -995,13 +930,13 @@ func getUploadForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	params, err := util.GetUploadFormParams(r, "", "NEW_RECEIPTS/", filename)
+	params, err := util.GetUploadFormParams(r, "NEW_RECEIPTS/", filename)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	err = UploadFormView(*params).Render(r.Context(), w)
+	err = api.UploadFormView(*params).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
