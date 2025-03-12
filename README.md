@@ -13,8 +13,11 @@ Tech:
 TODOS:
 - [ ] Send Pdfs by selection
 - [ ] Copy Receipt
+- [ ] Optimize SELECT on Calculate Receipt
 - [ ] Receipt nav
 - [ ] Permissions
+- [ ] Horizontal scroll on view receipts
+- [ ] Toast Error
 - [ ] Cache of partials (building ids, years, etc)
 - [ ] Backups
 - [ ] Telegram

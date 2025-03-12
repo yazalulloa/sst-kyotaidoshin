@@ -204,3 +204,10 @@ type ReceiptNewFormRequest struct {
 	Rate     string `form:"rate" validate:"required,notblank,min=3,max=20"`
 	Data     string `form:"data" validate:"required,notblank,min=3,max=10000"`
 }
+
+type ReceiptFull struct {
+	model.Receipts
+	Expenses     []model.Expenses
+	Debts        []model.Debts
+	ExtraCharges []model.ExtraCharges
+}

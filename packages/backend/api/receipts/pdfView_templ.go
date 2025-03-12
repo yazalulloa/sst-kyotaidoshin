@@ -622,7 +622,7 @@ func DebtView(dto CalculatedReceipt) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		debtCurrency := util.GetAllowedCurrency(dto.Building.DebtCurrency)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "<div class=\"grid grid-cols-[1fr_4fr_1fr_2fr_3fr_2fr] gap-x-2\"><span class=\"font-bold\">APTO</span> <span class=\"font-bold\">PROPIETARIO</span> <span class=\"font-bold\">RECIBOS</span> <span class=\"font-bold text-end\">DEUDA</span> <span class=\"font-bold text-center\">MESES</span> <span class=\"font-bold\">ABONO</span> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 51, "<div class=\"grid grid-cols-[1fr_4fr_1fr_2fr_3fr_2fr] gap-x-2\"><span class=\"font-bold text-start\">APTO</span> <span class=\"font-bold text-start\">PROPIETARIO</span> <span class=\"font-bold text-end\">RECIBOS</span> <span class=\"font-bold text-end\">DEUDA</span> <span class=\"font-bold text-center\">MESES</span> <span class=\"font-bold text-end\">ABONO</span> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

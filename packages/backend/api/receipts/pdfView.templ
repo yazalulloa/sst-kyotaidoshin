@@ -135,12 +135,12 @@ templ DebtView(dto CalculatedReceipt) {
 			<p class="text-center font-bold">DEUDAS</p>
 			{{ debtCurrency := util.GetAllowedCurrency(dto.Building.DebtCurrency) }}
 			<div class="grid grid-cols-[1fr_4fr_1fr_2fr_3fr_2fr] gap-x-2">
-				<span class="font-bold">APTO</span>
-				<span class="font-bold">PROPIETARIO</span>
-				<span class="font-bold">RECIBOS</span>
+				<span class="font-bold text-start">APTO</span>
+				<span class="font-bold text-start">PROPIETARIO</span>
+				<span class="font-bold text-end">RECIBOS</span>
 				<span class="font-bold text-end">DEUDA</span>
 				<span class="font-bold text-center">MESES</span>
-				<span class="font-bold">ABONO</span>
+				<span class="font-bold text-end">ABONO</span>
 				for _,apt := range dto.Apartments {
 					<span class="text-start">{ apt.Apartment.Number }</span>
 					<span class="text-start">{ apt.Apartment.Name }</span>

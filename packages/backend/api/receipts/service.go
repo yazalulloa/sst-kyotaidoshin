@@ -672,3 +672,144 @@ func deleteReceipt(keys Keys) (int64, error) {
 
 	return sum, nil
 }
+
+func duplicate(key Keys) (*string, error) {
+	var wg sync.WaitGroup
+	wg.Add(4)
+	errorChan := make(chan error, 4)
+
+	var receipt *model.Receipts
+	var debtArray []model.Debts
+	var expenseArray []model.Expenses
+	var extraChargeArray []model.ExtraCharges
+
+	go func() {
+		defer wg.Done()
+		rec, err := selectById(key.Id)
+		if err != nil {
+			errorChan <- err
+			return
+		}
+		receipt = rec
+	}()
+
+	go func() {
+		defer wg.Done()
+		array, err := debts.SelectByBuildingReceipt(key.BuildingId, key.Id)
+		if err != nil {
+			errorChan <- err
+			return
+		}
+		debtArray = array
+	}()
+
+	go func() {
+		defer wg.Done()
+		array, err := expenses.SelectByReceipt(key.Id)
+		if err != nil {
+			errorChan <- err
+			return
+		}
+		expenseArray = array
+	}()
+
+	go func() {
+		defer wg.Done()
+		array, err := extraCharges.SelectByReceipt(key.Id)
+		if err != nil {
+			errorChan <- err
+			return
+		}
+		extraChargeArray = array
+	}()
+
+	wg.Wait()
+	close(errorChan)
+
+	err := util.HasErrors(errorChan)
+	if err != nil {
+		return nil, err
+	}
+
+	receipt.ID = util.UuidV7()
+	receipt.Sent = false
+
+	for i := range debtArray {
+		debtArray[i].ReceiptID = receipt.ID
+	}
+
+	for i := range expenseArray {
+		expenseArray[i].ReceiptID = receipt.ID
+	}
+
+	for i := range extraChargeArray {
+		extraChargeArray[i].ParentReference = receipt.ID
+	}
+
+	rowsChan := make(chan int64, 4)
+	errorChan = make(chan error, 4)
+	wg.Add(4)
+
+	go func() {
+		defer wg.Done()
+
+		rowsAffected, err := insert(*receipt)
+		if err != nil {
+			errorChan <- err
+			return
+		}
+
+		rowsChan <- rowsAffected
+	}()
+
+	go func() {
+		defer wg.Done()
+		rowsAffected, err := debts.InsertBulk(debtArray)
+		if err != nil {
+			errorChan <- err
+			return
+		}
+
+		rowsChan <- rowsAffected
+	}()
+
+	go func() {
+		defer wg.Done()
+		rowsAffected, err := expenses.InsertBulk(expenseArray)
+		if err != nil {
+			errorChan <- err
+			return
+		}
+
+		rowsChan <- rowsAffected
+	}()
+
+	go func() {
+		defer wg.Done()
+		rowsAffected, err := extraCharges.InsertBulk(extraChargeArray)
+		if err != nil {
+			errorChan <- err
+			return
+		}
+
+		rowsChan <- rowsAffected
+	}()
+
+	wg.Wait()
+	close(errorChan)
+	close(rowsChan)
+
+	err = util.HasErrors(errorChan)
+	if err != nil {
+		return nil, err
+	}
+
+	var sum int64 = 0
+	for value := range rowsChan {
+		sum += value
+	}
+
+	log.Printf("Inserted %d records", sum)
+
+	return util.Encode(keys(*receipt, "")), nil
+}

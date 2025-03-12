@@ -41,6 +41,7 @@ const _DOWNLOAD_ZIP_FILE = _PATH + "/download/zip"
 const _DOWNLOAD_PDF_FILE = _PATH + "/download/pdf"
 const _SEND_PDFS = _PATH + "/send_pdfs"
 const _SEND_PDFS_PROGRESS = _SEND_PDFS + "/progress"
+const _DUPLICATE = _PATH + "/duplicate"
 
 func Routes(server *mux.Router) {
 
@@ -63,6 +64,7 @@ func Routes(server *mux.Router) {
 	server.HandleFunc(_SEND_PDFS_PROGRESS+"/{key}", sendPdfsProgress).Methods("GET")
 	server.HandleFunc(_PATH+"/upload_form", getUploadForm).Methods("GET")
 	server.HandleFunc(_PATH+"/new_from_file", newFromFile).Methods("POST")
+	server.HandleFunc(_DUPLICATE+"/{key}", duplicateReceipt).Methods("POST")
 }
 
 func getBuildingIds(w http.ResponseWriter, r *http.Request) {
@@ -962,6 +964,34 @@ func newFromFile(w http.ResponseWriter, r *http.Request) {
 	encoded := base64.URLEncoding.EncodeToString(byteArray)
 
 	err = ShowNewReceiptsDialog(encoded).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func duplicateReceipt(w http.ResponseWriter, r *http.Request) {
+	keyStr := mux.Vars(r)["key"]
+	if keyStr == "" {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	var keys Keys
+	err := util.Decode(keyStr, &keys)
+	if err != nil {
+		log.Printf("failed to decode key: %v", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	str, err := duplicate(keys)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = api.AnchorClickInitView(fmt.Sprintf("/receipts/edit/%s", *str)).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

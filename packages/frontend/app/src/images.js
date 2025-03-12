@@ -16,6 +16,7 @@ import receiptIconUrl from './assets/images/receipt.svg?no-inline'
 import pdfIconUrl from './assets/images/pdf-logo.svg?no-inline'
 import loadingIconUrl from './assets/images/loading.svg?no-inline'
 import sendMailIconUrl from './assets/images/send-mail.svg?no-inline'
+import duplicateIconUrl from './assets/images/duplicate.svg?no-inline'
 
 window.deleteIconUrl = deleteIconUrl;
 window.processIconUrl = processIconUrl;
@@ -31,6 +32,7 @@ window.receiptIconUrl = receiptIconUrl
 window.pdfIconUrl = pdfIconUrl
 window.loadingIconUrl = loadingIconUrl
 window.sendMailIconUrl = sendMailIconUrl
+window.duplicateIconUrl = duplicateIconUrl
 
 window.ratesIconUrl = ratesIconUrl;
 window.bucketIconUrl = bucketIconUrl;
