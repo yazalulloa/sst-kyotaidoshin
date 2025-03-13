@@ -22,7 +22,7 @@ TODOS:
 - [ ] Backups
 - [ ] Telegram
 - [ ] Cleanup Frontend
-- [ ] Focus edit on click
+- [x] Focus edit on click
 - [ ] Scroll forms
 - [ ] Custom Login
 - [ ] My Profile

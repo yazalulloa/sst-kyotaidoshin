@@ -167,7 +167,6 @@ func GetParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKey
 
 	}
 
-	log.Printf("Parts %v", parts)
 	pdfItems, err := checkOrBuild(ctx, parts)
 	if err != nil {
 		return nil, err

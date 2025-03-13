@@ -14,8 +14,6 @@ func FileExistsS3(ctx context.Context, bucketName string, objectKey string) (boo
 		return false, err
 	}
 
-	log.Printf("Checking if file %s %s exists", bucketName, objectKey)
-
 	_, err = s3Client.HeadObject(ctx, &s3.HeadObjectInput{
 		Bucket: &bucketName,
 		Key:    &objectKey,

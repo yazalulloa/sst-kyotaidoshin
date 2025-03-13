@@ -18,7 +18,7 @@ templ ReceiptHeader(dto CalculatedReceipt) {
 
 templ AptView(dto CalculatedReceipt, apt AptTotal) {
 	<h4 class="text-center font-bold">AVISO DE COBRO</h4>
-	<div class="flex flex-col justify-start text-start items-start">
+	<div class="w-full flex flex-col justify-start text-start items-start">
 		@ReceiptHeader(dto)
 		<p>PROPIETARIO: { apt.Apartment.Name }</p>
 		<p>APT: { apt.Apartment.Number }</p>
@@ -161,7 +161,7 @@ templ BuildingView(dto CalculatedReceipt) {
 	{{ multipleCurrencies := len(dto.CurrenciesToShowAmountToPay) > 1 }}
 	{{ mainCurrency := util.GetAllowedCurrency(dto.Building.MainCurrency) }}
 	<h4 class="text-center font-bold">AVISO DE COBRO</h4>
-	<div class="flex flex-col justify-start text-start items-start">
+	<div class="w-full flex flex-col justify-start text-start items-start">
 		<p>{ dto.Building.Name }</p>
 		<p>{ dto.Building.Rif }</p>
 		<p>MES A PAGAR: { strings.ToUpper(dto.MonthStr) }</p>
@@ -344,7 +344,7 @@ templ PrintView(title string, component templ.Component) {
           }
 			</style>
 		</head>
-		<body class="bg-white px-1 py-1 text-black">
+		<body class="bg-white px-1 py-1 text-black flex flex-col justify-center items-center">
 			@component
 		</body>
 	</html>

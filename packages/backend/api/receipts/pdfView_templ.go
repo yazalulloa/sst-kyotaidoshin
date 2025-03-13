@@ -119,7 +119,7 @@ func AptView(dto CalculatedReceipt, apt AptTotal) templ.Component {
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<h4 class=\"text-center font-bold\">AVISO DE COBRO</h4><div class=\"flex flex-col justify-start text-start items-start\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<h4 class=\"text-center font-bold\">AVISO DE COBRO</h4><div class=\"w-full flex flex-col justify-start text-start items-start\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -767,7 +767,7 @@ func BuildingView(dto CalculatedReceipt) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		multipleCurrencies := len(dto.CurrenciesToShowAmountToPay) > 1
 		mainCurrency := util.GetAllowedCurrency(dto.Building.MainCurrency)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 62, "<h4 class=\"text-center font-bold\">AVISO DE COBRO</h4><div class=\"flex flex-col justify-start text-start items-start\"><p>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 62, "<h4 class=\"text-center font-bold\">AVISO DE COBRO</h4><div class=\"w-full flex flex-col justify-start text-start items-start\"><p>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -859,7 +859,7 @@ func BuildingView(dto CalculatedReceipt) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var48 = []any{"grid gap-x-3 w-fit",
+		var templ_7745c5c3_Var48 = []any{"grid gap-x-2 w-fit",
 			templ.KV("grid-cols-[1fr_3fr_2fr]", !multipleCurrencies),
 			templ.KV("grid-cols-[1fr_3fr_1fr_1fr]", multipleCurrencies)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var48...)
@@ -1224,7 +1224,7 @@ func PrintView(title string, component templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, "</title><style>\n\n          @media print {\n            @page {\n              margin: 0.25cm;\n            }\n\n             html, body {\n               font-size: 10pt;\n             }\n          }\n\t\t\t</style></head><body class=\"bg-white px-1 py-1 text-black\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, "</title><style>\n\n          @media print {\n            @page {\n              margin: 0.25cm;\n            }\n\n             html, body {\n               font-size: 10pt;\n             }\n          }\n\t\t\t</style></head><body class=\"bg-white px-1 py-1 text-black flex flex-col justify-center items-center\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
