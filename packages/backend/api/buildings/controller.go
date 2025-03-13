@@ -468,6 +468,19 @@ func ProcessDecoder(decoder *json.Decoder) (int64, error) {
 	buildings := make([]model.Buildings, len(dto))
 	var reserveFundArray []model.ReserveFunds
 	var extraChargeArray []model.ExtraCharges
+
+	configs, err := email_h.GetConfigs()
+	if err != nil {
+		return 0, err
+	}
+
+	getFirst := func() string {
+		for key := range configs {
+			return key
+		}
+		return ""
+	}
+
 	for i, record := range dto {
 		buildings[i] = model.Buildings{
 			ID:                          record.Building.Id,
@@ -479,7 +492,7 @@ func ProcessDecoder(decoder *json.Decoder) (int64, error) {
 			FixedPay:                    record.Building.FixedPay,
 			FixedPayAmount:              record.Building.FixedPayAmount,
 			RoundUpPayments:             record.Building.RoundUpPayments,
-			EmailConfig:                 "test",
+			EmailConfig:                 getFirst(),
 		}
 
 		for _, reserveFund := range record.ReserveFunds {

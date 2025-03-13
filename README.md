@@ -11,7 +11,7 @@ Tech:
 - Turso
 
 TODOS:
-- [ ] Send Pdfs by selection
+- [x] Send Pdfs by selection
 - [x] Copy Receipt
 - [ ] Optimize SELECT on Calculate Receipt
 - [ ] Receipt nav
