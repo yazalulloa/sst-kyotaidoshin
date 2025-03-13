@@ -65,6 +65,7 @@ func Routes(server *mux.Router) {
 	server.HandleFunc(_PATH+"/upload_form", getUploadForm).Methods("GET")
 	server.HandleFunc(_PATH+"/new_from_file", newFromFile).Methods("POST")
 	server.HandleFunc(_DUPLICATE+"/{key}", duplicateReceipt).Methods("POST")
+	server.HandleFunc(_PATH+"/apts", getSendApts).Methods("GET")
 }
 
 func getBuildingIds(w http.ResponseWriter, r *http.Request) {
@@ -996,4 +997,20 @@ func duplicateReceipt(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func getSendApts(w http.ResponseWriter, r *http.Request) {
+
+	str, err := getApts()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = SendAptsView(*str).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 }

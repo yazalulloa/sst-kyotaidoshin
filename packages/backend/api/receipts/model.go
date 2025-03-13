@@ -38,7 +38,7 @@ type Item struct {
 	Item         model.Receipts
 	CreatedAt    int64
 	LastSent     *int64
-	UpdateParams *string
+	UpdateParams string
 	isUpdate     bool
 }
 
@@ -94,10 +94,11 @@ type RatesHolder struct {
 }
 
 type UpdateParams struct {
-	Key   string `json:"key"`
-	Year  int16  `json:"year"`
-	Month int16  `json:"month"`
-	Date  string `json:"date"`
+	Key      string `json:"key"`
+	Building string `json:"building"`
+	Year     int16  `json:"year"`
+	Month    int16  `json:"month"`
+	Date     string `json:"date"`
 }
 
 type RateDto struct {

@@ -346,12 +346,29 @@ func toItem(item *model.Receipts, oldCardId *string) (*Item, error) {
 		lastSent = &tmp
 	}
 
+	params := UpdateParams{
+		Key:      key,
+		Building: item.BuildingID,
+		Year:     item.Year,
+		Month:    item.Month,
+		Date:     item.Date.Format(time.DateOnly),
+	}
+
+	byteArray, err := json.Marshal(params)
+
+	if err != nil {
+		return nil, err
+	}
+
+	base64Str := base64.URLEncoding.EncodeToString(byteArray)
+
 	return &Item{
-		CardId:    keys.CardId,
-		Key:       key,
-		Item:      *item,
-		CreatedAt: item.CreatedAt.UnixMilli(),
-		LastSent:  lastSent,
+		CardId:       keys.CardId,
+		Key:          key,
+		Item:         *item,
+		CreatedAt:    item.CreatedAt.UnixMilli(),
+		LastSent:     lastSent,
+		UpdateParams: base64Str,
 	}, nil
 }
 
@@ -812,4 +829,29 @@ func duplicate(key Keys) (*string, error) {
 	log.Printf("Inserted %d records", sum)
 
 	return util.Encode(keys(*receipt, "")), nil
+}
+
+func getApts() (*string, error) {
+
+	array, err := apartments.SelectAllNumberAndName()
+	if err != nil {
+		return nil, err
+	}
+
+	apts := make(map[string][]apartments.Apt)
+
+	for _, apt := range array {
+		apts[apt.BuildingID] = append(apts[apt.BuildingID], apartments.Apt{
+			Number: apt.Number,
+			Name:   apt.Name,
+		})
+	}
+
+	bytes, err := json.Marshal(apts)
+	if err != nil {
+		return nil, err
+	}
+
+	base64Str := base64.URLEncoding.EncodeToString(bytes)
+	return &base64Str, nil
 }

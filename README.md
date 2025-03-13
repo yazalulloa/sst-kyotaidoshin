@@ -12,7 +12,7 @@ Tech:
 
 TODOS:
 - [ ] Send Pdfs by selection
-- [ ] Copy Receipt
+- [x] Copy Receipt
 - [ ] Optimize SELECT on Calculate Receipt
 - [ ] Receipt nav
 - [ ] Permissions

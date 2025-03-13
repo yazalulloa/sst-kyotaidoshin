@@ -30,6 +30,7 @@ import debtsFormPartialUrl from './pages/debts/form.html?url'
 import usersIndexPartialUrl from './pages/users/index.html?url'
 import debtMonthsPartialUrl from './pages/debts/debtMonthsComponent.html?url'
 import uploadFormPartialUrl from './pages/partials/uploadForm.html?url'
+import aptSendDialogPartialUrl from './pages/receipts/aptSendDialog.html?url'
 
 window.backBtnPartialUrl = backBtnPartialUrl;
 window.currencyPickerPartialUrl = currencyPickerPartialUrl;
@@ -58,6 +59,7 @@ window.debtsFormPartialUrl = debtsFormPartialUrl;
 window.usersIndexPartialUrl = usersIndexPartialUrl;
 window.debtMonthsPartialUrl = debtMonthsPartialUrl;
 window.uploadFormPartialUrl = uploadFormPartialUrl;
+window.aptSendDialogPartialUrl = aptSendDialogPartialUrl;
 
 window.NAV_URLS = new Map([
   ['nav-apartments', apartmentsIndexPartialUrl],

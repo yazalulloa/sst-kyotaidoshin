@@ -1,0 +1,183 @@
+<div x-data="{
+       modalIsOpen: false,
+       selectAll: false,
+
+       key: '',
+       building: '',
+       year: 0,
+       month: 0,
+       date: '',
+
+       aptMap: null,
+       apts: [],
+       errMsg: '',
+     }"
+     @event-update-apts="
+
+     let base64 = $event.detail.apts;
+     let decodedString = decodeBase64UrlStr(base64);
+     aptMap = JSON.parse(decodedString);
+     "
+     @event-open-send-dialog.window="
+
+     let base64 = $event.detail.params
+     let decodedString = decodeBase64UrlStr(base64);
+     let jsonObject = JSON.parse(decodedString);
+     key = jsonObject.key;
+     building = jsonObject.building;
+     year = jsonObject.year;
+     month = jsonObject.month;
+     date = jsonObject.date;
+
+     apts = aptMap[building]
+     modalIsOpen = true;
+     "
+>
+
+  <div hidden="hidden"
+       hx-get="/api/receipts/apts"
+       hx-trigger="load"
+       hx-swap="outerHTML">
+
+  </div>
+  <div x-cloak x-show="modalIsOpen" x-transition.opacity.duration.200ms asd-x-trap.inert.noscroll="modalIsOpen"
+       x-on:keydown.esc.window="modalIsOpen = false" x-on:click.self="modalIsOpen = false"
+       class="fixed inset-0 z-30 flex items-end justify-center bg-black/20 p-4 pb-8 backdrop-blur-xs sm:items-center lg:p-8"
+       role="dialog" aria-modal="true" aria-labelledby="defaultModalTitle">
+    <!-- Modal Dialog -->
+    <form x-show="modalIsOpen"
+          x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
+          x-transition:enter-start="scale-0 opacity-0 -translate-y-8" x-transition:enter-end="scale-100"
+          class="flex flex-col gap-4 border max-h-[99%] max-w-9/0 min-w-2/10 rounded-radius border-outline bg-surface text-on-surface dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark"
+          hx-post="/api/receipts"
+          hx-disabled-elt="this, * > input:not([disabled]), * > button:not([disabled]), * > select:not([disabled])"
+          hx-indicator=".htmx-indicator"
+          hx-target="#send-apt-dialog-error"
+          hx-swap="innerHTML"
+    >
+
+      <div id="send-apt-dialog-error" hidden="hidden"></div>
+
+      <input hidden="hidden" name="key" x-model="key"/>
+
+      <!-- Dialog Header -->
+      <div
+          class="flex flex-col gap-1 items-center border-b p-4 border-outline bg-surface-alt/60 dark:border-outline-dark dark:bg-surface-dark/20">
+        <div class="flex items-center justify-between w-full">
+          <h3 class="font-semibold tracking-wide text-on-surface-strong dark:text-on-surface-dark-strong"
+              x-text="$t('main-action-send-pdfs')">
+          </h3>
+          <button type="button" x-on:click="modalIsOpen = false" aria-label="close modal">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor"
+                 fill="none" stroke-width="1.4" class="h-5 w-5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <div class="flex flex-row gap-2 items-center justify-center w-full">
+          <span x-text="building"></span>
+          <span x-text="year"></span>
+          <span x-text="$t('main-months-' + month)"></span>
+          <span x-text="date"></span>
+        </div>
+
+        <label for="toggleselect_all"
+               class="inline-flex items-center justify-between gap-3 border px-4 min-w-52 rounded-radius border-outline bg-surface-alt py-1.5 dark:border-outline-dark dark:bg-surface-dark-alt">
+          <input id="toggleselect_all"
+                 type="checkbox"
+                 class="sr-only peer"
+                 role="switch"
+                 aria-checked="false"
+                 @click="selectAll=!selectAll"
+                 x-bind:checked="selectAll"
+                 x-effect="
+
+                 document.querySelectorAll('input[name=apt_input]').forEach((input) => {
+                   input.checked = selectAll;
+                 })
+
+                 $el.setAttribute('aria-checked', selectAll)
+                 "
+          />
+          <span
+              class="peer-disabled:cursor-not-allowed text-sm font-medium peer-disabled:opacity-70 trancking-wide text-on-surface peer-checked:text-on-surface-strong dark:peer-checked:text-on-surface-dark-strong dark:text-on-surface-dark"
+              x-text="$t('main-action-select-all')">
+          </span>
+          <div
+              class="relative h-6 w-11 after:h-5 after:w-5 peer-checked:after:translate-x-5 rounded-full border border-outline bg-surface after:absolute after:bottom-0 after:left-[0.0625rem] after:top-0 after:my-auto after:rounded-full after:bg-on-surface after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:bg-on-primary peer-focus:outline-2 peer-focus:outline-outline-strong peer-focus:peer-checked:outline-primary peer-active:outline-offset-0 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 dark:border-outline-dark dark:bg-surface-dark dark:after:bg-on-surface-dark dark:peer-checked:bg-primary-dark dark:peer-checked:after:bg-on-primary-dark dark:peer-focus:outline-outline-dark-strong dark:peer-focus:peer-checked:outline-primary-dark"
+              aria-hidden="true"></div>
+        </label>
+
+      </div>
+      <!-- Dialog Body -->
+      <div class="flex w-full flex-col gap-2 overflow-auto px-4 py-2">
+
+        <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+          <label for="subjectInput" class="w-fit pl-0.5 text-sm" x-text="$t('main-title-name')"></label>
+          <input id="subjectInput" type="text"
+                 class="w-full rounded-radius border border-outline bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+                 name="subject" placeholder="AVISO DE COBRO" autocomplete="subject"/>
+        </div>
+
+        <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark pb-1">
+          <label for="messageTextArea" class="w-fit pl-0.5 text-sm" x-text="$t('main-title-msg')"></label>
+          <textarea id="messageTextArea"
+                    class="w-full rounded-radius border border-outline bg-surface-alt px-2.5 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+                    rows="3" placeholder="AVISO DE COBRO"></textarea>
+        </div>
+
+
+        <div class="flex flex-col gap-1 w-full">
+          <template x-for="apt in apts">
+            <label
+                class="grid grid-cols-[1fr_3fr_1fr] p-1 has-disabled:cursor-not-allowed items-center gap-2 text-base font-medium has-disabled:opacity-75 text-on-surface has-checked:text-on-surface-strong dark:has-checked:text-on-surface-dark-strong dark:text-on-surface-dark hover:rounded-radius hover:border-outline hover:border hover:dark:border-outline-dark">
+
+              <span x-text="apt.number"></span>
+              <span x-text="apt.name"></span>
+
+              <div class="flex w-full justify-center">
+                <div class="relative flex items-center w-fit">
+                  <input type="checkbox"
+                         name="apt_input"
+                         class="before:content[''] peer relative size-5 appearance-none overflow-hidden rounded-sm border border-outline bg-surface-alt before:absolute before:inset-0 checked:border-primary checked:before:bg-primary focus:outline-2 focus:outline-offset-2 focus:outline-outline-strong checked:focus:outline-primary active:outline-offset-0 disabled:cursor-not-allowed dark:border-outline-dark dark:bg-surface-dark-alt dark:checked:border-primary-dark dark:checked:before:bg-primary-dark dark:focus:outline-outline-dark-strong dark:checked:focus:outline-primary-dark"
+                         x-bind:value="apt.number"
+                  />
+                  <svg x-bind:data-src="checkBoxIconUrl" data-cache="21600"></svg>
+                </div>
+              </div>
+            </label>
+
+          </template>
+        </div>
+
+
+      </div>
+
+      <span x-show="errMsg !== ''" x-text="errMsg" class="p-2 border text-danger border-danger"></span>
+
+      <!-- Dialog Footer -->
+      <div
+          class="flex flex-col-reverse justify-between gap-2 border-t p-4 border-outline bg-surface-alt/60 dark:border-outline-dark dark:bg-surface-dark/20 sm:flex-row sm:items-center md:justify-end">
+        <button
+            x-text="$t('main-action-create')"
+            class="whitespace-nowrap border px-4 py-2 text-center text-sm font-medium tracking-wide transition rounded-radius bg-primary border-primary text-on-primary hover:opacity-75 focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+            @click="
+          let form = $el.closest('form');
+          form.classList.remove('border', 'border-success')
+          errMsg = '';
+          "
+        >
+        </button>
+
+        <button x-on:click="
+                  modalIsOpen = false
+                "
+                type="button"
+                class="whitespace-nowrap px-4 py-2 text-center text-sm font-medium tracking-wide transition rounded-radius text-on-surface hover:opacity-75 focus-visible:outline-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark"
+                x-text="$t('main-action-cancel')">
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

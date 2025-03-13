@@ -48,6 +48,14 @@
 
       modalIsOpen = true;
      "
+
+     x-init="
+     $watch('modalIsOpen', (value) => {
+        if (!value) {
+          $dispatch('event-receipt-form-reset')
+        }
+     })
+     "
 >
   <div x-cloak x-show="modalIsOpen" x-transition.opacity.duration.200ms asd-x-trap.inert.noscroll="modalIsOpen"
        x-on:keydown.esc.window="modalIsOpen = false" x-on:click.self="modalIsOpen = false"
