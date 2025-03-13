@@ -63,8 +63,8 @@ func keys(receipt model.Receipts, cardId string) Keys {
 type DownloadKeys struct {
 	BuildingId string
 	Id         string
-	Part       string
-	IsApt      bool
+	Parts      []string
+	AllApt     bool
 }
 
 type InitDto struct {
@@ -211,4 +211,11 @@ type ReceiptFull struct {
 	Expenses     []model.Expenses
 	Debts        []model.Debts
 	ExtraCharges []model.ExtraCharges
+}
+
+type SendFormRequest struct {
+	Key        string   `form:"key" validate:"required,notblank,min=3,max=200"`
+	Subject    string   `form:"subject" validate:"required,min=3,max=200"`
+	Message    string   `form:"message" validate:"required,min=3,max=1000"`
+	Apartments []string `form:"apt_input" validate:"required,gte=1,lte=100,dive,notblank"`
 }

@@ -20,10 +20,11 @@ const (
 )
 
 type QueueEvent struct {
-	Type       Type   `json:"type"`
-	BuildingId string `json:"buildingId"`
-	ReceiptId  string `json:"receiptId"`
-	ProgressId string `json:"progressId"`
+	Type       Type     `json:"type"`
+	BuildingId string   `json:"buildingId"`
+	ReceiptId  string   `json:"receiptId"`
+	ProgressId string   `json:"progressId"`
+	Apartments []string `json:"apartments"`
 }
 
 func (receiver QueueEvent) IsChanges() bool {
@@ -90,13 +91,14 @@ func publishEvent(ctx context.Context, event QueueEvent, messageGroupId string, 
 	return nil
 }
 
-func PublishSendPdfs(ctx context.Context, buildingId string, receiptId string) (string, error) {
+func PublishSendPdfs(ctx context.Context, buildingId, receiptId string, apartments []string) (string, error) {
 	deduplicationId := uuid.NewString()
 	event := QueueEvent{
 		Type:       SendPdfs,
 		BuildingId: buildingId,
 		ReceiptId:  receiptId,
 		ProgressId: deduplicationId,
+		Apartments: apartments,
 	}
 
 	update := ProgressUpdate{ObjectKey: deduplicationId}

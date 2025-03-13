@@ -186,7 +186,7 @@ templ ItemView(item Item) {
 							></svg>
 						</a>
 						<a
-							hx-post={ fmt.Sprintf(_SEND_PDFS+"/%s", item.Key) }
+							hx-get={ fmt.Sprintf(_SEND_PDFS+"/%s", item.Key) }
 							hx-indicator=".htmx-indicator"
 							hx-disabled-elt="this"
 							hx-trigger="mousedown"
@@ -199,7 +199,10 @@ templ ItemView(item Item) {
 						</a>
 						<button
 						  data-params={ item.UpdateParams }
-						  @click="$dispatch('event-open-send-dialog', { params: $el.dataset.params })"
+						  @click="
+						    isOpen = false;
+						    $dispatch('event-open-send-dialog', { params: $el.dataset.params })
+						  "
 							class="flex items-center gap-2 bg-surface-alt px-4 py-2 text-sm text-on-surface hover:bg-surface-dark-alt/5 hover:text-on-surface-strong focus-visible:bg-surface-dark-alt/10 focus-visible:text-on-surface-strong focus-visible:outline-hidden dark:bg-surface-dark-alt dark:text-on-surface-dark dark:hover:bg-surface-alt/5 dark:hover:text-on-surface-dark-strong dark:focus-visible:bg-surface-alt/10 dark:focus-visible:text-on-surface-dark-strong"
 							role="menuitem"
 						>
@@ -300,7 +303,7 @@ form.classList.remove('border', 'border-success');
 	></div>
 }
 
-templ SendPdfsView(progressId string) {
+templ SendPdfsView(progressId string, closeModal bool) {
 	<div id="receipts-email-progress" hx-swap-oob="beforeend">
 		<div
 			class="pb-2 w-full flex justify-center"
@@ -313,6 +316,12 @@ templ SendPdfsView(progressId string) {
 			></div>
 		</div>
 	</div>
+
+	if closeModal {
+	 <div x-init="modalIsOpen = false">
+   	</div>
+
+	}
 }
 
 templ SendPdfsProgressView(update string) {

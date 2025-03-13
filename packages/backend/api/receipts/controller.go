@@ -66,6 +66,7 @@ func Routes(server *mux.Router) {
 	server.HandleFunc(_PATH+"/new_from_file", newFromFile).Methods("POST")
 	server.HandleFunc(_DUPLICATE+"/{key}", duplicateReceipt).Methods("POST")
 	server.HandleFunc(_PATH+"/apts", getSendApts).Methods("GET")
+	server.HandleFunc(_PATH+"/send/pdfs", sendPdfsApt).Methods("POST")
 }
 
 func getBuildingIds(w http.ResponseWriter, r *http.Request) {
@@ -660,8 +661,7 @@ func getReceiptView(w http.ResponseWriter, r *http.Request) {
 	buildingDownloadKeys := util.Encode(DownloadKeys{
 		BuildingId: receipt.Building.ID,
 		Id:         receipt.Receipt.ID,
-		Part:       receipt.Building.ID,
-		IsApt:      false,
+		Parts:      []string{receipt.Building.ID},
 	})
 
 	receipt.BuildingDownloadKeys = *buildingDownloadKeys
@@ -679,8 +679,8 @@ func getReceiptView(w http.ResponseWriter, r *http.Request) {
 		downloadKeys := util.Encode(DownloadKeys{
 			BuildingId: receipt.Building.ID,
 			Id:         receipt.Receipt.ID,
-			Part:       apt.Apartment.Number,
-			IsApt:      true,
+			Parts:      []string{apt.Apartment.Number},
+			AllApt:     true,
 		})
 
 		apt.DownloadKeys = *downloadKeys
@@ -873,7 +873,7 @@ func sendPdfs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	clientId, err := receiptPdf.PublishSendPdfs(r.Context(), keys.BuildingId, keys.Id)
+	clientId, err := receiptPdf.PublishSendPdfs(r.Context(), keys.BuildingId, keys.Id, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -881,7 +881,7 @@ func sendPdfs(w http.ResponseWriter, r *http.Request) {
 
 	progressId := util.Encode(clientId)
 
-	err = SendPdfsView(*progressId).Render(r.Context(), w)
+	err = SendPdfsView(*progressId, false).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -1008,6 +1008,49 @@ func getSendApts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = SendAptsView(*str).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+}
+
+func sendPdfsApt(w http.ResponseWriter, r *http.Request) {
+
+	err := r.ParseForm()
+	if err != nil {
+		log.Printf("Error parsing form: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	decoder := form.NewDecoder()
+	var request SendFormRequest
+	err = decoder.Decode(&request, r.Form)
+
+	if err != nil {
+		log.Printf("Error decoding form: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var keys Keys
+	err = util.Decode(request.Key, &keys)
+	if err != nil {
+		log.Printf("Error decoding key: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	clientId, err := receiptPdf.PublishSendPdfs(r.Context(), keys.BuildingId, keys.Id, request.Apartments)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	progressId := util.Encode(clientId)
+
+	err = SendPdfsView(*progressId, true).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

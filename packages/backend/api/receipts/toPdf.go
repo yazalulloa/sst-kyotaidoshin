@@ -18,6 +18,7 @@ import (
 	"io"
 	"kyotaidoshin/util"
 	"log"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -135,55 +136,38 @@ func GetParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKey
 		return nil, err
 	}
 
-	var numOfWorkers int
-	if keys == nil {
-		numOfWorkers = len(receipt.Apartments) + 1
-	} else if keys.IsApt && keys.Part == "" {
-		numOfWorkers = len(receipt.Apartments)
-	} else {
-		numOfWorkers = 1
-	}
-
 	buildObjectKey := func(str string) string {
 		date := receipt.Receipt.Date.Format(time.DateOnly)
 		return fmt.Sprintf("RECEIPTS/%s/%s/%s_%s_%s_%s.pdf", receipt.Building.ID, receipt.Receipt.ID,
 			receipt.Building.ID, strings.ToUpper(receipt.MonthStr), date, str)
 	}
 
-	parts := make([]PartInfoUpload, numOfWorkers)
-	if keys == nil || (!keys.IsApt && keys.Part == receipt.Building.ID) {
-		parts[0] = PartInfoUpload{
+	parts := make([]PartInfoUpload, 0)
+	isOnlyBuilding := keys != nil && len(keys.Parts) == 1 && slices.Contains(keys.Parts, receipt.Building.ID)
+
+	if keys == nil || isOnlyBuilding {
+		parts = append(parts, PartInfoUpload{
 			FileName:  fmt.Sprintf("%s.pdf", receipt.Building.ID),
 			ObjectKey: buildObjectKey(receipt.Building.ID),
 			Component: PrintView(receipt.Building.ID, BuildingView(*receipt)),
-		}
+		})
 	}
 
-	if keys == nil || keys.IsApt {
-		for i, apt := range receipt.Apartments {
-			index := -1
-			if keys == nil {
-				index = i + 1
-			} else {
-				if apt.Apartment.Number == keys.Part {
-					index = 0
-				} else if keys.IsApt && keys.Part == "" {
-					index = i
-				}
-			}
-
-			if index >= 0 {
-				parts[index] = PartInfoUpload{
+	if keys == nil || keys.AllApt || (len(keys.Parts) > 0 && !isOnlyBuilding) {
+		for _, apt := range receipt.Apartments {
+			if keys == nil || keys.AllApt || slices.Contains(keys.Parts, apt.Apartment.Number) {
+				parts = append(parts, PartInfoUpload{
 					FileName:  fmt.Sprintf("%s.pdf", apt.Apartment.Number),
 					ObjectKey: buildObjectKey(apt.Apartment.Number),
 					Component: PrintView(apt.Apartment.Number, AptView(*receipt, apt)),
 					Apt:       apt.Apartment,
-				}
+				})
 			}
 		}
 
 	}
 
+	log.Printf("Parts %v", parts)
 	pdfItems, err := checkOrBuild(ctx, parts)
 	if err != nil {
 		return nil, err
