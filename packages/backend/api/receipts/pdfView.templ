@@ -173,42 +173,46 @@ templ BuildingView(dto CalculatedReceipt) {
 	</div>
 	<br/>
 	<p class="font-bold">LISTADO A PAGAR</p>
-	<div
-		class={ "grid gap-x-3",
-  		templ.KV("grid-cols-[1fr_7fr_2fr]", !multipleCurrencies),
-  		 templ.KV("grid-cols-[1fr_7fr_1fr_1fr]", multipleCurrencies) }
-	>
-		<span class="font-bold">APTO</span>
-		<span class="font-bold">PROPIETARIO</span>
-		if multipleCurrencies {
-			for _,currency := range dto.CurrenciesToShowAmountToPay {
-				<span class="font-bold">MONTO { currency.Name() }</span>
-			}
-		} else {
-			<span class="font-bold">MONTO</span>
-		}
-		for _,aptTotal := range dto.Apartments {
-			<span class="text-start">{ aptTotal.Apartment.Number }</span>
-			<span class="text-start">{ aptTotal.Apartment.Name }</span>
-			if multipleCurrencies {
-				for _,currency := range dto.CurrenciesToShowAmountToPay {
-					for _,amount := range aptTotal.Amounts {
-						if currency == amount.Currency {
-							<span class="text-end px-4">{ amount.Currency.Format(amount.Amount) }</span>
+	<div class="w-full flex flex-col justify-center items-center">
+		<div class="w-fit flex flex-col justify-center items-center gap-1">
+			<div
+				class={ "grid gap-x-2 w-fit",
+          		templ.KV("grid-cols-[1fr_3fr_2fr]", !multipleCurrencies),
+          		 templ.KV("grid-cols-[1fr_3fr_1fr_1fr]", multipleCurrencies) }
+			>
+				<span class="font-bold text-start">APTO</span>
+				<span class="font-bold text-start">PROPIETARIO</span>
+				if multipleCurrencies {
+					for _,currency := range dto.CurrenciesToShowAmountToPay {
+						<span class="font-bold text-end">MONTO { currency.Name() }</span>
+					}
+				} else {
+					<span class="font-bold text-end">MONTO</span>
+				}
+				for _,aptTotal := range dto.Apartments {
+					<span class="text-start">{ aptTotal.Apartment.Number }</span>
+					<span class="text-start">{ aptTotal.Apartment.Name }</span>
+					if multipleCurrencies {
+						for _,currency := range dto.CurrenciesToShowAmountToPay {
+							for _,amount := range aptTotal.Amounts {
+								if currency == amount.Currency {
+									<span class="text-end">{ amount.Currency.Format(amount.Amount) }</span>
+								}
+							}
+						}
+					} else {
+						for _,amount := range aptTotal.Amounts {
+							if mainCurrency == amount.Currency {
+								<span class="text-end">{ amount.Currency.Format(amount.Amount) }</span>
+							}
 						}
 					}
 				}
-			} else {
-				for _,amount := range aptTotal.Amounts {
-					if mainCurrency == amount.Currency {
-						<span class="text-end px-4">{ amount.Currency.Format(amount.Amount) }</span>
-					}
-				}
-			}
-		}
+			</div>
+			<br/>
+			<p class="w-full font-bold text-end">TOTAL: { mainCurrency.Format(dto.ApartmentsTotal) }</p>
+		</div>
 	</div>
-	<br/>
-	<p class="font-bold text-end">TOTAL: { mainCurrency.Format(dto.ApartmentsTotal) }</p>
 }
 
 templ Views(key string, dto CalculatedReceipt, idMap map[string]string, tabs string) {

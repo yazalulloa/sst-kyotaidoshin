@@ -1,6 +1,7 @@
 package receipts
 
 import (
+	"cmp"
 	"db/gen/model"
 	"encoding/base64"
 	"encoding/json"
@@ -210,6 +211,13 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 		}
 
 	}
+
+	slices.SortFunc(extraChargeArray, func(a, b model.ExtraCharges) int {
+		return cmp.Or(
+			cmp.Compare(a.Description, b.Description),
+			cmp.Compare(a.Amount, b.Amount),
+		)
+	})
 
 	var wg sync.WaitGroup
 	wg.Add(4)
