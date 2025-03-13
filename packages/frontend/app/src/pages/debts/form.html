@@ -56,6 +56,16 @@
           previousPaymentAmountCurrency = jsonObject.previous_payment_amount_currency;
 
           open_form = true;
+
+           document.getElementById('debtsAmountInput').scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'center'
+          });
+          document.getElementById('debtsAmountInput').focus({
+             preventScroll: true,
+             focusVisible: true
+          });
      "
        class="flex flex-col justify-center gap-4"
        x-bind:class="open_form ? 'md:grid md:grid-cols-[7fr_3fr]' : ''">

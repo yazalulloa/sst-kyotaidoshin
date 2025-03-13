@@ -41,6 +41,16 @@
           active = jsonObject.active;
           addToExpenses = jsonObject.addToExpenses;
 
+           document.getElementById('reserveFundNameInput').scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'center'
+          });
+          document.getElementById('reserveFundNameInput').focus({
+             preventScroll: true,
+             focusVisible: true
+          });
+
      "
        @event-reserve-fund-building-restart-after-deletion="
               let v = $event.detail?.key?.trim();

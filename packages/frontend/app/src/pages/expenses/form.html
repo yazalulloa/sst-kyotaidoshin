@@ -64,6 +64,16 @@
           currency = jsonObject.currency;
           type = jsonObject.type;
 
+          document.getElementById('expensesDescriptionInput').scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'center'
+          });
+          document.getElementById('expensesDescriptionInput').focus({
+             preventScroll: true,
+             focusVisible: true
+          });
+
      "
        @event-expense-form-restart-after-deletion="
               let v = $event.detail?.key?.trim();

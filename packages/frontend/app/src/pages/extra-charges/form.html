@@ -36,6 +36,15 @@
           currency = jsonObject.currency;
           apartmentsSelected = jsonObject.apts;
 
+          document.getElementById('extraChargeDescriptionInput').scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'center'
+          });
+          document.getElementById('extraChargeDescriptionInput').focus({
+             preventScroll: true,
+             focusVisible: true
+          });
      "
        @event-extra-charge-form-restart-after-deletion="
               let v = $event.detail?.key?.trim();
