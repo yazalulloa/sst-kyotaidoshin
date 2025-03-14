@@ -198,8 +198,8 @@ templ ItemView(item Item) {
 							<span x-text="$t('main-action-send-pdfs-now')"></span>
 						</a>
 						<button
-						  data-params={ item.UpdateParams }
-						  @click="
+							data-params={ item.UpdateParams }
+							@click="
 						    isOpen = false;
 						    $dispatch('event-open-send-dialog', { params: $el.dataset.params })
 						  "
@@ -209,6 +209,20 @@ templ ItemView(item Item) {
 							<svg x-bind:data-src="sendMailIconUrl" data-cache="21600" class="size-5"></svg>
 							<span x-text="$t('main-action-send-pdfs')"></span>
 						</button>
+						<a
+							hx-get={ fmt.Sprintf(_DOWNLOAD_HTML_FILE+"/%s", item.Key) }
+							hx-indicator=".htmx-indicator"
+							hx-disabled-elt="this"
+							hx-trigger="mousedown"
+							hx-target="#anchor-download-html"
+							hx-swap="innerHTML"
+							class="flex items-center gap-2 bg-surface-alt px-4 py-2 text-sm text-on-surface hover:bg-surface-dark-alt/5 hover:text-on-surface-strong focus-visible:bg-surface-dark-alt/10 focus-visible:text-on-surface-strong focus-visible:outline-hidden dark:bg-surface-dark-alt dark:text-on-surface-dark dark:hover:bg-surface-alt/5 dark:hover:text-on-surface-dark-strong dark:focus-visible:bg-surface-alt/10 dark:focus-visible:text-on-surface-dark-strong"
+							role="menuitem"
+						>
+							<div hidden="hidden" id="anchor-download-html"></div>
+							<svg x-bind:data-src="sendMailIconUrl" data-cache="21600" class="size-5"></svg>
+							<span x-text="$t('main-action-download-html')"></span>
+						</a>
 					</div>
 				</div>
 			</div>
@@ -316,11 +330,8 @@ templ SendPdfsView(progressId string, closeModal bool) {
 			></div>
 		</div>
 	</div>
-
 	if closeModal {
-	 <div x-init="modalIsOpen = false">
-   	</div>
-
+		<div x-init="modalIsOpen = false"></div>
 	}
 }
 

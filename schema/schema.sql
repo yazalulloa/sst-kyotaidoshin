@@ -214,3 +214,30 @@ CREATE TABLE IF NOT EXISTS users
 );
 
 CREATE INDEX IF NOT EXISTS users_provider_id_idx ON users (provider, provider_id);
+
+
+CREATE TABLE roles (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE NOT NULL
+);
+
+CREATE TABLE permissions (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE NOT NULL
+);
+
+CREATE TABLE role_permissions (
+    role_id INTEGER,
+    permission_id INTEGER,
+    PRIMARY KEY (role_id, permission_id),
+    FOREIGN KEY (role_id) REFERENCES roles(id),
+    FOREIGN KEY (permission_id) REFERENCES permissions(id)
+);
+
+CREATE TABLE user_roles (
+    user_id INTEGER,
+    role_id INTEGER,
+    PRIMARY KEY (user_id, role_id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (role_id) REFERENCES roles(id)
+);

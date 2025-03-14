@@ -1224,7 +1224,7 @@ func PrintView(title string, component templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, "</title><style>\n\n          @media print {\n            @page {\n              margin: 0.25cm;\n            }\n\n             html, body {\n               font-size: 10pt;\n             }\n          }\n\t\t\t</style></head><body class=\"bg-white px-1 py-1 text-black flex flex-col justify-center items-center\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 100, "</title><style>\n\n          @media print {\n            @page {\n              margin: 0.25cm;\n            }\n\n             html, body {\n               font-size: 10pt;\n             }\n          }\n\t\t\t</style></head><body class=\"bg-white px-4 py-1 text-black flex flex-col justify-center items-center\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

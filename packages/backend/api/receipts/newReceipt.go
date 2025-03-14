@@ -325,7 +325,7 @@ func parseDebts(rows *[][]string) ([]model.Debts, error) {
 		if len(row) >= 4 {
 			apt := row[0]
 
-			if apt == "APTO" {
+			if apt == "APTO" || apt == "MONTOS EN DOLARES" {
 				continue
 			}
 

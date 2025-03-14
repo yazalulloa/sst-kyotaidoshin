@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/go-playground/form"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -39,6 +38,7 @@ const _UPLOAD_BACKUP_FORM = _PATH + "/uploadBackupForm"
 const _UPLOAD_BACKUP = _PATH + "/upload/backup"
 const _DOWNLOAD_ZIP_FILE = _PATH + "/download/zip"
 const _DOWNLOAD_PDF_FILE = _PATH + "/download/pdf"
+const _DOWNLOAD_HTML_FILE = _PATH + "/download/html"
 const _SEND_PDFS = _PATH + "/send_pdfs"
 const _SEND_PDFS_PROGRESS = _SEND_PDFS + "/progress"
 const _DUPLICATE = _PATH + "/duplicate"
@@ -60,6 +60,7 @@ func Routes(server *mux.Router) {
 	server.HandleFunc(_PATH+"/view/{key}", getReceiptView).Methods("GET")
 	server.HandleFunc(_DOWNLOAD_ZIP_FILE+"/{key}", getZip).Methods("GET")
 	server.HandleFunc(_DOWNLOAD_PDF_FILE+"/{key}", getPdf).Methods("GET")
+	server.HandleFunc(_DOWNLOAD_HTML_FILE+"/{key}", getHtml).Methods("GET")
 	server.HandleFunc(_SEND_PDFS+"/{key}", sendPdfs).Methods("GET")
 	server.HandleFunc(_SEND_PDFS_PROGRESS+"/{key}", sendPdfsProgress).Methods("GET")
 	server.HandleFunc(_PATH+"/upload_form", getUploadForm).Methods("GET")
@@ -739,33 +740,14 @@ func getZip(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !exists {
-		buf, err := toZip(receipt, r.Context())
+		buf, err := toZip(receipt, r.Context(), true)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		s3Client, err := aws_h.GetS3Client(r.Context())
-
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		contentLength := int64(buf.Len())
-		_, err = s3Client.PutObject(r.Context(), &s3.PutObjectInput{
-			Bucket:            aws.String(bucketName),
-			Key:               aws.String(objectKey),
-			Body:              buf,
-			ChecksumAlgorithm: types.ChecksumAlgorithmCrc64nvme,
-			//ChecksumCRC32:             nil,
-			//ChecksumCRC32C:            nil,
-			//ChecksumSHA1:              nil,
-			//ChecksumSHA256:            nil,
-			ContentLength: &contentLength,
-			ContentType:   aws.String("application/zip"),
-		})
+		_, err = aws_h.PutBuffer(r.Context(), bucketName, objectKey, "application/zip", buf)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -821,7 +803,7 @@ func getPdf(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	parts, err := GetParts(receipt, r.Context(), &keys)
+	parts, err := GetParts(receipt, r.Context(), true, &keys)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -845,6 +827,84 @@ func getPdf(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Add("HX-Redirect", presignedHTTPRequest.URL)
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func getHtml(w http.ResponseWriter, r *http.Request) {
+	keyStr := mux.Vars(r)["key"]
+	if keyStr == "" {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	var keys Keys
+	err := util.Decode(keyStr, &keys)
+	if err != nil {
+		log.Printf("failed to decode key: %v", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	bucketName, err := util.GetReceiptsBucket()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	date := receipt.Receipt.Date.Format(time.DateOnly)
+	objectKey := fmt.Sprintf("RECEIPS/HTML/%s/%s/%s_%s_%s.zip", receipt.Building.ID, receipt.Receipt.ID,
+		receipt.Building.ID, strings.ToUpper(receipt.MonthStr), date)
+
+	exists, err := aws_h.FileExistsS3(r.Context(), bucketName, objectKey)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !exists {
+		buf, err := toZip(receipt, r.Context(), false)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		_, err = aws_h.PutBuffer(r.Context(), bucketName, objectKey, "application/zip", buf)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	presignClient, err := aws_h.GetPresignClient(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	presignedHTTPRequest, err := presignClient.PresignGetObject(r.Context(), &s3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(objectKey),
+	}, func(options *s3.PresignOptions) {
+		options.Expires = time.Minute
+	})
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = api.AnchorClickInitView(presignedHTTPRequest.URL).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func clearPdfs(w http.ResponseWriter, r *http.Request) {

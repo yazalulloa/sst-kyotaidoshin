@@ -176,6 +176,15 @@ templ AnchorClickInitView(url string) {
 	</div>
 }
 
+templ AnchorClickDownloadView(url string) {
+	<div>
+		<a
+			href={ templ.SafeURL(url) }
+			x-init="$el.click()"
+		></a>
+	</div>
+}
+
 templ Badge(condition bool) {
 	<div
 		class={ "peer rounded-radius w-fit border px-2 py-1 text-xs font-medium tracking-wide ",

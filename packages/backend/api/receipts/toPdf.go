@@ -35,7 +35,7 @@ type PartInfoUpload struct {
 	Component templ.Component
 }
 
-func checkOrBuild(ctx context.Context, parts []PartInfoUpload) ([]PdfItem, error) {
+func checkOrBuild(ctx context.Context, parts []PartInfoUpload, isPdf bool) ([]PdfItem, error) {
 	bucketName, err := util.GetReceiptsBucket()
 	if err != nil {
 		return nil, err
@@ -100,10 +100,19 @@ func checkOrBuild(ctx context.Context, parts []PartInfoUpload) ([]PdfItem, error
 				return
 			}
 
-			base64Str := base64.URLEncoding.EncodeToString(buf.Bytes())
-			itemChan <- PdfItem{
-				ObjectKey: part.ObjectKey,
-				Html:      base64Str,
+			if isPdf {
+				base64Str := base64.URLEncoding.EncodeToString(buf.Bytes())
+				itemChan <- PdfItem{
+					ObjectKey: part.ObjectKey,
+					Html:      base64Str,
+				}
+			} else {
+				_, err = aws_h.PutBuffer(ctx, bucketName, part.ObjectKey, "text/html", &buf)
+
+				if err != nil {
+					errorChan <- err
+					return
+				}
 			}
 		}()
 	}
@@ -125,7 +134,7 @@ func checkOrBuild(ctx context.Context, parts []PartInfoUpload) ([]PdfItem, error
 	return pdfItems, err
 }
 
-func GetParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKeys) ([]PartInfoUpload, error) {
+func GetParts(receipt *CalculatedReceipt, ctx context.Context, isPdf bool, keys *DownloadKeys) ([]PartInfoUpload, error) {
 	functionName, err := resource.Get("HtmlToPdf", "name")
 	if err != nil {
 		return nil, err
@@ -136,10 +145,16 @@ func GetParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKey
 		return nil, err
 	}
 
+	suffix := "pdf"
+	if !isPdf {
+		suffix = "html"
+	}
+
 	buildObjectKey := func(str string) string {
 		date := receipt.Receipt.Date.Format(time.DateOnly)
-		return fmt.Sprintf("RECEIPTS/%s/%s/%s_%s_%s_%s.pdf", receipt.Building.ID, receipt.Receipt.ID,
-			receipt.Building.ID, strings.ToUpper(receipt.MonthStr), date, str)
+
+		return fmt.Sprintf("RECEIPTS/%s/%s/%s_%s_%s_%s.%s", receipt.Building.ID, receipt.Receipt.ID,
+			receipt.Building.ID, strings.ToUpper(receipt.MonthStr), date, str, suffix)
 	}
 
 	parts := make([]PartInfoUpload, 0)
@@ -147,7 +162,7 @@ func GetParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKey
 
 	if keys == nil || isOnlyBuilding {
 		parts = append(parts, PartInfoUpload{
-			FileName:  fmt.Sprintf("%s.pdf", receipt.Building.ID),
+			FileName:  fmt.Sprintf("%s.%s", receipt.Building.ID, suffix),
 			ObjectKey: buildObjectKey(receipt.Building.ID),
 			Component: PrintView(receipt.Building.ID, BuildingView(*receipt)),
 		})
@@ -157,7 +172,7 @@ func GetParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKey
 		for _, apt := range receipt.Apartments {
 			if keys == nil || keys.AllApt || slices.Contains(keys.Parts, apt.Apartment.Number) {
 				parts = append(parts, PartInfoUpload{
-					FileName:  fmt.Sprintf("%s.pdf", apt.Apartment.Number),
+					FileName:  fmt.Sprintf("%s.%s", apt.Apartment.Number, suffix),
 					ObjectKey: buildObjectKey(apt.Apartment.Number),
 					Component: PrintView(apt.Apartment.Number, AptView(*receipt, apt)),
 					Apt:       apt.Apartment,
@@ -167,7 +182,7 @@ func GetParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKey
 
 	}
 
-	pdfItems, err := checkOrBuild(ctx, parts)
+	pdfItems, err := checkOrBuild(ctx, parts, isPdf)
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +207,7 @@ func GetParts(receipt *CalculatedReceipt, ctx context.Context, keys *DownloadKey
 	return parts, nil
 }
 
-func toZip(receipt *CalculatedReceipt, ctx context.Context) (*bytes.Buffer, error) {
+func toZip(receipt *CalculatedReceipt, ctx context.Context, isPdf bool) (*bytes.Buffer, error) {
 	bucketName, err := util.GetReceiptsBucket()
 	if err != nil {
 		return nil, err
@@ -203,7 +218,7 @@ func toZip(receipt *CalculatedReceipt, ctx context.Context) (*bytes.Buffer, erro
 		return nil, err
 	}
 
-	parts, err := GetParts(receipt, ctx, nil)
+	parts, err := GetParts(receipt, ctx, isPdf, nil)
 	if err != nil {
 		return nil, err
 	}

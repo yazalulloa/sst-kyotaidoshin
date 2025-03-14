@@ -69,15 +69,6 @@ export const handler: Handler = async (event: PdfItem[], context) => {
           // margin: { top: '1.8cm', right: '1cm', bottom: '1cm', left: '1cm' },
         })
 
-        // await page.setContent(html, {
-        //   waitUntil: ['domcontentloaded', 'networkidle0', 'load'],
-        // })
-        //
-        // await page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
-        //
-        // const result = await page.pdf({format: 'a4', printBackground: true})
-
-        // console.log("PDF %s", key)
         const command = new PutObjectCommand({
           Key: key,
           Bucket: Resource.ReceiptsBucket.name,

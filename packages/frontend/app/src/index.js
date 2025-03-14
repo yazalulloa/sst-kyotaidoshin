@@ -330,6 +330,15 @@ document.addEventListener("htmx:afterSettle", function (event) {
 
 document.addEventListener('alpine-i18n:ready', function () {
   let locale = 'en';
+
+  let userLang = navigator.language || navigator.userLanguage;
+  if (userLang && userLang.length > 0) {
+    let split = userLang.split("-")
+    if (split.length > 0) {
+      locale = split[0];
+    }
+  }
+
   window.AlpineI18n.create(locale, JSON.parse(messages));
 });
 

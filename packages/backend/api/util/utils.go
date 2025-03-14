@@ -193,3 +193,19 @@ type UploadBackupParams struct {
 	Values           map[string]string
 	OutOfBandsUpdate bool
 }
+
+func StringToInt32(str string) int32 {
+	value, err := strconv.ParseInt(str, 10, 32)
+	if err != nil {
+		return 0
+	}
+	return int32(value)
+}
+
+func StringToInt64(str string) int64 {
+	value, err := strconv.ParseInt(str, 10, 64)
+	if err != nil {
+		return 0
+	}
+	return int64(value)
+}
