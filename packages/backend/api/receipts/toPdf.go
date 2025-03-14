@@ -76,7 +76,7 @@ func checkOrBuild(ctx context.Context, parts []PartInfoUpload, isPdf bool) ([]Pd
 	itemChan := make(chan PdfItem, numOfWorkers)
 	errorChan := make(chan error, numOfWorkers)
 
-	for _, part := range parts {
+	for i, part := range parts {
 
 		go func() {
 			defer wg.Done()
@@ -98,6 +98,23 @@ func checkOrBuild(ctx context.Context, parts []PartInfoUpload, isPdf bool) ([]Pd
 			if err != nil {
 				errorChan <- err
 				return
+			}
+
+			content := buf.String()
+
+			if i == 2 {
+				//log.Printf("Content %d", len(content))
+				//log.Printf("Content %s", content)
+				//log.Printf("Content %d", len(content))
+			}
+
+			newStr := strings.ReplaceAll(content, "<br>", "<br></br>")
+			newStr = strings.Replace(newStr, "!doctype", "!DOCTYPE", 1)
+			buf.Reset()
+
+			_, err = buf.WriteString(newStr)
+			if err != nil {
+				errorChan <- err
 			}
 
 			if isPdf {
@@ -164,7 +181,7 @@ func GetParts(receipt *CalculatedReceipt, ctx context.Context, isPdf bool, keys 
 		parts = append(parts, PartInfoUpload{
 			FileName:  fmt.Sprintf("%s.%s", receipt.Building.ID, suffix),
 			ObjectKey: buildObjectKey(receipt.Building.ID),
-			Component: PrintView(receipt.Building.ID, BuildingView(*receipt)),
+			Component: PrintViewV2(receipt.Building.ID, BuildingViewV2(*receipt)),
 		})
 	}
 
@@ -174,7 +191,7 @@ func GetParts(receipt *CalculatedReceipt, ctx context.Context, isPdf bool, keys 
 				parts = append(parts, PartInfoUpload{
 					FileName:  fmt.Sprintf("%s.%s", apt.Apartment.Number, suffix),
 					ObjectKey: buildObjectKey(apt.Apartment.Number),
-					Component: PrintView(apt.Apartment.Number, AptView(*receipt, apt)),
+					Component: PrintViewV2(apt.Apartment.Number, AptViewV2(*receipt, apt)),
 					Apt:       apt.Apartment,
 				})
 			}

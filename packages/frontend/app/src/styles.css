@@ -752,3 +752,16 @@ select option {
   border: 0;
   padding: 1rem;
 }
+
+th {
+  padding: 0 15px;
+}
+
+td {
+  padding: 0 15px;
+}
+
+table {
+  margin-left: auto;
+  margin-right: auto;
+}

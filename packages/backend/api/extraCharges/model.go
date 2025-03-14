@@ -60,7 +60,7 @@ type FormResponse struct {
 }
 
 type FormRequest struct {
-	Key         string   `form:"key" validate:"required,min=3,max=200"`
+	Key         string   `form:"key" validate:"required,min=3,max=500"`
 	Description string   `form:"description" validate:"required,min=3,max=100"`
 	Amount      float64  `form:"amount" validate:"required,gt=0"`
 	Currency    string   `form:"currency" validate:"required,oneof=USD VED"`

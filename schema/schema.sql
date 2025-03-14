@@ -1,4 +1,20 @@
 -- DROP TABLE IF EXISTS rates;
+-- DROP TABLE IF EXISTS apartments;
+-- DROP TABLE IF EXISTS buildings;
+-- DROP TABLE IF EXISTS extra_charges;
+-- DROP TABLE IF EXISTS reserve_funds;
+-- DROP TABLE IF EXISTS receipts;
+-- DROP TABLE IF EXISTS expenses;
+-- DROP TABLE IF EXISTS debts;
+-- DROP TABLE IF EXISTS users;
+-- DROP TABLE IF EXISTS roles;
+-- DROP TABLE IF EXISTS permissions;
+-- DROP TABLE IF EXISTS role_permissions;
+-- DROP TABLE IF EXISTS user_roles;
+
+
+
+-- DROP TABLE IF EXISTS rates;
 
 CREATE TABLE IF NOT EXISTS rates
 (

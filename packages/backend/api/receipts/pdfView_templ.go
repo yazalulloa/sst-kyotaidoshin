@@ -1125,7 +1125,7 @@ func Views(key string, dto CalculatedReceipt, idMap map[string]string, tabs stri
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = BuildingView(dto).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = BuildingViewV2(dto).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -1177,7 +1177,7 @@ func Views(key string, dto CalculatedReceipt, idMap map[string]string, tabs stri
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = AptView(dto, apt).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = AptViewV2(dto, apt).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

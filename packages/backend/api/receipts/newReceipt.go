@@ -270,16 +270,16 @@ func parseExpenses(rows *[][]string) ([]model.Expenses, error) {
 
 		row = trimRow(row)
 
-		if expenses.UNCOMMON == expenseType && len(row) == 0 {
-			break
-		}
-
 		if len(row) > 0 {
 			description := row[0]
 
 			if strings.Contains(description, "GASTOS NO COMUNES") || strings.Contains(description, "TOTAL GASTOS COMUNES") {
 				expenseType = expenses.UNCOMMON
 				continue
+			}
+
+			if strings.Contains(description, "TOTAL GASTOS NO COMUNES") || strings.Contains(description, "TOTAL GASTOS DEL MES") {
+				break
 			}
 
 			if strings.Contains(description, "FONDOS DE") || strings.Contains(description, "TOTAL GASTOS DEL MES") {

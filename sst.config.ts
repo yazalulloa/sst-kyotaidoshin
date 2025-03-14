@@ -22,7 +22,7 @@ export default $config({
     const secretTursoUrl = new sst.Secret("SecretTursoUrl");
     const bcvUrl = new sst.Secret("SecretBcvUrl");
     const bcvFileStartPath = new sst.Secret("SecretBcvFileStartPath");
-    const webUrl = new sst.Secret("WebUrl");
+
     const appClientId = new sst.Secret("AppClientId");
     const githubClientId = new sst.Secret("GithubClientId");
     const githubClientSecret = new sst.Secret("GithubClientSecret");
@@ -105,7 +105,8 @@ export default $config({
     });
 
     const domain = process.env.DOMAIN;
-    const currentWebUrl = `${$app.stage}.${domain}`
+    const stageDomain = $app.stage === PROD_STAGE ? "" : `${$app.stage}.`;
+    const currentWebUrl = `${stageDomain}${domain}`
     console.log("currentWebUrl", currentWebUrl);
     const apiDomain = `api.${currentWebUrl}`
 
@@ -195,7 +196,7 @@ export default $config({
       fifo: {
         contentBasedDeduplication: true,
       },
-      visibilityTimeout: "160 seconds",
+      visibilityTimeout: "310 seconds",
     });
     receiptPdfQueue.subscribe({
       link: [
@@ -276,7 +277,6 @@ export default $config({
     api.route("GET /callback", authClientFunction.arn);
     api.route("GET /", authClientFunction.arn);
     return {
-      Web_App: webUrl.value,
       SiteUrl: site.url,
       VerifyAccess: verifyAccessFunction.arn,
       // ApiFunction: apiFunction.url,

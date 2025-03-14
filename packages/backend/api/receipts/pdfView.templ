@@ -282,7 +282,7 @@ templ Views(key string, dto CalculatedReceipt, idMap map[string]string, tabs str
 			></svg>
 		</button>
 		<div class="bg-white px-6 py-2 text-black">
-			@BuildingView(dto)
+			@BuildingViewV2(dto)
 		</div>
 	</div>
 	for _,apt := range dto.Apartments {
@@ -317,7 +317,7 @@ templ Views(key string, dto CalculatedReceipt, idMap map[string]string, tabs str
 				></svg>
 			</button>
 			<div class="bg-white px-6 py-2 text-black">
-				@AptView(dto, apt)
+				@AptViewV2(dto, apt)
 			</div>
 		</div>
 	}

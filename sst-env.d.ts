@@ -106,10 +106,6 @@ declare module "sst" {
       "type": "sst.aws.StaticSite"
       "url": string
     }
-    "WebUrl": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
     "bcv-bucket": {
       "name": string
       "type": "sst.aws.Bucket"
