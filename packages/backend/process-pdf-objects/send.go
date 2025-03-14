@@ -49,7 +49,7 @@ func sendPdfs(ctx context.Context, event receiptPdf.QueueEvent) error {
 		return err
 	}
 
-	parts, err := receipts.GetParts(receipt, ctx, &receipts.DownloadKeys{
+	parts, err := receipts.GetParts(receipt, ctx, true, &receipts.DownloadKeys{
 		Parts:  event.Apartments,
 		AllApt: len(event.Apartments) == 0,
 	})
