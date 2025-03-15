@@ -47,7 +47,6 @@ func Verify(ctx context.Context, accessToken, refreshToken string) (context.Cont
 	}
 	payload := string(output.Payload)
 	if output.FunctionError != nil {
-
 		log.Printf("Function error: %v %s", *output.FunctionError, payload)
 		return nil, fmt.Errorf("function error: %s", payload)
 	}

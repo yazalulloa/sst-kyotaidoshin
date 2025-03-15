@@ -46,7 +46,7 @@ func BuildMsg(ctx context.Context, req SendPdfRequest) (*mail.Msg, error) {
 
 	for _, email := range req.Emails {
 		if err := message.AddTo(email); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to add email %s: %v", email, err)
 		}
 	}
 

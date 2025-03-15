@@ -228,6 +228,12 @@ export default $config({
         mailerConfigsSecret,
       ],
       timeout: "60 seconds",
+      permissions : [
+        {
+          actions: ["lambda:InvokeFunction"],
+          resources: ["arn:aws:lambda:us-east-1:905418377819:function:HtmlToPdf"]
+        },
+      ]
     });
     api.route("GET /api/{proxy+}", mainApiFunction.arn);
     api.route("POST /api/{proxy+}", mainApiFunction.arn);
@@ -278,7 +284,6 @@ export default $config({
     api.route("GET /", authClientFunction.arn);
     return {
       SiteUrl: site.url,
-      VerifyAccess: verifyAccessFunction.arn,
       // ApiFunction: apiFunction.url,
       // MyBucket: bucket.name,
       // BcvUrl: bcvUrl.value,

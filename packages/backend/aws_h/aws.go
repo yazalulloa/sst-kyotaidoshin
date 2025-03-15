@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"sync"
+	"time"
 )
 
 var configInstance *aws.Config
@@ -122,6 +123,29 @@ func PresignPostObject(ctx context.Context, bucketName string, objectKey string,
 		return nil, err
 	}
 	return request, nil
+}
+
+func PresignPut(ctx context.Context, bucketName, objectKey, contentType string) (string, error) {
+	client, err := GetPresignClient(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	optionFn := func(options *s3.PresignOptions) {
+		options.Expires = 2 * time.Hour
+	}
+
+	req, err := client.PresignPutObject(ctx, &s3.PutObjectInput{
+		Bucket:      aws.String(bucketName),
+		Key:         aws.String(objectKey),
+		ContentType: aws.String(contentType),
+	}, optionFn)
+
+	if err != nil {
+		return "", err
+	}
+
+	return req.URL, nil
 }
 
 var sqsClientInstance *sqs.Client

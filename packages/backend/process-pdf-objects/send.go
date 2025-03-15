@@ -79,12 +79,9 @@ func sendPdfs(ctx context.Context, event receiptPdf.QueueEvent) error {
 			var emails []string
 			if altRecipient == "" {
 				emails = strings.Split(part.Apt.Emails, ",")
-				log.Printf("Emails %v", emails)
 			} else {
 				emails = []string{altRecipient}
 			}
-
-			emails = []string{altRecipient}
 
 			req := receiptPdf.SendPdfRequest{
 				Emails:        emails,
@@ -106,8 +103,6 @@ func sendPdfs(ctx context.Context, event receiptPdf.QueueEvent) error {
 			messages[i] = &email_h.MsgWithCallBack{
 				Msg: msg,
 				Callback: func() {
-
-					log.Printf("Sent %s", part.Apt.Number)
 					progressUpdate.Counter++
 					progressUpdate.Apt = part.Apt.Number
 					progressUpdate.Name = part.Apt.Name

@@ -14,7 +14,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/sst/sst/v3/sdk/golang/resource"
 	"io"
 	"kyotaidoshin/util"
 	"log"
@@ -25,8 +24,9 @@ import (
 )
 
 type PdfItem struct {
-	ObjectKey string `json:"objectKey"`
-	Html      string `json:"html"`
+	ObjectKey    string `json:"objectKey"`
+	Html         string `json:"html"`
+	PresignedUrl string `json:"presignedUrl"`
 }
 type PartInfoUpload struct {
 	FileName  string
@@ -61,11 +61,28 @@ func checkOrBuild(ctx context.Context, parts []PartInfoUpload, isPdf bool) ([]Pd
 			return nil, err
 		}
 
+		content := buf.String()
+
+		newStr := strings.ReplaceAll(content, "<br>", "<br></br>")
+		newStr = strings.Replace(newStr, "!doctype", "!DOCTYPE", 1)
+		buf.Reset()
+
+		_, err = buf.WriteString(newStr)
+		if err != nil {
+			return nil, err
+		}
+
 		base64Str := base64.URLEncoding.EncodeToString(buf.Bytes())
 
+		url, err := aws_h.PresignPut(ctx, bucketName, part.ObjectKey, "application/pdf")
+		if err != nil {
+			return nil, err
+		}
+
 		pdfItems = append(pdfItems, PdfItem{
-			ObjectKey: part.ObjectKey,
-			Html:      base64Str,
+			ObjectKey:    part.ObjectKey,
+			Html:         base64Str,
+			PresignedUrl: url,
 		})
 		return pdfItems, err
 	}
@@ -119,9 +136,15 @@ func checkOrBuild(ctx context.Context, parts []PartInfoUpload, isPdf bool) ([]Pd
 
 			if isPdf {
 				base64Str := base64.URLEncoding.EncodeToString(buf.Bytes())
+				url, err := aws_h.PresignPut(ctx, bucketName, part.ObjectKey, "application/pdf")
+				if err != nil {
+					errorChan <- err
+				}
+
 				itemChan <- PdfItem{
-					ObjectKey: part.ObjectKey,
-					Html:      base64Str,
+					ObjectKey:    part.ObjectKey,
+					Html:         base64Str,
+					PresignedUrl: url,
 				}
 			} else {
 				_, err = aws_h.PutBuffer(ctx, bucketName, part.ObjectKey, "text/html", &buf)
@@ -152,10 +175,10 @@ func checkOrBuild(ctx context.Context, parts []PartInfoUpload, isPdf bool) ([]Pd
 }
 
 func GetParts(receipt *CalculatedReceipt, ctx context.Context, isPdf bool, keys *DownloadKeys) ([]PartInfoUpload, error) {
-	functionName, err := resource.Get("HtmlToPdf", "name")
-	if err != nil {
-		return nil, err
-	}
+	//functionName, err := resource.Get("HtmlToPdf", "name")
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	lambdaClient, err := aws_h.GetLambdaClient(ctx)
 	if err != nil {
@@ -210,14 +233,23 @@ func GetParts(receipt *CalculatedReceipt, ctx context.Context, isPdf bool, keys 
 			return nil, err
 		}
 
-		_, err = lambdaClient.Invoke(ctx, &lambda.InvokeInput{
-			FunctionName:   aws.String(functionName.(string)),
+		res, err := lambdaClient.Invoke(ctx, &lambda.InvokeInput{
+			FunctionName: aws.String("arn:aws:lambda:us-east-1:905418377819:function:HtmlToPdf"),
+			//FunctionName:   aws.String(functionName.(string)),
 			InvocationType: types.InvocationTypeRequestResponse,
 			Payload:        jsonBytes,
 		})
 
 		if err != nil {
 			return nil, err
+		}
+
+		if res.StatusCode != 200 {
+			return nil, fmt.Errorf("error invoking lambda %d %s", res.StatusCode, string(res.Payload))
+		}
+
+		if res.FunctionError != nil {
+			return nil, fmt.Errorf("error invoking lambda %s", *res.FunctionError)
 		}
 	}
 

@@ -90,7 +90,7 @@ func BuildingViewV2(dto CalculatedReceipt) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		multipleCurrencies := len(dto.CurrenciesToShowAmountToPay) > 1
 		mainCurrency := util.GetAllowedCurrency(dto.Building.MainCurrency)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<h4 class=\"title-center\"><strong>AVISO DE COBRO</strong></h4><div class=\"w-full flex flex-col justify-start text-start items-start\"><p>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<h4 class=\"text-center font-bold\">AVISO DE COBRO</h4><div class=\"w-full flex flex-col justify-start text-start items-start\"><p>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

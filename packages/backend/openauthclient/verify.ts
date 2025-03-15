@@ -21,11 +21,25 @@ export const handler: Handler = async (event, context) => {
 
   let refreshToken: string | undefined = event?.refreshToken?.trim()
 
-  const verified = await client.verify(subjects, accessToken!, {
-    refresh: refreshToken,
-  })
+  let verified;
 
-  if (verified.err) throw new Error("Invalid access token")
+  try {
+    verified = await client.verify(subjects, accessToken!, {
+      refresh: refreshToken,
+    })
+  } catch (e) {
+    console.log("Error client.verify", e)
+    return {
+      statusCode: 401,
+      body: "Invalid access token",
+    }
+  }
+
+  if (verified.err) {
+
+    console.log("Error verifying token", verified.err)
+    throw new Error("Invalid access token")
+  }
 
   return verified.subject;
 }
