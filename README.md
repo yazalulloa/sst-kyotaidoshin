@@ -14,7 +14,7 @@ TODOS:
 - [x] Send Pdfs by selection
 - [x] Copy Receipt
 - [ ] Optimize SELECT on Calculate Receipt
-- [ ] Receipt nav
+- [x] Receipt nav
 - [ ] Permissions
 - [ ] Horizontal scroll on view receipts
 - [ ] Toast Error
