@@ -1,6 +1,9 @@
 <div id="header-container" hx-swap-oob="true" class="flex flex-col gap-2">
 
-  <div id="pdf-header" class="flex flex-row justify-start items-center text-center gap-4">
+  <div id="pdf-header" class="flex flex-row justify-start items-center text-center gap-4"
+       x-data="{
+   key: getLastPathSegment()
+  }">
     <div x-data="{
    url: '/receipts'
   }">
@@ -9,6 +12,36 @@
            hx-swap="outerHTML">
       </div>
     </div>
+
+    <button
+        type="button"
+        x-bind:hx-get="`/api/receipts/download/zip/${key}`"
+        hx-trigger="mousedown"
+        hx-target="this"
+        hx-swap="none"
+        hx-on:htmx:before-request="this.dispatchEvent(new CustomEvent('event-is-loading'))"
+        hx-on:htmx:after-request="this.dispatchEvent(new CustomEvent('event-is-not-loading'))"
+        @event-is-loading="isLoading = true"
+        @event-is-not-loading="isLoading = false"
+        x-data="{isLoading: false}"
+        x-bind:disabled="isLoading"
+        class="w-fit inline-flex justify-center items-center gap-2 whitespace-nowrap rounded-radius bg-primary border border-primary dark:border-primary-dark px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+    >
+      <svg x-bind:data-src="zipFileIconUrl" data-cache="21600" class="size-5"></svg>
+      <span x-text="$t('main-action-download-zip')"></span>
+      <svg
+          x-show="isLoading"
+          x-bind:data-src="loadingIconUrl"
+          class="size-5 animate-spin motion-reduce:animate-none fill-on-primary dark:fill-on-primary-dark"
+      ></svg>
+    </button>
+    <a
+        x-bind:href="`/receipts/edit/${key}`"
+        class="w-fit inline-flex justify-center items-center gap-2 whitespace-nowrap rounded-radius bg-primary border border-primary px-4 py-2 text-center text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:border-primary-dark dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+    >
+      <svg x-bind:data-src="editIconUrl" data-cache="21600" class="size-5"></svg>
+      <span x-text="$t('main-action-edit')"></span>
+    </a>
 
   </div>
 

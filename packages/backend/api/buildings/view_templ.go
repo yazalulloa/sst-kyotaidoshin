@@ -222,7 +222,7 @@ func Search(res TableResponse) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\"><button type=\"button\" class=\"whitespace-nowrap bg-transparent rounded-full border border-secondary p-1 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-secondary-dark dark:text-secondary-dark dark:focus-visible:outline-secondary-dark\"><svg x-bind:data-src=\"editIconUrl\" data-cache=\"21600\" class=\"h-6 w-6\"></svg></button></a>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\"><button type=\"button\" class=\"whitespace-nowrap bg-transparent rounded-full border border-success p-1 text-sm font-medium tracking-wide text-success transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-success active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-success-dark dark:text-success-dark dark:focus-visible:outline-success-dark\"><svg x-bind:data-src=\"editIconUrl\" data-cache=\"21600\" class=\"h-6 w-6\"></svg></button></a>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

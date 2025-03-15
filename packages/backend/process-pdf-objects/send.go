@@ -22,7 +22,7 @@ func sendPdfs(ctx context.Context, event receiptPdf.QueueEvent) error {
 
 	altRecipient := altEmailsRecipient.(string)
 
-	receipt, err := receipts.CalculateReceipt(event.BuildingId, event.ReceiptId)
+	receipt, err := receipts.CalculateReceipt(event.BuildingId, event.ReceiptId, event.KeyStr)
 	if err != nil {
 		return err
 	}

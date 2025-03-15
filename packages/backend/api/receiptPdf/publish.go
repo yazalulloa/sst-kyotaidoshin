@@ -25,6 +25,7 @@ type QueueEvent struct {
 	ReceiptId  string   `json:"receiptId"`
 	ProgressId string   `json:"progressId"`
 	Apartments []string `json:"apartments"`
+	KeyStr     string   `json:"keyStr"`
 }
 
 func (receiver QueueEvent) IsChanges() bool {

@@ -653,7 +653,7 @@ func getReceiptView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id)
+	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id, keyStr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -723,7 +723,7 @@ func getZip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id)
+	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id, keyStr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -797,7 +797,7 @@ func getPdf(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id)
+	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id, keyStr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -850,7 +850,7 @@ func getHtml(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id)
+	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id, keyStr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
