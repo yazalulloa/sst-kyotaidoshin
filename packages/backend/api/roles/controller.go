@@ -2,6 +2,8 @@ package roles
 
 import (
 	"db/gen/model"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"github.com/go-playground/form"
 	"github.com/go-playground/validator/v10"
@@ -20,6 +22,8 @@ func Routes(server *mux.Router) {
 	server.HandleFunc(_SEARCH, search).Methods("GET")
 	server.HandleFunc(_PATH, rolesPut).Methods("PUT")
 	server.HandleFunc(_PATH+"/{key}", roleDelete).Methods("DELETE")
+	server.HandleFunc(_PATH+"/all", getAll).Methods("GET")
+	server.HandleFunc(_PATH+"/all/min", getAllMin).Methods("GET")
 }
 
 func search(w http.ResponseWriter, r *http.Request) {
@@ -198,4 +202,69 @@ func roleDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+
+func getAll(w http.ResponseWriter, r *http.Request) {
+
+	data, err := selectAll()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	roles := make([]RoleWithPermissions, len(data))
+
+	for i, item := range data {
+		roles[i] = RoleWithPermissions{
+			Role:        item.Roles,
+			Permissions: item.Permissions,
+		}
+	}
+
+	byteArray, err := json.Marshal(roles)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	base64Str := base64.StdEncoding.EncodeToString(byteArray)
+
+	err = AllData(base64Str).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+}
+
+func getAllMin(w http.ResponseWriter, r *http.Request) {
+	data, err := selectAll()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	roles := make([]RoleMin, len(data))
+
+	for i, item := range data {
+		roles[i] = RoleMin{
+			ID:          *item.Roles.ID,
+			Name:        item.Roles.Name,
+			PermsLength: len(item.Permissions),
+		}
+	}
+
+	byteArray, err := json.Marshal(roles)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	base64Str := base64.StdEncoding.EncodeToString(byteArray)
+
+	err = AllData(base64Str).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }

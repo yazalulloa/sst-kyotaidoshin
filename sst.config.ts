@@ -149,7 +149,7 @@ export default $config({
       },
       cors: {
         allowOrigins: allowedOrigins,
-        allowMethods: ["GET", "PUT", "POST", "DELETE"],
+        allowMethods: ["GET", "PUT", "POST", "DELETE", "PATCH"],
         allowHeaders: [
           "Authorization",
           "Content-Type",

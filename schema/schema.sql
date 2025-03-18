@@ -250,8 +250,9 @@ CREATE TABLE IF NOT EXISTS role_permissions (
     FOREIGN KEY (permission_id) REFERENCES permissions(id)
 );
 
+-- DROP TABLE IF EXISTS user_roles;
 CREATE TABLE IF NOT EXISTS user_roles (
-    user_id INTEGER,
+    user_id VARCHAR(50),
     role_id INTEGER,
     PRIMARY KEY (user_id, role_id),
     FOREIGN KEY (user_id) REFERENCES users(id),

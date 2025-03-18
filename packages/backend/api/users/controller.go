@@ -2,6 +2,8 @@ package users
 
 import (
 	"fmt"
+	"github.com/go-playground/form"
+	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"kyotaidoshin/util"
 	"log"
@@ -16,6 +18,7 @@ func Routes(server *mux.Router) {
 
 	server.HandleFunc(_SEARCH, search).Methods("GET")
 	server.HandleFunc(_PATH+"/{id}", userDelete).Methods("DELETE")
+	server.HandleFunc(_PATH+"/role", userRolePatch).Methods("PUT")
 }
 
 func search(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +51,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 	response.NextPageUrl = nextPageUrl
 	response.Results = results
 
-	err = Search(response).Render(r.Context(), w)
+	err = Search(*response).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -83,4 +86,99 @@ func userDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+
+func userRolePatch(w http.ResponseWriter, r *http.Request) {
+
+	upsert := func() FormResponse {
+
+		response := FormResponse{}
+
+		err := r.ParseForm()
+		if err != nil {
+			log.Printf("Error parsing form: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		decoder := form.NewDecoder()
+		var request FormRequest
+		err = decoder.Decode(&request, r.Form)
+
+		if err != nil {
+			log.Printf("Error decoding form: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		if request.Key == "" {
+			response.errorStr = "Bad Request"
+			return response
+		}
+
+		var keys Keys
+		err = util.Decode(request.Key, &keys)
+		if err != nil {
+			log.Printf("Error decoding key: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		validate, err := util.GetValidator()
+		if err != nil {
+			log.Printf("Error getting validator: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
+		err = validate.Struct(request)
+		if err != nil {
+			// Validation failed, handle the error
+			errors := err.(validator.ValidationErrors)
+			for _, valErr := range errors {
+				log.Printf("Validation error: %v", valErr)
+			}
+			response.errorStr = fmt.Sprintf("Validation error: %s", errors)
+			return response
+		}
+
+		if request.RoleId < 0 {
+			response.errorStr = "Bad Request"
+			return response
+		}
+
+		var roleId *int32
+		if request.RoleId > 0 {
+			roleId = &request.RoleId
+		}
+
+		rowsAffected, err := updateRole(keys.ID, roleId)
+
+		if err != nil {
+			response.errorStr = err.Error()
+			return response
+		}
+
+		log.Printf("Updated userRole: %d", rowsAffected)
+
+		item, err := getItemWitRole(keys)
+
+		if err != nil {
+			response.errorStr = err.Error()
+			return response
+		}
+
+		item.isUpdate = true
+		response.item = item
+
+		return response
+	}
+
+	response := upsert()
+
+	err := UserRoleFormResponseView(response).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }

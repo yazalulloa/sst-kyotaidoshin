@@ -28,6 +28,7 @@ import receiptNewDialogPartialUrl
 import expensesFormPartialUrl from './pages/expenses/form.html?url'
 import debtsFormPartialUrl from './pages/debts/form.html?url'
 import usersIndexPartialUrl from './pages/users/index.html?url'
+import usersEditDialogPartialUrl from './pages/users/editDialog.html?url'
 import debtMonthsPartialUrl from './pages/debts/debtMonthsComponent.html?url'
 import uploadFormPartialUrl from './pages/partials/uploadForm.html?url'
 import aptSendDialogPartialUrl from './pages/receipts/aptSendDialog.html?url'
@@ -60,6 +61,7 @@ window.receiptNewDialogPartialUrl = receiptNewDialogPartialUrl;
 window.expensesFormPartialUrl = expensesFormPartialUrl;
 window.debtsFormPartialUrl = debtsFormPartialUrl;
 window.usersIndexPartialUrl = usersIndexPartialUrl;
+window.usersEditDialogPartialUrl = usersEditDialogPartialUrl;
 window.debtMonthsPartialUrl = debtMonthsPartialUrl;
 window.uploadFormPartialUrl = uploadFormPartialUrl;
 window.aptSendDialogPartialUrl = aptSendDialogPartialUrl;

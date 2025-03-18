@@ -59,6 +59,13 @@ func getQueryCount(requestQuery RequestQuery) (*int64, error) {
 	return &dest.Count, nil
 }
 
+func selectAll() ([]struct {
+	model.Roles
+	Permissions []model.Permissions
+}, error) {
+	return selectList(RequestQuery{})
+}
+
 func selectList(requestQuery RequestQuery) ([]struct {
 	model.Roles
 	Permissions []model.Permissions
@@ -80,8 +87,11 @@ func selectList(requestQuery RequestQuery) ([]struct {
 		Roles.LEFT_JOIN(RolePermissions, Roles.ID.EQ(RolePermissions.RoleID)).
 			LEFT_JOIN(Permissions, RolePermissions.PermissionID.EQ(Permissions.ID)),
 	).WHERE(condition).
-		ORDER_BY(Roles.ID.ASC()).
-		LIMIT(int64(requestQuery.Limit))
+		ORDER_BY(Roles.ID.ASC())
+
+	if requestQuery.Limit > 0 {
+		stmt = stmt.LIMIT(int64(requestQuery.Limit))
+	}
 
 	//log.Printf("selectList : %v\n", stmt.DebugSql())
 
@@ -139,7 +149,7 @@ func update(role model.Roles) (int64, error) {
 	stmt := Roles.UPDATE(Roles.Name).SET(Roles.Name).
 		WHERE(Roles.ID.EQ(sqlite.Int32(*role.ID))).
 		SET(role.Name)
-	
+
 	res, err := stmt.Exec(db.GetDB().DB)
 	if err != nil {
 		return 0, err

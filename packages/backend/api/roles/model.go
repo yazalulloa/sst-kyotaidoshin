@@ -68,3 +68,9 @@ type UpdateParams struct {
 	Name  string  `json:"name"`
 	Perms []int32 `json:"perms"`
 }
+
+type RoleMin struct {
+	ID          int32  `json:"id"`
+	Name        string `json:"name"`
+	PermsLength int    `json:"perms"`
+}

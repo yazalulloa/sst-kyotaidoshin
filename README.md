@@ -29,3 +29,4 @@ TODOS:
 - [ ] Language Selector
 - [ ] Themes
 - [ ] Sessions
+- [ ] Fix Z index of tooltips and dialogs (Receipts)

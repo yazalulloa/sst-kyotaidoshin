@@ -77,3 +77,8 @@ templ FormResponseView(res FormResponse) {
 		@ItemView(*res.item)
 	}
 }
+
+templ AllData(str string) {
+	<div data-params={ str }
+	x-init="$dispatch('event-set-roles', { params: $el.dataset.params })"></div>
+}
