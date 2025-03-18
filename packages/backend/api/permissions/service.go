@@ -16,7 +16,7 @@ func insertAll() (int64, error) {
 	return insertBulk(array)
 }
 
-func allItems() ([]Item, error) {
+func tableResponse() (*TableResponse, error) {
 
 	perms, err := selectAll()
 	if err != nil {
@@ -32,5 +32,10 @@ func allItems() ([]Item, error) {
 		}
 	}
 
-	return items, nil
+	return &TableResponse{
+		Counters: Counters{
+			TotalCount: int64(len(perms)),
+		},
+		Results: items,
+	}, nil
 }

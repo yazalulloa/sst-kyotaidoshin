@@ -16,6 +16,12 @@ export default $config({
         $app.stage !== PROD_STAGE && $app.stage !== STAG_STAGE,
     );
     console.log("isLocal", isLocal);
+
+    const domain = process.env.DOMAIN;
+    const stageDomain = $app.stage === PROD_STAGE ? "" : `${$app.stage}.`;
+    const currentWebUrl = `${stageDomain}${domain}`
+    console.log("currentWebUrl", currentWebUrl);
+
     const bucket = new sst.aws.Bucket("bcv-bucket", {
       versioning: false,
     });
@@ -30,13 +36,22 @@ export default $config({
     const googleClientSecret = new sst.Secret("GoogleClientSecret");
     const mailerConfigsSecret = new sst.Secret("MailerConfigs");
     const altEmailsRecipientSecret = new sst.Secret("AltEmailsRecipient", "");
+    const htmlToPdfFunction = new sst.Secret("HtmlToPdfFunction")
+
     // const domain = new sst.Secret("Domain");
     const processUserFunction = new sst.aws.Function("ProcessUser", {
       link: [secretTursoUrl],
       handler: "packages/backend/process-user/",
       runtime: "go",
     });
+
+
+    const authDomain = `auth.${currentWebUrl}`
+    console.log('AuthDomain', authDomain)
     const auth = new sst.aws.Auth("AuthServer", {
+      domain: {
+        name: authDomain
+      },
       forceUpgrade: "v2",
       issuer: {
         handler: "packages/auth/index.handler",
@@ -103,11 +118,6 @@ export default $config({
       // schedule: "cron(0/15 * * * ? *)",
       function: bcvFunction.arn,
     });
-
-    const domain = process.env.DOMAIN;
-    const stageDomain = $app.stage === PROD_STAGE ? "" : `${$app.stage}.`;
-    const currentWebUrl = `${stageDomain}${domain}`
-    console.log("currentWebUrl", currentWebUrl);
     const apiDomain = `api.${currentWebUrl}`
 
     const uploadBackupBucket = new sst.aws.Bucket("UploadBackupBucket", {
@@ -205,6 +215,7 @@ export default $config({
         mailerConfigsSecret,
         htmlToPdf,
         altEmailsRecipientSecret,
+        htmlToPdfFunction,
       ],
       runtime: "go",
       handler: "packages/backend/process-pdf-objects/",
@@ -226,12 +237,13 @@ export default $config({
         htmlToPdf,
         receiptPdfQueue,
         mailerConfigsSecret,
+        htmlToPdfFunction,
       ],
       timeout: "60 seconds",
-      permissions : [
+      permissions: [
         {
           actions: ["lambda:InvokeFunction"],
-          resources: ["arn:aws:lambda:us-east-1:905418377819:function:HtmlToPdf"]
+          resources: [htmlToPdfFunction.value]
         },
       ]
     });

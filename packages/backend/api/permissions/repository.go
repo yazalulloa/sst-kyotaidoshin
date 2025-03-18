@@ -10,7 +10,7 @@ import (
 
 func insertBulk(perms []string) (int64, error) {
 
-	stmt := Permissions.INSERT(Permissions.Name)
+	stmt := Permissions.INSERT(Permissions.Name).ON_CONFLICT().DO_NOTHING()
 
 	for _, perm := range perms {
 		stmt = stmt.VALUES(perm)

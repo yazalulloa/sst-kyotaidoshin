@@ -119,3 +119,45 @@ func AllRoles() []PERM {
 		ROLES_WRITE,
 	}
 }
+
+type WithLabel struct {
+	Label string
+	Perms []PERM
+}
+
+func WithLabels() []WithLabel {
+	return []WithLabel{
+		{
+			Label: "apartments",
+			Perms: AllApartments(),
+		},
+		{
+			Label: "buildings",
+			Perms: AllBuildings(),
+		},
+		{
+			Label: "receipts",
+			Perms: AllReceipts(),
+		},
+		{
+			Label: "users",
+			Perms: AllUsers(),
+		},
+		{
+			Label: "rates",
+			Perms: AllRates(),
+		},
+		{
+			Label: "bcv-files",
+			Perms: AllBcvFiles(),
+		},
+		{
+			Label: "permissions",
+			Perms: AllPermissions(),
+		},
+		{
+			Label: "roles",
+			Perms: AllRoles(),
+		},
+	}
+}

@@ -85,7 +85,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 	response.NextPageUrl = nextPageUrl
 	response.Results = results
 
-	err = Search(response).Render(r.Context(), w)
+	err = Search(*response).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

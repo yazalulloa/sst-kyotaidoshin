@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/sst/sst/v3/sdk/golang/resource"
 	"io"
 	"kyotaidoshin/util"
 	"log"
@@ -228,14 +229,18 @@ func GetParts(receipt *CalculatedReceipt, ctx context.Context, isPdf bool, keys 
 	}
 
 	if len(pdfItems) > 0 {
+		functionName, err := resource.Get("HtmlToPdfFunction", "value")
+		if err != nil {
+			return nil, err
+		}
+
 		jsonBytes, err := json.Marshal(pdfItems)
 		if err != nil {
 			return nil, err
 		}
 
 		res, err := lambdaClient.Invoke(ctx, &lambda.InvokeInput{
-			FunctionName: aws.String("arn:aws:lambda:us-east-1:905418377819:function:HtmlToPdf"),
-			//FunctionName:   aws.String(functionName.(string)),
+			FunctionName:   aws.String(functionName.(string)),
 			InvocationType: types.InvocationTypeRequestResponse,
 			Payload:        jsonBytes,
 		})

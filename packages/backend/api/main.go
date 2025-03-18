@@ -12,9 +12,11 @@ import (
 	"kyotaidoshin/debts"
 	"kyotaidoshin/expenses_api"
 	"kyotaidoshin/extraCharges"
+	"kyotaidoshin/permissions"
 	"kyotaidoshin/rates"
 	"kyotaidoshin/receipts"
 	"kyotaidoshin/reserveFundsApi"
+	"kyotaidoshin/roles"
 	"kyotaidoshin/start"
 	"kyotaidoshin/users"
 	"kyotaidoshin/util"
@@ -72,6 +74,8 @@ func router() http.Handler {
 	expenses_api.Routes(newRouter)
 	debts.Routes(newRouter)
 	users.Routes(newRouter)
+	permissions.Routes(newRouter)
+	roles.Routes(newRouter)
 
 	//newRouter.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	//

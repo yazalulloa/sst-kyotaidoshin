@@ -61,6 +61,14 @@ func getInit(w http.ResponseWriter, r *http.Request) {
 			Id:   "nav-users",
 			Path: "/users",
 		},
+		{
+			Id:   "nav-permissions",
+			Path: "/permissions",
+		},
+		{
+			Id:   "nav-roles",
+			Path: "/roles",
+		},
 	}
 
 	bytes, err := json.Marshal(pages)

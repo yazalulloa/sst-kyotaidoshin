@@ -232,17 +232,17 @@ CREATE TABLE IF NOT EXISTS users
 CREATE INDEX IF NOT EXISTS users_provider_id_idx ON users (provider, provider_id);
 
 
-CREATE TABLE roles (
+CREATE TABLE IF NOT EXISTS roles  (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL UNIQUE NOT NULL
 );
 
-CREATE TABLE permissions (
+CREATE TABLE IF NOT EXISTS permissions (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL UNIQUE NOT NULL
 );
 
-CREATE TABLE role_permissions (
+CREATE TABLE IF NOT EXISTS role_permissions (
     role_id INTEGER,
     permission_id INTEGER,
     PRIMARY KEY (role_id, permission_id),
@@ -250,7 +250,7 @@ CREATE TABLE role_permissions (
     FOREIGN KEY (permission_id) REFERENCES permissions(id)
 );
 
-CREATE TABLE user_roles (
+CREATE TABLE IF NOT EXISTS user_roles (
     user_id INTEGER,
     role_id INTEGER,
     PRIMARY KEY (user_id, role_id),

@@ -31,6 +31,9 @@ import usersIndexPartialUrl from './pages/users/index.html?url'
 import debtMonthsPartialUrl from './pages/debts/debtMonthsComponent.html?url'
 import uploadFormPartialUrl from './pages/partials/uploadForm.html?url'
 import aptSendDialogPartialUrl from './pages/receipts/aptSendDialog.html?url'
+import permissionsIndexPartialUrl from './pages/permissions/index.html?url'
+import rolesIndexPartialUrl from './pages/roles/index.html?url'
+import rolesFormPartialUrl from './pages/roles/formDialog.html?url'
 
 window.backBtnPartialUrl = backBtnPartialUrl;
 window.currencyPickerPartialUrl = currencyPickerPartialUrl;
@@ -60,6 +63,9 @@ window.usersIndexPartialUrl = usersIndexPartialUrl;
 window.debtMonthsPartialUrl = debtMonthsPartialUrl;
 window.uploadFormPartialUrl = uploadFormPartialUrl;
 window.aptSendDialogPartialUrl = aptSendDialogPartialUrl;
+window.permissionsIndexPartialUrl = permissionsIndexPartialUrl;
+window.rolesIndexPartialUrl = rolesIndexPartialUrl;
+window.rolesFormPartialUrl = rolesFormPartialUrl;
 
 window.NAV_URLS = new Map([
   ['nav-apartments', apartmentsIndexPartialUrl],
@@ -72,7 +78,8 @@ window.NAV_URLS = new Map([
   ['nav-rates', ratesIndexPartialUrl],
   ['nav-bcv-files', bucketIndexPartialUrl],
   ['nav-users', usersIndexPartialUrl],
-
+  ['nav-permissions', permissionsIndexPartialUrl],
+  ['nav-roles', rolesIndexPartialUrl],
 ])
 
 document.addEventListener("DOMContentLoaded", function () {

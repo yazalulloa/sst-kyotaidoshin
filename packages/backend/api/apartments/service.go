@@ -9,24 +9,18 @@ import (
 	"sync"
 )
 
-func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
+func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 	var tableResponse TableResponse
-	var oErr error
-	var once sync.Once
-	handleErr := func(e error) {
-		if e != nil {
-			once.Do(func() {
-				oErr = e
-			})
-		}
-	}
+
 	var wg sync.WaitGroup
 	wg.Add(3)
+	errorChan := make(chan error, 3)
+
 	go func() {
 		defer wg.Done()
 		array, err := selectList(requestQuery)
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 
@@ -35,7 +29,7 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 
 			obj, err := toItem(&item, nil)
 			if err != nil {
-				handleErr(err)
+				errorChan <- err
 				return
 			}
 
@@ -49,7 +43,7 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 		defer wg.Done()
 		totalCount, err := getTotalCount()
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 		tableResponse.Counters.TotalCount = totalCount
@@ -59,7 +53,7 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 		defer wg.Done()
 		queryCount, err := getQueryCount(requestQuery)
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 		if queryCount != nil {
@@ -68,8 +62,14 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 	}()
 
 	wg.Wait()
+	close(errorChan)
 
-	return tableResponse, oErr
+	err := util.HasErrors(errorChan)
+	if err != nil {
+		return nil, err
+	}
+
+	return &tableResponse, nil
 }
 
 func toItem(item *model.Apartments, oldCardId *string) (*Item, error) {
