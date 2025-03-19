@@ -10,7 +10,8 @@
     </div>
   </div>
 
-  <button hx-post="/api/permissions/all"
+  <button x-show="hasPerm('permissions:write')"
+          hx-post="/api/permissions/all"
           hx-trigger="mousedown"
           hx-swap="none"
           hx-disabled-elt="this"
@@ -23,7 +24,7 @@
 </div>
 
 <div id="container" hx-swap-oob="true">
-  <ul class="flex flex-col gap-2 *:md:grid *:md:grid-cols-3 *:md:gap-2 *:flex *:flex-row *:flex-wrap *:gap-4 *:items-center *:text-center">
+  <ul class="flex flex-col gap-2 *:md:grid *:md:gap-2 *:flex *:flex-row *:flex-wrap *:gap-4 *:items-center *:text-center">
     <li hidden="hidden"
         hx-get="/api/permissions/search"
         hx-trigger="load"

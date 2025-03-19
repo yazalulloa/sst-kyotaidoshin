@@ -14,13 +14,16 @@ templ searchView(res TableResponse) {
 }
 
 templ ItemView(item Item) {
+	{{ hasWritePerm := api.HasPerms(ctx, api.ROLES_WRITE) }}
 	<li
 		id={ item.CardId }
-		class="fade-me-in fade-me-out"
+		class={ "fade-me-in fade-me-out ",
+            templ.KV("md:grid-cols-[1fr_1fr_8fr_1fr]", hasWritePerm),
+            templ.KV("md:grid-cols-[1fr_1fr_8fr]", !hasWritePerm) }
 		if item.isUpdate {
 			hx-swap-oob="true"
 		}
-		if item.UpdateParams != nil {
+		if hasWritePerm && item.UpdateParams != nil {
 			data-update-params={ *item.UpdateParams }
 			@dblclick.prevent="$dispatch('event-roles-form-update', { params: $el.dataset.updateParams })"
 		}
@@ -36,7 +39,9 @@ templ ItemView(item Item) {
 				<span>{ perm.Name }</span>
 			}
 		</div>
-		@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
+		if hasWritePerm {
+			@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
+		}
 	</li>
 }
 
@@ -79,6 +84,8 @@ templ FormResponseView(res FormResponse) {
 }
 
 templ AllData(str string) {
-	<div data-params={ str }
-	x-init="$dispatch('event-set-roles', { params: $el.dataset.params })"></div>
+	<div
+		data-params={ str }
+		x-init="$dispatch('event-set-roles', { params: $el.dataset.params })"
+	></div>
 }

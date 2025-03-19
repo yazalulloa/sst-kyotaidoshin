@@ -9,10 +9,13 @@ import (
 )
 
 templ Search(res TableResponse) {
+	{{ hasWritePerm := api.HasPerms(ctx, api.BUILDINGS_WRITE) }}
 	for _, item := range res.Results {
 		<li
 			id={ item.CardId }
-			class="fade-me-in fade-me-out"
+			class={ "fade-me-in fade-me-out ",
+        templ.KV("md:grid-cols-6", hasWritePerm),
+        templ.KV("md:grid-cols-5", !hasWritePerm) }
 		>
 			<div class="flex flex-col gap-2">
 				<span>{ fmt.Sprint(item.Item.ID) }</span>
@@ -65,17 +68,19 @@ templ Search(res TableResponse) {
                                            .toLocaleString()
                                            "
 			></span>
-			<div class="flex flex-row flex-wrap gap-2 justify-center items-center">
-				<a href={ templ.URL(fmt.Sprintf("/buildings/edit/%s", item.Key)) }>
-					<button
-						type="button"
-						class="whitespace-nowrap bg-transparent rounded-full border border-success p-1 text-sm font-medium tracking-wide text-success transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-success active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-success-dark dark:text-success-dark dark:focus-visible:outline-success-dark"
-					>
-						<svg x-bind:data-src="editIconUrl" data-cache="21600" class="h-6 w-6"></svg>
-					</button>
-				</a>
-				@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
-			</div>
+			if hasWritePerm {
+				<div class="flex flex-row flex-wrap gap-2 justify-center items-center">
+					<a href={ templ.URL(fmt.Sprintf("/buildings/edit/%s", item.Key)) }>
+						<button
+							type="button"
+							class="whitespace-nowrap bg-transparent rounded-full border border-success p-1 text-sm font-medium tracking-wide text-success transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-success active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-success-dark dark:text-success-dark dark:focus-visible:outline-success-dark"
+						>
+							<svg x-bind:data-src="editIconUrl" data-cache="21600" class="h-6 w-6"></svg>
+						</button>
+					</a>
+					@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
+				</div>
+			}
 		</li>
 	}
 	if res.NextPageUrl != "" {

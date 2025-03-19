@@ -4,11 +4,19 @@ import "fmt"
 import "kyotaidoshin/api"
 
 templ SearchView(res TableResponse) {
+	{{ hasWritePerm := api.HasPerms(ctx, api.PERMISSIONS_WRITE) }}
 	for _, item := range res.Results {
-		<li>
-			<span>{ fmt.Sprint(*item.Item.ID) } </span>
-			<span>{ item.Item.Name } </span>
-			@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
+		<li
+			id={ item.CardId }
+			class={ "fade-me-in fade-me-out ",
+            templ.KV("md:grid-cols-3", hasWritePerm),
+            templ.KV("md:grid-cols-2", !hasWritePerm) }
+		>
+			<span>{ fmt.Sprint(*item.Item.ID) }</span>
+			<span>{ item.Item.Name }</span>
+			if hasWritePerm {
+				@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
+			}
 		</li>
 	}
 	@CountersView(res.Counters)

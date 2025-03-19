@@ -48,6 +48,7 @@
      console.log(roles);
 
      "
+     x-show="hasPerm('users:write')"
 >
   <div hidden="hidden"
        hx-get="/api/roles/all/min"

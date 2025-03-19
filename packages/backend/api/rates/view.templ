@@ -8,10 +8,13 @@ import (
 )
 
 templ Search(res TableResponse) {
+	{{ hasWritePerm := api.HasPerms(ctx, api.RATES_WRITE) }}
 	for _, item := range res.Results {
 		<li
 			id={ item.CardId }
-			class="fade-me-in fade-me-out"
+			class={ "fade-me-in fade-me-out ",
+            templ.KV("md:grid-cols-[3fr_1fr_1fr_1fr_3fr_1fr]", hasWritePerm),
+            templ.KV("md:grid-cols-[3fr_1fr_1fr_1fr_3fr]", !hasWritePerm) }
 		>
 			<span>{ fmt.Sprint(*item.Item.ID) }</span>
 			<div class="flex flex-row justify-center gap-2">
@@ -33,7 +36,9 @@ templ Search(res TableResponse) {
                                      .toLocaleString()
                                      "
 			></span>
-			@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{"hx-include": "[name='currency_input'],[name='date_input']"})
+			if hasWritePerm {
+				@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{"hx-include": "[name='currency_input'],[name='date_input']"})
+			}
 		</li>
 	}
 	if res.NextPageUrl != "" {

@@ -10,7 +10,8 @@
     </div>
   </div>
 
-  <button hx-get="/api/bcv-bucket/process-all"
+  <button x-show="hasPerm('bcv_files:write')"
+          hx-get="/api/bcv-bucket/process-all"
           hx-trigger="mousedown"
           hx-swap="none"
           hx-disabled-elt="this"
@@ -20,7 +21,8 @@
           x-text="$t('main-action-process-all')">
   </button>
 
-  <button hx-get="/api/bcv-bucket/look-up"
+  <button x-show="hasPerm('bcv_files:write')"
+          hx-get="/api/bcv-bucket/look-up"
           hx-trigger="mousedown"
           hx-swap="none"
           hx-disabled-elt="this"
@@ -33,7 +35,7 @@
 </div>
 
 <div id="container" hx-swap-oob="true">
-  <ul class="flex flex-col gap-2 *:md:grid *:md:grid-cols-[5fr_1fr_4fr_4fr_3fr_1fr] *:md:gap-2 *:flex *:flex-row *:flex-wrap *:gap-4 *:items-center *:text-center">
+  <ul class="flex flex-col gap-2 *:md:grid *:md:gap-2 *:flex *:flex-row *:flex-wrap *:gap-4 *:items-center *:text-center">
     <li hidden="hidden"
         hx-get="/api/bcv-bucket/search"
         hx-trigger="load"

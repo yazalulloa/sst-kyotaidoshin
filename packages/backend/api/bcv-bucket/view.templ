@@ -10,7 +10,9 @@ templ Search(res TableResponse) {
 	for _, item := range res.Results {
 		<li
 			id={ item.CardId }
-			class="fade-me-in fade-me-out"
+			class={ "fade-me-in fade-me-out ",
+        templ.KV("md:grid-cols-[5fr_1fr_4fr_4fr_3fr_1fr]", hasWritePerm),
+        templ.KV("md:grid-cols-[5fr_1fr_4fr_4fr_3fr]", !hasWritePerm) }
 		>
 			<a
 				href={ templ.URL(item.Item.Url) }
@@ -30,32 +32,34 @@ templ Search(res TableResponse) {
                                            .toLocaleString()
                                            "
 			></span>
-			<div class="relative w-fit">
-				<div
-					aria-describedby={ fmt.Sprintf("%s-tooltip", item.CardId) }
-					class={ "flex flex-row gap-0 justify-center peer rounded-radius w-fit border px-2 py-1 text-xs font-medium tracking-wide focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:focus-visible:outline-primary-dark ",
-					   templ.KV("border-success bg-success text-on-success dark:border-success dark:bg-success dark:text-on-success", item.Item.Processed),
-					   templ.KV("border-danger bg-danger text-on-danger dark:border-danger dark:bg-danger dark:text-on-danger", !item.Item.Processed) }
-				>
-					<span x-text="$t('main-bcv-files-processed')"></span>
-					if item.Item.Processed {
-						<span>:&nbsp;</span>
-						<span class="w-[2.5em] inline-block text-start">{ fmt.Sprint(item.Item.Rates) }</span>
+			<div class="flex flex justify-center w-full">
+				<div class="relative w-fit">
+					<div
+						aria-describedby={ fmt.Sprintf("%s-tooltip", item.CardId) }
+						class={ "flex flex-row gap-0 justify-center peer rounded-radius w-fit border px-2 py-1 text-xs font-medium tracking-wide focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:focus-visible:outline-primary-dark ",
+      					   templ.KV("border-success bg-success text-on-success dark:border-success dark:bg-success dark:text-on-success", item.Item.Processed),
+      					   templ.KV("border-danger bg-danger text-on-danger dark:border-danger dark:bg-danger dark:text-on-danger", !item.Item.Processed) }
+					>
+						<span x-text="$t('main-bcv-files-processed')"></span>
+						if item.Item.Processed {
+							<span>:&nbsp;</span>
+							<span class="w-[2.5em] inline-block text-start">{ fmt.Sprint(item.Item.Rates) }</span>
+						}
+					</div>
+					if item.Item.ProcessedDate != nil {
+						<div
+							id={ fmt.Sprintf("%s-tooltip", item.CardId) }
+							class="absolute -bottom-9 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap rounded-sm bg-surface-dark px-2 py-1 text-center text-sm text-on-surface-dark-strong opacity-0 transition-all ease-out peer-hover:opacity-100 peer-focus:opacity-100 dark:bg-surface dark:text-on-surface-strong"
+							role="tooltip"
+							data-date={ fmt.Sprint(*item.Item.ProcessedDate) }
+							x-init="
+                					$el.innerHTML = new Date(parseInt($el.getAttribute('data-date')))
+                                                      //.toLocaleDateString()
+                                                     .toLocaleString()
+                                                     "
+						></div>
 					}
 				</div>
-				if item.Item.ProcessedDate != nil {
-					<div
-						id={ fmt.Sprintf("%s-tooltip", item.CardId) }
-						class="absolute -bottom-9 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap rounded-sm bg-surface-dark px-2 py-1 text-center text-sm text-on-surface-dark-strong opacity-0 transition-all ease-out peer-hover:opacity-100 peer-focus:opacity-100 dark:bg-surface dark:text-on-surface-strong"
-						role="tooltip"
-						data-date={ fmt.Sprint(*item.Item.ProcessedDate) }
-						x-init="
-          					$el.innerHTML = new Date(parseInt($el.getAttribute('data-date')))
-                                                //.toLocaleDateString()
-                                               .toLocaleString()
-                                               "
-					></div>
-				}
 			</div>
 			if hasWritePerm {
 				<div class="flex flex-row gap-4 justify-center">

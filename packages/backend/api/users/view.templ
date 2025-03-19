@@ -16,13 +16,16 @@ templ Search(res TableResponse) {
 }
 
 templ ItemView(item Item) {
+	{{ hasWritePerm := api.HasPerms(ctx, api.USERS_WRITE) }}
 	<li
 		id={ item.CardId }
-		class="fade-me-in fade-me-out"
+		class={ "fade-me-in fade-me-out ",
+            templ.KV("md:grid-cols-[1fr_2fr_2fr_2fr_2fr_2fr_1fr]", hasWritePerm),
+            templ.KV("md:grid-cols-[1fr_2fr_2fr_2fr_2fr_2fr]", !hasWritePerm) }
 		if item.isUpdate {
 			hx-swap-oob="true"
 		}
-		if item.UpdateParams != nil {
+		if hasWritePerm && item.UpdateParams != nil {
 			data-params={ *item.UpdateParams }
 			@dblclick.prevent="$dispatch('event-users-form-update', { params: $el.dataset.params })"
 		}
@@ -51,7 +54,9 @@ templ ItemView(item Item) {
 				@api.SpanFormatDate(fmt.Sprint(item.LastLoginAt))
 			}
 		</div>
-		@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
+		if hasWritePerm {
+			@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
+		}
 	</li>
 }
 
