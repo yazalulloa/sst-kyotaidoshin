@@ -78,7 +78,7 @@ function setSession(c: Context, accessToken?: string, refreshToken?: string) {
     setCookie(c, "access_token", accessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "none",
+      sameSite: "strict",
       path: "/",
       maxAge: 34560000,
     })
@@ -87,7 +87,7 @@ function setSession(c: Context, accessToken?: string, refreshToken?: string) {
     setCookie(c, "refresh_token", refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "none",
+      sameSite: "strict",
       path: "/",
       maxAge: 34560000,
     })

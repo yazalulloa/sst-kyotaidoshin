@@ -247,10 +247,12 @@ export default $config({
         },
       ]
     });
+
     api.route("GET /api/{proxy+}", mainApiFunction.arn);
     api.route("POST /api/{proxy+}", mainApiFunction.arn);
     api.route("PUT /api/{proxy+}", mainApiFunction.arn);
     api.route("DELETE /api/{proxy+}", mainApiFunction.arn);
+
     const site = new sst.aws.StaticSite("WebApp", {
       path: "packages/frontend/app",
       domain: {
