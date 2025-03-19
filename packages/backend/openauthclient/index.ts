@@ -74,11 +74,14 @@ const app = new Hono()
 export const handler = handle(app)
 
 function setSession(c: Context, accessToken?: string, refreshToken?: string) {
+
+  const sameSite = isLocal ? "none" : "strict"
+
   if (accessToken) {
     setCookie(c, "access_token", accessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
+      sameSite: sameSite,
       path: "/",
       maxAge: 34560000,
     })
@@ -87,7 +90,7 @@ function setSession(c: Context, accessToken?: string, refreshToken?: string) {
     setCookie(c, "refresh_token", refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
+      sameSite: sameSite,
       path: "/",
       maxAge: 34560000,
     })

@@ -21,11 +21,11 @@ const storage = DynamoStorage({
 const app = issuer({
   subjects,
   storage: storage,
-  // Remove after setting custom domain
-  allow: async (input, req) => {
-    console.log("Allow: ", input)
-    return true
-  },
+  // // Remove after setting custom domain
+  // allow: async (input, req) => {
+  //   console.log("Allow: ", input, req)
+  //   return true
+  // },
   providers: {
     github: GithubProvider({
       clientID: Resource.GithubClientId.value,
