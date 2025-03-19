@@ -28,6 +28,7 @@
           } else {
            //todo show toast
           console.log('Response', $event.detail)
+          $dispatch('notify', { variant: 'danger', title: 'Error Uploading',  message: $event.detail })
           }
 
           $el.firstElementChild.innerHTML = ''

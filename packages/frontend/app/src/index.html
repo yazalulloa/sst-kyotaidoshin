@@ -238,6 +238,12 @@
       <div hidden="hidden" id="default-anchor">
 
       </div>
+      <div id="toast-container">
+        <div x-bind:hx-get="toastPartialUrl"
+             hx-trigger="load"
+             hx-swap="outerHTML">
+        </div>
+      </div>
 
     </div>
   </div>

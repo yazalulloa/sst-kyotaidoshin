@@ -17,7 +17,7 @@ TODOS:
 - [x] Receipt nav
 - [x] Permissions
 - [ ] Horizontal scroll on view receipts
-- [ ] Toast Error
+- [x] Toast Error
 - [ ] Cache of partials (building ids, years, etc)
 - [ ] Backups
 - [ ] Telegram

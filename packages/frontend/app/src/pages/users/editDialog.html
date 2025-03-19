@@ -29,7 +29,6 @@
      let base64 = $event.detail.params;
      let decodedString = decodeBase64UrlStr(base64);
      let jsonObject = JSON.parse(decodedString);
-     console.log(jsonObject)
 
       key = jsonObject.key;
       params = jsonObject;
@@ -45,7 +44,6 @@
      let base64 = $event.detail.params;
      let decodedString = decodeBase64UrlStr(base64);
      roles = JSON.parse(decodedString);
-     console.log(roles);
 
      "
      x-show="hasPerm('users:write')"

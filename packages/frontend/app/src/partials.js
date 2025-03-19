@@ -35,6 +35,7 @@ import aptSendDialogPartialUrl from './pages/receipts/aptSendDialog.html?url'
 import permissionsIndexPartialUrl from './pages/permissions/index.html?url'
 import rolesIndexPartialUrl from './pages/roles/index.html?url'
 import rolesFormPartialUrl from './pages/roles/formDialog.html?url'
+import toastPartialUrl from './pages/partials/toast.html?url'
 
 window.backBtnPartialUrl = backBtnPartialUrl;
 window.currencyPickerPartialUrl = currencyPickerPartialUrl;
@@ -68,6 +69,7 @@ window.aptSendDialogPartialUrl = aptSendDialogPartialUrl;
 window.permissionsIndexPartialUrl = permissionsIndexPartialUrl;
 window.rolesIndexPartialUrl = rolesIndexPartialUrl;
 window.rolesFormPartialUrl = rolesFormPartialUrl;
+window.toastPartialUrl = toastPartialUrl;
 
 window.NAV_URLS = new Map([
   ['nav-apartments', apartmentsIndexPartialUrl],
