@@ -26,12 +26,12 @@ templ ItemView(item Item) {
 		}
 	>
 		<span>{ item.Item.Role.Name } </span>
-		<div class="flex flex">
+		<div class="flex flex justify-center">
 			<span x-text="$t('main-title-perms')"></span>
 			<span>:&nbsp;</span>
 			<span>{ fmt.Sprint(len(item.Item.Permissions)) }</span>
 		</div>
-		<div class="grid grid-cols-3 gap-2">
+		<div class="grid grid-cols-3 gap-2 text-start break-words">
 			for _,perm := range item.Item.Permissions {
 				<span>{ perm.Name }</span>
 			}

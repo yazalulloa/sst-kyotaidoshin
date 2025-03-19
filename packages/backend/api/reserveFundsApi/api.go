@@ -3,7 +3,7 @@ package reserveFundsApi
 import (
 	"context"
 	"github.com/a-h/templ"
-	"github.com/gorilla/mux"
+	"kyotaidoshin/api"
 	"kyotaidoshin/expenses"
 	"kyotaidoshin/receipts"
 	"kyotaidoshin/reserveFunds"
@@ -11,10 +11,10 @@ import (
 	"net/http"
 )
 
-func Routes(server *mux.Router) {
+func Routes(holder *api.RouterHolder) {
 
-	server.HandleFunc(reserveFunds.PATH, reserveFundPut).Methods("PUT")
-	server.HandleFunc(reserveFunds.PATH+"/{key}", reserveFundDelete).Methods("DELETE")
+	holder.PUT(reserveFunds.PATH, reserveFundPut, api.RECEIPTS_WRITE, api.BUILDINGS_WRITE)
+	holder.DELETE(reserveFunds.PATH+"/{key}", reserveFundDelete, api.RECEIPTS_WRITE, api.BUILDINGS_WRITE)
 }
 
 func reserveFundPut(w http.ResponseWriter, r *http.Request) {

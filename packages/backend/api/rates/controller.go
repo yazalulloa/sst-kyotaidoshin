@@ -3,6 +3,7 @@ package rates
 import (
 	"fmt"
 	"github.com/gorilla/mux"
+	"kyotaidoshin/api"
 	"kyotaidoshin/util"
 	"log"
 	"net/http"
@@ -13,11 +14,11 @@ import (
 const _PATH = "/api/rates"
 const _SEARCH = _PATH + "/search"
 
-func Routes(server *mux.Router) {
+func Routes(holder *api.RouterHolder) {
 
-	server.HandleFunc(_SEARCH, search).Methods("GET")
-	server.HandleFunc(_PATH+"/currencies", loadCurrencies).Methods("GET")
-	server.HandleFunc(_PATH+"/{id}", deleteRate).Methods("DELETE")
+	holder.GET(_SEARCH, search, api.RATES_READ)
+	holder.GET(_PATH+"/currencies", loadCurrencies, api.RATES_READ)
+	holder.DELETE(_PATH+"/{id}", deleteRate, api.RATES_WRITE)
 }
 
 func search(w http.ResponseWriter, r *http.Request) {

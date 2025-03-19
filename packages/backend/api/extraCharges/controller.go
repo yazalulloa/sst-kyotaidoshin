@@ -6,6 +6,7 @@ import (
 	"github.com/go-playground/form"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
+	"kyotaidoshin/api"
 	"kyotaidoshin/receiptPdf"
 	"kyotaidoshin/util"
 	"log"
@@ -15,10 +16,10 @@ import (
 
 const _PATH = "/api/extraCharges"
 
-func Routes(server *mux.Router) {
+func Routes(holder *api.RouterHolder) {
 
-	server.HandleFunc(_PATH, extraChargesPut).Methods("PUT")
-	server.HandleFunc(_PATH+"/{key}", extraChargesDelete).Methods("DELETE")
+	holder.PUT(_PATH, extraChargesPut, api.RECEIPTS_WRITE, api.BUILDINGS_WRITE)
+	holder.DELETE(_PATH+"/{key}", extraChargesDelete, api.RECEIPTS_WRITE, api.BUILDINGS_WRITE)
 }
 
 func extraChargesPut(w http.ResponseWriter, r *http.Request) {

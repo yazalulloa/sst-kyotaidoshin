@@ -287,3 +287,9 @@ templ EmptyDiv() {
 templ SpanFormatCurrency(amount float64, currency string) {
 	<span class="text-end" x-text={ fmt.Sprintf("FormatCurrency(parseFloat(%f), '%s')", amount, currency) }></span>
 }
+
+templ AddComponentIfPerms(component templ.Component, perms ...PERM) {
+	if HasPerms(ctx, perms...) {
+		@component
+	}
+}

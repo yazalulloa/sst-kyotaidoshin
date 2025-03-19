@@ -5,15 +5,15 @@ import (
 	"fmt"
 )
 
-templ Init(pages []Page, pagesStr string, user model.Users) {
+templ Init(pages []Page, permStr, pagesStr string, user model.Users) {
 	<div
 		hidden="hidden"
-		data-pages-array={ pagesStr }
+		data-perms={ permStr }
+		data-pages={ pagesStr }
 		x-init="
-    let parts = JSON.parse($el.getAttribute('data-pages-array'));
-    parts.forEach((part) => {
-      pages.push(part);
-    })
+    $dispatch('event-load-perms', { params: $el.dataset.perms });
+    $dispatch('event-load-pages', { params: $el.dataset.pages });
+    $el.remove()
 "
 	></div>
 	for _, page := range pages {

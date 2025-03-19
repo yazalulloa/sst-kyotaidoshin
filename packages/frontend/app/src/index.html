@@ -14,7 +14,16 @@
 <div class="flex h-1 bg-surface-alt dark:bg-surface-dark-alt">
   <progress class="m-0 h-1 w-full p-0 progress htmx-indicator"></progress>
 </div>
-<div x-data="{ sidebarIsOpen: false }" class="relative flex w-full flex-col md:flex-row">
+
+<div x-data="{ sidebarIsOpen: false, perms: [],
+              hasPerm(str) {
+                return this.perms.includes(str)
+              }
+            }"
+     @event-load-perms="
+      perms = JSON.parse(decodeBase64UrlStr($event.detail.params))
+     "
+     class="relative flex w-full flex-col md:flex-row">
   <!-- This allows screen readers to skip the sidebar and go directly to the main content. -->
   <a class="sr-only" href="#main-content">skip to the main content</a>
 
@@ -35,6 +44,9 @@
     pages: [],
     selected: '',
     }"
+         @event-load-pages="
+          pages = JSON.parse(decodeBase64UrlStr($event.detail.params))
+         "
          x-init="
          $watch('pages', value => {
 

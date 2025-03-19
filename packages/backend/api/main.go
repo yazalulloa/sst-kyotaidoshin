@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"kyotaidoshin/apartments"
+	"kyotaidoshin/api"
 	bcv_bucket "kyotaidoshin/bcv-bucket"
 	"kyotaidoshin/buildings"
 	"kyotaidoshin/debts"
@@ -63,19 +64,21 @@ func router() http.Handler {
 
 	}).Methods("GET")
 
+	holder := api.NewRouterHolder(newRouter)
+
 	start.Routes(newRouter)
-	rates.Routes(newRouter)
-	bcv_bucket.Routes(newRouter)
-	buildings.Routes(newRouter)
-	reserveFundsApi.Routes(newRouter)
-	apartments.Routes(newRouter)
-	extraCharges.Routes(newRouter)
-	receipts.Routes(newRouter)
-	expenses_api.Routes(newRouter)
-	debts.Routes(newRouter)
-	users.Routes(newRouter)
-	permissions.Routes(newRouter)
-	roles.Routes(newRouter)
+	rates.Routes(holder)
+	bcv_bucket.Routes(holder)
+	buildings.Routes(holder)
+	reserveFundsApi.Routes(holder)
+	apartments.Routes(holder)
+	extraCharges.Routes(holder)
+	receipts.Routes(holder)
+	expenses_api.Routes(holder)
+	debts.Routes(holder)
+	users.Routes(holder)
+	permissions.Routes(holder)
+	roles.Routes(holder)
 
 	//newRouter.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	//

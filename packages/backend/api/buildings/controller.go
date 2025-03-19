@@ -29,14 +29,14 @@ const _SEARCH = _PATH + "/search"
 const _UPLOAD_BACKUP_FORM = _PATH + "/uploadBackupForm"
 const _UPLOAD_BACKUP = _PATH + "/upload/backup"
 
-func Routes(server *mux.Router) {
+func Routes(holder *api.RouterHolder) {
 
-	server.HandleFunc(_SEARCH, search).Methods("GET")
-	server.HandleFunc(_PATH+"/{id}", buildingDelete).Methods("DELETE")
-	server.HandleFunc(_PATH, buildingPut).Methods("PUT")
-	server.HandleFunc(_PATH+"/formData", formData).Methods("GET")
-	server.HandleFunc(_UPLOAD_BACKUP_FORM, getUploadBackupForm).Methods("GET")
-	server.HandleFunc(_UPLOAD_BACKUP, uploadBackup).Methods("POST")
+	holder.GET(_SEARCH, search, api.BUILDINGS_READ)
+	holder.DELETE(_PATH+"/{id}", buildingDelete, api.BUILDINGS_WRITE)
+	holder.PUT(_PATH, buildingPut, api.BUILDINGS_WRITE)
+	holder.GET(_PATH+"/formData", formData, api.BUILDINGS_WRITE)
+	holder.GET(_UPLOAD_BACKUP_FORM, getUploadBackupForm, api.BUILDINGS_READ)
+	holder.POST(_UPLOAD_BACKUP, uploadBackup, api.BUILDINGS_WRITE)
 }
 
 func search(w http.ResponseWriter, r *http.Request) {

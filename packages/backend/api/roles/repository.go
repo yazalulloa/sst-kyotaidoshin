@@ -89,9 +89,9 @@ func selectList(requestQuery RequestQuery) ([]struct {
 	).WHERE(condition).
 		ORDER_BY(Roles.ID.ASC())
 
-	if requestQuery.Limit > 0 {
-		stmt = stmt.LIMIT(int64(requestQuery.Limit))
-	}
+	//if requestQuery.Limit > 0 {
+	//	stmt = stmt.LIMIT(int64(requestQuery.Limit))
+	//}
 
 	//log.Printf("selectList : %v\n", stmt.DebugSql())
 
@@ -125,7 +125,9 @@ func insert(role model.Roles) (int64, error) {
 }
 
 func insertPerms(roleId int32, perms []int32) (int64, error) {
-	stmt := RolePermissions.INSERT(RolePermissions.RoleID, RolePermissions.PermissionID).ON_CONFLICT().DO_NOTHING()
+	stmt := RolePermissions.INSERT(RolePermissions.RoleID, RolePermissions.PermissionID).
+		ON_CONFLICT().DO_NOTHING()
+
 	for _, perm := range perms {
 		stmt = stmt.VALUES(roleId, perm)
 	}

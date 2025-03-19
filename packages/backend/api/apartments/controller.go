@@ -21,16 +21,14 @@ const _SEARCH = _PATH + "/search"
 const _UPLOAD_BACKUP_FORM = _PATH + "/uploadBackupForm"
 const _UPLOAD_BACKUP = _PATH + "/upload/backup"
 
-func Routes(server *mux.Router) {
+func Routes(holder *api.RouterHolder) {
 
-	server.HandleFunc(_SEARCH, search).Methods("GET")
-	server.HandleFunc(_PATH, aptPut).Methods("PUT")
-	server.HandleFunc(_PATH+"/{key}", aptDelete).Methods("DELETE")
-	server.HandleFunc(_UPLOAD_BACKUP_FORM, getUploadBackupForm).Methods("GET")
-	server.HandleFunc(_UPLOAD_BACKUP, uploadBackup).Methods("POST")
-	server.HandleFunc(_PATH+"/buildingsIds", getBuildingIds).Methods("GET")
-	//server.HandleFunc(_PATH+"/upload/backup", uploadBackupUrl).Methods("GET")
-	//server.HandleFunc(_PATH+"/formData", formData).Methods("GET")
+	holder.GET(_SEARCH, search, api.APARTMENTS_READ)
+	holder.PUT(_PATH, aptPut, api.APARTMENTS_WRITE)
+	holder.DELETE(_PATH+"/{key}", aptDelete, api.APARTMENTS_WRITE)
+	holder.GET(_UPLOAD_BACKUP_FORM, getUploadBackupForm, api.APARTMENTS_UPLOAD_BACKUP)
+	holder.POST(_UPLOAD_BACKUP, uploadBackup, api.APARTMENTS_UPLOAD_BACKUP)
+	holder.GET(_PATH+"/buildingsIds", getBuildingIds, api.APARTMENTS_READ)
 }
 
 func search(w http.ResponseWriter, r *http.Request) {

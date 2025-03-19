@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"kyotaidoshin/api"
 	"kyotaidoshin/util"
 	"net/http"
 	"strings"
@@ -12,12 +13,12 @@ import (
 
 const _PATH = "/api/permissions"
 
-func Routes(server *mux.Router) {
+func Routes(holder *api.RouterHolder) {
 
-	server.HandleFunc(_PATH+"/all", permissionsAll).Methods("POST")
-	server.HandleFunc(_PATH+"/all", getAllWithLabels).Methods("GET")
-	server.HandleFunc(_PATH+"/search", search).Methods("GET")
-	server.HandleFunc(_PATH+"/{id}", permissionsDelete).Methods("DELETE")
+	holder.POST(_PATH+"/all", permissionsAll, api.PERMISSIONS_WRITE)
+	holder.GET(_PATH+"/all", getAllWithLabels, api.PERMISSIONS_READ)
+	holder.GET(_PATH+"/search", search, api.PERMISSIONS_READ)
+	holder.DELETE(_PATH+"/{id}", permissionsDelete, api.PERMISSIONS_WRITE)
 }
 
 func permissionsAll(w http.ResponseWriter, r *http.Request) {
@@ -79,7 +80,7 @@ func getAllWithLabels(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	labels := WithLabels()
+	labels := api.WithLabels()
 	array := make([]PermWithLabels, 0)
 
 	for _, label := range labels {

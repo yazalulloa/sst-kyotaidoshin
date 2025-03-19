@@ -3,6 +3,8 @@ package util
 import (
 	"aws_h"
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -208,4 +210,13 @@ func StringToInt64(str string) int64 {
 		return 0
 	}
 	return int64(value)
+}
+
+func ObjToJsonBase64(obj any) (string, error) {
+	jsonBytes, err := json.Marshal(obj)
+	if err != nil {
+		return "", err
+	}
+
+	return base64.StdEncoding.EncodeToString(jsonBytes), nil
 }

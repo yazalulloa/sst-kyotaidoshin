@@ -18,13 +18,16 @@ templ Search(res TableResponse) {
 }
 
 templ ItemView(item Item) {
+	{{ hasWritePerm := api.HasPerms(ctx, api.APARTMENTS_WRITE) }}
 	<li
 		id={ item.CardId }
-		class="fade-me-in fade-me-out"
+		class={ "fade-me-in fade-me-out ",
+        templ.KV("md:grid-cols-[2fr_1fr_4fr_1fr_5fr_1fr]", hasWritePerm),
+        templ.KV("md:grid-cols-[2fr_1fr_4fr_1fr_5fr]", !hasWritePerm) }
 		if item.isUpdate {
 			hx-swap-oob="true"
 		}
-		if item.UpdateParams != nil {
+		if hasWritePerm && item.UpdateParams != nil {
 			data-update-params={ *item.UpdateParams }
 			@dblclick.prevent="$dispatch('event-apartment-form-update', { params: $el.getAttribute('data-update-params') })"
 		}
@@ -38,8 +41,10 @@ templ ItemView(item Item) {
 				<span>{ email }</span>
 			}
 		</div>
-		@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{
-			"hx-include": "[name='building_input'],[name='apt_search_input']"})
+		if hasWritePerm {
+			@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{
+				"hx-include": "[name='building_input'],[name='apt_search_input']"})
+		}
 	</li>
 }
 
@@ -71,10 +76,10 @@ templ FormResponseView(res FormResponse) {
 		data-response-err={ res.errorStr }
 		data-send-event={ fmt.Sprint(res.errorStr == "" && res.item == nil) }
 		x-init="
- 		errMsg = $el.getAttribute('data-response-err');
+ 		  errMsg = $el.getAttribute('data-response-err');
   		counter = parseInt($el.getAttribute('data-counter'));
 
- 		if (errMsg === '') {
+ 		 if (errMsg === '') {
  		  modalIsOpen = false;
  		 }
 

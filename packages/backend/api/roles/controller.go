@@ -8,6 +8,7 @@ import (
 	"github.com/go-playground/form"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
+	"kyotaidoshin/api"
 	"kyotaidoshin/util"
 	"log"
 	"net/http"
@@ -17,13 +18,13 @@ import (
 const _PATH = "/api/roles"
 const _SEARCH = _PATH + "/search"
 
-func Routes(server *mux.Router) {
+func Routes(holder *api.RouterHolder) {
 
-	server.HandleFunc(_SEARCH, search).Methods("GET")
-	server.HandleFunc(_PATH, rolesPut).Methods("PUT")
-	server.HandleFunc(_PATH+"/{key}", roleDelete).Methods("DELETE")
-	server.HandleFunc(_PATH+"/all", getAll).Methods("GET")
-	server.HandleFunc(_PATH+"/all/min", getAllMin).Methods("GET")
+	holder.GET(_SEARCH, search, api.ROLES_READ)
+	holder.PUT(_PATH, rolesPut, api.ROLES_WRITE)
+	holder.DELETE(_PATH+"/{key}", roleDelete, api.ROLES_WRITE)
+	holder.GET(_PATH+"/all", getAll, api.ROLES_READ)
+	holder.GET(_PATH+"/all/min", getAllMin, api.ROLES_READ)
 }
 
 func search(w http.ResponseWriter, r *http.Request) {

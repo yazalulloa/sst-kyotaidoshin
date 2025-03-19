@@ -3,11 +3,12 @@ package permissions
 import (
 	"fmt"
 	"github.com/google/uuid"
+	"kyotaidoshin/api"
 )
 
 func insertAll() (int64, error) {
 
-	perms := All()
+	perms := api.All()
 	array := make([]string, len(perms))
 	for i := range perms {
 		array[i] = perms[i].Name()

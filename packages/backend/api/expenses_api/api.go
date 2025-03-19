@@ -1,17 +1,17 @@
 package expenses_api
 
 import (
-	"github.com/gorilla/mux"
+	"kyotaidoshin/api"
 	"kyotaidoshin/expenses"
 	"kyotaidoshin/receipts"
 	"log"
 	"net/http"
 )
 
-func Routes(server *mux.Router) {
+func Routes(holder *api.RouterHolder) {
 
-	server.HandleFunc(expenses.PATH, expensesPut).Methods("PUT")
-	server.HandleFunc(expenses.PATH+"/{key}", expensesDelete).Methods("DELETE")
+	holder.PUT(expenses.PATH, expensesPut, api.RECEIPTS_WRITE)
+	holder.DELETE(expenses.PATH+"/{key}", expensesDelete, api.RECEIPTS_WRITE)
 }
 
 func expensesPut(w http.ResponseWriter, r *http.Request) {

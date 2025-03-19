@@ -34,7 +34,7 @@ import (
 
 const _PATH = "/api/receipts"
 const _SEARCH = _PATH + "/search"
-const _UPLOAD_BACKUP_FORM = _PATH + "/uploadBackupForm"
+const _UPLOAD_BACKUP_FORM = _PATH + "/uploadBackupForm" // todo remove
 const _UPLOAD_BACKUP = _PATH + "/upload/backup"
 const _DOWNLOAD_ZIP_FILE = _PATH + "/download/zip"
 const _DOWNLOAD_PDF_FILE = _PATH + "/download/pdf"
@@ -43,31 +43,30 @@ const _SEND_PDFS = _PATH + "/send_pdfs"
 const _SEND_PDFS_PROGRESS = _SEND_PDFS + "/progress"
 const _DUPLICATE = _PATH + "/duplicate"
 
-func Routes(server *mux.Router) {
+func Routes(holder *api.RouterHolder) {
 
-	server.HandleFunc(_SEARCH, search).Methods("GET")
-	server.HandleFunc(_PATH, receiptPost).Methods("POST")
-	server.HandleFunc(_PATH, receiptPut).Methods("PUT")
-	server.HandleFunc(_PATH+"/clear_pdfs", clearPdfs).Methods("DELETE")
-	server.HandleFunc(_PATH+"/{key}", receiptDelete).Methods("DELETE")
-	server.HandleFunc(_PATH+"/buildingsIds", getBuildingIds).Methods("GET")
-	//server.HandleFunc(_PATH+"/init", getInit).Methods("GET")
-	server.HandleFunc(_UPLOAD_BACKUP_FORM, getUploadBackupForm).Methods("GET")
-	server.HandleFunc(_UPLOAD_BACKUP, uploadBackup).Methods("POST")
-	server.HandleFunc(_PATH+"/years", getYears).Methods("GET")
-	//server.HandleFunc(_PATH+"/buildingsIds", getBuildingIds).Methods("GET")
-	server.HandleFunc(_PATH+"/formData/{key}", formData).Methods("GET")
-	server.HandleFunc(_PATH+"/view/{key}", getReceiptView).Methods("GET")
-	server.HandleFunc(_DOWNLOAD_ZIP_FILE+"/{key}", getZip).Methods("GET")
-	server.HandleFunc(_DOWNLOAD_PDF_FILE+"/{key}", getPdf).Methods("GET")
-	server.HandleFunc(_DOWNLOAD_HTML_FILE+"/{key}", getHtml).Methods("GET")
-	server.HandleFunc(_SEND_PDFS+"/{key}", sendPdfs).Methods("GET")
-	server.HandleFunc(_SEND_PDFS_PROGRESS+"/{key}", sendPdfsProgress).Methods("GET")
-	server.HandleFunc(_PATH+"/upload_form", getUploadForm).Methods("GET")
-	server.HandleFunc(_PATH+"/new_from_file", newFromFile).Methods("POST")
-	server.HandleFunc(_DUPLICATE+"/{key}", duplicateReceipt).Methods("POST")
-	server.HandleFunc(_PATH+"/apts", getSendApts).Methods("GET")
-	server.HandleFunc(_PATH+"/send/pdfs", sendPdfsApt).Methods("POST")
+	holder.GET(_SEARCH, search, api.RECEIPTS_READ)
+	holder.POST(_PATH, receiptPost, api.RECEIPTS_WRITE)
+	holder.PUT(_PATH, receiptPut, api.RECEIPTS_WRITE)
+	holder.DELETE(_PATH+"/clear_pdfs", clearPdfs, api.RECEIPTS_WRITE)
+	holder.DELETE(_PATH+"/{key}", receiptDelete, api.RECEIPTS_WRITE)
+	holder.GET(_PATH+"/buildingsIds", getBuildingIds, api.RECEIPTS_READ)
+	holder.GET(_UPLOAD_BACKUP_FORM, getUploadBackupForm, api.RECEIPTS_UPLOAD_BACKUP)
+	holder.POST(_UPLOAD_BACKUP, uploadBackup, api.RECEIPTS_UPLOAD_BACKUP)
+	holder.GET(_PATH+"/years", getYears, api.RECEIPTS_READ)
+	holder.GET(_PATH+"/formData/{key}", formData, api.RECEIPTS_WRITE)
+	holder.GET(_PATH+"/view/{key}", getReceiptView, api.RECEIPTS_READ)
+	holder.GET(_DOWNLOAD_ZIP_FILE+"/{key}", getZip, api.RECEIPTS_READ)
+	holder.GET(_DOWNLOAD_PDF_FILE+"/{key}", getPdf, api.RECEIPTS_READ)
+	holder.GET(_DOWNLOAD_HTML_FILE+"/{key}", getHtml, api.RECEIPTS_READ)
+	holder.GET(_SEND_PDFS+"/{key}", sendPdfs, api.RECEIPTS_WRITE)
+	holder.GET(_SEND_PDFS_PROGRESS+"/{key}", sendPdfsProgress, api.RECEIPTS_WRITE)
+	holder.GET(_PATH+"/upload_form", getUploadForm, api.RECEIPTS_UPLOAD_BACKUP)
+	holder.POST(_PATH+"/new_from_file", newFromFile, api.RECEIPTS_WRITE)
+	holder.POST(_DUPLICATE+"/{key}", duplicateReceipt, api.RECEIPTS_WRITE)
+	holder.GET(_PATH+"/apts", getSendApts, api.RECEIPTS_READ)
+	holder.POST(_PATH+"/send/pdfs", sendPdfsApt, api.RECEIPTS_WRITE)
+
 }
 
 func getBuildingIds(w http.ResponseWriter, r *http.Request) {

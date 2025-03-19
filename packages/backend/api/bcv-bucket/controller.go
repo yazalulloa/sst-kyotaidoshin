@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"kyotaidoshin/api"
 	"kyotaidoshin/util"
 	"log"
 	"net/http"
@@ -25,13 +26,13 @@ import (
 const _PATH = "/api/bcv-bucket"
 const _SEARCH = _PATH + "/search"
 
-func Routes(server *mux.Router) {
+func Routes(holder *api.RouterHolder) {
 
-	server.HandleFunc(_SEARCH, search).Methods("GET")
-	server.HandleFunc(_PATH+"/{id}", bcvBucketDelete).Methods("DELETE")
-	server.HandleFunc(_PATH+"/process/{id}", process).Methods("POST")
-	server.HandleFunc(_PATH+"/process-all", processAll).Methods("GET")
-	server.HandleFunc(_PATH+"/look-up", lookUp).Methods("GET")
+	holder.GET(_SEARCH, search, api.BCV_FILES_READ)
+	holder.DELETE(_PATH+"/{id}", bcvBucketDelete, api.BCV_FILES_WRITE)
+	holder.POST(_PATH+"/process/{id}", process, api.BCV_FILES_WRITE)
+	holder.GET(_PATH+"/process-all", processAll, api.BCV_FILES_WRITE)
+	holder.GET(_PATH+"/look-up", lookUp, api.BCV_FILES_WRITE)
 }
 
 func search(w http.ResponseWriter, r *http.Request) {

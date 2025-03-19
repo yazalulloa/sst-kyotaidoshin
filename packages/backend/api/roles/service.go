@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"kyotaidoshin/util"
+	"log"
 	"sync"
 )
 
@@ -153,11 +154,13 @@ func updateRole(role model.Roles, perms []int32) (int64, error) {
 
 	go func() {
 		defer wg.Done()
-		_, err := deleteOnUpdate(*role.ID, perms)
+		rows, err := deleteOnUpdate(*role.ID, perms)
 		if err != nil {
 			errorChan <- err
 			return
 		}
+		
+		log.Printf("Deleted %d rows", rows)
 	}()
 
 	wg.Wait()
