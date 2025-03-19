@@ -15,7 +15,7 @@ TODOS:
 - [x] Copy Receipt
 - [ ] Optimize SELECT on Calculate Receipt
 - [x] Receipt nav
-- [ ] Permissions
+- [x] Permissions
 - [ ] Horizontal scroll on view receipts
 - [ ] Toast Error
 - [ ] Cache of partials (building ids, years, etc)
