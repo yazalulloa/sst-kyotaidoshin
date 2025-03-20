@@ -13,6 +13,7 @@ import (
 	"kyotaidoshin/api"
 	"kyotaidoshin/email_h"
 	"kyotaidoshin/extraCharges"
+	"kyotaidoshin/isr"
 	"kyotaidoshin/receiptPdf"
 	"kyotaidoshin/reserveFunds"
 	"kyotaidoshin/util"
@@ -97,6 +98,7 @@ func buildingDelete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer receiptPdf.PublishBuilding(r.Context(), dest)
+	defer isr.Invoke(r.Context())
 
 	err = CountersView(*counters).Render(r.Context(), w)
 	if err != nil {
@@ -206,6 +208,7 @@ func buildingPut(w http.ResponseWriter, r *http.Request) {
 
 		} else {
 			err = insert(building)
+			defer isr.Invoke(r.Context())
 		}
 
 		if err != nil {

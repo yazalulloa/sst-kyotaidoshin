@@ -79,8 +79,20 @@ export default $config({
     // const efs = new sst.aws.Efs("MyEfs", {
     //   vpc: vpc
     // });
+
+    const webAssetsBucket = new sst.aws.Bucket("WebAssetsBucket", {
+      access: "cloudfront",
+    });
+
+    const isrGenFunction = new sst.aws.Function("IsrGenFunction", {
+      url: true,
+      link: [webAssetsBucket, secretTursoUrl],
+      handler: "packages/backend/isr-gen/",
+      runtime: "go",
+    });
+
     const processBcvFileFunction = new sst.aws.Function("ProcessBcvFile", {
-      link: [secretTursoUrl, bucket, bcvQueue],
+      link: [secretTursoUrl, bucket, bcvQueue, webAssetsBucket],
       runtime: "go",
       handler: "packages/backend/process-bcv-file/",
       timeout: "90 seconds",
@@ -221,6 +233,7 @@ export default $config({
       handler: "packages/backend/process-pdf-objects/",
       timeout: "300 seconds",
     });
+
     const mainApiFunction = new sst.aws.Function("MainApiFunction", {
       handler: "packages/backend/api",
       runtime: "go",
@@ -238,6 +251,8 @@ export default $config({
         receiptPdfQueue,
         mailerConfigsSecret,
         htmlToPdfFunction,
+        webAssetsBucket,
+        isrGenFunction,
       ],
       timeout: "60 seconds",
       permissions: [
@@ -252,6 +267,7 @@ export default $config({
     api.route("POST /api/{proxy+}", mainApiFunction.arn);
     api.route("PUT /api/{proxy+}", mainApiFunction.arn);
     api.route("DELETE /api/{proxy+}", mainApiFunction.arn);
+
 
     const site = new sst.aws.StaticSite("WebApp", {
       path: "packages/frontend/app",
@@ -268,11 +284,17 @@ export default $config({
         output: "dist",
       },
       assets: {
+        bucket: webAssetsBucket.name,
         fileOptions: [
           {
             files: ["**/*"],
-            cacheControl: "max-age=21600,must-revalidate,public,immutable",
+            ignore: "index.html",
+            cacheControl: "public, max-age=21600, immutable",
           },
+          {
+            files: "index.html",
+            cacheControl: "max-age=0,no-cache,no-store,must-revalidate",
+          }
           // {
           //   files: "**/*.html",
           //   cacheControl: "max-age=0,no-cache,no-store,must-revalidate"
@@ -280,6 +302,8 @@ export default $config({
         ],
       },
     });
+
+
     // const router = new sst.aws.Router("MyRouter", {
     //   routes: {
     //     "/api/*": api.url,
@@ -298,12 +322,6 @@ export default $config({
     api.route("GET /", authClientFunction.arn);
     return {
       SiteUrl: site.url,
-      // ApiFunction: apiFunction.url,
-      // MyBucket: bucket.name,
-      // BcvUrl: bcvUrl.value,
-      // BcvFileStartPath: bcvFileStartPath.value,
-      // SiteUrl: site.url,
-      // url: router.url,
     };
   },
 });

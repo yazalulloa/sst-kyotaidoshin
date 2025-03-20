@@ -58,6 +58,11 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
+    "IsrGenFunction": {
+      "name": string
+      "type": "sst.aws.Function"
+      "url": string
+    }
     "MailerConfigs": {
       "type": "sst.sst.Secret"
       "value": string
@@ -109,6 +114,10 @@ declare module "sst" {
     "WebApp": {
       "type": "sst.aws.StaticSite"
       "url": string
+    }
+    "WebAssetsBucket": {
+      "name": string
+      "type": "sst.aws.Bucket"
     }
     "bcv-bucket": {
       "name": string

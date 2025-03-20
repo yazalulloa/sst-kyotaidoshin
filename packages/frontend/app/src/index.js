@@ -22,7 +22,9 @@ htmx.config.selfRequestsOnly = false;
 htmx.config.historyCacheSize = 0;
 htmx.config.refreshOnHistoryMiss = true;
 
-if (import.meta.env.VITE_IS_DEV === 'true') {
+const isDev = import.meta.env.VITE_IS_DEV === 'true'
+
+if (isDev) {
   SVGLoader.destroyCache();
 }
 
@@ -55,6 +57,12 @@ window.addEventListener("popstate", (event) => {
 });
 
 document.body.addEventListener('htmx:configRequest', function (evt) {
+
+  if (isDev) {
+    if (evt.detail.path.includes("/isr/")) {
+      evt.detail.path = evt.detail.path.replace("/isr/", "/api/");
+    }
+  }
 
   if (evt.detail.path.includes("/api/")) {
     evt.detail.withCredentials = true;

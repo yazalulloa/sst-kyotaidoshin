@@ -224,6 +224,11 @@ func checkPerms(next func(http.ResponseWriter, *http.Request), perm []PERM) func
 			return
 		}
 
+		if len(perm) == 0 {
+			next(w, r)
+			return
+		}
+
 		userId := r.Context().Value(util.USER_ID)
 		if userId == nil {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)

@@ -133,18 +133,6 @@ func selectList(requestQuery RequestQuery) ([]model.Receipts, error) {
 	return list, nil
 }
 
-func selectYears() ([]int16, error) {
-	stmt := Receipts.SELECT(Receipts.Year).DISTINCT().FROM(Receipts)
-
-	var years []int16
-	err := stmt.Query(db.GetDB().DB, &years)
-	if err != nil {
-		return nil, err
-	}
-
-	return years, nil
-}
-
 func selectById(id string) (*model.Receipts, error) {
 	stmt := Receipts.SELECT(Receipts.AllColumns).FROM(Receipts).WHERE(Receipts.ID.EQ(sqlite.String(id)))
 

@@ -159,7 +159,7 @@ func updateRole(role model.Roles, perms []int32) (int64, error) {
 			errorChan <- err
 			return
 		}
-		
+
 		log.Printf("Deleted %d rows", rows)
 	}()
 

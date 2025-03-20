@@ -70,6 +70,7 @@ func fileParse(params ParsingParams) error {
 		BucketKey:  objKey,
 		Data:       data,
 		ProcessAll: processAll,
+		Ctx:        params.Ctx,
 	}
 
 	result, err := info.parse()
@@ -136,6 +137,7 @@ type ParsingInfo struct {
 	BucketKey  string
 	Data       []byte
 	ProcessAll bool
+	Ctx        context.Context
 }
 
 func (info ParsingInfo) parse() (*Result, error) {

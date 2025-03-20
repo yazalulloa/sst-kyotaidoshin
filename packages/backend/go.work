@@ -11,4 +11,5 @@ use (
 	./process-user
 	./process-backup
 	./process-pdf-objects
+	./isr-gen
 )

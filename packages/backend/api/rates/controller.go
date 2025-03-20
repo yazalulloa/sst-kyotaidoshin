@@ -17,7 +17,6 @@ const _SEARCH = _PATH + "/search"
 func Routes(holder *api.RouterHolder) {
 
 	holder.GET(_SEARCH, search, api.RATES_READ)
-	holder.GET(_PATH+"/currencies", loadCurrencies, api.RATES_READ)
 	holder.DELETE(_PATH+"/{id}", deleteRate, api.RATES_WRITE)
 }
 
@@ -70,32 +69,6 @@ func search(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func loadCurrencies(w http.ResponseWriter, r *http.Request) {
-	response, err := getCurrencies()
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	var builder strings.Builder
-	builder.WriteString("currencies = [")
-	for i, currency := range response {
-		builder.WriteString(fmt.Sprintf("\"%s\"", currency))
-		if i < len(response)-1 {
-			builder.WriteString(",")
-		}
-	}
-
-	builder.WriteString("]")
-
-	err = Currencies(builder.String()).Render(r.Context(), w)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
 func deleteRate(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
 	var str int64
@@ -120,7 +93,7 @@ func deleteRate(w http.ResponseWriter, r *http.Request) {
 		SortOrder:  util.GetQueryParamAsSortOrderType(r, "sort_order"),
 	}
 
-	counters, err := deleteRateReturnCounters(str, rateQuery)
+	counters, err := deleteRateReturnCounters(r.Context(), str, rateQuery)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

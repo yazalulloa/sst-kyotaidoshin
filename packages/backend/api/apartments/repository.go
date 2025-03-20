@@ -150,17 +150,6 @@ func insertBulk(apartments []model.Apartments) (int64, error) {
 	return rowsAffected, nil
 }
 
-func buildingIds() ([]string, error) {
-	stmt := Apartments.SELECT(Apartments.BuildingID).DISTINCT().FROM(Apartments)
-	var dest []string
-	err := stmt.Query(db.GetDB().DB, &dest)
-	if err != nil {
-		return nil, err
-	}
-
-	return dest, nil
-}
-
 func SelectNumberAndNameByBuildingId(buildingId string) ([]Apt, error) {
 	stmt := Apartments.SELECT(Apartments.Number, Apartments.Name).FROM(Apartments).
 		WHERE(Apartments.BuildingID.EQ(sqlite.String(buildingId))).

@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	"io"
 	"log"
 	"strings"
 )
@@ -61,4 +62,31 @@ func PutBuffer(ctx context.Context, bucketName, objectKey, contentType string, b
 	}
 
 	return nil, nil
+}
+
+func GetObject(ctx context.Context, bucketName, objectKey string) ([]byte, error) {
+	s3Client, err := GetS3Client(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := s3Client.GetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(objectKey),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(res.Body)
+
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }

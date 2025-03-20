@@ -26,14 +26,14 @@
       }
     </script>
 
-    <div hx-get="/api/apartments/buildingsIds"
+    <div hx-get="/isr/apartments/buildings.html"
          hx-trigger="load"
          hx-swap="outerHTML"
          hidden="hidden">
     </div>
 
     <div x-show="hasPerm('apartments:upload_backup')"
-        x-data="{
+         x-data="{
         formId: 'apartments-upload-backup',
         uploadFormPath: '/api/apartments/uploadBackupForm',
         uploadFileCallback: '/api/apartments/upload/backup',

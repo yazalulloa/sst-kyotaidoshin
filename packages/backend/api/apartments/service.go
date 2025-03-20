@@ -167,5 +167,4 @@ func insertDtos(apts []ApartmentDto) (int64, error) {
 	}
 
 	return insertBulk(array)
-
 }

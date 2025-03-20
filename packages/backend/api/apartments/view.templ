@@ -64,13 +64,6 @@ templ CountersView(counters Counters) {
 	></div>
 }
 
-templ buildingIdsView(ids string) {
-	<div
-		hidden="hidden"
-		x-init={ fmt.Sprintf("buildings = %s", ids) }
-	></div>
-}
-
 templ FormResponseView(res FormResponse) {
 	<div
 		data-response-err={ res.errorStr }

@@ -135,17 +135,6 @@ func Insert(rates []model.Rates) (int64, error) {
 	return rowsAffected, nil
 }
 
-func getCurrencies() ([]string, error) {
-	stmt := Rates.SELECT(Rates.FromCurrency).DISTINCT().FROM(Rates)
-	var dest []string
-	err := stmt.Query(db.GetDB().DB, &dest)
-	if err != nil {
-		return nil, err
-	}
-
-	return dest, nil
-}
-
 func deleteRateById(id int64) (int64, error) {
 	stmt := Rates.DELETE().WHERE(Rates.ID.EQ(sqlite.Int64(id)))
 	res, err := stmt.Exec(db.GetDB().DB)

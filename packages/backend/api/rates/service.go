@@ -1,6 +1,7 @@
 package rates
 
 import (
+	"context"
 	"db/gen/model"
 	"github.com/google/uuid"
 	"kyotaidoshin/util"
@@ -101,7 +102,7 @@ func CheckRateInsert(ratesArr *[]model.Rates) ([]model.Rates, error) {
 	return ratesToInsert, nil
 }
 
-func deleteRateReturnCounters(id int64, requestQuery RequestQuery) (*Counters, error) {
+func deleteRateReturnCounters(ctx context.Context, id int64, requestQuery RequestQuery) (*Counters, error) {
 
 	_, err := deleteRateById(id)
 	if err != nil {

@@ -17,10 +17,10 @@ import (
 	"golang.org/x/sync/syncmap"
 	"io"
 	"kyotaidoshin/api"
-	"kyotaidoshin/buildings"
 	"kyotaidoshin/debts"
 	"kyotaidoshin/expenses"
 	"kyotaidoshin/extraCharges"
+	"kyotaidoshin/isr"
 	"kyotaidoshin/rates"
 	"kyotaidoshin/receiptPdf"
 	"kyotaidoshin/util"
@@ -50,10 +50,8 @@ func Routes(holder *api.RouterHolder) {
 	holder.PUT(_PATH, receiptPut, api.RECEIPTS_WRITE)
 	holder.DELETE(_PATH+"/clear_pdfs", clearPdfs, api.RECEIPTS_WRITE)
 	holder.DELETE(_PATH+"/{key}", receiptDelete, api.RECEIPTS_WRITE)
-	holder.GET(_PATH+"/buildingsIds", getBuildingIds, api.RECEIPTS_READ)
 	holder.GET(_UPLOAD_BACKUP_FORM, getUploadBackupForm, api.RECEIPTS_UPLOAD_BACKUP)
 	holder.POST(_UPLOAD_BACKUP, uploadBackup, api.RECEIPTS_UPLOAD_BACKUP)
-	holder.GET(_PATH+"/years", getYears, api.RECEIPTS_READ)
 	holder.GET(_PATH+"/formData/{key}", formData, api.RECEIPTS_WRITE)
 	holder.GET(_PATH+"/view/{key}", getReceiptView, api.RECEIPTS_READ)
 	holder.GET(_DOWNLOAD_ZIP_FILE+"/{key}", getZip, api.RECEIPTS_READ)
@@ -67,22 +65,6 @@ func Routes(holder *api.RouterHolder) {
 	holder.GET(_PATH+"/apts", getSendApts, api.RECEIPTS_READ)
 	holder.POST(_PATH+"/send/pdfs", sendPdfsApt, api.RECEIPTS_WRITE)
 
-}
-
-func getBuildingIds(w http.ResponseWriter, r *http.Request) {
-	buildingIds, err := buildings.SelectIds()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	str := util.StringArrayToString(buildingIds)
-
-	err = BuildingIdsView(str).Render(r.Context(), w)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 }
 
 func getUploadBackupForm(w http.ResponseWriter, r *http.Request) {
@@ -231,31 +213,6 @@ func search(w http.ResponseWriter, r *http.Request) {
 	response.Results = results
 
 	err = Search(response).Render(r.Context(), w)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-func getYears(w http.ResponseWriter, r *http.Request) {
-	years, err := selectYears()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	var builder strings.Builder
-	builder.WriteString("years = [")
-	for i, year := range years {
-		builder.WriteString(fmt.Sprint(year))
-		if i < len(years)-1 {
-			builder.WriteString(",")
-		}
-	}
-
-	builder.WriteString("]")
-
-	err = YearsView(builder.String()).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -632,6 +589,7 @@ func receiptDelete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer receiptPdf.PublishReceipt(r.Context(), keys.BuildingId, keys.Id)
+	defer isr.Invoke(r.Context())
 
 	w.WriteHeader(http.StatusOK)
 }
@@ -1022,6 +980,8 @@ func newFromFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	encoded := base64.URLEncoding.EncodeToString(byteArray)
+
+	defer isr.Invoke(r.Context())
 
 	err = ShowNewReceiptsDialog(encoded).Render(r.Context(), w)
 	if err != nil {

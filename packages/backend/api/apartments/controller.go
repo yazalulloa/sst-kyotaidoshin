@@ -8,11 +8,11 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"kyotaidoshin/api"
+	"kyotaidoshin/isr"
 	"kyotaidoshin/receiptPdf"
 	"kyotaidoshin/util"
 	"log"
 	"net/http"
-	"slices"
 	"strings"
 )
 
@@ -28,7 +28,6 @@ func Routes(holder *api.RouterHolder) {
 	holder.DELETE(_PATH+"/{key}", aptDelete, api.APARTMENTS_WRITE)
 	holder.GET(_UPLOAD_BACKUP_FORM, getUploadBackupForm, api.APARTMENTS_UPLOAD_BACKUP)
 	holder.POST(_UPLOAD_BACKUP, uploadBackup, api.APARTMENTS_UPLOAD_BACKUP)
-	holder.GET(_PATH+"/buildingsIds", getBuildingIds, api.APARTMENTS_READ)
 }
 
 func search(w http.ResponseWriter, r *http.Request) {
@@ -113,6 +112,7 @@ func aptDelete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	defer receiptPdf.PublishBuilding(r.Context(), keys.BuildingId)
+	defer isr.Invoke(r.Context())
 
 	err = CountersView(*counters).Render(r.Context(), w)
 	if err != nil {
@@ -188,19 +188,19 @@ func aptPut(w http.ResponseWriter, r *http.Request) {
 				return response
 			}
 		}
-
-		if !isUpdate {
-			buildingIds, err := buildingIds()
-			if err != nil {
-				response.errorStr = err.Error()
-				return response
-			}
-
-			if !slices.Contains(buildingIds, request.Building) {
-				response.errorStr = fmt.Sprintf("Building ID %s does not exist", request.Building)
-				return response
-			}
-		}
+		// todo improve this
+		//if !isUpdate {
+		//	buildingIds, err := buildingIds()
+		//	if err != nil {
+		//		response.errorStr = err.Error()
+		//		return response
+		//	}
+		//
+		//	if !slices.Contains(buildingIds, request.Building) {
+		//		response.errorStr = fmt.Sprintf("Building ID %s does not exist", request.Building)
+		//		return response
+		//	}
+		//}
 
 		apartment := model.Apartments{
 			BuildingID: request.Building,
@@ -217,6 +217,7 @@ func aptPut(w http.ResponseWriter, r *http.Request) {
 			err = update(apartment)
 		} else {
 			err = insert(apartment)
+			defer isr.Invoke(r.Context())
 		}
 
 		if err != nil {
@@ -290,22 +291,6 @@ func uploadBackup(w http.ResponseWriter, r *http.Request) {
 
 	err = component.Render(r.Context(), w)
 
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-}
-
-func getBuildingIds(w http.ResponseWriter, r *http.Request) {
-	buildingIds, err := buildingIds()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	str := util.StringArrayToString(buildingIds)
-
-	err = buildingIdsView(str).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
