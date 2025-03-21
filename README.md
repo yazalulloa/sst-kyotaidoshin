@@ -18,7 +18,7 @@ TODOS:
 - [x] Permissions
 - [ ] Horizontal scroll on view receipts
 - [x] Toast Error
-- [ ] Cache of partials (building ids, years, etc)
+- [x] Cache of partials (building ids, years, etc)
 - [ ] Backups
 - [ ] Telegram
 - [ ] Cleanup Frontend
@@ -30,3 +30,4 @@ TODOS:
 - [ ] Themes
 - [ ] Sessions
 - [ ] Fix Z index of tooltips and dialogs (Receipts)
+- [ ] Redirect after login

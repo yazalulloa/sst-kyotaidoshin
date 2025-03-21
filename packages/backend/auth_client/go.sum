@@ -8,10 +8,14 @@ github.com/golang-jwt/jwt/v5 v5.2.0 h1:d/ix8ftRUorsN+5eMIlF4T6J8CAt9rch3My2winC1
 github.com/golang-jwt/jwt/v5 v5.2.0/go.mod h1:pqrtFR0X4osieyHYxtmOUWsAWrfe1Q5UVIyoH402zdk=
 github.com/golang-jwt/jwt/v5 v5.2.1 h1:OuVbFODueb089Lh128TAcimifWaLhJwVflnrgM17wHk=
 github.com/golang-jwt/jwt/v5 v5.2.1/go.mod h1:pqrtFR0X4osieyHYxtmOUWsAWrfe1Q5UVIyoH402zdk=
+github.com/golang-jwt/jwt/v5 v5.2.2 h1:Rl4B7itRWVtYIHFrSNd7vhTiz9UpLdi6gZhZ3wEeDy8=
+github.com/golang-jwt/jwt/v5 v5.2.2/go.mod h1:pqrtFR0X4osieyHYxtmOUWsAWrfe1Q5UVIyoH402zdk=
 github.com/sst/sst/v3 v3.9.19 h1:cIf0OQb0s2lRpuUTXHjZm5dHRqlrIsqCKBIAUVOIop8=
 github.com/sst/sst/v3 v3.9.19/go.mod h1:t0+Krbn45bPEvo19BNbP3TACUS6J7TLbM04YvuoX3Gg=
 github.com/sst/sst/v3 v3.9.36 h1:BgeT1S8BMZk8VuY4c72kl4yH0jSFCZXi8KdKppkQwHU=
 github.com/sst/sst/v3 v3.9.36/go.mod h1:t0+Krbn45bPEvo19BNbP3TACUS6J7TLbM04YvuoX3Gg=
+github.com/sst/sst/v3 v3.10.4 h1:qKVT4EFcTUj8KFVGAhWBLD+/ohAtJDnFy5IAitpJ3kc=
+github.com/sst/sst/v3 v3.10.4/go.mod h1:t0+Krbn45bPEvo19BNbP3TACUS6J7TLbM04YvuoX3Gg=
 golang.org/x/crypto v0.19.0 h1:ENy+Az/9Y1vSrlrvBSyna3PITt4tiZLf7sgCjZBX7Wo=
 golang.org/x/crypto v0.19.0/go.mod h1:Iy9bg/ha4yyC70EfRS8jz+B6ybOBKMaSxLj6P6oBDfU=
 golang.org/x/crypto v0.35.0 h1:b15kiHdrGCHrP6LvwaQ3c03kgNhhiMgvlhxHQhmg2Xs=

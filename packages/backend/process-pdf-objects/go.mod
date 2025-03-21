@@ -1,8 +1,8 @@
 module process-pdf-objects
 
-go 1.23.4
+go 1.24.1
 
 require (
 	github.com/aws/aws-lambda-go v1.47.0
-	github.com/sst/sst/v3 v3.9.36
+	github.com/sst/sst/v3 v3.10.4
 )

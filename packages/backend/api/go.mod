@@ -1,6 +1,6 @@
 module kyotaidoshin
 
-go 1.23.4
+go 1.24.1
 
 require (
 	github.com/a-h/templ v0.3.833
@@ -8,11 +8,11 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.78.2
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
-	github.com/go-jet/jet/v2 v2.12.0
+	github.com/go-jet/jet/v2 v2.13.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/csrf v1.7.2
 	github.com/gorilla/mux v1.8.1
-	github.com/sst/sst/v3 v3.9.36
+	github.com/sst/sst/v3 v3.10.4
 )
 
 require (

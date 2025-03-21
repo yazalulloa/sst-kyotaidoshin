@@ -1,11 +1,11 @@
 module aws_h
 
-go 1.23.4
+go 1.24.1
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.29.9
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.70.1
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.71.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.78.2
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.38.1
 )

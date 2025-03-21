@@ -1,6 +1,6 @@
 module bcv
 
-go 1.23.4
+go 1.24.1
 
 require (
 	github.com/PuerkitoBio/goquery v1.10.2
@@ -8,7 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.78.2
 	github.com/cespare/xxhash v1.1.0
-	github.com/sst/sst/v3 v3.9.36
+	github.com/sst/sst/v3 v3.10.4
 )
 
 require (
