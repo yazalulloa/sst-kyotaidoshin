@@ -38,7 +38,6 @@ export default $config({
     const altEmailsRecipientSecret = new sst.Secret("AltEmailsRecipient", "");
     const htmlToPdfFunction = new sst.Secret("HtmlToPdfFunction")
 
-    // const domain = new sst.Secret("Domain");
     const processUserFunction = new sst.aws.Function("ProcessUser", {
       link: [secretTursoUrl],
       handler: "packages/backend/process-user/",
@@ -132,23 +131,6 @@ export default $config({
     });
     const apiDomain = `api.${currentWebUrl}`
 
-    const uploadBackupBucket = new sst.aws.Bucket("UploadBackupBucket", {
-      versioning: false,
-      cors: {
-        allowHeaders: [
-          "Content-Type",
-          "hx-current-url",
-          "hx-request",
-          "hx-trigger",
-          "hx-target",
-        ],
-        allowOrigins: isLocal ? ["http://localhost:5173"] : [`https://${currentWebUrl}`],
-        allowMethods: ["GET", "POST", "PUT"],
-        exposeHeaders: [],
-        maxAge: isLocal ? "1 minute" : "1 day",
-      },
-    });
-
 
     // let allowedOrigins = isLocal ? ["*"] : [webUrl.value];
 //  uploadBackupBucket.domain.apply(v => `https://${v}`)
@@ -176,26 +158,7 @@ export default $config({
         exposeHeaders: ["HX-Redirect", "hx-location"],
       },
     });
-    const uploadBackupQueue = new sst.aws.Queue("UploadBackupQueue", {
-      //not supported for S3 notificationsm
-      fifo: false,
-      visibilityTimeout: "300 seconds",
-    });
-    uploadBackupQueue.subscribe({
-      link: [secretTursoUrl, uploadBackupBucket, uploadBackupQueue],
-      runtime: "go",
-      handler: "packages/backend/process-backup/",
-      timeout: "90 seconds",
-    });
-    uploadBackupBucket.notify({
-      notifications: [
-        {
-          name: "ProcessBackupSubscriber",
-          queue: uploadBackupQueue,
-          events: ["s3:ObjectCreated:Post"],
-        },
-      ],
-    });
+
     const verifyAccessFunction = new sst.aws.Function("VerifyAccess", {
       link: [appClientId, auth],
       handler: "packages/backend/openauthclient/verify.handler",
@@ -242,7 +205,6 @@ export default $config({
         secretTursoUrl,
         bcvUrl,
         bcvFileStartPath,
-        uploadBackupBucket,
         appClientId,
         auth,
         verifyAccessFunction,

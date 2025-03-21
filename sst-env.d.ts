@@ -99,14 +99,6 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
-    "UploadBackupBucket": {
-      "name": string
-      "type": "sst.aws.Bucket"
-    }
-    "UploadBackupQueue": {
-      "type": "sst.aws.Queue"
-      "url": string
-    }
     "VerifyAccess": {
       "name": string
       "type": "sst.aws.Function"

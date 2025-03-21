@@ -8,10 +8,10 @@ import (
 
 func Routes(holder *api.RouterHolder) {
 
-	holder.GET("/api/rates/currencies.html", renderObj(GetRatesCurrencies))
-	holder.GET("/api/receipts/buildings.html", renderObj(GetReceiptsBuildings))
-	holder.GET("/api/receipts/years.html", renderObj(GetReceiptsYears))
-	holder.GET("/api/apartments/buildings.html", renderObj(GetApartmentsBuildings))
+	holder.GET("/api/rates/currencies", renderObj(GetRatesCurrencies))
+	holder.GET("/api/receipts/buildings", renderObj(GetReceiptsBuildings))
+	holder.GET("/api/receipts/years", renderObj(GetReceiptsYears))
+	holder.GET("/api/apartments/buildings", renderObj(GetApartmentsBuildings))
 }
 
 func renderObj(dataFunc func(ctx context.Context) ([]byte, error)) func(w http.ResponseWriter, r *http.Request) {

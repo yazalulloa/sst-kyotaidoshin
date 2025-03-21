@@ -46,7 +46,7 @@
         data-change-event="update-receipts">
 
       <div hidden="hidden"
-           hx-get="/isr/receipts/buildings.html"
+           hx-get="/api/receipts/buildings"
            hx-trigger="load"
            hx-swap="outerHTML">
       </div>
@@ -82,7 +82,7 @@
   }"
     >
 
-      <div hx-get="/isr/receipts/years.html"
+      <div hx-get="/api/receipts/years"
            hx-trigger="load"
            hx-swap="outerHTML"
            hidden="hidden">
