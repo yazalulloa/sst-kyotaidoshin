@@ -9,7 +9,18 @@
   <link href="styles.css" rel="stylesheet">
   <script src="index.js" type="module"></script>
 </head>
-<body class="flex max-h-full w-full flex-col gap-0 overflow-hidden text-on-surface dark:text-on-surface-dark">
+<body class="flex max-h-full w-full flex-col gap-0 overflow-hidden text-on-surface dark:text-on-surface-dark"
+      x-init=""
+      x-on:htmx:after-request.document="
+
+       if ($event?.detail?.xhr && $event.detail.xhr.responseURL.includes('/api/') && $event.detail.xhr.status >= 400) {
+         console.log('Error', $event.detail)
+         let pathname = new URL($event.detail.xhr.responseURL).pathname
+         let msg = `${$event.detail.xhr.status} - ${pathname}\n${$event.detail.xhr.response}`
+         $dispatch('notify', { variant: 'danger', title: 'Error',  message: msg })
+       }
+
+">
 
 <div class="flex h-1 bg-surface-alt dark:bg-surface-dark-alt">
   <progress class="m-0 h-1 w-full p-0 progress htmx-indicator"></progress>
