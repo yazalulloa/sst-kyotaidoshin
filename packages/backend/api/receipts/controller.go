@@ -48,7 +48,7 @@ func Routes(holder *api.RouterHolder) {
 	holder.GET(_SEARCH, search, api.RECEIPTS_READ)
 	holder.POST(_PATH, receiptPost, api.RECEIPTS_WRITE)
 	holder.PUT(_PATH, receiptPut, api.RECEIPTS_WRITE)
-	holder.DELETE(_PATH+"/clear_pdfs", clearPdfs, api.RECEIPTS_WRITE)
+	holder.DELETE(_PATH+"/clear_pdfs", clearPdfs, api.RECEIPTS_DELETE_PDFS)
 	holder.DELETE(_PATH+"/{key}", receiptDelete, api.RECEIPTS_WRITE)
 	holder.GET(_UPLOAD_BACKUP_FORM, getUploadBackupForm, api.RECEIPTS_UPLOAD_BACKUP)
 	holder.POST(_UPLOAD_BACKUP, uploadBackup, api.RECEIPTS_UPLOAD_BACKUP)

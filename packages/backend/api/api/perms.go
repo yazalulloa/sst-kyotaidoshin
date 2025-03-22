@@ -27,6 +27,7 @@ const (
 	RECEIPTS_WRITE           PERM = "receipts:write"
 	RECEIPTS_UPLOAD_BACKUP   PERM = "receipts:upload_backup"
 	RECEIPTS_DOWNLOAD_BACKUP PERM = "receipts:download_backup"
+	RECEIPTS_DELETE_PDFS     PERM = "receipts:delete_pdfs"
 
 	USERS_READ  PERM = "users:read"
 	USERS_WRITE PERM = "users:write"
@@ -82,6 +83,7 @@ func AllReceipts() []PERM {
 		RECEIPTS_WRITE,
 		RECEIPTS_UPLOAD_BACKUP,
 		RECEIPTS_DOWNLOAD_BACKUP,
+		RECEIPTS_DELETE_PDFS,
 	}
 }
 
