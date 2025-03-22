@@ -256,6 +256,10 @@ export default $config({
           {
             files: "index.html",
             cacheControl: "max-age=0,no-cache,no-store,must-revalidate",
+          },
+          {
+            files: "^isr(/.*)?$",
+            cacheControl: "max-age=0,no-cache,no-store,must-revalidate",
           }
           // {
           //   files: "**/*.html",

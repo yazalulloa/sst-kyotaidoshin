@@ -26,13 +26,13 @@
   <progress class="m-0 h-1 w-full p-0 progress htmx-indicator"></progress>
 </div>
 
-<div x-data="{ sidebarIsOpen: false, perms: [],
+<div x-data="{ sidebarIsOpen: false, userPerms: [],
               hasPerm(str) {
-                return this.perms.includes(str)
+                return this.userPerms.includes(str)
               }
             }"
      @event-load-perms="
-      perms = JSON.parse(decodeBase64UrlStr($event.detail.params))
+      userPerms = JSON.parse(decodeBase64UrlStr($event.detail.params))
      "
      class="relative flex w-full flex-col md:flex-row">
   <!-- This allows screen readers to skip the sidebar and go directly to the main content. -->
