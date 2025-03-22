@@ -69,7 +69,8 @@ func putInBucket(ctx context.Context, objectKey string, component templ.Componen
 		//ChecksumSHA256:            nil,
 		ContentLength: &contentLength,
 		ContentType:   aws.String("text/html;charset=UTF-8"),
-		CacheControl:  aws.String("public,must-revalidate"),
+		CacheControl:  aws.String("public,max-age=0,s-maxage=0,must-revalidate"),
+		//CacheControl:  aws.String("max-age=0,no-cache,no-store,must-revalidate"), Works but no 304
 	})
 
 	if err != nil {
@@ -112,7 +113,7 @@ func getObject(ctx context.Context, objectKey string, putIfNotExists func(ctx co
 	return data, nil
 }
 
-const ratesCurrenciesObjectKey = "isr/rates/currencies.html"
+const ratesCurrenciesObjectKey = "isr/v2/rates/currencies.html"
 
 func GetRatesCurrencies(ctx context.Context) ([]byte, error) {
 
@@ -128,7 +129,7 @@ func UpdateRatesCurrencies(ctx context.Context) error {
 	return putInBucket(ctx, ratesCurrenciesObjectKey, component)
 }
 
-const receiptsBuildingsObjectKey = "isr/receipts/buildings.html"
+const receiptsBuildingsObjectKey = "isr/v2/receipts/buildings.html"
 
 func GetReceiptsBuildings(ctx context.Context) ([]byte, error) {
 
@@ -145,7 +146,7 @@ func updateReceiptsBuildings(ctx context.Context) error {
 	return putInBucket(ctx, receiptsBuildingsObjectKey, component)
 }
 
-const receiptsYearsObjectKey = "isr/receipts/years.html"
+const receiptsYearsObjectKey = "isr/v2/receipts/years.html"
 
 func GetReceiptsYears(ctx context.Context) ([]byte, error) {
 	return getObject(ctx, receiptsYearsObjectKey, updateReceiptsYears)
@@ -172,7 +173,7 @@ func updateReceiptsYears(ctx context.Context) error {
 	return putInBucket(ctx, receiptsYearsObjectKey, XInitView(builder.String()))
 }
 
-const apartmentsBuildingsObjectKey = "isr/apartments/buildings.html"
+const apartmentsBuildingsObjectKey = "isr/v2/apartments/buildings.html"
 
 func GetApartmentsBuildings(ctx context.Context) ([]byte, error) {
 	return getObject(ctx, apartmentsBuildingsObjectKey, updateApartmentsBuildings)
