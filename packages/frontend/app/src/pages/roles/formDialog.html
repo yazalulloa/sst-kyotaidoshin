@@ -18,10 +18,10 @@
      @event-roles-form-reset="
        isEdit = false;
        key = ''
-       name: '',
-       selected.clear(),
+       name = ''
+       selected.clear()
 
-       nameErr = '',
+       nameErr = ''
        errMsg = ''
      "
      @event-roles-form-update.window="
@@ -49,7 +49,7 @@
   </div>
 
   <button x-on:click="
-            $dispatch('event-apartment-form-reset')
+            $dispatch('event-roles-form-reset')
             modalIsOpen = true
           "
           type="button"

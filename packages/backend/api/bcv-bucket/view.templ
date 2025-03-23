@@ -24,15 +24,8 @@ templ Search(res TableResponse) {
 			</a>
 			<span class="text-end">{ item.Item.SizeFormatted }</span>
 			<span>{ item.Item.Etag }</span>
-			<span
-				data-date={ fmt.Sprint(item.Item.LastModified) }
-				x-init="
-      					$el.innerHTML = new Date(parseInt($el.getAttribute('data-date')))
-                                            //.toLocaleDateString()
-                                           .toLocaleString()
-                                           "
-			></span>
-			<div class="flex flex justify-center w-full">
+			@api.SpanFormatDate(fmt.Sprint(item.Item.LastModified))
+			<div class="flex flex justify-center">
 				<div class="relative w-fit">
 					<div
 						aria-describedby={ fmt.Sprintf("%s-tooltip", item.CardId) }
