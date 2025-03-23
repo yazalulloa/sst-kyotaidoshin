@@ -13,11 +13,13 @@ import checkBoxIconUrl from './assets/images/checkbox-icon.svg?no-inline'
 import profileIconUrl from './assets/images/profile.svg?no-inline'
 import zipFileIconUrl from './assets/images/zip-file.svg?no-inline'
 import receiptIconUrl from './assets/images/receipt.svg?no-inline'
+import receiptAltIconUrl from './assets/images/receipt-alt.svg?no-inline'
 import pdfIconUrl from './assets/images/pdf-logo.svg?no-inline'
 import loadingIconUrl from './assets/images/loading.svg?no-inline'
 import sendMailIconUrl from './assets/images/send-mail.svg?no-inline'
 import duplicateIconUrl from './assets/images/duplicate.svg?no-inline'
 import permissionsIconUrl from './assets/images/permissions-icon.svg?no-inline'
+import usersIconUrl from './assets/images/users.svg?no-inline'
 
 window.deleteIconUrl = deleteIconUrl;
 window.processIconUrl = processIconUrl;
@@ -30,6 +32,7 @@ window.checkBoxIconUrl = checkBoxIconUrl;
 window.profileIconUrl = profileIconUrl;
 window.zipFileIconUrl = zipFileIconUrl;
 window.receiptIconUrl = receiptIconUrl
+window.receiptAltIconUrl = receiptAltIconUrl
 window.pdfIconUrl = pdfIconUrl
 window.loadingIconUrl = loadingIconUrl
 window.sendMailIconUrl = sendMailIconUrl
@@ -41,13 +44,14 @@ window.buildingsIconUrl = buildingsIconUrl;
 window.apartmentsIconUrl = apartmentsIconUrl;
 
 window.permissionsIconUrl = permissionsIconUrl;
+window.usersIconUrl = usersIconUrl;
 
 window.NAV_ICONS = new Map([
   ['nav-apartments', apartmentsIconUrl],
   ['nav-buildings', buildingsIconUrl],
-  ['nav-receipts', ratesIconUrl],
+  ['nav-receipts', receiptAltIconUrl],
   ['nav-rates', ratesIconUrl],
-  ['nav-users', bucketIconUrl],
+  ['nav-users', usersIconUrl],
   ['nav-bcv-files', bucketIconUrl],
   ['nav-permissions', permissionsIconUrl],
   ['nav-roles', permissionsIconUrl]
