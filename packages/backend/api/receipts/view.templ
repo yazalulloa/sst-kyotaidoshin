@@ -54,7 +54,7 @@ templ ItemView(item Item) {
 		<span x-text={ fmt.Sprintf("$t('main-months-%d')", item.Item.Month) }></span>
 		<span>{ fmt.Sprint(item.Item.Year) }</span>
 		<span>{ item.Item.Date.Format(time.DateOnly) }</span>
-		<div class="flex justify-center w-full">
+		<div class="flex justify-center">
 			if item.Item.LastSent != nil {
 				{{
 		tooltipId := "tooltip-" + uuid.New().String()
@@ -65,15 +65,8 @@ templ ItemView(item Item) {
 				@api.BadgeIndicatorWithTooltip(item.Item.Sent, "", api.SpanWitX_Text("$t('main-title-sent')"), nil)
 			}
 		</div>
-		<span
-			data-date={ fmt.Sprint(item.CreatedAt) }
-			x-init="
-    					$el.innerHTML = new Date(parseInt($el.getAttribute('data-date')))
-                                          //.toLocaleDateString()
-                                         .toLocaleString()
-                                         "
-		></span>
-		<div class="w-full flex justify-center">
+		@api.SpanFormatDate(fmt.Sprint(item.CreatedAt))
+		<div class="flex justify-center">
 			<div
 				x-data="{ isOpen: false, openedWithKeyboard: false }"
 				x-on:keydown.esc.window="isOpen = false, openedWithKeyboard = false"
