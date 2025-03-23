@@ -116,6 +116,10 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
+* {
+  scrollbar-width: thin;
+}
+
 @theme {
   /* Fonts */
   --font-title: 'Poppins', sans-serif;
@@ -159,16 +163,7 @@ input[type=number] {
   --radius-radius: var(--radius-lg);
 }
 
-* {
-  scrollbar-width: thin;
-}
-
-
 @layer base {
-
-  :root {
-    scrollbar-color: color-mix(in oklch, currentColor 35%, #0000) #0000;
-  }
 
   [data-theme=arctic] {
     /* Fonts */
@@ -253,7 +248,7 @@ input[type=number] {
     --color-on-danger: var(--color-white);
 
     /* Border Radius */
-    --radius-radius: var(--radius-none);
+    --radius-radius: 0;
   }
 
   [data-theme=modern] {
@@ -382,7 +377,7 @@ input[type=number] {
     --color-on-danger: var(--color-black);
 
     /* Border Radius */
-    --radius-radius: var(--radius-none);
+    --radius-radius: 0;
   }
 
   [data-theme=halloween] {
@@ -514,7 +509,7 @@ input[type=number] {
     --radius-radius: var(--radius-xl);
   }
 
-  [data-theme=90s] {
+  [data-theme=ninetys] {
   /* Fonts */
   --font-body: 'Poppins', sans-serif;
   --font-title: 'Oswald', sans-serif;
@@ -640,7 +635,7 @@ input[type=number] {
     --color-on-danger: var(--color-black);
 
     /* Border Radius */
-    --radius-radius: var(--radius-none);
+    --radius-radius: 0;
   }
 
   [data-theme=news] {
@@ -726,23 +721,23 @@ input[type=number] {
     --color-on-danger: var(--color-white);
 
     /* Border Radius */
-    --radius-radius: var(--radius-none);
+    --radius-radius: 0;
   }
 
 }
 
 
-select option {
-  color: var(--color-on-surface);
-  background: var(--color-surface-alt);
-}
+/*select option {*/
+/*  color: var(--color-on-surface);*/
+/*  background: var(--color-surface-alt);*/
+/*}*/
 
-@media (prefers-color-scheme: dark) {
-  select option {
-    color: var(--color-on-surface-dark);
-    background: var(--color-surface-dark-alt);
-  }
-}
+/*@media (prefers-color-scheme: dark) {*/
+/*  select option {*/
+/*    color: var(--color-on-surface-dark);*/
+/*    background: var(--color-surface-dark-alt);*/
+/*  }*/
+/*}*/
 
 .next-page-element {
   display: flex;

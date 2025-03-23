@@ -275,6 +275,32 @@ function configureCurrencyInputs() {
 
 }
 
+window.fetchAndParseCSS = async function () {
+  try {
+    // Fetch the CSS file
+    const response = await fetch('styles.css');
+    const cssText = await response.text();
+
+    // Use a regular expression to find all data-theme declarations
+    const themeRegex = /\[data-theme=(.+?)\]/g;
+    const themes = new Set();
+    let match;
+
+    // Loop through all matches and add them to the Set
+    while ((match = themeRegex.exec(cssText)) !== null) {
+      themes.add(match[1].trim());
+    }
+
+    // Convert the Set to an array and log the themes
+    const themeArray = Array.from(themes);
+    // console.log('Declared themes:', themeArray);
+    return themeArray;
+  } catch (error) {
+    console.error('Error fetching CSS:', error);
+    return []
+  }
+}
+
 window.FormatDate = function (date) {
   return new Date(parseInt(date))
   //.toLocaleDateString()
@@ -384,3 +410,4 @@ Alpine.plugin(collapse)
 Alpine.plugin(AlpineI18n)
 Alpine.plugin(PineconeRouter)
 Alpine.start()
+
