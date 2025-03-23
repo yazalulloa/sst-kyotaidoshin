@@ -54,8 +54,8 @@
   appearance: none;
   overflow: hidden;
   border-radius: var(--radius-radius);
-  background-color: color-mix(in oklab, currentColor 20%, transparent);
-  color: var(--color-primary);
+  /*background-color: color-mix(in oklab, currentColor 20%, transparent);*/
+  /*color: var(--color-primary);*/
   &:indeterminate {
     background-image: repeating-linear-gradient( 90deg, currentColor -1%, currentColor 10%, #0000 10%, #0000 90% );
     background-size: 200%;

@@ -26,7 +26,7 @@
 ">
 
 <div class="flex h-1 bg-surface-alt dark:bg-surface-dark-alt">
-  <progress class="m-0 h-1 w-full p-0 progress htmx-indicator"></progress>
+  <progress class="text-primary dark:text-primary-dark m-0 h-1 w-full p-0 progress htmx-indicator"></progress>
 </div>
 
 <div x-data="{ sidebarIsOpen: false, userPerms: [],
@@ -148,6 +148,7 @@
         <div class="flex items-center gap-4">
           <div
               x-data="{ themeDropdownIsOpen: false, themes: [], themeSelected: document.documentElement.getAttribute('data-theme') }"
+              x-show="themes.length > 0"
               class="relative flex items-center"
               x-on:keydown.esc.window="themeDropdownIsOpen = false"
               x-init="themes = await fetchAndParseCSS()">

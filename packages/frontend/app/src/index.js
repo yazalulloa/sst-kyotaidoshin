@@ -277,24 +277,31 @@ function configureCurrencyInputs() {
 
 window.fetchAndParseCSS = async function () {
   try {
-    // Fetch the CSS file
-    const response = await fetch('styles.css');
-    const cssText = await response.text();
-
-    // Use a regular expression to find all data-theme declarations
-    const themeRegex = /\[data-theme=(.+?)\]/g;
+    const themeRegex = /\[data-theme=(.+?)]/g;
     const themes = new Set();
     let match;
 
-    // Loop through all matches and add them to the Set
-    while ((match = themeRegex.exec(cssText)) !== null) {
-      themes.add(match[1].trim());
-    }
+    for (let styleSheetsKey in document.styleSheets) {
+      let styleSheet = document.styleSheets[styleSheetsKey];
+      if (styleSheet.href) {
+        for (let cssRulesKey in styleSheet.cssRules) {
+          let cssRule = styleSheet.cssRules[cssRulesKey];
+          if (cssRule.name && cssRule.name === 'base') {
+            while ((match = themeRegex.exec(cssRule.cssText)) !== null) {
+              let theme = match[1].trim()
+              theme = theme.replaceAll("\"", "");
+              themes.add(theme);
+            }
+          }
+        }
 
-    // Convert the Set to an array and log the themes
+      }
+
+    }
     const themeArray = Array.from(themes);
     // console.log('Declared themes:', themeArray);
-    return themeArray;
+    return themeArray
+
   } catch (error) {
     console.error('Error fetching CSS:', error);
     return []

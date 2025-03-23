@@ -3,12 +3,13 @@ Web app (rebuild of condo manager)
 Tech:
 
 - Golang
-- SST
-- HTMX
-- AlpineJs
+- [SST](https://sst.dev/)
+- [HTMX](https://htmx.org/)
+- [AlpineJs](https://alpinejs.dev/)
 - Vite
 - TailwindCSS
-- Turso
+- [Turso](https://turso.tech/)
+- [Penguinui](https://www.penguinui.com/)
 
 TODOS:
 - [x] Send Pdfs by selection
@@ -27,7 +28,7 @@ TODOS:
 - [ ] Custom Login
 - [ ] My Profile
 - [ ] Language Selector
-- [ ] Themes
+- [x] Themes
 - [ ] Sessions
 - [ ] Fix Z index of tooltips and dialogs (Receipts)
 - [ ] Redirect after login
