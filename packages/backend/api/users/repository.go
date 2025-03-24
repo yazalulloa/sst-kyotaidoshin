@@ -43,22 +43,33 @@ func Insert(user model.Users) (int64, error) {
 	return rowsAffected, nil
 }
 
-func UpdateLastLogin(id string) (int64, error) {
-	stmt := Users.UPDATE(Users.LastLoginAt).
-		SET(sqlite.DATETIME("now")).
-		WHERE(Users.ID.EQ(sqlite.String(id)))
+func UpdateWithLogin(user model.Users) (int64, error) {
+	stmt := Users.UPDATE(Users.LastLoginAt, Users.Email, Users.Username, Users.Name, Users.Picture, Users.Data).
+		SET(sqlite.DATETIME("now"), user.Email, user.Username, user.Name, user.Picture, user.Data).
+		WHERE(Users.ID.EQ(sqlite.String(user.ID)))
 
 	res, err := stmt.Exec(db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}
 
-	rowsAffected, err := res.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
+	return res.RowsAffected()
 
-	return rowsAffected, nil
+	//stmt := Users.UPDATE(Users.LastLoginAt).
+	//	SET(sqlite.DATETIME("now")).
+	//	WHERE(Users.ID.EQ(sqlite.String(id)))
+	//
+	//res, err := stmt.Exec(db.GetDB().DB)
+	//if err != nil {
+	//	return 0, err
+	//}
+	//
+	//rowsAffected, err := res.RowsAffected()
+	//if err != nil {
+	//	return 0, err
+	//}
+	//
+	//return rowsAffected, nil
 }
 
 func GetByID(id string) (*model.Users, error) {

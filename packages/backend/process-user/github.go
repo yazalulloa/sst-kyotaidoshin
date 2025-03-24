@@ -1,10 +1,13 @@
 package main
 
 import (
+	"db/gen/model"
 	"encoding/json"
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"io"
+	"kyotaidoshin/users"
 	"kyotaidoshin/util"
 	"log"
 	"net/http"
@@ -129,13 +132,14 @@ func githubUserInfo(input Input) (*UserInfo, error) {
 	wg.Add(2)
 	errorChan := make(chan error, 2)
 
-	var user PublicUser
-	var emails []Email
+	var publicUser PublicUser
+	emails := make([]Email, 0)
 
 	header := http.Header{
-		"Authorization":        []string{fmt.Sprintf("Bearer %s", input.Tokenset.Raw.AccessToken)},
-		"Accept":               []string{"application/vnd.github.v3+json"},
-		"X-GitHub-Api-Version": []string{"2022-11-28"},
+		"Authorization": []string{fmt.Sprintf("Bearer %s", input.Tokenset.Raw.AccessToken)},
+		"Accept":        []string{"application/vnd.github.v3+json"},
+		//"Accept":               []string{"application/vnd.github.v3+json"},
+		//"X-GitHub-Api-Version": []string{"2022-11-28"},
 	}
 
 	go func() {
@@ -167,13 +171,30 @@ func githubUserInfo(input Input) (*UserInfo, error) {
 				return
 			}
 
-			errorChan <- fmt.Errorf("failed to get user: %d %s", res.StatusCode, string(byteArray))
+			errorChan <- fmt.Errorf("failed to get publicUser: %d %s", res.StatusCode, string(byteArray))
 			return
 		}
 
-		err = json.NewDecoder(res.Body).Decode(&user)
+		err = json.NewDecoder(res.Body).Decode(&publicUser)
 		if err != nil {
 			errorChan <- err
+		}
+
+		validate, err := util.GetValidator()
+		if err != nil {
+			errorChan <- err
+			return
+		}
+
+		err = validate.Struct(publicUser)
+		if err != nil {
+			// Validation failed, handle the error
+			errors := err.(validator.ValidationErrors)
+			for _, valErr := range errors {
+				log.Printf("Validation error: %v", valErr)
+			}
+			errorChan <- fmt.Errorf("validation error: %s", errors)
+			return
 		}
 	}()
 
@@ -206,14 +227,15 @@ func githubUserInfo(input Input) (*UserInfo, error) {
 				return
 			}
 
-			errorChan <- fmt.Errorf("failed to get emails: %d %s", res.StatusCode, string(byteArray))
+			log.Printf("failed to get emails: %d %s", res.StatusCode, string(byteArray))
 			return
-		}
+		} else {
 
-		err = json.NewDecoder(res.Body).Decode(&emails)
+			err = json.NewDecoder(res.Body).Decode(&emails)
 
-		if err != nil {
-			errorChan <- err
+			if err != nil {
+				errorChan <- err
+			}
 		}
 	}()
 
@@ -221,7 +243,7 @@ func githubUserInfo(input Input) (*UserInfo, error) {
 	close(errorChan)
 
 	log.Printf("Errors: %d", len(errorChan))
-	log.Printf("User: %+v", user)
+	log.Printf("User: %+v", publicUser)
 	log.Printf("Emails: %+v", emails)
 	err := util.HasErrors(errorChan)
 	if err != nil {
@@ -239,8 +261,56 @@ func githubUserInfo(input Input) (*UserInfo, error) {
 
 	log.Printf("Primary Email: %s", primaryEmail)
 
+	providerId := fmt.Sprint(publicUser.ID)
+
+	user, err := users.GetByProvider(users.GOOGLE, providerId)
+	if err != nil {
+		return nil, err
+	}
+
+	jsonByte, err := json.Marshal(publicUser)
+	if err != nil {
+		return nil, err
+	}
+
+	newUser := model.Users{
+		ProviderID: providerId,
+		Provider:   users.GOOGLE.Name(),
+		Email:      primaryEmail,
+		Username:   *publicUser.Name,
+		Name:       *publicUser.Name,
+		Picture:    publicUser.AvatarURL,
+		Data:       string(jsonByte),
+	}
+
+	if user != nil {
+		newUser.ID = user.ID
+
+		_, err = users.UpdateWithLogin(newUser)
+		if err != nil {
+			return nil, err
+		}
+
+		return &UserInfo{
+			UserId:      user.ID,
+			WorkspaceID: "workspace-" + uuid.NewString(),
+		}, nil
+	}
+
+	id, err := uuid.NewV7()
+	if err != nil {
+		return nil, err
+	}
+	newId := id.String()
+	newUser.ID = newId
+
+	_, err = users.Insert(newUser)
+	if err != nil {
+		return nil, err
+	}
+
 	return &UserInfo{
-		UserId:      "user-" + uuid.NewString(),
+		UserId:      newId,
 		WorkspaceID: "workspace-" + uuid.NewString(),
 	}, nil
 }

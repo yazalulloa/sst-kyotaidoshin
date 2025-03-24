@@ -22,7 +22,7 @@ TODOS:
 - [x] Cache of partials (building ids, years, etc)
 - [ ] Backups
 - [ ] Telegram
-- [ ] Cleanup Frontend
+- [x] Cleanup Frontend
 - [x] Focus edit on click
 - [ ] Scroll forms
 - [ ] Custom Login

@@ -25,30 +25,12 @@ func googleUserInfo(ctx context.Context, input Input) (*UserInfo, error) {
 
 	providerId := userinfo.Id
 
-	user, err := users.GetByProvider(users.GOOGLE, providerId)
-	if err != nil {
-		return nil, err
-	}
-
-	if user != nil {
-		return &UserInfo{
-			UserId:      user.ID,
-			WorkspaceID: "workspace-" + uuid.NewString(),
-		}, nil
-	}
-
 	jsonByte, err := json.Marshal(userinfo)
 	if err != nil {
 		return nil, err
 	}
 
-	id, err := uuid.NewV7()
-	if err != nil {
-		return nil, err
-	}
-	newId := id.String()
 	newUser := model.Users{
-		ID:         newId,
 		ProviderID: providerId,
 		Provider:   users.GOOGLE.Name(),
 		Email:      userinfo.Email,
@@ -57,6 +39,32 @@ func googleUserInfo(ctx context.Context, input Input) (*UserInfo, error) {
 		Picture:    userinfo.Picture,
 		Data:       string(jsonByte),
 	}
+
+	user, err := users.GetByProvider(users.GOOGLE, providerId)
+	if err != nil {
+		return nil, err
+	}
+
+	if user != nil {
+		newUser.ID = user.ID
+
+		_, err = users.UpdateWithLogin(newUser)
+		if err != nil {
+			return nil, err
+		}
+
+		return &UserInfo{
+			UserId:      user.ID,
+			WorkspaceID: "workspace-" + uuid.NewString(),
+		}, nil
+	}
+
+	id, err := uuid.NewV7()
+	if err != nil {
+		return nil, err
+	}
+	newId := id.String()
+	newUser.ID = newId
 
 	_, err = users.Insert(newUser)
 	if err != nil {

@@ -31,8 +31,8 @@ const app = issuer({
       clientID: Resource.GithubClientId.value,
       clientSecret: Resource.GithubClientSecret.value,
       // scopes: ["openid", "profile", "email"],
-      // scopes: ["openid", "user:email"],
-      scopes: ["email", "profile"],
+      scopes: ["openid", "read:user", "user:email"],
+      // scopes: ["email", "profile"],
       pkce: true,
       query: {
         nonce: uuidv4(),

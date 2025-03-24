@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/aws/aws-lambda-go/lambda"
-	"kyotaidoshin/users"
+	"log"
 )
 
 type UserInfo struct {
@@ -25,17 +25,11 @@ func handler(ctx context.Context, input Input) (*UserInfo, error) {
 		}
 	}()
 
-	if err == nil && userInfo != nil {
-		_, err = users.UpdateLastLogin(userInfo.UserId)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	return userInfo, err
 }
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Llongfile)
 	lambda.Start(handler)
 }
 
