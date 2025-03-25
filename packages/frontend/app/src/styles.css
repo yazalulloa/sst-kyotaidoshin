@@ -726,11 +726,12 @@ input[type=number] {
 
 }
 
+/* Select option background */
 select option {
   color: var(--color-on-surface);
   background: var(--color-surface-alt);
 }
-
+/* Select option background dark*/
 @media (prefers-color-scheme: dark) {
   select option {
     color: var(--color-on-surface-dark);
