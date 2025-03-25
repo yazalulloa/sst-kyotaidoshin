@@ -263,7 +263,7 @@ func githubUserInfo(input Input) (*UserInfo, error) {
 
 	providerId := fmt.Sprint(publicUser.ID)
 
-	user, err := users.GetByProvider(users.GOOGLE, providerId)
+	user, err := users.GetByProvider(users.GITHUB, providerId)
 	if err != nil {
 		return nil, err
 	}
@@ -275,7 +275,7 @@ func githubUserInfo(input Input) (*UserInfo, error) {
 
 	newUser := model.Users{
 		ProviderID: providerId,
-		Provider:   users.GOOGLE.Name(),
+		Provider:   users.GITHUB.Name(),
 		Email:      primaryEmail,
 		Username:   *publicUser.Name,
 		Name:       *publicUser.Name,

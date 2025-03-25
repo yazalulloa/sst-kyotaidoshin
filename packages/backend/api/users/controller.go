@@ -18,7 +18,7 @@ const _SEARCH = _PATH + "/search"
 func Routes(holder *api.RouterHolder) {
 
 	holder.GET(_SEARCH, search, api.USERS_READ)
-	holder.DELETE(_PATH+"/{id}", userDelete, api.USERS_WRITE)
+	holder.DELETE(_PATH+"/{key}", userDelete, api.USERS_WRITE)
 	holder.PUT(_PATH+"/role", userRolePatch, api.USERS_WRITE)
 }
 
@@ -60,21 +60,21 @@ func search(w http.ResponseWriter, r *http.Request) {
 }
 
 func userDelete(w http.ResponseWriter, r *http.Request) {
-	id := mux.Vars(r)["id"]
-	var str string
-	err := util.Decode(id, &str)
+	keyStr := mux.Vars(r)["key"]
+	if keyStr == "" {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	var keys Keys
+	err := util.Decode(keyStr, &keys)
 	if err != nil {
-		log.Printf("Error decoding id: %v", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("failed to decode key: %v", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 
-	if str == "" {
-		http.Error(w, "Bad Request id", http.StatusBadRequest)
-		return
-	}
-
-	counters, err := deleteRateReturnCounters(str, RequestQuery{})
+	counters, err := deleteRateReturnCounters(keys.ID, RequestQuery{})
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

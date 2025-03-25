@@ -159,6 +159,14 @@ export default $config({
       },
     });
 
+    const telegramWebhook = new sst.aws.ApiGatewayV1("TelegramWebhook")
+    telegramWebhook.route("POST /", {
+      runtime: "go",
+      handler: "packages/backend/telegram-webhook/",
+    })
+
+    telegramWebhook.deploy()
+
     const verifyAccessFunction = new sst.aws.Function("VerifyAccess", {
       link: [appClientId, auth],
       handler: "packages/backend/openauthclient/verify.handler",

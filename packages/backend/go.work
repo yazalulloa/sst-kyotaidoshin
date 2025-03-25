@@ -12,4 +12,5 @@ use (
 	./process-backup
 	./process-pdf-objects
 	./isr-gen
+	./telegram-webhook
 )
