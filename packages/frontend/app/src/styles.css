@@ -726,18 +726,17 @@ input[type=number] {
 
 }
 
+select option {
+  color: var(--color-on-surface);
+  background: var(--color-surface-alt);
+}
 
-/*select option {*/
-/*  color: var(--color-on-surface);*/
-/*  background: var(--color-surface-alt);*/
-/*}*/
-
-/*@media (prefers-color-scheme: dark) {*/
-/*  select option {*/
-/*    color: var(--color-on-surface-dark);*/
-/*    background: var(--color-surface-dark-alt);*/
-/*  }*/
-/*}*/
+@media (prefers-color-scheme: dark) {
+  select option {
+    color: var(--color-on-surface-dark);
+    background: var(--color-surface-dark-alt);
+  }
+}
 
 .next-page-element {
   display: flex;
