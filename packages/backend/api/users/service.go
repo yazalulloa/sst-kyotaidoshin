@@ -1,6 +1,7 @@
 package users
 
 import (
+	"context"
 	"db/gen/model"
 	"encoding/base64"
 	"encoding/json"
@@ -9,7 +10,17 @@ import (
 	"sync"
 )
 
-func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
+type Service struct {
+	repo Repository
+}
+
+func NewService(ctx context.Context) Service {
+	return Service{
+		repo: NewRepository(ctx),
+	}
+}
+
+func (service Service) getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 	var tableResponse TableResponse
 	var wg sync.WaitGroup
 	wg.Add(3)
@@ -17,7 +28,7 @@ func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 
 	go func() {
 		defer wg.Done()
-		array, err := selectList(requestQuery)
+		array, err := service.repo.selectList(requestQuery)
 		if err != nil {
 			errorChan <- err
 			return
@@ -39,7 +50,7 @@ func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 
 	go func() {
 		defer wg.Done()
-		totalCount, err := getTotalCount()
+		totalCount, err := service.repo.getTotalCount()
 
 		if err != nil {
 			errorChan <- err
@@ -51,7 +62,7 @@ func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 
 	go func() {
 		defer wg.Done()
-		queryCount, err := getQueryCount(requestQuery)
+		queryCount, err := service.repo.getQueryCount(requestQuery)
 		if err != nil {
 			errorChan <- err
 			return
@@ -124,9 +135,9 @@ func toItem(user model.Users, role *model.Roles, oldCardId *string) (*Item, erro
 	}, nil
 }
 
-func deleteRateReturnCounters(id string, requestQuery RequestQuery) (*Counters, error) {
+func (service Service) deleteRateReturnCounters(id string, requestQuery RequestQuery) (*Counters, error) {
 
-	_, err := deleteById(id)
+	_, err := service.repo.deleteById(id)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +157,7 @@ func deleteRateReturnCounters(id string, requestQuery RequestQuery) (*Counters, 
 	wg.Add(2)
 	go func() {
 		defer wg.Done()
-		totalCount, err := getTotalCount()
+		totalCount, err := service.repo.getTotalCount()
 		if err != nil {
 			handleErr(err)
 			return
@@ -156,7 +167,7 @@ func deleteRateReturnCounters(id string, requestQuery RequestQuery) (*Counters, 
 
 	go func() {
 		defer wg.Done()
-		queryCount, err := getQueryCount(requestQuery)
+		queryCount, err := service.repo.getQueryCount(requestQuery)
 		if err != nil {
 			handleErr(err)
 			return
@@ -174,11 +185,11 @@ func deleteRateReturnCounters(id string, requestQuery RequestQuery) (*Counters, 
 
 }
 
-func updateRole(id string, roleId *int32) (int64, error) {
+func (service Service) updateRole(id string, roleId *int32) (int64, error) {
 
 	if roleId == nil {
 		log.Printf("roleId is nil, deleting user role")
-		return deleteUserRole(id, nil)
+		return service.repo.deleteUserRole(id, nil)
 	}
 
 	var wg sync.WaitGroup
@@ -188,7 +199,7 @@ func updateRole(id string, roleId *int32) (int64, error) {
 
 	go func() {
 		defer wg.Done()
-		rowsAffected, err := insertUserRole(id, *roleId)
+		rowsAffected, err := service.repo.insertUserRole(id, *roleId)
 		if err != nil {
 			errorChan <- err
 			return
@@ -199,7 +210,7 @@ func updateRole(id string, roleId *int32) (int64, error) {
 
 	go func() {
 		defer wg.Done()
-		rowsAffected, err := deleteUserRole(id, roleId)
+		rowsAffected, err := service.repo.deleteUserRole(id, roleId)
 		if err != nil {
 			errorChan <- err
 			return
@@ -225,9 +236,9 @@ func updateRole(id string, roleId *int32) (int64, error) {
 	return sum, nil
 }
 
-func getItemWitRole(keys Keys) (*Item, error) {
+func (service Service) getItemWitRole(keys Keys) (*Item, error) {
 
-	user, err := getWitRole(keys.ID)
+	user, err := service.repo.getWitRole(keys.ID)
 
 	if err != nil {
 		return nil, err

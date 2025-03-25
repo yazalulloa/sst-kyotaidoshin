@@ -30,7 +30,9 @@ func search(w http.ResponseWriter, r *http.Request) {
 		SortOrder: util.GetQueryParamAsSortOrderType(r, "sort_order"),
 	}
 
-	response, err := getTableResponse(requestQuery)
+	service := NewService(r.Context())
+
+	response, err := service.getTableResponse(requestQuery)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -74,7 +76,8 @@ func userDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	counters, err := deleteRateReturnCounters(keys.ID, RequestQuery{})
+	service := NewService(r.Context())
+	counters, err := service.deleteRateReturnCounters(keys.ID, RequestQuery{})
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -153,7 +156,8 @@ func userRolePatch(w http.ResponseWriter, r *http.Request) {
 			roleId = &request.RoleId
 		}
 
-		rowsAffected, err := updateRole(keys.ID, roleId)
+		service := NewService(r.Context())
+		rowsAffected, err := service.updateRole(keys.ID, roleId)
 
 		if err != nil {
 			response.errorStr = err.Error()
@@ -162,7 +166,7 @@ func userRolePatch(w http.ResponseWriter, r *http.Request) {
 
 		log.Printf("Updated userRole: %d", rowsAffected)
 
-		item, err := getItemWitRole(keys)
+		item, err := service.getItemWitRole(keys)
 
 		if err != nil {
 			response.errorStr = err.Error()

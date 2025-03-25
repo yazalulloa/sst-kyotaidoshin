@@ -139,7 +139,7 @@ func deleteRateById(id int64) (int64, error) {
 	stmt := Rates.DELETE().WHERE(Rates.ID.EQ(sqlite.Int64(id)))
 	res, err := stmt.Exec(db.GetDB().DB)
 	if err != nil {
-		return 0, nil
+		return 0, err
 	}
 
 	rowsAffected, err := res.RowsAffected()

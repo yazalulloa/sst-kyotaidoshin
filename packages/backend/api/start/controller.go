@@ -71,7 +71,7 @@ func getInit(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		defer wg.Done()
 
-		anUser, err := users.GetByID(userId)
+		anUser, err := users.NewRepository(r.Context()).GetByID(userId)
 		if err != nil {
 			log.Printf("Error getting user: %v", err)
 			errorChan <- err

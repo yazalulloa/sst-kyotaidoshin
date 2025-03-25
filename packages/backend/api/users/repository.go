@@ -1,6 +1,7 @@
 package users
 
 import (
+	"context"
 	"db"
 	"db/gen/model"
 	. "db/gen/table"
@@ -8,12 +9,20 @@ import (
 	"kyotaidoshin/util"
 )
 
-func GetByProvider(provider Provider, providerID string) (*model.Users, error) {
+type Repository struct {
+	ctx context.Context
+}
+
+func NewRepository(ctx context.Context) Repository {
+	return Repository{ctx: ctx}
+}
+
+func (repo Repository) GetByProvider(provider Provider, providerID string) (*model.Users, error) {
 
 	stmt := Users.SELECT(Users.AllColumns).WHERE(Users.Provider.EQ(sqlite.String(provider.Name())).AND(Users.ProviderID.EQ(sqlite.String(providerID))))
 
 	var dest model.Users
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 
 	if err != nil {
 		if util.ErrNoRows.Error() == err.Error() {
@@ -26,11 +35,11 @@ func GetByProvider(provider Provider, providerID string) (*model.Users, error) {
 	return &dest, nil
 }
 
-func Insert(user model.Users) (int64, error) {
+func (repo Repository) Insert(user model.Users) (int64, error) {
 	stmt := Users.INSERT(Users.ID, Users.ProviderID, Users.Provider, Users.Email, Users.Username, Users.Name, Users.Picture, Users.Data).
 		VALUES(user.ID, user.ProviderID, user.Provider, user.Email, user.Username, user.Name, user.Picture, user.Data)
 
-	res, err := stmt.Exec(db.GetDB().DB)
+	res, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}
@@ -43,12 +52,12 @@ func Insert(user model.Users) (int64, error) {
 	return rowsAffected, nil
 }
 
-func UpdateWithLogin(user model.Users) (int64, error) {
+func (repo Repository) UpdateWithLogin(user model.Users) (int64, error) {
 	stmt := Users.UPDATE(Users.LastLoginAt, Users.Email, Users.Username, Users.Name, Users.Picture, Users.Data).
 		SET(sqlite.DATETIME("now"), user.Email, user.Username, user.Name, user.Picture, user.Data).
 		WHERE(Users.ID.EQ(sqlite.String(user.ID)))
 
-	res, err := stmt.Exec(db.GetDB().DB)
+	res, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}
@@ -59,7 +68,7 @@ func UpdateWithLogin(user model.Users) (int64, error) {
 	//	SET(sqlite.DATETIME("now")).
 	//	WHERE(Users.ID.EQ(sqlite.String(id)))
 	//
-	//res, err := stmt.Exec(db.GetDB().DB)
+	//res, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	//if err != nil {
 	//	return 0, err
 	//}
@@ -72,10 +81,10 @@ func UpdateWithLogin(user model.Users) (int64, error) {
 	//return rowsAffected, nil
 }
 
-func GetByID(id string) (*model.Users, error) {
+func (repo Repository) GetByID(id string) (*model.Users, error) {
 	stmt := Users.SELECT(Users.AllColumns).WHERE(Users.ID.EQ(sqlite.String(id)))
 	var dest model.Users
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
@@ -83,11 +92,16 @@ func GetByID(id string) (*model.Users, error) {
 	return &dest, nil
 }
 
-func deleteById(id string) (int64, error) {
-	stmt := Users.DELETE().WHERE(Users.ID.EQ(sqlite.String(id)))
-	res, err := stmt.Exec(db.GetDB().DB)
+func (repo Repository) deleteById(id string) (int64, error) {
+
+	_, err := UserRoles.DELETE().WHERE(UserRoles.UserID.EQ(sqlite.String(id))).ExecContext(repo.ctx, db.GetDB().DB)
 	if err != nil {
-		return 0, nil
+		return 0, err
+	}
+
+	res, err := Users.DELETE().WHERE(Users.ID.EQ(sqlite.String(id))).ExecContext(repo.ctx, db.GetDB().DB)
+	if err != nil {
+		return 0, err
 	}
 
 	rowsAffected, err := res.RowsAffected()
@@ -99,7 +113,7 @@ func deleteById(id string) (int64, error) {
 	return rowsAffected, nil
 }
 
-func getWitRole(id string) (*struct {
+func (repo Repository) getWitRole(id string) (*struct {
 	model.Users
 	Role *model.Roles
 }, error) {
@@ -112,7 +126,7 @@ func getWitRole(id string) (*struct {
 		model.Users
 		Role *model.Roles
 	}
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +134,7 @@ func getWitRole(id string) (*struct {
 	return &dest, nil
 }
 
-func selectList(requestQuery RequestQuery) ([]struct {
+func (repo Repository) selectList(requestQuery RequestQuery) ([]struct {
 	model.Users
 	Role *model.Roles
 }, error) {
@@ -148,7 +162,7 @@ func selectList(requestQuery RequestQuery) ([]struct {
 		stmt = stmt.ORDER_BY(Users.ID.DESC())
 	}
 
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
@@ -157,27 +171,27 @@ func selectList(requestQuery RequestQuery) ([]struct {
 
 }
 
-func getTotalCount() (int64, error) {
+func (repo Repository) getTotalCount() (int64, error) {
 	var dest struct {
 		Count int64
 	}
-	err := Users.SELECT(sqlite.COUNT(sqlite.STAR).AS("Count")).FROM(Users).Query(db.GetDB().DB, &dest)
+	err := Users.SELECT(sqlite.COUNT(sqlite.STAR).AS("Count")).FROM(Users).QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return 0, err
 	}
 	return dest.Count, nil
 }
 
-func getQueryCount(requestQuery RequestQuery) (*int64, error) {
+func (repo Repository) getQueryCount(requestQuery RequestQuery) (*int64, error) {
 	return nil, nil
 }
 
-func insertUserRole(id string, roleId int32) (int64, error) {
+func (repo Repository) insertUserRole(id string, roleId int32) (int64, error) {
 
 	stmt := UserRoles.INSERT(UserRoles.UserID, UserRoles.RoleID).
 		ON_CONFLICT().DO_NOTHING().VALUES(id, roleId)
 
-	res, err := stmt.Exec(db.GetDB().DB)
+	res, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}
@@ -185,7 +199,7 @@ func insertUserRole(id string, roleId int32) (int64, error) {
 	return res.RowsAffected()
 }
 
-func deleteUserRole(id string, roleId *int32) (int64, error) {
+func (repo Repository) deleteUserRole(id string, roleId *int32) (int64, error) {
 	condition := UserRoles.UserID.EQ(sqlite.String(id))
 	if roleId != nil {
 		condition = condition.AND(UserRoles.RoleID.NOT_EQ(sqlite.Int32(*roleId)))
@@ -194,7 +208,7 @@ func deleteUserRole(id string, roleId *int32) (int64, error) {
 
 	stmt := UserRoles.DELETE().WHERE(condition)
 
-	res, err := stmt.Exec(db.GetDB().DB)
+	res, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}

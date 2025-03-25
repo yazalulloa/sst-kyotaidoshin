@@ -40,7 +40,9 @@ func googleUserInfo(ctx context.Context, input Input) (*UserInfo, error) {
 		Data:       string(jsonByte),
 	}
 
-	user, err := users.GetByProvider(users.GOOGLE, providerId)
+	userRepo := users.NewRepository(ctx)
+
+	user, err := userRepo.GetByProvider(users.GOOGLE, providerId)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +50,7 @@ func googleUserInfo(ctx context.Context, input Input) (*UserInfo, error) {
 	if user != nil {
 		newUser.ID = user.ID
 
-		_, err = users.UpdateWithLogin(newUser)
+		_, err = userRepo.UpdateWithLogin(newUser)
 		if err != nil {
 			return nil, err
 		}
@@ -66,7 +68,7 @@ func googleUserInfo(ctx context.Context, input Input) (*UserInfo, error) {
 	newId := id.String()
 	newUser.ID = newId
 
-	_, err = users.Insert(newUser)
+	_, err = userRepo.Insert(newUser)
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"db/gen/model"
 	"encoding/json"
 	"fmt"
@@ -123,7 +124,7 @@ type Email struct {
 	Visibility string `json:"visibility"`
 }
 
-func githubUserInfo(input Input) (*UserInfo, error) {
+func githubUserInfo(ctx context.Context, input Input) (*UserInfo, error) {
 	httpClient := &http.Client{
 		Timeout: time.Minute * 7,
 	}
@@ -263,7 +264,9 @@ func githubUserInfo(input Input) (*UserInfo, error) {
 
 	providerId := fmt.Sprint(publicUser.ID)
 
-	user, err := users.GetByProvider(users.GITHUB, providerId)
+	userRepo := users.NewRepository(ctx)
+
+	user, err := userRepo.GetByProvider(users.GITHUB, providerId)
 	if err != nil {
 		return nil, err
 	}
@@ -286,7 +289,7 @@ func githubUserInfo(input Input) (*UserInfo, error) {
 	if user != nil {
 		newUser.ID = user.ID
 
-		_, err = users.UpdateWithLogin(newUser)
+		_, err = userRepo.UpdateWithLogin(newUser)
 		if err != nil {
 			return nil, err
 		}
@@ -304,7 +307,7 @@ func githubUserInfo(input Input) (*UserInfo, error) {
 	newId := id.String()
 	newUser.ID = newId
 
-	_, err = users.Insert(newUser)
+	_, err = userRepo.Insert(newUser)
 	if err != nil {
 		return nil, err
 	}
