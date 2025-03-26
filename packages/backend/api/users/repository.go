@@ -94,12 +94,14 @@ func (repo Repository) GetByID(id string) (*model.Users, error) {
 
 func (repo Repository) deleteById(id string) (int64, error) {
 
-	_, err := UserRoles.DELETE().WHERE(UserRoles.UserID.EQ(sqlite.String(id))).ExecContext(repo.ctx, db.GetDB().DB)
+	DB := db.GetDB().DB
+
+	_, err := UserRoles.DELETE().WHERE(UserRoles.UserID.EQ(sqlite.String(id))).ExecContext(repo.ctx, DB)
 	if err != nil {
 		return 0, err
 	}
 
-	res, err := Users.DELETE().WHERE(Users.ID.EQ(sqlite.String(id))).ExecContext(repo.ctx, db.GetDB().DB)
+	res, err := Users.DELETE().WHERE(Users.ID.EQ(sqlite.String(id))).ExecContext(repo.ctx, DB)
 	if err != nil {
 		return 0, err
 	}

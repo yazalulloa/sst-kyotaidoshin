@@ -46,7 +46,7 @@
         data-change-event="update-receipts">
 
       <div hidden="hidden"
-           hx-get="/isr/v2/receipts/buildings.html"
+           x-bind:hx-get="withIsrPrefix('/receipts/buildings.html')"
            hx-trigger="load"
            hx-swap="outerHTML">
       </div>
@@ -82,7 +82,7 @@
   }"
     >
 
-      <div hx-get="/isr/v2/receipts/years.html"
+      <div x-bind:hx-get="withIsrPrefix('/receipts/years.html')"
            hx-trigger="load"
            hx-swap="outerHTML"
            hidden="hidden">

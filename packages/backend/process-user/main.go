@@ -17,7 +17,7 @@ func handler(ctx context.Context, input Input) (*UserInfo, error) {
 	userInfo, err := func() (*UserInfo, error) {
 		switch input.Provider {
 		case "github":
-			return githubUserInfo(input)
+			return githubUserInfo(ctx, input)
 		case "google":
 			return googleUserInfo(ctx, input)
 		default:

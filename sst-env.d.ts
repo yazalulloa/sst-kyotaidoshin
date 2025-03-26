@@ -109,6 +109,7 @@ declare module "sst" {
     }
     "WebApp": {
       "type": "sst.aws.StaticSite"
+      "url": string
     }
     "WebAssetsBucket": {
       "name": string

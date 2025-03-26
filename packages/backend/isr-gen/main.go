@@ -17,5 +17,6 @@ func handler(ctx context.Context, event interface{}) (string, error) {
 }
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Llongfile)
 	lambda.Start(handler)
 }

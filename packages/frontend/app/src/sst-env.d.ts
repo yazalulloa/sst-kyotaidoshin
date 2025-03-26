@@ -5,6 +5,7 @@
 interface ImportMetaEnv {
   readonly VITE_VAR_ENV: string
   readonly VITE_IS_DEV: string
+  readonly VITE_ISR_PREFIX: string
 }
 interface ImportMeta {
   readonly env: ImportMetaEnv

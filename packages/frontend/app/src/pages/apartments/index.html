@@ -5,7 +5,7 @@
        x-data="{
   buildings: []
   }">
-    <div class="flex flex-row gap-2 justify-center min-w-[8rem]"
+    <div class="flex flex-row gap-2 justify-center min-w-[9rem]"
          x-data="{
    total: null,
    query: null
@@ -25,12 +25,6 @@
         sendEvent('apartments-updater', 'update-apartments');
       }
     </script>
-
-    <div hx-get="/isr/v2/apartments/buildings.html"
-         hx-trigger="load"
-         hx-swap="outerHTML"
-         hidden="hidden">
-    </div>
 
     <div x-show="hasPerm('apartments:upload_backup')"
          x-data="{
@@ -100,6 +94,12 @@
          hx-swap="innerHTML"
          hx-sync="this:replace"
          hx-indicator=".htmx-indicator">
+    </div>
+
+    <div x-bind:hx-get="withIsrPrefix('/apartments/buildings.html')"
+         hx-trigger="load"
+         hx-swap="outerHTML"
+         hidden="hidden">
     </div>
   </div>
 

@@ -83,9 +83,14 @@ export default $config({
       access: "cloudfront",
     });
 
+    const isrPrefix = "isr/v6"
+
     const isrGenFunction = new sst.aws.Function("IsrGenFunction", {
       url: true,
       link: [webAssetsBucket, secretTursoUrl],
+      environment: {
+        ISR_PREFIX: isrPrefix
+      },
       handler: "packages/backend/isr-gen/",
       runtime: "go",
     });
@@ -224,6 +229,9 @@ export default $config({
         webAssetsBucket,
         isrGenFunction,
       ],
+      environment: {
+        ISR_PREFIX: isrPrefix
+      },
       timeout: "60 seconds",
       permissions: [
         {
@@ -248,6 +256,7 @@ export default $config({
         // Accessible in the browser
         VITE_VAR_ENV: `https://${apiDomain}`,
         VITE_IS_DEV: isLocal.toString(),
+        VITE_ISR_PREFIX: isrPrefix
       },
       build: {
         command: "bun run build",
@@ -257,18 +266,18 @@ export default $config({
         bucket: webAssetsBucket.name,
         fileOptions: [
           {
-            files: ["**/*"],
-            ignore: "index.html",
-            cacheControl: "public, max-age=21600, immutable",
-          },
-          {
             files: "index.html",
             cacheControl: "max-age=0,no-cache,no-store,must-revalidate",
           },
           {
-            files: "^isr(/.*)?$",
+            files: "isr/**/*",
             cacheControl: "max-age=0,no-cache,no-store,must-revalidate",
-          }
+          },
+          {
+            files: ["**/*"],
+            ignore: ["index.html", "isr/**/*"],
+            cacheControl: "public,max-age=21600,immutable",
+          },
           // {
           //   files: "**/*.html",
           //   cacheControl: "max-age=0,no-cache,no-store,must-revalidate"

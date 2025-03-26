@@ -11,18 +11,18 @@
     "@alpinejs/collapse": "^3.14.9",
     "@alpinejs/focus": "^3.14.9",
     "@alpinejs/mask": "^3.14.9",
-    "@tailwindcss/vite": "^4.0.16",
+    "@tailwindcss/vite": "^4.0.17",
     "alpinejs": "^3.14.9",
     "alpinejs-i18n": "^2.5.3",
     "external-svg-loader": "^1.7.1",
     "htmx.org": "2.0.4",
     "pinecone-router": "^5.5.0",
-    "tailwindcss": "^4.0.16",
+    "tailwindcss": "^4.0.17",
     "vite": "^6.2.3"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.16",
-    "sst": "^3.10.11",
+    "sst": "3.9.44",
     "vite-plugin-handlebars": "^2.0.0"
   }
 }

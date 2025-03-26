@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/sst/sst/v3/sdk/golang/resource"
 	"log"
+	"os"
 	"strings"
 )
 
@@ -60,7 +61,7 @@ func putInBucket(ctx context.Context, objectKey string, component templ.Componen
 	contentLength := int64(buf.Len())
 	_, err = s3Client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:            aws.String(bucket.(string)),
-		Key:               aws.String(objectKey),
+		Key:               aws.String(os.Getenv("ISR_PREFIX") + objectKey),
 		Body:              &buf,
 		ChecksumAlgorithm: types.ChecksumAlgorithmCrc64nvme,
 		//ChecksumCRC32:             nil,
@@ -70,7 +71,8 @@ func putInBucket(ctx context.Context, objectKey string, component templ.Componen
 		ContentLength: &contentLength,
 		ContentType:   aws.String("text/html;charset=UTF-8"),
 		CacheControl:  aws.String("public,max-age=0,s-maxage=0,must-revalidate"),
-		//CacheControl:  aws.String("max-age=0,no-cache,no-store,must-revalidate"), Works but no 304
+		//CacheControl: aws.String("public,max-age=0,must-revalidate"),
+		//CacheControl: aws.String("max-age=0,no-cache,no-store,must-revalidate"), //Works but no 304
 	})
 
 	if err != nil {
@@ -85,6 +87,8 @@ func getObject(ctx context.Context, objectKey string, putIfNotExists func(ctx co
 	if err != nil {
 		return nil, err
 	}
+
+	objectKey = os.Getenv("ISR_PREFIX") + objectKey
 
 	exists, err := aws_h.FileExistsS3(ctx, bucket.(string), objectKey)
 	if err != nil {
@@ -113,7 +117,7 @@ func getObject(ctx context.Context, objectKey string, putIfNotExists func(ctx co
 	return data, nil
 }
 
-const ratesCurrenciesObjectKey = "isr/v2/rates/currencies.html"
+const ratesCurrenciesObjectKey = "/rates/currencies.html"
 
 func GetRatesCurrencies(ctx context.Context) ([]byte, error) {
 
@@ -129,7 +133,7 @@ func UpdateRatesCurrencies(ctx context.Context) error {
 	return putInBucket(ctx, ratesCurrenciesObjectKey, component)
 }
 
-const receiptsBuildingsObjectKey = "isr/v2/receipts/buildings.html"
+const receiptsBuildingsObjectKey = "/receipts/buildings.html"
 
 func GetReceiptsBuildings(ctx context.Context) ([]byte, error) {
 
@@ -146,7 +150,7 @@ func updateReceiptsBuildings(ctx context.Context) error {
 	return putInBucket(ctx, receiptsBuildingsObjectKey, component)
 }
 
-const receiptsYearsObjectKey = "isr/v2/receipts/years.html"
+const receiptsYearsObjectKey = "/receipts/years.html"
 
 func GetReceiptsYears(ctx context.Context) ([]byte, error) {
 	return getObject(ctx, receiptsYearsObjectKey, updateReceiptsYears)
@@ -173,7 +177,7 @@ func updateReceiptsYears(ctx context.Context) error {
 	return putInBucket(ctx, receiptsYearsObjectKey, XInitView(builder.String()))
 }
 
-const apartmentsBuildingsObjectKey = "isr/v2/apartments/buildings.html"
+const apartmentsBuildingsObjectKey = "/apartments/buildings.html"
 
 func GetApartmentsBuildings(ctx context.Context) ([]byte, error) {
 	return getObject(ctx, apartmentsBuildingsObjectKey, updateApartmentsBuildings)

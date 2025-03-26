@@ -56,11 +56,16 @@ window.addEventListener("popstate", (event) => {
   window.location.reload();
 });
 
+window.withIsrPrefix = function (path) {
+  return "/" + import.meta.env.VITE_ISR_PREFIX + path;
+}
+
 document.body.addEventListener('htmx:configRequest', function (evt) {
 
   if (isDev) {
-    if (evt.detail.path.includes("/isr/")) {
-      evt.detail.path = evt.detail.path.replace("/isr/", "/api/");
+    if (evt.detail.path.includes(import.meta.env.VITE_ISR_PREFIX)) {
+      evt.detail.path = evt.detail.path.replace(import.meta.env.VITE_ISR_PREFIX,
+          "api/isr");
     }
   }
 

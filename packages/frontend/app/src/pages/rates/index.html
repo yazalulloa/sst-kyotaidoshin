@@ -23,7 +23,7 @@
   }"
   >
 
-    <div hx-get="/isr/v2/rates/currencies.html"
+    <div x-bind:hx-get="withIsrPrefix('/rates/currencies.html')"
          hx-trigger="load"
          hx-swap="outerHTML"
          hidden="hidden">
@@ -74,7 +74,8 @@
 </div>
 
 <div id="container" hx-swap-oob="true">
-  <ul id="rates-table" class="flex flex-col gap-1 p-1 *:md:grid *:flex *:flex-row *:flex-wrap *:gap-4 *:justify-between *:items-center">
+  <ul id="rates-table"
+      class="flex flex-col gap-1 p-1 *:md:grid *:flex *:flex-row *:flex-wrap *:gap-4 *:justify-between *:items-center">
 
   </ul>
 
