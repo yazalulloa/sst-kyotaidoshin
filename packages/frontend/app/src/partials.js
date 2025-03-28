@@ -35,6 +35,7 @@ import aptSendDialogPartialUrl from './pages/receipts/aptSendDialog.html?url'
 import permissionsIndexPartialUrl from './pages/permissions/index.html?url'
 import rolesIndexPartialUrl from './pages/roles/index.html?url'
 import rolesFormPartialUrl from './pages/roles/formDialog.html?url'
+import adminIndexPartialUrl from './pages/admin/index.html?url'
 import toastPartialUrl from './pages/partials/toast.html?url'
 
 window.backBtnPartialUrl = backBtnPartialUrl;
@@ -70,6 +71,7 @@ window.permissionsIndexPartialUrl = permissionsIndexPartialUrl;
 window.rolesIndexPartialUrl = rolesIndexPartialUrl;
 window.rolesFormPartialUrl = rolesFormPartialUrl;
 window.toastPartialUrl = toastPartialUrl;
+window.adminIndexPartialUrl = adminIndexPartialUrl;
 
 window.NAV_URLS = new Map([
   ['nav-apartments', apartmentsIndexPartialUrl],
@@ -84,6 +86,7 @@ window.NAV_URLS = new Map([
   ['nav-users', usersIndexPartialUrl],
   ['nav-permissions', permissionsIndexPartialUrl],
   ['nav-roles', rolesIndexPartialUrl],
+  ['nav-admin', adminIndexPartialUrl],
 ])
 
 document.addEventListener("DOMContentLoaded", function () {

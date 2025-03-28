@@ -413,6 +413,7 @@ window.NAV_TITLES = new Map([
   ['nav-bcv-files', 'main-title-bcv-files'],
   ['nav-permissions', 'main-title-permissions'],
   ['nav-roles', 'main-title-roles'],
+  ['nav-admin', 'main-title-admin'],
 ]);
 
 window.Alpine = Alpine

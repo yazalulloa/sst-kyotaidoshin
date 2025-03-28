@@ -20,6 +20,7 @@ import (
 	"kyotaidoshin/reserveFundsApi"
 	"kyotaidoshin/roles"
 	"kyotaidoshin/start"
+	"kyotaidoshin/telegram_api"
 	"kyotaidoshin/users"
 	"kyotaidoshin/util"
 	"log"
@@ -81,6 +82,7 @@ func router() http.Handler {
 	permissions.Routes(holder)
 	roles.Routes(holder)
 	isr.Routes(holder)
+	telegram_api.Routes(holder)
 
 	//newRouter.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	//

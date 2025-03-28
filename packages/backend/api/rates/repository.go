@@ -203,3 +203,21 @@ func GetFromDate(fromCurrency string, date time.Time, limit int64, isLt bool) ([
 	return dest, nil
 
 }
+
+func LastRate(fromCurrency string) (model.Rates, error) {
+	stmt := Rates.SELECT(Rates.AllColumns).FROM(Rates).
+		WHERE(Rates.FromCurrency.EQ(sqlite.String(fromCurrency))).
+		ORDER_BY(Rates.ID.DESC()).LIMIT(1)
+
+	var dest []model.Rates
+	err := stmt.Query(db.GetDB().DB, &dest)
+	if err != nil {
+		return model.Rates{}, err
+	}
+
+	if len(dest) == 0 {
+		return model.Rates{}, util.ErrNoRows
+	}
+
+	return dest[0], nil
+}

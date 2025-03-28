@@ -63,22 +63,6 @@ func (repo Repository) UpdateWithLogin(user model.Users) (int64, error) {
 	}
 
 	return res.RowsAffected()
-
-	//stmt := Users.UPDATE(Users.LastLoginAt).
-	//	SET(sqlite.DATETIME("now")).
-	//	WHERE(Users.ID.EQ(sqlite.String(id)))
-	//
-	//res, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
-	//if err != nil {
-	//	return 0, err
-	//}
-	//
-	//rowsAffected, err := res.RowsAffected()
-	//if err != nil {
-	//	return 0, err
-	//}
-	//
-	//return rowsAffected, nil
 }
 
 func (repo Repository) GetByID(id string) (*model.Users, error) {
@@ -97,6 +81,11 @@ func (repo Repository) deleteById(id string) (int64, error) {
 	DB := db.GetDB().DB
 
 	_, err := UserRoles.DELETE().WHERE(UserRoles.UserID.EQ(sqlite.String(id))).ExecContext(repo.ctx, DB)
+	if err != nil {
+		return 0, err
+	}
+
+	_, err = TelegramChats.DELETE().WHERE(TelegramChats.UserID.EQ(sqlite.String(id))).ExecContext(repo.ctx, DB)
 	if err != nil {
 		return 0, err
 	}
@@ -138,6 +127,7 @@ func (repo Repository) getWitRole(id string) (*struct {
 
 func (repo Repository) selectList(requestQuery RequestQuery) ([]struct {
 	model.Users
+	Chat *model.TelegramChats
 	Role *model.Roles
 }, error) {
 	condition := sqlite.Bool(true)
@@ -146,15 +136,17 @@ func (repo Repository) selectList(requestQuery RequestQuery) ([]struct {
 		condition = condition.AND(Users.ID.GT_EQ(sqlite.String(requestQuery.LastId)))
 	}
 
-	stmt := Users.SELECT(Users.AllColumns, Roles.AllColumns).
+	stmt := Users.SELECT(Users.AllColumns, Roles.AllColumns, TelegramChats.AllColumns).
 		FROM(
 			Users.LEFT_JOIN(UserRoles, Users.ID.EQ(UserRoles.UserID)).
-				LEFT_JOIN(Roles, UserRoles.RoleID.EQ(Roles.ID)),
+				LEFT_JOIN(Roles, UserRoles.RoleID.EQ(Roles.ID)).
+				LEFT_JOIN(TelegramChats, Users.ID.EQ(TelegramChats.UserID)),
 		).
 		WHERE(condition).LIMIT(int64(requestQuery.Limit))
 
 	var dest []struct {
 		model.Users
+		Chat *model.TelegramChats
 		Role *model.Roles
 	}
 
@@ -217,4 +209,24 @@ func (repo Repository) deleteUserRole(id string, roleId *int32) (int64, error) {
 
 	return res.RowsAffected()
 
+}
+
+func (repo Repository) UpdateTelegramChat(id string, chatId int64, username, firstName, lastName string) (int64, error) {
+
+	stmt := TelegramChats.INSERT(TelegramChats.ChatID, TelegramChats.UserID, TelegramChats.Username, TelegramChats.FirstName, TelegramChats.LastName).
+		ON_CONFLICT().
+		DO_UPDATE(
+			sqlite.SET(
+				TelegramChats.Username.SET(sqlite.String(username)),
+				TelegramChats.FirstName.SET(sqlite.String(firstName)),
+				TelegramChats.LastName.SET(sqlite.String(lastName)),
+			),
+		).VALUES(chatId, id, username, firstName, lastName)
+
+	res, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
+	if err != nil {
+		return 0, err
+	}
+
+	return res.RowsAffected()
 }

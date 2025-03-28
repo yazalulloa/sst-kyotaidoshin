@@ -38,6 +38,12 @@ templ ItemView(item Item) {
 			if item.Item.Name != item.Item.Username {
 				<span>{ item.Item.Name }</span>
 			}
+			if item.Chat != nil && item.Chat.Username != nil {
+				<div class="flex flex-row gap-2 justify-center items-center text-center">
+					<svg x-bind:data-src="telegramIconUrl" class="h-4 w-4"></svg>
+					<span>{ *item.Chat.Username }</span>
+				</div>
+			}
 		</div>
 		<div>
 			<span x-text="$t('main-title-role')"></span>

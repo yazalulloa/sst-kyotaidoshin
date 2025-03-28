@@ -43,6 +43,8 @@ const (
 
 	ROLES_READ  PERM = "roles:read"
 	ROLES_WRITE PERM = "roles:write"
+
+	ADMIN PERM = "admin:admin"
 )
 
 func All() []PERM {
@@ -56,6 +58,7 @@ func All() []PERM {
 		AllBcvFiles(),
 		AllPermissions(),
 		AllRoles(),
+		AllAdmin(),
 	)
 }
 
@@ -122,6 +125,12 @@ func AllRoles() []PERM {
 	}
 }
 
+func AllAdmin() []PERM {
+	return []PERM{
+		ADMIN,
+	}
+}
+
 type WithLabel struct {
 	Label string
 	Perms []PERM
@@ -160,6 +169,10 @@ func WithLabels() []WithLabel {
 		{
 			Label: "roles",
 			Perms: AllRoles(),
+		},
+		{
+			Label: "admin",
+			Perms: AllAdmin(),
 		},
 	}
 }

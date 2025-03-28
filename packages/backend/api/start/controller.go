@@ -39,17 +39,6 @@ func getInit(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		defer wg.Done()
 
-		if false {
-			dest = make([]model.Permissions, 0)
-			for _, p := range api.All() {
-				dest = append(dest, model.Permissions{
-					Name: p.Name(),
-				})
-			}
-
-			return
-		}
-
 		stmt := Permissions.SELECT(Permissions.AllColumns).
 			FROM(
 				Users.INNER_JOIN(UserRoles, Users.ID.EQ(UserRoles.UserID)).
@@ -183,6 +172,13 @@ func getInit(w http.ResponseWriter, r *http.Request) {
 				Path: "/roles",
 			})
 			break
+		case api.ADMIN.Name():
+			pages = append(pages, Page{
+				Id:   "nav-admin",
+				Path: "/admin",
+			})
+			break
+
 		}
 	}
 

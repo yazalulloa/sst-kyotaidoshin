@@ -21,6 +21,7 @@ func UseSchema(schema string) {
 	ReserveFunds = ReserveFunds.FromSchema(schema)
 	RolePermissions = RolePermissions.FromSchema(schema)
 	Roles = Roles.FromSchema(schema)
+	TelegramChats = TelegramChats.FromSchema(schema)
 	UserRoles = UserRoles.FromSchema(schema)
 	Users = Users.FromSchema(schema)
 }

@@ -37,6 +37,8 @@ export default $config({
     const mailerConfigsSecret = new sst.Secret("MailerConfigs");
     const altEmailsRecipientSecret = new sst.Secret("AltEmailsRecipient", "");
     const htmlToPdfFunction = new sst.Secret("HtmlToPdfFunction")
+    const telegramBotToken = new sst.Secret("TelegramBotToken")
+    const telegramBotApiKey = new sst.Secret("TelegramBotApiKey")
 
     const processUserFunction = new sst.aws.Function("ProcessUser", {
       link: [secretTursoUrl],
@@ -164,13 +166,12 @@ export default $config({
       },
     });
 
-    const telegramWebhook = new sst.aws.ApiGatewayV1("TelegramWebhook")
-    telegramWebhook.route("POST /", {
-      runtime: "go",
+    const telegramWebhookFunction = new sst.aws.Function("TelegramWebhookFunction", {
+      url: true,
+      link: [telegramBotToken, telegramBotApiKey, secretTursoUrl],
       handler: "packages/backend/telegram-webhook/",
+      runtime: "go",
     })
-
-    telegramWebhook.deploy()
 
     const verifyAccessFunction = new sst.aws.Function("VerifyAccess", {
       link: [appClientId, auth],
@@ -228,6 +229,9 @@ export default $config({
         htmlToPdfFunction,
         webAssetsBucket,
         isrGenFunction,
+        telegramBotToken,
+        telegramBotApiKey,
+        telegramWebhookFunction,
       ],
       environment: {
         ISR_PREFIX: isrPrefix
@@ -264,6 +268,7 @@ export default $config({
       },
       assets: {
         bucket: webAssetsBucket.name,
+        routes: ["isr"],
         fileOptions: [
           {
             files: "index.html",

@@ -1,0 +1,61 @@
+<div id="header-container" hx-swap-oob="true" class="flex flex-row items-center gap-2 text-center">
+
+  <button hx-get="/api/telegram/start"
+          hx-trigger="mousedown"
+          hx-target="#default-anchor"
+          hx-swap="innerHTML"
+          hx-disabled-elt="this"
+          hx-indicator=".htmx-indicator"
+          type="button"
+  >
+    <svg x-bind:data-src="telegramIconUrl" class="h-6 w-6"></svg>
+  </button>
+
+</div>
+
+<div id="container" hx-swap-oob="true" class="p-4">
+
+  <div class="flex flex-col gap-2">
+    <div class="flex flex-row gap-2">
+      <h2 class="heading-2 font-bold underline mb-2 scroll-mt-20 font-merriweather">Telegram</h2>
+      <svg x-bind:data-src="telegramIconUrl" class="h-6 w-6"></svg>
+    </div>
+
+    <div class="flex flex-row gap-2">
+      <button x-show="hasPerm('admin:admin')"
+              hx-post="/api/telegram/webhook"
+              hx-trigger="mousedown"
+              hx-swap="none"
+              hx-disabled-elt="this"
+              hx-indicator=".htmx-indicator"
+              type="button"
+              class="inline-flex w-fit items-center justify-between gap-2 whitespace-nowrap border px-4 py-2 text-sm font-medium tracking-wide transition border-outline bg-surface-alt text-on-surface rounded-radius hover:opacity-75 focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark"
+              x-text="$t('main-action-set-webhook')">
+      </button>
+
+      <button x-show="hasPerm('admin:admin')"
+              hx-delete="/api/telegram/webhook"
+              hx-trigger="mousedown"
+              hx-swap="none"
+              hx-disabled-elt="this"
+              hx-indicator=".htmx-indicator"
+              type="button"
+              class="inline-flex w-fit items-center justify-between gap-2 whitespace-nowrap border px-4 py-2 text-sm font-medium tracking-wide transition border-outline bg-surface-alt text-on-surface rounded-radius hover:opacity-75 focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark"
+              x-text="$t('main-action-delete-webhook')">
+      </button>
+    </div>
+
+    <div hx-get="/api/telegram/info"
+         hx-disabled-elt="this"
+         hx-trigger="load, every 2s"
+         hx-swap="innerHTML"
+         class="text-start"
+    >
+      <svg x-bind:data-src="loadingIconUrl"
+           class="size-7 motion-safe:animate-spin fill-primary dark:fill-primary-dark"></svg>
+    </div>
+
+  </div>
+
+
+</div>

@@ -40,6 +40,7 @@ type Item struct {
 	Key          string
 	Item         model.Users
 	Role         *model.Roles
+	Chat         *model.TelegramChats
 	CreatedAt    int64
 	LastLoginAt  int64
 	isUpdate     bool

@@ -36,7 +36,7 @@ func (service Service) getTableResponse(requestQuery RequestQuery) (*TableRespon
 
 		results := make([]Item, len(array))
 		for i, item := range array {
-			obj, err := toItem(item.Users, item.Role, nil)
+			obj, err := toItem(item.Users, item.Role, item.Chat, nil)
 			if err != nil {
 				errorChan <- err
 				return
@@ -84,7 +84,7 @@ func (service Service) getTableResponse(requestQuery RequestQuery) (*TableRespon
 	return &tableResponse, nil
 }
 
-func toItem(user model.Users, role *model.Roles, oldCardId *string) (*Item, error) {
+func toItem(user model.Users, role *model.Roles, chat *model.TelegramChats, oldCardId *string) (*Item, error) {
 
 	var cardIdStr string
 	if oldCardId != nil {
@@ -129,6 +129,7 @@ func toItem(user model.Users, role *model.Roles, oldCardId *string) (*Item, erro
 		Key:          key,
 		Item:         user,
 		Role:         role,
+		Chat:         chat,
 		UpdateParams: &updateParams,
 		CreatedAt:    user.CreatedAt.UnixMilli(),
 		LastLoginAt:  lastLoginAt,
@@ -244,5 +245,5 @@ func (service Service) getItemWitRole(keys Keys) (*Item, error) {
 		return nil, err
 	}
 
-	return toItem(user.Users, user.Role, &keys.CardId)
+	return toItem(user.Users, user.Role, nil, &keys.CardId)
 }

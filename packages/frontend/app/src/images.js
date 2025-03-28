@@ -20,6 +20,7 @@ import sendMailIconUrl from './assets/images/send-mail.svg?no-inline'
 import duplicateIconUrl from './assets/images/duplicate.svg?no-inline'
 import permissionsIconUrl from './assets/images/permissions-icon.svg?no-inline'
 import usersIconUrl from './assets/images/users.svg?no-inline'
+import telegramIconUrl from './assets/images/telegram_logo.svg?no-inline'
 
 window.deleteIconUrl = deleteIconUrl;
 window.processIconUrl = processIconUrl;
@@ -45,6 +46,7 @@ window.apartmentsIconUrl = apartmentsIconUrl;
 
 window.permissionsIconUrl = permissionsIconUrl;
 window.usersIconUrl = usersIconUrl;
+window.telegramIconUrl = telegramIconUrl;
 
 window.NAV_ICONS = new Map([
   ['nav-apartments', apartmentsIconUrl],
@@ -54,6 +56,6 @@ window.NAV_ICONS = new Map([
   ['nav-users', usersIconUrl],
   ['nav-bcv-files', bucketIconUrl],
   ['nav-permissions', permissionsIconUrl],
-  ['nav-roles', permissionsIconUrl]
-
+  ['nav-roles', permissionsIconUrl],
+  ['nav-admin', permissionsIconUrl],
 ]);

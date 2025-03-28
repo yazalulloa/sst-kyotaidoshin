@@ -125,9 +125,7 @@ type Email struct {
 }
 
 func githubUserInfo(ctx context.Context, input Input) (*UserInfo, error) {
-	httpClient := &http.Client{
-		Timeout: time.Minute * 7,
-	}
+	httpClient := util.GetHttpClient()
 
 	var wg sync.WaitGroup
 	wg.Add(2)
