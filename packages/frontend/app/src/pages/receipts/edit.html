@@ -1,5 +1,5 @@
 <div id="header-container" hx-swap-oob="true"
-     class="flex flex-row justify-start items-center text-center gap-4"
+     class="flex flex-row justify-start items-center text-center gap-4 fade-me-out fade-me-in"
      x-data="{
        key: getLastPathSegment()
        }">
@@ -44,7 +44,7 @@
   </a>
 </div>
 
-<div id="container" class="" hx-swap-oob="true">
+<div id="container" class="" hx-swap-oob="true" hx-include="fade-me-out fade-me-in">
   <div x-bind:hx-get="receiptsFormPartialUrl"
        hx-trigger="load"
        hx-swap="outerHTML">
