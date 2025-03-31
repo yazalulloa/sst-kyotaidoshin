@@ -419,13 +419,6 @@ func parseDebts(rows *[][]string) ([]model.Debts, error) {
 						}
 					}
 				}
-				//
-				//location, err := time.LoadLocation("America/Caracas")
-				//if err != nil {
-				//	return nil, err
-				//}
-				//
-				//now := time.Now().In(location)
 
 				if len(months) > 0 {
 					years = append(years, debts.YearWithMonths{

@@ -66,7 +66,7 @@
        x-effect="$dispatch('event-receipt-tab-selected', { selected })">
 
     <div x-on:keydown.right.prevent="$focus.wrap().next()" x-on:keydown.left.prevent="$focus.wrap().previous()"
-         class="flex gap-2 overflow-x-auto border-b border-outline dark:border-outline-dark" role="tablist"
+         class="flex gap-2 overflow-x-auto border-b border-outline dark:border-outline-dark hide-scrollbar" role="tablist"
          aria-label="tab options">
 
       <template x-for="tab in tabs">
@@ -84,7 +84,7 @@
   </div>
 </div>
 
-<div id="container" class="fade-me-out fade-me-in" hx-swap-oob="true"
+<div id="container" class="fade-me-out fade-me-in p-1 overflow-x-auto whitespace-nowrap w-full inline-block" hx-swap-oob="true"
      x-data="{
        selected: ''
        }"

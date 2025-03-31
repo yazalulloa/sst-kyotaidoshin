@@ -205,7 +205,7 @@ func GetParts(receipt *CalculatedReceipt, ctx context.Context, isPdf bool, keys 
 		parts = append(parts, PartInfoUpload{
 			FileName:  fmt.Sprintf("%s.%s", receipt.Building.ID, suffix),
 			ObjectKey: buildObjectKey(receipt.Building.ID),
-			Component: PrintViewV2(receipt.Building.ID, BuildingViewV2(*receipt)),
+			Component: PrintView(receipt.Building.ID, BuildingView(*receipt)),
 		})
 	}
 
@@ -215,7 +215,7 @@ func GetParts(receipt *CalculatedReceipt, ctx context.Context, isPdf bool, keys 
 				parts = append(parts, PartInfoUpload{
 					FileName:  fmt.Sprintf("%s.%s", apt.Apartment.Number, suffix),
 					ObjectKey: buildObjectKey(apt.Apartment.Number),
-					Component: PrintViewV2(apt.Apartment.Number, AptViewV2(*receipt, apt)),
+					Component: PrintView(apt.Apartment.Number, AptView(*receipt, apt)),
 					Apt:       apt.Apartment,
 				})
 			}

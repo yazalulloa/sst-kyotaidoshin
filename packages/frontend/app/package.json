@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.16",
-    "sst": "^3.11.10",
+    "sst": "^3.11.11",
     "vite-plugin-handlebars": "^2.0.0"
   }
 }

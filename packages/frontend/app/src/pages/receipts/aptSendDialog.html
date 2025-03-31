@@ -42,7 +42,7 @@
        hx-swap="outerHTML">
 
   </div>
-  <div x-cloak x-show="modalIsOpen" x-transition.opacity.duration.200ms asd-x-trap.inert.noscroll="modalIsOpen"
+  <div x-cloak x-show="modalIsOpen" x-transition.opacity.duration.200ms x-trap.inert.noscroll="modalIsOpen"
        x-on:keydown.esc.window="modalIsOpen = false" x-on:click.self="modalIsOpen = false"
        class="fixed inset-0 z-30 flex items-end justify-center bg-black/20 p-4 pb-8 backdrop-blur-xs sm:items-center lg:p-8"
        role="dialog" aria-modal="true" aria-labelledby="defaultModalTitle">
@@ -134,10 +134,10 @@
         </div>
 
 
-        <div class="flex flex-col gap-1 w-full">
+        <div class="flex flex-col w-full">
           <template x-for="apt in apts">
             <label
-                class="grid grid-cols-[1fr_3fr_1fr] p-1 has-disabled:cursor-not-allowed items-center gap-2 text-base font-medium has-disabled:opacity-75 text-on-surface has-checked:text-on-surface-strong dark:has-checked:text-on-surface-dark-strong dark:text-on-surface-dark hover:rounded-radius hover:border-outline hover:border hover:dark:border-outline-dark">
+                class="grid grid-cols-[1fr_3fr_1fr] p-1 py-2 has-disabled:cursor-not-allowed items-center gap-2 text-base font-medium has-disabled:opacity-75 text-on-surface has-checked:text-on-surface-strong dark:has-checked:text-on-surface-dark-strong dark:text-on-surface-dark hover:rounded-radius hover:border-outline hover:border hover:dark:border-outline-dark">
 
               <span x-text="apt.number"></span>
               <span x-text="apt.name"></span>

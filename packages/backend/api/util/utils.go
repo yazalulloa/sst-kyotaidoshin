@@ -220,3 +220,7 @@ func ObjToJsonBase64(obj any) (string, error) {
 
 	return base64.StdEncoding.EncodeToString(jsonBytes), nil
 }
+
+func TzCss() (*time.Location, error) {
+	return time.LoadLocation("America/Caracas")
+}

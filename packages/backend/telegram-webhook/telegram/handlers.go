@@ -103,7 +103,7 @@ func optionsHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 				{
 					{
 						Text:         "Ultima tasa de cambio",
-						CallbackData: "last_rate",
+						CallbackData: _LAST_RATE_CALLBACK,
 					},
 				},
 				{
@@ -150,6 +150,12 @@ func lastRateCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
 	//
 	//log.Printf("Update callback: %s", byteArray)
 
+	location, err := util.TzCss()
+	if err != nil {
+		log.Printf("Error getting timezone: %v", err)
+		return
+	}
+
 	rate, err := rates.LastRate(util.USD.Name())
 	if err != nil {
 		log.Printf("Error getting last rate: %v", err)
@@ -157,7 +163,7 @@ func lastRateCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
 	}
 
 	msg := fmt.Sprintf("TASA: %s\nFECHA: %s\nCREADO: %s", util.VED.Format(rate.Rate),
-		rate.DateOfRate.Format(time.DateOnly), rate.CreatedAt.Format(time.DateTime))
+		rate.DateOfRate.Format(time.DateOnly), rate.CreatedAt.In(location).Format(time.DateTime))
 
 	var wg sync.WaitGroup
 	wg.Add(2)

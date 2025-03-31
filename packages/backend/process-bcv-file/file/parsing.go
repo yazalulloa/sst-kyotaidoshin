@@ -142,7 +142,7 @@ type ParsingInfo struct {
 
 func (info ParsingInfo) parse() (*Result, error) {
 
-	location, err := time.LoadLocation("America/Caracas")
+	location, err := util.TzCss()
 	if err != nil {
 		return nil, err
 	}
