@@ -12,6 +12,13 @@
            hx-swap="outerHTML">
       </div>
     </div>
+    <a x-show="hasPerm('receipts:write')"
+       x-bind:href="`/receipts/edit/${key}`"
+       class="btn btn-neutral"
+    >
+      <svg x-bind:data-src="editIconUrl" data-cache="21600" class="size-5"></svg>
+      <span x-text="$t('main-action-edit')"></span>
+    </a>
 
     <button
         type="button"
@@ -25,7 +32,7 @@
         @event-is-not-loading="isLoading = false"
         x-data="{isLoading: false}"
         x-bind:disabled="isLoading"
-        class="w-fit inline-flex justify-center items-center gap-2 whitespace-nowrap rounded-radius bg-primary border border-primary dark:border-primary-dark px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+        class="btn btn-neutral"
     >
       <svg x-bind:data-src="zipFileIconUrl" data-cache="21600" class="size-5"></svg>
       <span x-text="$t('main-action-download-zip')"></span>
@@ -35,17 +42,14 @@
           class="size-5 animate-spin motion-reduce:animate-none fill-on-primary dark:fill-on-primary-dark"
       ></svg>
     </button>
-    <a x-show="hasPerm('receipts:write')"
-        x-bind:href="`/receipts/edit/${key}`"
-        class="w-fit inline-flex justify-center items-center gap-2 whitespace-nowrap rounded-radius bg-primary border border-primary px-4 py-2 text-center text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:border-primary-dark dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
-    >
-      <svg x-bind:data-src="editIconUrl" data-cache="21600" class="size-5"></svg>
-      <span x-text="$t('main-action-edit')"></span>
-    </a>
+
+    <div id="receipt-info">
+
+    </div>
 
   </div>
 
-  <div class="w-full flex flex-row gap-2 justify-center items-center text-center"
+  <div class="w-full flex flex-col gap-2 justify-center items-center text-center"
        x-data="{
         selected: '',
         allVisible: true,
@@ -65,26 +69,22 @@
         "
        x-effect="$dispatch('event-receipt-tab-selected', { selected })">
 
-    <div x-on:keydown.right.prevent="$focus.wrap().next()" x-on:keydown.left.prevent="$focus.wrap().previous()"
-         class="flex gap-2 overflow-x-auto border-b border-outline dark:border-outline-dark hide-scrollbar" role="tablist"
-         aria-label="tab options">
-
+    <div role="tablist" class="tabs tabs-border">
       <template x-for="tab in tabs">
-
-        <button x-on:click="selected = tab.id" x-bind:aria-selected="selected === tab.id"
-                x-bind:tabindex="selected === tab.id ? '0' : '-1'"
-                x-bind:class="selected === tab.id ? 'font-bold text-primary border-b-2 border-primary dark:border-primary-dark dark:text-primary-dark' : 'text-on-surface font-medium dark:text-on-surface-dark dark:hover:border-b-outline-dark-strong dark:hover:text-on-surface-dark-strong hover:border-b-2 hover:border-b-outline-strong hover:text-on-surface-strong'"
-                class="h-min px-4 py-2 text-sm" type="button" role="tab" x-bind:aria-controls="'tabpanel' + tab.id"
+        <a role="tab" class="tab"
+           x-on:click="selected = tab.id"
+           x-bind:class="selected === tab.id ? 'tab-active' : ''"
         >
           <span class="whitespace-nowrap" x-text="tab.name"></span>
-        </button>
-
+        </a>
       </template>
     </div>
   </div>
+
 </div>
 
-<div id="container" class="fade-me-out fade-me-in p-1 overflow-x-auto whitespace-nowrap w-full inline-block" hx-swap-oob="true"
+<div id="container" class="fade-me-out fade-me-in px-2 overflow-x-auto whitespace-nowrap w-full inline-block"
+     hx-swap-oob="true"
      x-data="{
        selected: ''
        }"

@@ -39,7 +39,7 @@ templ DeleteBtn(deleteUrl string, cardIdRef string, attrs templ.Attributes) {
 	<div class="flex justify-center">
 		<button
 			type="button"
-			class="whitespace-nowrap bg-transparent rounded-full border border-danger p-1 text-sm font-medium tracking-wide text-danger transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-danger dark:text-danger dark:focus-visible:outline-danger"
+			class="btn btn-sm btn-outline btn-error btn-circle"
 			if !util.IsDevMode() {
 				hx-headers={ util.CrsfHeaders(ctx) }
 			}
@@ -58,7 +58,7 @@ templ DeleteBtn(deleteUrl string, cardIdRef string, attrs templ.Attributes) {
 
 templ BackBtn(backUrl string) {
 	<button
-		class="whitespace-nowrap bg-transparent rounded-full border border-secondary p-1 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-secondary-dark dark:text-secondary-dark dark:focus-visible:outline-secondary-dark"
+		class="whitespace-nowrap bg-transparent rounded-full border border-secondary p-1 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed"
 		hx-get={ backUrl }
 		hx-disabled-elt="this"
 		hx-indicator=".htmx-indicator"
@@ -84,7 +84,7 @@ templ UploadFormView(params util.UploadBackupParams) {
 templ UploadBackupForm(params util.UploadBackupParams) {
 	<form
 		id="backup-file-uploader"
-		class="whitespace-nowrap bg-transparent rounded-radius border border-secondary px-4 py-2 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-secondary-dark dark:text-secondary-dark dark:focus-visible:outline-secondary-dark disabled:opacity-75 disabled:cursor-not-allowed"
+		class="whitespace-nowrap bg-transparent rounded-(--radius-selector) border border-secondary px-4 py-2 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed disabled:opacity-75 disabled:cursor-not-allowed"
 		hx-post={ params.Url }
 		hx-encoding="multipart/form-data"
 		hx-disabled-elt="this, #backup-file-uploader * > input:not([disabled]), #backup-file-uploader * > label:not([disabled])"
@@ -140,7 +140,7 @@ templ UploadBackupResponse(inserted int64, formUrl string, idUpdater string, eve
 	<button
 		disabled
 		type="button"
-		class="inline-flex items-center gap-2 whitespace-nowrap bg-transparent rounded-radius border border-secondary px-4 py-2 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-secondary-dark dark:text-secondary-dark dark:focus-visible:outline-secondary-dark"
+		class="inline-flex items-center gap-2 whitespace-nowrap bg-transparent rounded-(--radius-selector) border border-secondary px-4 py-2 text-sm font-medium tracking-wide text-secondary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed"
 		hx-get={ formUrl }
 		hx-trigger="load delay:2s"
 		hx-swap="outerHTML"
@@ -148,7 +148,7 @@ templ UploadBackupResponse(inserted int64, formUrl string, idUpdater string, eve
 			x-init={ fmt.Sprintf("sendEvent('%s', '%s')", idUpdater, event) }
 		}
 	>
-		<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="size-5 animate-spin motion-reduce:animate-none fill-on-secondary dark:fill-on-secondary-dark">
+		<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="size-5 animate-spin motion-reduce:animate-none fill-on-secondary">
 			<path opacity="0.25" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,19a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"></path>
 			<path d="M10.14,1.16a11,11,0,0,0-9,8.92A1.59,1.59,0,0,0,2.46,12,1.52,1.52,0,0,0,4.11,10.7a8,8,0,0,1,6.66-6.61A1.42,1.42,0,0,0,12,2.69h0A1.57,1.57,0,0,0,10.14,1.16Z"></path>
 		</svg>
@@ -187,9 +187,9 @@ templ AnchorClickDownloadView(url string) {
 
 templ Badge(condition bool) {
 	<div
-		class={ "peer rounded-radius w-fit border px-2 py-1 text-xs font-medium tracking-wide ",
-    templ.KV("border-success bg-success text-on-success dark:border-success dark:bg-success dark:text-on-success", condition),
-    templ.KV("border-danger bg-danger text-on-danger dark:border-danger dark:bg-danger dark:text-on-danger", !condition) }
+		class={ "peer rounded-(--radius-selector) w-fit border px-2 py-1 text-xs font-medium tracking-wide ",
+    templ.KV("border-success bg-success text-on-success", condition),
+    templ.KV("border-error bg-error text-on-error", !condition) }
 	>
 		{ children... }
 	</div>
@@ -198,28 +198,63 @@ templ Badge(condition bool) {
 templ BadgeIndicator(condition bool, badge string) {
 	<span
 		class={
-			"w-fit inline-flex overflow-hidden rounded-radius border bg-surface text-xs font-medium dark:bg-surface-dark",
-			templ.KV("border-success dark:border-success text-success dark:text-success", condition),
-			templ.KV("border-danger dark:border-danger text-danger dark:text-danger", !condition),
+			"w-fit inline-flex overflow-hidden rounded-(--radius-selector) border bg-surface text-xs font-medium",
+			templ.KV("border-success text-success", condition),
+			templ.KV("border-error text-error", !condition),
 		}
 	>
 		<span
 			class={
 				"flex items-center gap-1 px-2 py-1",
-				templ.KV("bg-success/10 dark:bg-success/10", condition),
-				templ.KV("bg-danger/10 dark:bg-danger/10", !condition),
+				templ.KV("bg-success/10", condition),
+				templ.KV("bg-error/10", !condition),
 			}
 		>
 			<span
 				class={
 					"size-1.5 rounded-full",
-					templ.KV("bg-success dark:bg-success", condition),
-					templ.KV("bg-danger dark:bg-danger", !condition),
+					templ.KV("bg-success", condition),
+					templ.KV("bg-error", !condition),
 				}
 			></span>
 			{ badge }
 		</span>
 	</span>
+}
+
+templ BadgeIndicatorWithTooltipV2(condition bool, badge templ.Component, attrs templ.Attributes) {
+	<div
+		class={
+			"w-fit",
+			templ.KV("tooltip tooltip-bottom", condition),
+		}
+		{ attrs... }
+	>
+		<span
+			class={
+				"peer w-fit inline-flex overflow-hidden rounded-(--radius-selector) border bg-surface text-xs font-medium tracking-wide focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+				templ.KV("border-success text-success", condition),
+				templ.KV("border-error text-error", !condition),
+			}
+		>
+			<span
+				class={
+					"flex items-center gap-1 px-2 py-1",
+					templ.KV("bg-success/10", condition),
+					templ.KV("bg-error/10", !condition),
+				}
+			>
+				<span
+					class={
+						"size-1.5 rounded-full",
+						templ.KV("bg-success", condition),
+						templ.KV("bg-error", !condition),
+					}
+				></span>
+				@badge
+			</span>
+		</span>
+	</div>
 }
 
 templ BadgeIndicatorWithTooltip(condition bool, tooltipId string, badge templ.Component, tooltip templ.Component) {
@@ -229,23 +264,23 @@ templ BadgeIndicatorWithTooltip(condition bool, tooltipId string, badge templ.Co
 				aria-describedby={ tooltipId }
 			}
 			class={
-				"peer w-fit inline-flex overflow-hidden rounded-radius border bg-surface text-xs font-medium dark:bg-surface-dark tracking-wide focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:focus-visible:outline-primary-dark",
-				templ.KV("border-success dark:border-success text-success dark:text-success", condition),
-				templ.KV("border-danger dark:border-danger text-danger dark:text-danger", !condition),
+				"peer w-fit inline-flex overflow-hidden rounded-(--radius-selector) border bg-surface text-xs font-medium tracking-wide focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+				templ.KV("border-success text-success", condition),
+				templ.KV("border-error text-error", !condition),
 			}
 		>
 			<span
 				class={
 					"flex items-center gap-1 px-2 py-1",
-					templ.KV("bg-success/10 dark:bg-success/10", condition),
-					templ.KV("bg-danger/10 dark:bg-danger/10", !condition),
+					templ.KV("bg-success/10", condition),
+					templ.KV("bg-error/10", !condition),
 				}
 			>
 				<span
 					class={
 						"size-1.5 rounded-full",
-						templ.KV("bg-success dark:bg-success", condition),
-						templ.KV("bg-danger dark:bg-danger", !condition),
+						templ.KV("bg-success", condition),
+						templ.KV("bg-error", !condition),
 					}
 				></span>
 				@badge
@@ -257,19 +292,10 @@ templ BadgeIndicatorWithTooltip(condition bool, tooltipId string, badge templ.Co
 	</div>
 }
 
-templ Tooltip(id string, value templ.Component) {
-	<div
-		id={ id }
-		class="absolute -bottom-9 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap rounded-sm bg-surface-dark px-2 py-1 text-center text-sm text-on-surface-dark-strong opacity-0 transition-all ease-out peer-hover:opacity-100 peer-focus:opacity-100 dark:bg-surface dark:text-on-surface-strong"
-		role="tooltip"
-	>
-		@value
-	</div>
-}
-
 templ SpanFormatDate(dataDate string) {
 	<span
 		data-date={ dataDate }
+		class="text-center"
 		x-text="FormatDate($el.getAttribute('data-date'))"
 	></span>
 }

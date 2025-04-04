@@ -315,7 +315,7 @@ func FormResponseView(res FormResponse) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" x-init=\"\n \t\terrMsg = $el.getAttribute(&#39;data-response-err&#39;);\n  \t\tcounter = parseInt($el.getAttribute(&#39;data-counter&#39;));\n\n \t\tif (errMsg === &#39;&#39;) {\n \t\t  modalIsOpen = false;\n \t\t }\n\n  \t\tif ($el.getAttribute(&#39;data-send-event&#39;) === &#39;true&#39;) {\n  \t\t   sendEvent(&#39;roles-updater&#39;, &#39;new-role&#39;);\n  \t\t}\n \t\t\"></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, "\" x-init=\"\n \t\terrMsg = $el.getAttribute(&#39;data-response-err&#39;);\n  \t\tcounter = parseInt($el.getAttribute(&#39;data-counter&#39;));\n\n \t\tif (errMsg === &#39;&#39;) {\n \t\t  $dispatch(&#39;event-roles-form-close&#39;);\n \t\t }\n\n  \t\tif ($el.getAttribute(&#39;data-send-event&#39;) === &#39;true&#39;) {\n  \t\t   sendEvent(&#39;roles-updater&#39;, &#39;new-role&#39;);\n  \t\t}\n \t\t\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

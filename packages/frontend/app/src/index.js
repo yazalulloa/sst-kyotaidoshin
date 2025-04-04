@@ -134,6 +134,26 @@ window.trimInput = function (input) {
   })
 }
 
+window.focusAndScroll = function (id) {
+  const element = document.getElementById(id);
+  if (element) {
+
+    // element.scrollIntoView({
+    //   behavior: 'smooth',
+    //   block: 'center',
+    //   inline: 'center'
+    // });
+
+    element.focus({
+      preventScroll: true,
+      focusVisible: true
+    });
+  } else {
+    console.error("Element not found: ", id);
+  }
+
+}
+
 window.scrollThroughParent = (element) => {
   let previousElementSibling = element.previousElementSibling;
 
@@ -141,7 +161,7 @@ window.scrollThroughParent = (element) => {
     // console.log("Previous element sibling found ", element.id);
 
     window.addEventListener('scroll', () => {
-      console.log("Scrolling ", element.id);
+      // console.log("Scrolling ", element.id);
       const div1Rect = previousElementSibling.getBoundingClientRect();
       const div2Rect = element.getBoundingClientRect();
       const dataToShow = {}
@@ -149,11 +169,11 @@ window.scrollThroughParent = (element) => {
       dataToShow.div1RectBottom = div1Rect.bottom;
       dataToShow.div2RectTop = div2Rect.top;
 
-      console.log("Data ", dataToShow);
+      // console.log("Data ", dataToShow);
 
       if (window.scrollY > 0 && (div1Rect.bottom === 0
           || !(div1Rect.bottom < div2Rect.top))) {
-        console.log("Scrolling ", dataToShow.id);
+        // console.log("Scrolling ", dataToShow.id);
 
         let header = document.getElementsByTagName('header')[0]?.offsetHeight
             ?? 0;

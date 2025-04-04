@@ -21,6 +21,7 @@ import duplicateIconUrl from './assets/images/duplicate.svg?no-inline'
 import permissionsIconUrl from './assets/images/permissions-icon.svg?no-inline'
 import usersIconUrl from './assets/images/users.svg?no-inline'
 import telegramIconUrl from './assets/images/telegram_logo.svg?no-inline'
+import menuVerticalIconUrl from './assets/images/menu-vertical.svg?no-inline'
 
 window.deleteIconUrl = deleteIconUrl;
 window.processIconUrl = processIconUrl;
@@ -47,6 +48,8 @@ window.apartmentsIconUrl = apartmentsIconUrl;
 window.permissionsIconUrl = permissionsIconUrl;
 window.usersIconUrl = usersIconUrl;
 window.telegramIconUrl = telegramIconUrl;
+
+window.menuVerticalIconUrl = menuVerticalIconUrl;
 
 window.NAV_ICONS = new Map([
   ['nav-apartments', apartmentsIconUrl],

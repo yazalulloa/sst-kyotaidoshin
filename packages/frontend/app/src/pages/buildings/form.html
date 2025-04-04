@@ -54,7 +54,7 @@
           id="buildingIdInput"
           type="text"
           maxlength="20"
-          class="w-full border px-2 py-2 text-sm rounded-radius bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+          class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
           name="id"
           x-model="id"
           x-bind:class="idErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
@@ -79,7 +79,7 @@
       <input
           id="buildingNameInput"
           type="text"
-          class="w-full border px-2 py-2 text-sm rounded-radius bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+          class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
           name="name"
           maxlength="100"
           x-model="name"
@@ -104,7 +104,7 @@
           id="buildingRifInput"
           type="text"
           maxlength="20"
-          class="w-full border px-2 py-2 text-sm rounded-radius bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+          class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
           name="rif"
           x-model="rif"
           x-bind:class="rifErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
@@ -117,36 +117,28 @@
       </small>
     </div>
 
-    <div class="flex flex-row justify-between gap-4">
-      <div class="relative flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-        <label for="mainCurrency" class="w-fit text-sm pl-0.5" x-text="$t('main-buildings-main-currency')">
-        </label>
-        <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
-        <select id="mainCurrency"
+    <div class="grid grid-cols-2 gap-4">
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend" x-text="$t('main-buildings-main-currency')"></legend>
+        <select class="select"
                 name="mainCurrency"
-                x-model="mainCurrency"
-                class="w-full appearance-none border px-4 py-2 text-sm rounded-radius border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+                x-model="mainCurrency">
           <template x-for="value in currencies">
             <option x-bind:value="value" x-text="value"></option>
           </template>
         </select>
-        <small></small>
-      </div>
+      </fieldset>
 
-      <div class="relative flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-        <label for="debtCurrency" class="w-fit text-sm pl-0.5" x-text="$t('main-buildings-debt-currency')">
-        </label>
-        <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
-        <select id="debtCurrency"
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend" x-text="$t('main-buildings-debt-currency')"></legend>
+        <select class="select"
                 name="debtCurrency"
-                x-model="debtCurrency"
-                class="w-full appearance-none border px-4 py-2 text-sm rounded-radius border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+                x-model="debtCurrency">
           <template x-for="value in currencies">
             <option x-bind:value="value" x-text="value"></option>
           </template>
         </select>
-        <small></small>
-      </div>
+      </fieldset>
     </div>
 
     <div class="flex flex-col items-center justify-center gap-2">
@@ -218,7 +210,7 @@
             limitInputToMaxLength($el)
             configureCurrencyInput($el)
             "
-            class="w-full border px-2 py-2 text-sm rounded-radius bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+            class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
             name="fixedPayAmount"
             x-model="fixedPayAmount"
             x-bind:class="fixedPayAmountErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
@@ -231,40 +223,45 @@
       </div>
     </div>
 
-    <div class="relative flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-      <label for="emailConfigSelect" class="w-fit text-sm pl-0.5" x-text="$t('main-buildings-email-configs')"></label>
-      <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
-      <select id="emailConfigSelect" name="emailConfig"
-              x-model="emailConfig"
-              class="w-full appearance-none border px-4 py-2 text-sm rounded-radius border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
-        <option value="mac">Mac</option>
-        <option value="windows">Windows</option>
-        <option value="linux">Linux</option>
+    <fieldset class="fieldset">
+      <legend class="fieldset-legend" x-text="$t('main-buildings-email-config')"></legend>
+      <select class="select"
+              id="emailConfigSelect"
+              name="emailConfig"
+              x-model="emailConfig">
+        <template x-for="value in currencies">
+          <option x-bind:value="value" x-text="value"></option>
+        </template>
       </select>
-    </div>
+    </fieldset>
 
     <p x-show="errMsg !== ''" x-text="errMsg" class="border text-danger border-danger"></p>
 
-    <div class="flex flex-row justify-start gap-2">
+    <div
+        class="flex flex-col-reverse justify-between gap-2 sm:flex-row sm:items-center md:justify-end">
+
       <button
           x-text="isEdit ? $t('main-action-update') : $t('main-action-create')"
+          class="btn btn-primary"
           x-effect="
           $el.disabled=!(id?.trim()?.length > 0 && name?.trim()?.length > 0 && rif?.trim()?.length > 0 && (fixedPay ? fixedPayAmount > 0 : true))
           "
-          class="whitespace-nowrap border px-4 py-2 text-center text-sm font-medium tracking-wide transition rounded-radius bg-primary border-primary text-on-primary hover:opacity-75 focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
           @click="
-          let form = document.getElementById('buildings-form');
+          let form = $el.closest('form');
           form.classList.remove('border', 'border-success')
           errMsg = '';
           "
       >
       </button>
+
       <a href="/buildings">
-        <button type="button"
-                class="whitespace-nowrap border px-4 py-2 text-center text-sm font-medium tracking-wide transition rounded-radius bg-surface-alt border-surface-alt text-on-surface-strong hover:opacity-75 focus-visible:outline-surface-alt focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark-alt"
-                x-text="$t('main-action-cancel')">
+        <button
+            type="button"
+            class="btn btn-secondary"
+            x-text="$t('main-action-cancel')">
         </button>
       </a>
+
     </div>
   </form>
 

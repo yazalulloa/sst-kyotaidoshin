@@ -41,15 +41,7 @@
           active = jsonObject.active;
           addToExpenses = jsonObject.addToExpenses;
 
-           document.getElementById('reserveFundNameInput').scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-            inline: 'center'
-          });
-          document.getElementById('reserveFundNameInput').focus({
-             preventScroll: true,
-             focusVisible: true
-          });
+          focusAndScroll('reserveFundNameInput')
 
      "
        @event-reserve-fund-building-restart-after-deletion="
@@ -87,7 +79,8 @@
               $dispatch('event-reserve-fund-form-clean-errors');
              ">
     <div class="flex flex-col gap-0">
-      <div class="grid border-b font-bold grid-cols-[2fr_1fr_1fr_1fr] border-surface-dark dark:border-surface dark:text-surface">
+      <div
+          class="grid border-b font-bold grid-cols-[2fr_1fr_1fr_1fr] border-surface-dark dark:border-surface dark:text-surface">
         <span x-text="$t('main-title-fund')"></span>
         <span x-text="$t('main-title-amount')"></span>
         <span x-text="$t('main-title-type')"></span>
@@ -123,7 +116,7 @@
         <input
             id="reserveFundNameInput"
             type="text"
-            class="w-full border px-2 py-2 text-sm rounded-radius bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+            class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
             name="name"
             maxlength="100"
             x-model="name"
@@ -150,7 +143,7 @@
         </label>
         <input
             id="reserveFundFundNameInput"
-            class="w-full border px-2 py-2 text-sm rounded-radius bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+            class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
             type="number"
             name="fund"
             maxlength="10"
@@ -179,7 +172,7 @@
         </label>
         <input
             id="reserveFundPayNameInput"
-            class="w-full border px-2 py-2 text-sm rounded-radius bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+            class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
             type="number"
             name="pay"
             maxlength="10"
@@ -213,16 +206,15 @@
           <span x-text="$t('main-title-active')"></span>
         </label>
 
-        <div class="relative flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-          <label for="reserveFundTypeSelect" class="w-fit text-sm pl-0.5" x-text="$t('main-reserve-fund-type')"></label>
-          <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
-          <select id="reserveFundTypeSelect" name="type"
-                  x-model="type"
-                  class="w-full appearance-none border px-4 py-2 text-sm rounded-radius border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend" x-text="$t('main-reserve-fund-type')"></legend>
+          <select class="select"
+                  name="type"
+                  x-model="type">
             <option value="FIXED_PAY">FIXED_PAY</option>
             <option value="PERCENTAGE">PERCENTAGE</option>
           </select>
-        </div>
+        </fieldset>
 
         <label for="reserveFundAddToExpenses"
                class="flex has-disabled:cursor-not-allowed items-center gap-2 text-sm font-medium has-disabled:opacity-75 text-on-surface has-checked:text-on-surface-strong dark:has-checked:text-on-surface-dark-strong dark:text-on-surface-dark">
@@ -238,17 +230,15 @@
           <span x-text="$t('main-reserve-funds-add-to-expenses')"></span>
         </label>
 
-        <div class="relative flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-          <label for="reserveFundExpenseTypeSelect" class="w-fit text-sm pl-0.5"
-                 x-text="$t('main-expenses-type')"></label>
-          <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
-          <select id="reserveFundExpenseTypeSelect" name="expenseType"
-                  x-model="expenseType"
-                  class="w-full appearance-none border px-4 py-2 text-sm rounded-radius border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend" x-text="$t('main-expenses-type')"></legend>
+          <select class="select"
+                  name="expenseType"
+                  x-model="expenseType">
             <option value="COMMON">COMMON</option>
             <option value="UNCOMMON">UNCOMMON</option>
           </select>
-        </div>
+        </fieldset>
 
       </div>
 
@@ -263,7 +253,7 @@
         </label>
         <input
             id="reserveFundExpenseInput"
-            class="w-full border px-2 py-2 text-sm rounded-radius bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+            class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
             type="number"
             name="expense"
             maxlength="10"
@@ -284,14 +274,14 @@
 
       <p x-show="errMsg !== ''" x-text="errMsg" class="border text-danger border-danger"></p>
 
-      <div class="flex flex-row justify-start gap-2">
+      <div class="flex flex-col-reverse justify-between gap-2 sm:flex-row sm:items-center md:justify-end">
         <button
             x-text="is_edit ? $t('main-action-update') : $t('main-action-create')"
             x-effect="
                   let v = !(name?.trim()?.length > 0 && parseFloat(pay) > 0);
                   $el.disabled=v;
                   "
-            class="whitespace-nowrap border px-4 py-2 text-center text-sm font-medium tracking-wide transition rounded-radius bg-primary border-primary text-on-primary hover:opacity-75 focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+            class="btn btn-primary"
             @click="
               let form = document.getElementById('reserve-fund-form');
               form.classList.remove('border', 'border-success')
@@ -299,7 +289,7 @@
             ">
         </button>
         <button type="button"
-                class="whitespace-nowrap border px-4 py-2 text-center text-sm font-medium tracking-wide transition rounded-radius bg-surface-alt border-surface-alt text-on-surface-strong hover:opacity-75 focus-visible:outline-surface-alt focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark-alt"
+                class="btn btn-secondary"
                 @click.prevent="$dispatch('event-reserve-fund-form-reset')"
                 x-text="$t('main-action-clear')">
         </button>

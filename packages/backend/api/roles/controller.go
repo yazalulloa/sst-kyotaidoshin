@@ -140,6 +140,7 @@ func rolesPut(w http.ResponseWriter, r *http.Request) {
 		} else {
 			roleId, err := insertRole(request.Name, request.Perms)
 
+			log.Printf("roleId: %v", roleId)
 			if err == nil {
 				role.ID = &roleId
 			}

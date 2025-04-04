@@ -1,4 +1,5 @@
 <div x-data="{
+       modalIsOpen: false,
        isEdit: false,
        emails: new Set(),
        emailIsFocused: false,
@@ -18,6 +19,7 @@
        isEdit = false;
        emails = new Set()
        key = ''
+       building = ''
        number = ''
        name = ''
        aliquot = 0
@@ -41,69 +43,73 @@
       number = jsonObject.number;
       name = jsonObject.name;
       aliquot = jsonObject.aliquot;
-      emails.clear();
+      emails = new Set();
       jsonObject.emails.split(',').forEach(email => emails.add(email));
-     $el.querySelector('dialog').showModal();
-     "
-     @event-apartment-form-close="
-      $dispatch('event-apartment-form-reset')
-      $el.querySelector('dialog').close();
+
+      modalIsOpen = true;
      "
      x-show="hasPerm('apartments:write')"
 >
 
-  <button class="btn btn-primary"
-          @click="
-           $dispatch('event-apartment-form-reset')
-           $el.nextElementSibling.showModal()
+  <button x-on:click="
+            $dispatch('event-apartment-form-reset')
+            modalIsOpen = true
           "
+          type="button"
+          class="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap border px-4 py-2 text-sm font-medium tracking-wide transition border-outline bg-surface-alt text-on-surface rounded-(--radius-selector) hover:opacity-75 focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark"
           x-text="$t('main-apartments-new')">
   </button>
-  <dialog class="modal modal-bottom sm:modal-middle">
-    <form class="modal-box p-0"
+  <div x-cloak x-show="modalIsOpen" x-transition.opacity.duration.200ms asd-x-trap.inert.noscroll="modalIsOpen"
+       x-on:keydown.esc.window="modalIsOpen = false" x-on:click.self="modalIsOpen = false"
+       class="fixed inset-0 z-30 flex items-end justify-center bg-black/20 p-4 pb-8 backdrop-blur-xs sm:items-center lg:p-8"
+       role="dialog" aria-modal="true" aria-labelledby="defaultModalTitle">
+    <!-- Modal Dialog -->
+    <form x-show="modalIsOpen"
+          x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
+          x-transition:enter-start="scale-0 opacity-0 -translate-y-8" x-transition:enter-end="scale-100"
+          class="flex flex-col gap-4 border max-h-9/10 max-w-9/0 min-w-2/10 rounded-(--radius-selector) border-outline bg-surface text-on-surface dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark"
           hx-put="/api/apartments"
           hx-disabled-elt="this, * > input:not([disabled]), * > button:not([disabled]), * > select:not([disabled])"
           hx-indicator=".htmx-indicator"
           hx-target="#apt-form-error"
-          hx-swap="innerHTML">
+          hx-swap="innerHTML"
+    >
 
+      <div id="apt-form-error" hidden="hidden"></div>
+
+      <input hidden="hidden" name="key" x-model="key"/>
       <!-- Dialog Header -->
-      <div class="sticky top-0 z-30 flex items-center justify-between gap-2 border-b p-4 border-outline bg-base-200">
-        <h3 class="font-semibold tracking-wide"
-            x-text="isEdit ? $t('main-apartments-edit') : $t('main-apartments-new')"></h3>
-
-        <div class="mt-0 modal-action">
-          <form method="dialog">
-            <button class="btn btn-circle btn-outline btn-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                   stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-              </svg>
-            </button>
-          </form>
-        </div>
-      </div>
-
-      <!-- Dialog Body -->
       <div
-          class="flex flex-col gap-2 p-4">
+          class="flex items-center justify-between border-b p-4 border-outline bg-surface-alt/60 dark:border-outline-dark dark:bg-surface-dark/20">
+        <h3 class="font-semibold tracking-wide text-on-surface-strong dark:text-on-surface-dark-strong"
+            x-text="isEdit ? $t('main-apartments-edit') : $t('main-apartments-new')">
+        </h3>
+        <button type="button" x-on:click="modalIsOpen = false" aria-label="close modal">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor"
+               fill="none" stroke-width="1.4" class="h-5 w-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
 
-        <div id="apt-form-error" hidden="hidden"></div>
-        <input hidden="hidden" name="key" x-model="key"/>
+      </div>
+      <!-- Dialog Body -->
+      <div class="flex w-full flex-col gap-2 overflow-auto px-4 py-2">
 
-        <fieldset class="fieldset">
-          <legend class="fieldset-legend text-start" x-text="$t('main-title-building')"></legend>
-          <select class="select w-full"
+        <div class="relative flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+          <label for="aptBuildingSelect" class="w-fit text-sm pl-0.5" x-text="$t('main-title-building')">
+          </label>
+          <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
+          <select id="aptBuildingSelect"
                   name="building"
                   x-model="building"
                   x-bind:disabled="key !== ''"
-          >
+                  class="w-full appearance-none border px-4 py-2 text-sm rounded-(--radius-selector) border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
             <template x-for="value in buildings">
               <option x-bind:value="value" x-text="value"></option>
             </template>
           </select>
-          <span class="hidden fieldset-label">Optional</span>
-        </fieldset>
+          <small></small>
+        </div>
 
         <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
           <label for="aptNumberInput"
@@ -203,9 +209,9 @@
                 <button
                     type="button"
                     @click.prevent="emails.delete(value)"
-                    class="btn btn-sm btn-outline btn-error btn-circle"
+                    class="w-fit whitespace-nowrap rounded-full border bg-transparent p-1 text-center text-sm font-medium tracking-wide transition border-danger text-danger hover:opacity-75 focus-visible:outline-danger focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:border-danger dark:text-danger dark:focus-visible:outline-danger"
                 >
-                  <svg x-bind:data-src="deleteIconUrl" data-cache="21600" class="h-5 w-5"></svg>
+                  <svg x-bind:data-src="deleteIconUrl" data-cache="21600" class="h-6 w-6"></svg>
                 </button>
               </div>
             </li>
@@ -268,22 +274,20 @@
           </label>
         </div>
 
-
-        <span x-show="errMsg !== ''" x-text="errMsg" class="p-2 border text-danger border-danger"></span>
-
       </div>
 
+      <p x-show="errMsg !== ''" x-text="errMsg" class="border text-danger border-danger"></p>
 
       <!-- Dialog Footer -->
       <div
-          class="sticky bottom-0 flex flex-col-reverse justify-between gap-2 border-t p-4 border-outline bg-base-200 sm:flex-row sm:items-center md:justify-end">
+          class="flex flex-col-reverse justify-between gap-2 border-t p-4 border-outline bg-surface-alt/60 dark:border-outline-dark dark:bg-surface-dark/20 sm:flex-row sm:items-center md:justify-end">
         <button
+            x-text="isEdit ? $t('main-action-update') : $t('main-action-create')"
             x-effect="
 
                   $el.disabled=!(number?.trim()?.length > 0 && name?.trim()?.length > 0 && parseFloat(aliquot) > 0 && !emailIsFocused)
                   "
-            x-text="isEdit ? $t('main-action-update') : $t('main-action-create')"
-            class="btn btn-primary"
+            class="whitespace-nowrap border px-4 py-2 text-center text-sm font-medium tracking-wide transition rounded-(--radius-selector) bg-primary border-primary text-on-primary hover:opacity-75 focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
             @click="
           let form = $el.closest('form');
           form.classList.remove('border', 'border-success')
@@ -293,16 +297,13 @@
         </button>
 
         <button x-on:click="
-                  $el.closest('dialog').close();
+                  modalIsOpen = false
                 "
                 type="button"
-                class="btn btn-secondary"
+                class="whitespace-nowrap px-4 py-2 text-center text-sm font-medium tracking-wide transition rounded-(--radius-selector) text-on-surface hover:opacity-75 focus-visible:outline-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark"
                 x-text="$t('main-action-cancel')">
         </button>
       </div>
     </form>
-    <form method="dialog" class="modal-backdrop">
-      <button>close</button>
-    </form>
-  </dialog>
+  </div>
 </div>

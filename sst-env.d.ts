@@ -50,10 +50,6 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
-    "HtmlToPdf": {
-      "name": string
-      "type": "sst.aws.Function"
-    }
     "HtmlToPdfFunction": {
       "type": "sst.sst.Secret"
       "value": string

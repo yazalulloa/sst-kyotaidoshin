@@ -1,0 +1,211 @@
+<div x-data="{
+       modalIsOpen: false,
+
+       months: MONTHS_GLOBAL,
+
+       month: '',
+       year: '',
+       years: [],
+       building: '',
+       buildings: [],
+       filename: '',
+       date: '',
+       rates: [],
+       data: '',
+
+       errMsg: ''
+     }"
+     @event-receipt-form-reset="
+       
+       month = '';
+       year = '';
+       years = [];
+       building = '';
+       buildings = [];
+       filename = '';
+       date = '';
+       rates = [];
+       data = '';
+       
+       errMsg = ''
+     "
+     @event-receipt-form-update.window="
+     $dispatch('event-receipt-form-reset')
+
+     let base64 = $event.detail.params;
+     let decodedString = decodeBase64UrlStr(base64);
+     let jsonObject = JSON.parse(decodedString);
+
+      month = jsonObject.month;
+      year = jsonObject.year;
+      years = jsonObject.years;
+      building = jsonObject.building;
+      buildings = jsonObject.buildings;
+      filename = jsonObject.filename;
+      date = jsonObject.date;
+      rates = jsonObject.rates;
+      data = jsonObject.data;
+
+      modalIsOpen = true;
+     "
+
+     x-init="
+     $watch('modalIsOpen', (value) => {
+        if (!value) {
+          $dispatch('event-receipt-form-reset')
+        }
+     })
+     "
+>
+  <div x-cloak x-show="modalIsOpen" x-transition.opacity.duration.200ms asd-x-trap.inert.noscroll="modalIsOpen"
+       x-on:keydown.esc.window="modalIsOpen = false" x-on:click.self="modalIsOpen = false"
+       class="fixed inset-0 z-30 flex items-end justify-center bg-black/20 p-4 pb-8 backdrop-blur-xs sm:items-center lg:p-8"
+       role="dialog" aria-modal="true" aria-labelledby="defaultModalTitle">
+    <!-- Modal Dialog -->
+    <form x-show="modalIsOpen"
+          x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
+          x-transition:enter-start="scale-0 opacity-0 -translate-y-8" x-transition:enter-end="scale-100"
+          class="flex flex-col gap-4 border max-h-9/10 max-w-9/0 min-w-2/10 rounded-(--radius-selector) border-outline bg-surface text-on-surface dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark"
+          hx-post="/api/receipts"
+          hx-disabled-elt="this, * > input:not([disabled]), * > button:not([disabled]), * > select:not([disabled])"
+          hx-indicator=".htmx-indicator"
+          hx-target="#receipt-form-error"
+          hx-swap="innerHTML"
+    >
+
+      <div id="receipt-form-error" hidden="hidden"></div>
+
+      <input hidden="hidden" x-bind:value="data" name="data"/>
+
+      <div id="receipts-dialog-content" hidden="hidden">
+
+      </div>
+
+      <!-- Dialog Header -->
+      <div
+          class="flex items-center justify-between border-b p-4 border-outline bg-surface-alt/60 dark:border-outline-dark dark:bg-surface-dark/20">
+        <h3 class="font-semibold tracking-wide text-on-surface-strong dark:text-on-surface-dark-strong"
+            x-text="$t('main-receipts-new')">
+        </h3>
+        <button type="button" x-on:click="modalIsOpen = false" aria-label="close modal">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor"
+               fill="none" stroke-width="1.4" class="h-5 w-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+
+      </div>
+      <!-- Dialog Body -->
+      <div class="flex w-full flex-col gap-2 overflow-auto px-4 py-2">
+
+        <p class="text-center font-bold pb-1" x-text="filename"></p>
+
+        <div class="relative flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+          <label for="aptBuildingSelect" class="w-fit text-sm pl-0.5" x-text="$t('main-title-building')">
+          </label>
+          <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
+          <select id="aptBuildingSelect"
+                  name="building"
+                  x-model="building"
+                  class="w-full appearance-none border px-4 py-2 text-sm rounded-(--radius-selector) border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+            <template x-for="value in buildings">
+              <option x-bind:value="value" x-text="value"></option>
+            </template>
+          </select>
+          <small></small>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div class="relative flex w-full max-w-xs flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+            <label for="receiptYearSelect"
+                   class="w-fit text-sm pl-0.5"
+                   x-text="$t('main-title-year')">
+            </label>
+            <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
+            <select id="receiptYearSelect"
+                    name="year"
+                    x-model="year"
+                    class="w-full appearance-none border px-4 py-2 text-sm rounded-(--radius-selector) border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+              <template x-for="v in years">
+                <option x-bind:value="v" x-text="v"></option>
+              </template>
+            </select>
+          </div>
+
+          <div class="relative flex w-full max-w-xs flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+            <label for="receiptMonthSelect"
+                   class="w-fit text-sm pl-0.5"
+                   x-text="$t('main-title-month')">
+            </label>
+            <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
+            <select id="receiptMonthSelect"
+                    name="month"
+                    x-model="month"
+                    class="w-full appearance-none border px-4 py-2 text-sm rounded-(--radius-selector) border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+              <template x-for="month in months">
+                <option x-bind:value="month" x-text="$t('main-months-' + month)"></option>
+              </template>
+            </select>
+          </div>
+        </div>
+
+        <div class="relative flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+          <label for="receiptDateInput"
+                 class="w-fit text-sm pl-0.5"
+                 x-text="$t('main-title-date')">
+          </label>
+          <input
+              id="receiptDateInput"
+              class="inline-flex w-full items-center justify-between gap-2 whitespace-nowrap border px-4 py-2 text-sm font-medium tracking-wide transition border-outline bg-surface-alt text-on-surface rounded-(--radius-selector) hover:opacity-75 focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark"
+              type="date"
+              name="date"
+              placeholder="YYYY-MM-DD"
+              x-model="date"
+          />
+        </div>
+
+        <div class="relative flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
+          <label for="receiptRateSelect" class="w-fit text-sm pl-0.5" x-text="$t('main-title-rates')">
+          </label>
+          <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
+          <select id="receiptRateSelect"
+                  name="rate"
+                  class="w-full appearance-none border px-4 py-2 text-sm rounded-(--radius-selector) border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+            <template x-for="value in rates">
+              <option x-bind:value="value.key">
+                <span x-text="value.dateOfRate"></span>&nbsp;&nbsp;&nbsp;<span x-text="value.rate"></span>
+              </option>
+            </template>
+          </select>
+          <small></small>
+        </div>
+
+      </div>
+
+      <span x-show="errMsg !== ''" x-text="errMsg" class="p-2 border text-danger border-danger"></span>
+
+      <!-- Dialog Footer -->
+      <div
+          class="flex flex-col-reverse justify-between gap-2 border-t p-4 border-outline bg-surface-alt/60 dark:border-outline-dark dark:bg-surface-dark/20 sm:flex-row sm:items-center md:justify-end">
+        <button
+            x-text="$t('main-action-create')"
+            class="whitespace-nowrap border px-4 py-2 text-center text-sm font-medium tracking-wide transition rounded-(--radius-selector) bg-primary border-primary text-on-primary hover:opacity-75 focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+            @click="
+          let form = $el.closest('form');
+          form.classList.remove('border', 'border-success')
+          errMsg = '';
+          "
+        >
+        </button>
+
+        <button x-on:click="
+                  modalIsOpen = false
+                "
+                type="button"
+                class="whitespace-nowrap px-4 py-2 text-center text-sm font-medium tracking-wide transition rounded-(--radius-selector) text-on-surface hover:opacity-75 focus-visible:outline-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark"
+                x-text="$t('main-action-cancel')">
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

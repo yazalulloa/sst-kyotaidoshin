@@ -234,7 +234,7 @@ CREATE INDEX IF NOT EXISTS users_provider_id_idx ON users (provider, provider_id
 
 CREATE TABLE IF NOT EXISTS roles  (
     id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE NOT NULL
+    name TEXT NOT NULL NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS permissions (

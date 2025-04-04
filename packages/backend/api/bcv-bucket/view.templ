@@ -5,6 +5,16 @@ import (
 	"kyotaidoshin/api"
 )
 
+templ spanProcess(item Item) {
+	<span class="flex">
+		<span x-text="$t('main-bcv-files-processed')"></span>
+		if item.Item.Processed {
+			<span>:&nbsp;</span>
+			<span class="w-[2.5em] inline-block text-start">{ fmt.Sprint(item.Item.Rates) }</span>
+		}
+	</span>
+}
+
 templ Search(res TableResponse) {
 	{{ hasWritePerm := api.HasPerms(ctx, api.BCV_FILES_WRITE) }}
 	for _, item := range res.Results {
@@ -26,39 +36,21 @@ templ Search(res TableResponse) {
 			<span>{ item.Item.Etag }</span>
 			@api.SpanFormatDate(fmt.Sprint(item.Item.LastModified))
 			<div class="flex flex justify-center">
-				<div class="relative w-fit">
-					<div
-						aria-describedby={ fmt.Sprintf("%s-tooltip", item.CardId) }
-						class={ "flex flex-row gap-0 justify-center peer rounded-radius w-fit border px-2 py-1 text-xs font-medium tracking-wide focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:focus-visible:outline-primary-dark ",
-      					   templ.KV("border-success bg-success text-on-success dark:border-success dark:bg-success dark:text-on-success", item.Item.Processed),
-      					   templ.KV("border-danger bg-danger text-on-danger dark:border-danger dark:bg-danger dark:text-on-danger", !item.Item.Processed) }
-					>
-						<span x-text="$t('main-bcv-files-processed')"></span>
-						if item.Item.Processed {
-							<span>:&nbsp;</span>
-							<span class="w-[2.5em] inline-block text-start">{ fmt.Sprint(item.Item.Rates) }</span>
-						}
-					</div>
-					if item.Item.ProcessedDate != nil {
-						<div
-							id={ fmt.Sprintf("%s-tooltip", item.CardId) }
-							class="absolute -bottom-9 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap rounded-sm bg-surface-dark px-2 py-1 text-center text-sm text-on-surface-dark-strong opacity-0 transition-all ease-out peer-hover:opacity-100 peer-focus:opacity-100 dark:bg-surface dark:text-on-surface-strong"
-							role="tooltip"
-							data-date={ fmt.Sprint(*item.Item.ProcessedDate) }
-							x-init="
-                					$el.innerHTML = new Date(parseInt($el.getAttribute('data-date')))
-                                                      //.toLocaleDateString()
-                                                     .toLocaleString()
-                                                     "
-						></div>
-					}
-				</div>
+				{{
+			attrs := templ.Attributes{}
+			tooltip := ""
+			if item.Item.ProcessedDate != nil {
+				tooltip = fmt.Sprintf("FormatDate(%d)", *item.Item.ProcessedDate)
+				attrs["x-bind:data-tip"] = tooltip
+			}
+				}}
+				@api.BadgeIndicatorWithTooltipV2(item.Item.Processed, spanProcess(item), attrs)
 			</div>
 			if hasWritePerm {
 				<div class="flex flex-row gap-4 justify-center">
 					<button
 						type="button"
-						class="whitespace-nowrap bg-transparent rounded-full border border-surface-dark p-1 text-sm font-medium tracking-wide text-surface-dark transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-surface-dark active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-surface dark:text-surface dark:focus-visible:outline-surface"
+						class="btn btn-sm btn-ghost btn-circle btn-outline"
 						hx-post={ fmt.Sprintf(_PATH+"/process/%s", item.Key) }
 						hx-disabled-elt="this"
 						hx-indicator=".htmx-indicator"

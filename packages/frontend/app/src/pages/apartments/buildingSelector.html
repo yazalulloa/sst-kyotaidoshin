@@ -1,80 +1,88 @@
-<div x-data="{modalIsOpen: false, buildingsSelected: []}"
-     x-init="$watch('buildingsSelected', value => {
-           let parentElement = $el.parentElement;
-           let elemId = parentElement.getAttribute('data-change-element');
-           let event = parentElement.getAttribute('data-change-event');
-           if (elemId && event) {
-              document.getElementById(elemId).dispatchEvent(new CustomEvent(event));
-           }
-           })"
->
+<div x-data="{
+      buildingsSelected: new Set(),
 
-  <button x-on:click="modalIsOpen = true" type="button"
-          class="inline-flex w-fit items-center justify-between gap-2 whitespace-nowrap border px-4 py-2 text-sm font-medium tracking-wide transition border-outline bg-surface-alt text-on-surface rounded-radius hover:opacity-75 focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark">
+      sendEvent() {
+        let parentElement = $el.parentElement;
+        let elemId = parentElement.getAttribute('data-change-element');
+        let event = parentElement.getAttribute('data-change-event');
+        if (elemId && event) {
+          document.getElementById(elemId).dispatchEvent(new CustomEvent(event));
+        }
+      }
+      }"
+>
+  <!-- Open the modal using ID.showModal() method -->
+  <button class="btn btn-neutral" @click="$el.nextElementSibling.showModal()">
     <div class="flex flex-row gap-0">
       <span x-text="$t('main-title-buildings')"></span><span>:&nbsp;</span><span
-        x-text="buildingsSelected.length"></span>
+        x-text="buildingsSelected.size"></span>
     </div>
   </button>
-  <div x-cloak x-show="modalIsOpen" x-transition.opacity.duration.200ms asd-x-trap.inert.noscroll="modalIsOpen"
-       x-on:keydown.esc.window="modalIsOpen = false" x-on:click.self="modalIsOpen = false"
-       class="fixed inset-0 z-30 flex items-end justify-center bg-black/20 p-4 pb-8 backdrop-blur-xs sm:items-center lg:p-8"
-       role="dialog" aria-modal="true" aria-labelledby="defaultModalTitle">
-    <!-- Modal Dialog -->
-    <div x-show="modalIsOpen"
-         x-transition:enter="transition ease-out duration-200 delay-100 motion-reduce:transition-opacity"
-         x-transition:enter-start="scale-0 opacity-0 -translate-y-8" x-transition:enter-end="scale-100"
-         class="flex max-w-lg flex-col gap-4 overflow-hidden border min-w-2/10 rounded-radius border-outline bg-surface text-on-surface dark:border-outline-dark dark:bg-surface-dark-alt dark:text-on-surface-dark">
+  <dialog class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box p-0">
+
       <!-- Dialog Header -->
       <div
-          class="flex items-center justify-between border-b p-4 border-outline bg-surface-alt/60 dark:border-outline-dark dark:bg-surface-dark/20">
+          class="flex items-center justify-between border-b p-4 border-outline bg-base-200">
         <h3 id="defaultModalTitle"
-            class="font-semibold tracking-wide text-on-surface-strong dark:text-on-surface-dark-strong"
+            class="font-semibold tracking-wide"
             x-text="$t('main-title-select-building')"></h3>
-        <button x-on:click="modalIsOpen = false" aria-label="close modal">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor"
-               fill="none" stroke-width="1.4" class="h-5 w-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-          </svg>
-        </button>
+
+        <div class="mt-0 modal-action">
+          <form method="dialog">
+            <button class="btn btn-circle btn-outline btn-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                   stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </form>
+        </div>
       </div>
-      <!-- Dialog Body -->
+
       <div class="grid grid-cols-2 gap-3 px-4 py-8">
 
         <template x-for="value in buildings">
-          <label
-              class="flex has-disabled:cursor-not-allowed items-center gap-2 px-2 py-1 text-base font-medium has-disabled:opacity-75 text-on-surface has-checked:text-on-surface-strong hover:rounded-radius hover:border-outline hover:border dark:has-checked:text-on-surface-dark-strong dark:text-on-surface-dark hover:dark:border-outline-dark">
-            <div class="relative flex items-center">
-              <input type="checkbox"
-                     name="building_input"
-                     class="before:content[''] peer relative size-5 appearance-none overflow-hidden rounded-sm border border-outline bg-surface-alt before:absolute before:inset-0 checked:border-primary checked:before:bg-primary focus:outline-2 focus:outline-offset-2 focus:outline-outline-strong checked:focus:outline-primary active:outline-offset-0 disabled:cursor-not-allowed dark:border-outline-dark dark:bg-surface-dark-alt dark:checked:border-primary-dark dark:checked:before:bg-primary-dark dark:focus:outline-outline-dark-strong dark:checked:focus:outline-primary-dark"
-                     x-bind:value="value"
-                     x-bind:checked="buildingsSelected.includes(value)"
-                     @click="buildingsSelected.includes(value) ? buildingsSelected = buildingsSelected.filter(a => a !== value) : buildingsSelected.push(value);"
-              />
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor"
-                   fill="none" stroke-width="4"
-                   class="pointer-events-none peer-checked:visible invisible absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-3 text-on-primary dark:text-on-primary-dark">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
-              </svg>
-            </div>
+          <label class="fieldset-label p-1 hover:border hover:rounded-(--radius-selector)">
+            <input type="checkbox"
+                   name="building_input"
+                   class="checkbox"
+                   x-bind:value="value"
+                   x-bind:checked="buildingsSelected.has(value)"
+                   @click="
+                    if (buildingsSelected.has(value)) {
+                      buildingsSelected.delete(value);
+                    } else {
+                      buildingsSelected.add(value);
+                    }
+                    sendEvent();
+                   "
+            />
             <span x-text="value"></span>
           </label>
         </template>
 
       </div>
+
+
       <!-- Dialog Footer -->
       <div
-          class="flex flex-col-reverse justify-between gap-2 border-t p-4 border-outline bg-surface-alt/60 dark:border-outline-dark dark:bg-surface-dark/20 sm:flex-row sm:items-center md:justify-end">
+          class="flex flex-col-reverse justify-between gap-2 border-t p-4 border-outline bg-base-200 sm:flex-row sm:items-center md:justify-end">
         <button x-on:click="
-                  modalIsOpen = false
-                  buildingsSelected = []
+                  if (buildingsSelected.size > 0) {
+                    buildingsSelected.clear()
+                    sendEvent();
+                  }
+                  $el.closest('dialog').close();
                 "
                 type="button"
-                class="whitespace-nowrap border px-4 py-2 text-center text-sm font-medium tracking-wide transition rounded-radius border-primary bg-primary text-on-primary hover:opacity-75 focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 dark:border-primary-dark dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+                class="btn btn-secondary"
                 x-text="$t('main-action-clear')">
         </button>
       </div>
     </div>
-  </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
 </div>

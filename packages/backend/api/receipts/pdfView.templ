@@ -17,6 +17,12 @@ templ ReceiptHeader(dto CalculatedReceipt) {
 }
 
 templ Views(key string, dto CalculatedReceipt, idMap map[string]string, tabs string) {
+	<div id="receipt-info" hx-swap-oob="true" class="flex gap-2">
+		<span>{ dto.Building.Name }</span>
+		<span>{ dto.Receipt.Date.Format(time.DateOnly) }</span>
+		<span>{ fmt.Sprint(dto.Receipt.Year) }</span>
+		<span>{ strings.ToUpper(dto.MonthStr) }</span>
+	</div>
 	<div id="pdf-header" hx-swap-oob="beforeend">
 		<div
 			data-tabs={ tabs }
@@ -43,7 +49,7 @@ templ Views(key string, dto CalculatedReceipt, idMap map[string]string, tabs str
 			hx-target="this"
 			hx-swap="none"
 			type="button"
-			class="w-fit inline-flex justify-center items-center gap-2 whitespace-nowrap rounded-radius bg-primary border border-primary dark:border-primary-dark px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+			class="btn btn-neutral"
 			hx-on:htmx:before-request="this.dispatchEvent(new CustomEvent('event-is-loading'))"
 			hx-on:htmx:after-request="this.dispatchEvent(new CustomEvent('event-is-not-loading'))"
 			@event-is-loading="isLoading = true"
@@ -78,7 +84,7 @@ templ Views(key string, dto CalculatedReceipt, idMap map[string]string, tabs str
 				hx-target="this"
 				hx-swap="none"
 				type="button"
-				class="w-fit inline-flex justify-center items-center gap-2 whitespace-nowrap rounded-radius bg-primary border border-primary dark:border-primary-dark px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+				class="btn btn-neutral"
 				hx-on:htmx:before-request="this.dispatchEvent(new CustomEvent('event-is-loading'))"
 				hx-on:htmx:after-request="this.dispatchEvent(new CustomEvent('event-is-not-loading'))"
 				@event-is-loading="isLoading = true"

@@ -73,7 +73,7 @@ templ FormResponseView(res FormResponse) {
   		counter = parseInt($el.getAttribute('data-counter'));
 
  		 if (errMsg === '') {
- 		  modalIsOpen = false;
+ 		  $dispatch('event-apartment-form-close');
  		 }
 
   		if ($el.getAttribute('data-send-event') === 'true') {

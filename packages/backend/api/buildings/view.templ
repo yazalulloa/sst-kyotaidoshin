@@ -60,14 +60,7 @@ templ Search(res TableResponse) {
 					<span>{ fmt.Sprint(item.Item.EmailConfig) }</span>
 				</span>
 			</div>
-			<span
-				data-date={ fmt.Sprint(item.CreatedAt) }
-				x-init="
-      					$el.innerHTML = new Date(parseInt($el.getAttribute('data-date')))
-                                            //.toLocaleDateString()
-                                           .toLocaleString()
-                                           "
-			></span>
+			@api.SpanFormatDate(fmt.Sprint(item.CreatedAt))
 			if hasWritePerm {
 				<div class="flex flex-row flex-wrap gap-2 justify-center items-center">
 					<a href={ templ.URL(fmt.Sprintf("/buildings/edit/%s", item.Key)) }>

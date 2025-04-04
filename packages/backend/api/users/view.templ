@@ -89,7 +89,7 @@ templ UserRoleFormResponseView(res FormResponse) {
   		errMsg = $el.getAttribute('data-response-err');
 
   		if (errMsg === '') {
-  		  modalIsOpen = false;
+  		  $dispatch('event-users-form-close');
   		 }
   		"
 	></div>

@@ -2,7 +2,6 @@ package receipts
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"kyotaidoshin/api"
 	"kyotaidoshin/debts"
 	"kyotaidoshin/expenses"
@@ -55,55 +54,25 @@ templ ItemView(item Item) {
 		<span>{ fmt.Sprint(item.Item.Year) }</span>
 		<span>{ item.Item.Date.Format(time.DateOnly) }</span>
 		<div class="flex justify-center">
-			if item.Item.LastSent != nil {
-				{{
-		tooltipId := "tooltip-" + uuid.New().String()
-		lastSent := fmt.Sprint(*item.LastSent)
-				}}
-				@api.BadgeIndicatorWithTooltip(item.Item.Sent, tooltipId, api.SpanWitX_Text("$t('main-title-sent')"), api.Tooltip(tooltipId, api.SpanFormatDate(lastSent)))
-			} else {
-				@api.BadgeIndicatorWithTooltip(item.Item.Sent, "", api.SpanWitX_Text("$t('main-title-sent')"), nil)
+			{{
+			attrs := templ.Attributes{}
+			tooltip := ""
+			if item.LastSent != nil {
+				tooltip = fmt.Sprintf("FormatDate(%d)", *item.LastSent)
+				attrs["x-bind:data-tip"] = tooltip
 			}
+			}}
+			@api.BadgeIndicatorWithTooltipV2(tooltip != "", api.SpanWitX_Text("$t('main-title-sent')"), attrs)
 		</div>
 		@api.SpanFormatDate(fmt.Sprint(item.CreatedAt))
-		<div class="flex justify-center">
-			<div
-				x-data="{ isOpen: false, openedWithKeyboard: false }"
-				x-on:keydown.esc.window="isOpen = false, openedWithKeyboard = false"
-				class="relative w-fit"
-			>
-				<!-- Toggle Button -->
-				<button
-					type="button"
-					aria-label="context menu"
-					x-on:click="isOpen = ! isOpen"
-					x-on:keydown.space.prevent="openedWithKeyboard = true"
-					x-on:keydown.enter.prevent="openedWithKeyboard = true"
-					x-on:keydown.down.prevent="openedWithKeyboard = true"
-					class="inline-flex items-center bg-transparent transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-outline-strong active:opacity-100 dark:focus-visible:outline-outline-dark-strong"
-					x-bind:class="isOpen || openedWithKeyboard ? 'text-on-surface-strong dark:text-on-surface-dark-strong' : 'text-on-surface dark:text-on-surface-dark'"
-					x-bind:aria-expanded="isOpen || openedWithKeyboard"
-					aria-haspopup="true"
-				>
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" class="w-8 h-8">
-						<path fill-rule="evenodd" d="M4.5 12a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm6 0a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm6 0a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z" clip-rule="evenodd"></path>
-					</svg>
-				</button>
-				<!-- Dropdown Menu -->
-				<div
-					x-cloak
-					x-show="isOpen || openedWithKeyboard"
-					x-transition
-					x-trap="openedWithKeyboard"
-					x-on:click.outside="isOpen = false, openedWithKeyboard = false"
-					x-on:keydown.down.prevent="$focus.wrap().next()"
-					x-on:keydown.up.prevent="$focus.wrap().previous()"
-					class="z-40 absolute right-full mr-1 top-0 flex w-fit min-w-48 flex-col divide-y divide-outline overflow-hidden rounded-radius border border-outline bg-surface-alt dark:divide-outline-dark dark:border-outline-dark dark:bg-surface-dark-alt"
-					role="menu"
-				>
-					<!-- Dropdown Section -->
-					<div class="flex flex-col py-1.5">
-						if hasWritePerm {
+		<div class="flex justify-center w-full">
+			<div class="dropdown dropdown-hover dropdown-left w-fit">
+				<div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+					<svg x-bind:data-src="menuVerticalIconUrl" class="size-5"></svg>
+				</div>
+				<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+					if hasWritePerm {
+						<li>
 							<a
 								hx-delete={ fmt.Sprintf(_PATH+"/%s", item.Key) }
 								hx-target={ "#" + item.CardId }
@@ -115,24 +84,26 @@ templ ItemView(item Item) {
 								hx-disabled-elt="this"
 								hx-trigger="mousedown"
 								hx-swap="delete swap:300ms"
-								class="flex items-center gap-2 bg-surface-alt px-4 py-2 text-sm text-on-surface hover:bg-surface-dark-alt/5 hover:text-on-surface-strong focus-visible:bg-surface-dark-alt/10 focus-visible:text-on-surface-strong focus-visible:outline-hidden dark:bg-surface-dark-alt dark:text-on-surface-dark dark:hover:bg-surface-alt/5 dark:hover:text-on-surface-dark-strong dark:focus-visible:bg-surface-alt/10 dark:focus-visible:text-on-surface-dark-strong"
-								role="menuitem"
+								class="flex items-center gap-2"
 							>
-								<div class="rounded-full border border-danger p-1 text-danger dark:border-danger dark:text-danger">
+								<div class="rounded-full border border-error p-1 text-error">
 									<svg x-bind:data-src="deleteIconUrl" data-cache="21600" class="size-3"></svg>
 								</div>
 								<span x-text="$t('main-action-delete')"></span>
 							</a>
+						</li>
+						<li>
 							<a
 								href={ templ.URL(fmt.Sprintf("/receipts/edit/%s", item.Key)) }
-								class="flex items-center gap-2 bg-surface-alt px-4 py-2 text-sm text-on-surface hover:bg-surface-dark-alt/5 hover:text-on-surface-strong focus-visible:bg-surface-dark-alt/10 focus-visible:text-on-surface-strong focus-visible:outline-hidden dark:bg-surface-dark-alt dark:text-on-surface-dark dark:hover:bg-surface-alt/5 dark:hover:text-on-surface-dark-strong dark:focus-visible:bg-surface-alt/10 dark:focus-visible:text-on-surface-dark-strong"
-								role="menuitem"
+								class="flex items-center gap-2"
 							>
-								<div class="rounded-full border border-success p-1 text-success dark:border-success dark:text-success">
+								<div class="rounded-full border border-success p-1 text-success">
 									<svg x-bind:data-src="editIconUrl" data-cache="21600" class="size-3"></svg>
 								</div>
 								<span x-text="$t('main-action-edit')"></span>
 							</a>
+						</li>
+						<li>
 							<a
 								hx-post={ fmt.Sprintf(_DUPLICATE+"/%s", item.Key) }
 								hx-indicator=".htmx-indicator"
@@ -140,21 +111,23 @@ templ ItemView(item Item) {
 								hx-trigger="mousedown"
 								hx-target="#default-anchor"
 								hx-swap="innerHTML"
-								class="flex items-center gap-2 bg-surface-alt px-4 py-2 text-sm text-on-surface hover:bg-surface-dark-alt/5 hover:text-on-surface-strong focus-visible:bg-surface-dark-alt/10 focus-visible:text-on-surface-strong focus-visible:outline-hidden dark:bg-surface-dark-alt dark:text-on-surface-dark dark:hover:bg-surface-alt/5 dark:hover:text-on-surface-dark-strong dark:focus-visible:bg-surface-alt/10 dark:focus-visible:text-on-surface-dark-strong"
-								role="menuitem"
+								class="flex items-center gap-2"
 							>
 								<svg x-bind:data-src="duplicateIconUrl" data-cache="21600" class="size-5"></svg>
 								<span x-text="$t('main-action-copy')"></span>
 							</a>
-						}
+						</li>
+					}
+					<li>
 						<a
 							href={ templ.URL(fmt.Sprintf("/receipts/view/%s", item.Key)) }
-							class="flex items-center gap-2 bg-surface-alt px-4 py-2 text-sm text-on-surface hover:bg-surface-dark-alt/5 hover:text-on-surface-strong focus-visible:bg-surface-dark-alt/10 focus-visible:text-on-surface-strong focus-visible:outline-hidden dark:bg-surface-dark-alt dark:text-on-surface-dark dark:hover:bg-surface-alt/5 dark:hover:text-on-surface-dark-strong dark:focus-visible:bg-surface-alt/10 dark:focus-visible:text-on-surface-dark-strong"
-							role="menuitem"
+							class="flex items-center gap-2"
 						>
 							<svg x-bind:data-src="receiptIconUrl" data-cache="21600" class="size-5"></svg>
 							<span x-text="$t('main-action-view-receipts')"></span>
 						</a>
+					</li>
+					<li>
 						<a
 							hx-get={ fmt.Sprintf(_DOWNLOAD_ZIP_FILE+"/%s", item.Key) }
 							todo-fix-hx-indicator=".htmx-indicator"
@@ -162,51 +135,52 @@ templ ItemView(item Item) {
 							hx-trigger="mousedown"
 							hx-target="this"
 							hx-swap="none"
-							class="flex items-center gap-2 bg-surface-alt px-4 py-2 text-sm text-on-surface hover:bg-surface-dark-alt/5 hover:text-on-surface-strong focus-visible:bg-surface-dark-alt/10 focus-visible:text-on-surface-strong focus-visible:outline-hidden dark:bg-surface-dark-alt dark:text-on-surface-dark dark:hover:bg-surface-alt/5 dark:hover:text-on-surface-dark-strong dark:focus-visible:bg-surface-alt/10 dark:focus-visible:text-on-surface-dark-strong"
+							class="flex items-center gap-2"
 							hx-on:htmx:before-request="this.dispatchEvent(new CustomEvent('event-is-loading'))"
 							hx-on:htmx:after-request="this.dispatchEvent(new CustomEvent('event-is-not-loading'))"
 							@event-is-loading="isLoading = true"
 							@event-is-not-loading="isLoading = false"
-							x-data="{
-                    			 isLoading: false,
-                    			}"
+							x-data="{isLoading: false}"
 							x-bind:disabled="isLoading"
-							role="menuitem"
 						>
 							<svg x-bind:data-src="zipFileIconUrl" data-cache="21600" class="size-5"></svg>
 							<span x-text="$t('main-action-download-zip')"></span>
 							<svg
 								x-show="isLoading"
 								x-bind:data-src="loadingIconUrl"
-								class="size-5 animate-spin motion-reduce:animate-none fill-on-primary dark:fill-on-primary-dark"
+								class="size-5 animate-spin motion-reduce:animate-none fill-on-primary"
 							></svg>
 						</a>
-						if hasWritePerm {
+					</li>
+					if hasWritePerm {
+						<li>
 							<a
 								hx-get={ fmt.Sprintf(_SEND_PDFS+"/%s", item.Key) }
 								hx-indicator=".htmx-indicator"
 								hx-disabled-elt="this"
 								hx-trigger="mousedown"
 								hx-swap="none"
-								class="flex items-center gap-2 bg-surface-alt px-4 py-2 text-sm text-on-surface hover:bg-surface-dark-alt/5 hover:text-on-surface-strong focus-visible:bg-surface-dark-alt/10 focus-visible:text-on-surface-strong focus-visible:outline-hidden dark:bg-surface-dark-alt dark:text-on-surface-dark dark:hover:bg-surface-alt/5 dark:hover:text-on-surface-dark-strong dark:focus-visible:bg-surface-alt/10 dark:focus-visible:text-on-surface-dark-strong"
-								role="menuitem"
+								class="flex items-center gap-2"
 							>
 								<svg x-bind:data-src="sendMailIconUrl" data-cache="21600" class="size-5"></svg>
 								<span x-text="$t('main-action-send-pdfs-now')"></span>
 							</a>
+						</li>
+						<li>
 							<button
 								data-params={ item.UpdateParams }
 								@click="
-            						    isOpen = false;
-            						    $dispatch('event-open-send-dialog', { params: $el.dataset.params })
-            						  "
-								class="flex items-center gap-2 bg-surface-alt px-4 py-2 text-sm text-on-surface hover:bg-surface-dark-alt/5 hover:text-on-surface-strong focus-visible:bg-surface-dark-alt/10 focus-visible:text-on-surface-strong focus-visible:outline-hidden dark:bg-surface-dark-alt dark:text-on-surface-dark dark:hover:bg-surface-alt/5 dark:hover:text-on-surface-dark-strong dark:focus-visible:bg-surface-alt/10 dark:focus-visible:text-on-surface-dark-strong"
-								role="menuitem"
+                              						    isOpen = false;
+                              						    $dispatch('event-open-send-dialog', { params: $el.dataset.params })
+                              						  "
+								class="flex items-center gap-2"
 							>
 								<svg x-bind:data-src="sendMailIconUrl" data-cache="21600" class="size-5"></svg>
 								<span x-text="$t('main-action-send-pdfs')"></span>
 							</button>
-						}
+						</li>
+					}
+					<li>
 						<a
 							hx-get={ fmt.Sprintf(_DOWNLOAD_HTML_FILE+"/%s", item.Key) }
 							hx-indicator=".htmx-indicator"
@@ -214,15 +188,14 @@ templ ItemView(item Item) {
 							hx-trigger="mousedown"
 							hx-target="#anchor-download-html"
 							hx-swap="innerHTML"
-							class="flex items-center gap-2 bg-surface-alt px-4 py-2 text-sm text-on-surface hover:bg-surface-dark-alt/5 hover:text-on-surface-strong focus-visible:bg-surface-dark-alt/10 focus-visible:text-on-surface-strong focus-visible:outline-hidden dark:bg-surface-dark-alt dark:text-on-surface-dark dark:hover:bg-surface-alt/5 dark:hover:text-on-surface-dark-strong dark:focus-visible:bg-surface-alt/10 dark:focus-visible:text-on-surface-dark-strong"
-							role="menuitem"
+							class="flex items-center gap-2"
 						>
 							<div hidden="hidden" id="anchor-download-html"></div>
 							<svg x-bind:data-src="sendMailIconUrl" data-cache="21600" class="size-5"></svg>
 							<span x-text="$t('main-action-download-html')"></span>
 						</a>
-					</div>
-				</div>
+					</li>
+				</ul>
 			</div>
 		</div>
 	</li>
@@ -329,7 +302,10 @@ templ SendPdfsView(progressId string, closeModal bool) {
 		</div>
 	</div>
 	if closeModal {
-		<div x-init="modalIsOpen = false"></div>
+		<div x-init="
+		   $dispatch('event-close-send-dialog')
+		   $el.remove()
+		"></div>
 	}
 }
 

@@ -180,15 +180,16 @@ export default $config({
     const receiptsBucket = new sst.aws.Bucket("ReceiptsBucket", {
       versioning: false,
     });
-    const htmlToPdf = new sst.aws.Function("HtmlToPdf", {
-      link: [receiptsBucket],
-      handler: "packages/backend/html-to-pdf/index.handler",
-      nodejs: {
-        install: ["@sparticuz/chromium"],
-      },
-      timeout: "80 seconds",
-      memory: "2 GB",
-    });
+
+    // const htmlToPdf = new sst.aws.Function("HtmlToPdf", {
+    //   link: [receiptsBucket],
+    //   handler: "packages/backend/html-to-pdf/index.handler",
+    //   nodejs: {
+    //     install: ["@sparticuz/chromium"],
+    //   },
+    //   timeout: "80 seconds",
+    //   memory: "2 GB",
+    // });
 
     const receiptPdfQueue = new sst.aws.Queue("ReceiptPdfQueue", {
       //not supported for S3 notificationsm
@@ -202,13 +203,18 @@ export default $config({
         secretTursoUrl,
         receiptsBucket,
         mailerConfigsSecret,
-        htmlToPdf,
         altEmailsRecipientSecret,
         htmlToPdfFunction,
       ],
       runtime: "go",
       handler: "packages/backend/process-pdf-objects/",
       timeout: "300 seconds",
+      permissions: [
+        {
+          actions: ["lambda:InvokeFunction"],
+          resources: [htmlToPdfFunction.value]
+        },
+      ]
     });
 
     const mainApiFunction = new sst.aws.Function("MainApiFunction", {
@@ -223,7 +229,6 @@ export default $config({
         auth,
         verifyAccessFunction,
         receiptsBucket,
-        htmlToPdf,
         receiptPdfQueue,
         mailerConfigsSecret,
         htmlToPdfFunction,
@@ -268,7 +273,7 @@ export default $config({
       },
       assets: {
         bucket: webAssetsBucket.name,
-        routes: ["isr"],
+        routes: ["isr", "assets"],
         fileOptions: [
           {
             files: "index.html",

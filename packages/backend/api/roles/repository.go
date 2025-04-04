@@ -168,8 +168,13 @@ func update(role model.Roles) (int64, error) {
 }
 
 func deleteById(id int32) (int64, error) {
+	res, err := RolePermissions.DELETE().WHERE(RolePermissions.RoleID.EQ(sqlite.Int32(id))).Exec(db.GetDB().DB)
+	if err != nil {
+		return 0, err
+	}
+
 	stmt := Roles.DELETE().WHERE(Roles.ID.EQ(sqlite.Int32(id)))
-	res, err := stmt.Exec(db.GetDB().DB)
+	res, err = stmt.Exec(db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}

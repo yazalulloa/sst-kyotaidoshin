@@ -16,7 +16,7 @@
       active: true,
       currency: '',
 
-      select_all: false,
+      selectAll: false,
       apartmentsSelected: [],
 
       descriptionErr: '',
@@ -36,15 +36,7 @@
           currency = jsonObject.currency;
           apartmentsSelected = jsonObject.apts;
 
-          document.getElementById('extraChargeDescriptionInput').scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-            inline: 'center'
-          });
-          document.getElementById('extraChargeDescriptionInput').focus({
-             preventScroll: true,
-             focusVisible: true
-          });
+          focusAndScroll('extraChargeDescriptionInput');
      "
        @event-extra-charge-form-restart-after-deletion="
               let v = $event.detail?.key?.trim();
@@ -63,7 +55,7 @@
               amount = '';
               active = true;
               apartmentsSelected = [];
-              select_all = false;
+              selectAll = false;
               is_edit = false;
               key = buildingKey;
               errMsg = '';
@@ -110,7 +102,7 @@
         <input
             id="extraChargeDescriptionInput"
             type="text"
-            class="w-full border px-2 py-2 text-sm rounded-radius bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+            class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
             name="description"
             maxlength="100"
             x-model="description"
@@ -138,7 +130,7 @@
         </label>
         <input
             id="extraChargesAmountInput"
-            class="w-full border px-2 py-2 text-sm rounded-radius bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
+            class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
             type="number"
             name="amount"
             maxlength="14"
@@ -172,20 +164,16 @@
           <span x-text="$t('main-title-active')"></span>
         </label>
 
-        <div class="relative flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-          <label for="extraChargesCurrencySelect" class="w-fit text-sm pl-0.5"
-                 x-text="$t('main-title-currency')"></label>
-          <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
-          <select id="extraChargesCurrencySelect"
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend" x-text="$t('main-title-currency')"></legend>
+          <select class="select w-full"
                   name="currency"
-                  x-model="currency"
-                  class="w-full appearance-none border px-4 py-2 text-sm rounded-radius border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+                  x-model="currency">
             <template x-for="value in currencies">
               <option x-bind:value="value" x-text="value"></option>
             </template>
           </select>
-          <small></small>
-        </div>
+        </fieldset>
 
       </div>
 
@@ -198,13 +186,13 @@
 
       <p x-show="errMsg !== ''" x-text="errMsg" class="border text-danger border-danger"></p>
 
-      <div class="flex flex-row justify-start gap-2">
+      <div class="flex flex-col-reverse justify-between gap-2 sm:flex-row sm:items-center md:justify-end">
         <button
             x-text="is_edit ? $t('main-action-update') : $t('main-action-create')"
             x-effect="
              $el.disabled=!(description?.trim()?.length > 0 && parseFloat(amount) > 0 && apartmentsSelected.length > 0)
             "
-            class="whitespace-nowrap border px-4 py-2 text-center text-sm font-medium tracking-wide transition rounded-radius bg-primary border-primary text-on-primary hover:opacity-75 focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+            class="btn btn-primary"
             @click="
               let form = document.getElementById('extra-charges-form');
               form.classList.remove('border', 'border-success')
@@ -212,7 +200,7 @@
             ">
         </button>
         <button type="button"
-                class="whitespace-nowrap border px-4 py-2 text-center text-sm font-medium tracking-wide transition rounded-radius bg-surface-alt border-surface-alt text-on-surface-strong hover:opacity-75 focus-visible:outline-surface-alt focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark-alt"
+                class="btn btn-secondary"
                 @click.prevent="$dispatch('event-extra-charge-form-reset')"
                 x-text="$t('main-action-clear')">
         </button>

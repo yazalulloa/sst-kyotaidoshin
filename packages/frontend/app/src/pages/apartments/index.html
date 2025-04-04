@@ -26,21 +26,31 @@
       }
     </script>
 
-    <div x-show="hasPerm('apartments:upload_backup')"
-         x-data="{
-        formId: 'apartments-upload-backup',
-        uploadFormPath: '/api/apartments/uploadBackupForm',
-        uploadFileCallback: '/api/apartments/upload/backup',
-        callBackSwap: 'innerHTML',
-        btnText: 'main-action-upload-backup',
-        fileAccept: '.json.gz'
-       }">
-      <div hidden="hidden"
-           x-bind:hx-get="uploadFormPartialUrl"
-           hx-trigger="load"
-           hx-swap="outerHTML">
-      </div>
-    </div>
+    <label class="input">
+      <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </g>
+      </svg>
+      <input type="search"
+             class="grow"
+             aria-label="search"
+             x-bind:placeholder="$t('main-action-search')"
+             name="apt_search_input"
+             @event-new_apt="updateApt()"
+             x-data="{ search: ''}"
+             x-model.debounce.300ms="search"
+             x-init="
+            trimInput($el);
+              $watch('search', (value, oldValue) => {
+                if (value !== oldValue) {
+                   updateApt()
+                }
+              });"
+             @search="updateApt()"
+      />
+    </label>
 
     <div x-bind:hx-get="apartmentsFormDialogPartialUrl"
          hx-trigger="load"
@@ -59,32 +69,6 @@
       </div>
     </div>
 
-    <div class="relative flex w-full flex-col gap-1 max-w-3xs text-on-surface dark:text-on-surface-dark">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-           aria-hidden="true"
-           class="absolute top-1/2 -translate-y-1/2 left-2.5 size-5 text-on-surface/50 dark:text-on-surface-dark/50">
-        <path stroke-linecap="round" stroke-linejoin="round"
-              d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
-      </svg>
-      <input type="search"
-             class="w-full border py-2 pr-2 pl-10 text-sm rounded-radius border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
-             name="apt_search_input"
-             x-bind:placeholder="$t('main-action-search')"
-             aria-label="search"
-             @event-new_apt="updateApt()"
-             x-data="{ search: ''}"
-             x-model.debounce.300ms="search"
-             x-init="
-            trimInput($el);
-              $watch('search', (value, oldValue) => {
-                if (value !== oldValue) {
-                   updateApt()
-                }
-              });"
-             @search="updateApt()"/>
-    </div>
-
-
     <div id="apartments-updater"
          hidden="hidden"
          hx-get="/api/apartments/search"
@@ -100,6 +84,22 @@
          hx-trigger="load"
          hx-swap="outerHTML"
          hidden="hidden">
+    </div>
+
+    <div x-show="hasPerm('apartments:upload_backup')"
+         x-data="{
+        formId: 'apartments-upload-backup',
+        uploadFormPath: '/api/apartments/uploadBackupForm',
+        uploadFileCallback: '/api/apartments/upload/backup',
+        callBackSwap: 'innerHTML',
+        btnText: 'main-action-upload-backup',
+        fileAccept: '.json.gz'
+       }">
+      <div hidden="hidden"
+           x-bind:hx-get="uploadFormPartialUrl"
+           hx-trigger="load"
+           hx-swap="outerHTML">
+      </div>
     </div>
   </div>
 

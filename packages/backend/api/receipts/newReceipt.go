@@ -278,7 +278,9 @@ func parseExpenses(rows *[][]string) ([]model.Expenses, error) {
 				continue
 			}
 
-			if strings.Contains(description, "TOTAL GASTOS NO COMUNES") || strings.Contains(description, "TOTAL GASTOS DEL MES") {
+			if strings.Contains(description, "TOTAL GASTOS NO COMUNES") ||
+				strings.Contains(description, "TOTAL GASTOS DEL MES") ||
+				strings.Contains(description, "TOTAL GASTOS DE MES") {
 				break
 			}
 

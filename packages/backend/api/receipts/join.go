@@ -514,7 +514,7 @@ func CalculateReceipt(buildingId, receiptId, keyStr string) (*CalculatedReceipt,
 						}
 						for j, month := range year.Months {
 
-							builder.WriteString(util.FromInt16ToMonth(month))
+							builder.WriteString(strings.ToUpper(util.FromInt16ToMonthShort(month)))
 							if j != len(year.Months)-1 {
 								builder.WriteString(", ")
 							}
@@ -526,6 +526,12 @@ func CalculateReceipt(buildingId, receiptId, keyStr string) (*CalculatedReceipt,
 				}
 
 				debtMonthStr = builder.String()
+			}
+
+			if debtMonthStr == "SOLVENTE" {
+				if debt.Receipts > 0 {
+					debtMonthStr = fmt.Sprintf("%d RECIBOS", debt.Receipts)
+				}
 			}
 		}
 

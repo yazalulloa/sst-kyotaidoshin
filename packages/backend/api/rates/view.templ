@@ -27,15 +27,8 @@ templ Search(res TableResponse) {
 				<div class="w-8">{ item.Item.FromCurrency }</div>
 			</div>
 			<span class="text-end">{ util.FormatFloat64(item.Item.Rate) }</span>
-			<span>{ item.DateOfRate }</span>
-			<span
-				data-date={ fmt.Sprint(item.DateOfFile) }
-				x-init="
-					$el.innerHTML = new Date(parseInt($el.getAttribute('data-date')))
-                                      //.toLocaleDateString()
-                                     .toLocaleString()
-                                     "
-			></span>
+			<span class="text-center">{ item.DateOfRate }</span>
+			@api.SpanFormatDate(fmt.Sprint(item.DateOfFile))
 			if hasWritePerm {
 				@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{"hx-include": "[name='currency_input'],[name='date_input']"})
 			}

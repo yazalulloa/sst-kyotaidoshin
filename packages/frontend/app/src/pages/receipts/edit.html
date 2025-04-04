@@ -12,6 +12,14 @@
     </div>
   </div>
 
+  <a
+      x-bind:href="`/receipts/view/${key}`"
+      class="btn btn-neutral"
+  >
+    <svg x-bind:data-src="receiptIconUrl" data-cache="21600" class="size-5"></svg>
+    <span x-text="$t('main-action-view-receipts')"></span>
+  </a>
+
   <button
       type="button"
       x-bind:hx-get="`/api/receipts/download/zip/${key}`"
@@ -24,7 +32,7 @@
       @event-is-not-loading="isLoading = false"
       x-data="{isLoading: false}"
       x-bind:disabled="isLoading"
-      class="w-fit inline-flex justify-center items-center gap-2 whitespace-nowrap rounded-radius bg-primary border border-primary dark:border-primary-dark px-4 py-2 text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+      class="btn btn-neutral"
   >
     <svg x-bind:data-src="zipFileIconUrl" data-cache="21600" class="size-5"></svg>
     <span x-text="$t('main-action-download-zip')"></span>
@@ -34,17 +42,9 @@
         class="size-5 animate-spin motion-reduce:animate-none fill-on-primary dark:fill-on-primary-dark"
     ></svg>
   </button>
-
-  <a
-      x-bind:href="`/receipts/view/${key}`"
-      class="w-fit inline-flex justify-center items-center gap-2 whitespace-nowrap rounded-radius bg-primary border border-primary px-4 py-2 text-center text-sm font-medium tracking-wide text-on-primary transition hover:opacity-75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:border-primary-dark dark:bg-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
-  >
-    <svg x-bind:data-src="receiptIconUrl" data-cache="21600" class="size-5"></svg>
-    <span x-text="$t('main-action-view-receipts')"></span>
-  </a>
 </div>
 
-<div id="container" class="" hx-swap-oob="true" hx-include="fade-me-out fade-me-in">
+<div id="container" class="" hx-swap-oob="true">
   <div x-bind:hx-get="receiptsFormPartialUrl"
        hx-trigger="load"
        hx-swap="outerHTML">

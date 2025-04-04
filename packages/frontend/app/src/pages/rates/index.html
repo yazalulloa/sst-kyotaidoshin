@@ -36,26 +36,18 @@
     </div>
   </div>
 
-  <label>
-    <input
-        class="inline-flex w-fit items-center justify-between gap-2 whitespace-nowrap border px-4 py-2 text-sm font-medium tracking-wide transition border-outline bg-surface-alt text-on-surface rounded-radius hover:opacity-75 focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark"
-        type="date"
-        name="date_input"
-        placeholder="YYYY-MM-DD"
-        x-on:change="sendEvent('rates-updater', 'update-rates')"
+  <label class="w-34">
+    <input type="date"
+           class="input"
+           name="date_input"
+           x-on:change="sendEvent('rates-updater', 'update-rates')"
     />
   </label>
 
-  <label class="relative flex w-20 flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
-         class="pointer-events-none absolute top-2 right-2 size-5">
-      <path fill-rule="evenodd"
-            d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
-            clip-rule="evenodd"/>
-    </svg>
-    <select name="sort_order"
-            x-on:change="sendEvent('rates-updater', 'update-rates')"
-            class="w-full appearance-none border px-4 py-2 text-sm rounded-radius border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+  <label class="w-22">
+    <select class="select"
+            name="sort_order"
+            x-on:change="sendEvent('rates-updater', 'update-rates')">
       <option>DESC</option>
       <option>ASC</option>
     </select>
@@ -75,7 +67,7 @@
 
 <div id="container" hx-swap-oob="true" class="fade-me-out fade-me-in">
   <ul id="rates-table"
-      class="flex flex-col gap-1 p-1 *:md:grid *:flex *:flex-row *:flex-wrap *:gap-4 *:justify-between *:items-center">
+      class="flex flex-col gap-1 p-1 *:md:grid *:md:grid-cols-[3fr_1fr_3fr_2fr_3fr_1fr] *:flex *:flex-row *:flex-wrap *:gap-4 *:justify-between *:items-center">
 
   </ul>
 

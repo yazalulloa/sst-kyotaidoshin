@@ -50,72 +50,55 @@
     <div id="receipts-form-error" hidden="hidden"></div>
 
     <div class="grid w-full gap-4">
-      <div class="relative flex w-full max-w-xs flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-        <label for="receiptYearSelect"
-               class="w-fit text-sm pl-0.5"
-               x-text="$t('main-title-year')">
-        </label>
-        <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
-        <select id="receiptYearSelect"
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend" x-text="$t('main-title-year')"></legend>
+        <select class="select"
                 name="year"
-                x-model="year"
-                class="w-full appearance-none border px-4 py-2 text-sm rounded-radius border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+                x-model="year">
           <template x-for="v in years">
             <option x-bind:value="v" x-text="v"></option>
           </template>
         </select>
-      </div>
+      </fieldset>
 
-      <div class="relative flex w-full max-w-xs flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-        <label for="receiptMonthSelect"
-               class="w-fit text-sm pl-0.5"
-               x-text="$t('main-title-month')">
-        </label>
-        <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
-        <select id="receiptMonthSelect"
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend" x-text="$t('main-title-month')"></legend>
+        <select class="select"
                 name="month"
-                x-model="month"
-                class="w-full appearance-none border px-4 py-2 text-sm rounded-radius border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+                x-model="month">
           <template x-for="month in months">
             <option x-bind:value="month" x-text="$t('main-months-' + month)"></option>
           </template>
         </select>
-      </div>
-      <div class="relative flex w-full max-w-xs flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-        <label for="receiptDateInput"
-               class="w-fit text-sm pl-0.5"
-               x-text="$t('main-title-date')">
-        </label>
+      </fieldset>
+
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend" x-text="$t('main-title-date')"></legend>
         <input
-            id="receiptDateInput"
-            class="inline-flex w-full items-center justify-between gap-2 whitespace-nowrap border px-4 py-2 text-sm font-medium tracking-wide transition border-outline bg-surface-alt text-on-surface rounded-radius hover:opacity-75 focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:text-on-surface-dark dark:focus-visible:outline-primary-dark"
+            class="input"
             type="date"
             name="date"
-            placeholder="YYYY-MM-DD"
             x-model="date"
         />
-      </div>
+      </fieldset>
 
-      <div class="relative flex w-full max-w-xs flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-        <label for="receiptRateSelect"
-               class="w-fit text-sm pl-0.5"
-               x-text="$t('main-title-rate')">
-        </label>
-        <svg x-bind:data-src="selectIconUrl" data-cache="21600"></svg>
-        <select id="receiptRateSelect"
-                name="rate"
-                class="w-full appearance-none border px-4 py-2 text-sm rounded-radius border-outline bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark">
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend" x-text="$t('main-title-rate')"></legend>
+        <select class="select"
+                id="receiptRateSelect"
+                name="rate">
         </select>
-      </div>
+      </fieldset>
+
     </div>
 
 
     <p x-show="errMsg !== ''" x-text="errMsg" class="border text-danger border-danger"></p>
 
-    <div class="flex flex-row justify-start gap-2">
+    <div class="flex flex-col-reverse justify-between gap-2 sm:flex-row sm:items-center md:justify-end">
       <button
           x-text="isEdit ? $t('main-action-update') : $t('main-action-create')"
-          class="whitespace-nowrap border px-4 py-2 text-center text-sm font-medium tracking-wide transition rounded-radius bg-primary border-primary text-on-primary hover:opacity-75 focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-primary-dark dark:border-primary-dark dark:text-on-primary-dark dark:focus-visible:outline-primary-dark"
+          class="btn btn-primary"
           @click="
           let form = document.getElementById('receipts-form');
           form.classList.remove('border', 'border-success')
@@ -125,7 +108,7 @@
       </button>
       <a href="/receipts">
         <button type="button"
-                class="whitespace-nowrap border px-4 py-2 text-center text-sm font-medium tracking-wide transition rounded-radius bg-surface-alt border-surface-alt text-on-surface-strong hover:opacity-75 focus-visible:outline-surface-alt focus-visible:outline-2 focus-visible:outline-offset-2 active:opacity-100 active:outline-offset-0 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt dark:border-surface-dark-alt dark:text-on-surface-dark-strong dark:focus-visible:outline-surface-dark-alt"
+                class="btn btn-secondary"
                 x-text="$t('main-action-cancel')">
         </button>
       </a>

@@ -391,7 +391,7 @@ func UserRoleFormResponseView(res FormResponse) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" x-init=\"\n  \t\terrMsg = $el.getAttribute(&#39;data-response-err&#39;);\n\n  \t\tif (errMsg === &#39;&#39;) {\n  \t\t  modalIsOpen = false;\n  \t\t }\n  \t\t\"></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "\" x-init=\"\n  \t\terrMsg = $el.getAttribute(&#39;data-response-err&#39;);\n\n  \t\tif (errMsg === &#39;&#39;) {\n  \t\t  $dispatch(&#39;event-users-form-close&#39;);\n  \t\t }\n  \t\t\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
