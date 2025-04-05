@@ -138,11 +138,15 @@ window.focusAndScroll = function (id) {
   const element = document.getElementById(id);
   if (element) {
 
-    // element.scrollIntoView({
-    //   behavior: 'smooth',
-    //   block: 'center',
-    //   inline: 'center'
-    // });
+    let scroll = window.screen.width <= 768;
+
+    if (scroll) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'center'
+      });
+    }
 
     element.focus({
       preventScroll: true,

@@ -36,7 +36,7 @@
      "
 >
 
-<header class="sticky top-0 flex flex-col gap-0 shadow-md z-11 bg-base-100">
+<nav class="sticky top-0 w-full flex flex-col shadow-md z-11 bg-base-100">
   <progress class="h-1 w-full htmx-indicator progress progress-primary"></progress>
   <div class="navbar bg-base-100">
     <div class="navbar-start"
@@ -91,7 +91,7 @@
                     hx-indicator=".htmx-indicator"
                     hx-trigger="load"
                     hx-swap="outerHTML"
-                    x-init="htmx.process($el)">
+          >
           </template>
         </ul>
       </div>
@@ -205,26 +205,26 @@
 
     </div>
   </div>
-</header>
+</nav>
 
-<div class="p-2 pt-3">
+<div class="relative max-w-[100vw] p-2 pt-3">
+
   <div id="container">
   </div>
-</div>
 
-<div class="flex w-full justify-center htmx-indicator p-6">
-  <svg x-bind:data-src="loadingIconUrl"
-       class="size-7 motion-safe:animate-spin fill-primary dark:fill-primary-dark"></svg>
-</div>
-<div hidden="hidden" id="default-anchor">
+  <div class="hidden w-full justify-center htmx-indicator p-6">
+    <svg x-bind:data-src="loadingIconUrl"
+         class="size-7 motion-safe:animate-spin fill-primary dark:fill-primary-dark"></svg>
+  </div>
+  <div hidden="hidden" id="default-anchor">
 
-</div>
-<div id="toast-container">
-  <div x-bind:hx-get="toastPartialUrl"
-       hx-trigger="load"
-       hx-swap="outerHTML">
+  </div>
+  <div id="toast-container">
+    <div x-bind:hx-get="toastPartialUrl"
+         hx-trigger="load"
+         hx-swap="outerHTML">
+    </div>
   </div>
 </div>
-
 </body>
 </html>

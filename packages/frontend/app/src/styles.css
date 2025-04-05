@@ -13,11 +13,13 @@
 }
 
 .htmx-request .htmx-indicator {
-  opacity: 1
+  opacity: 1;
+  display: flex;
 }
 
 .htmx-request.htmx-indicator {
-  opacity: 1
+  opacity: 1;
+  display: flex;
 }
 
 .fade-me-out .htmx-swapping {

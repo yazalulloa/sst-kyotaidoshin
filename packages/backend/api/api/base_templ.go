@@ -897,7 +897,7 @@ func BadgeIndicatorWithTooltipV2(condition bool, badge templ.Component, attrs te
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var47 = []any{
-			"peer w-fit inline-flex overflow-hidden rounded-(--radius-selector) border bg-surface text-xs font-medium tracking-wide focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+			"w-fit inline-flex overflow-hidden rounded-(--radius-selector) border text-xs font-medium tracking-wide",
 			templ.KV("border-success text-success", condition),
 			templ.KV("border-error text-error", !condition),
 		}
