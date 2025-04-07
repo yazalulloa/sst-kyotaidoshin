@@ -6,9 +6,9 @@ require (
 	github.com/PuerkitoBio/goquery v1.10.2
 	github.com/aws/aws-lambda-go v1.47.0
 	github.com/aws/aws-sdk-go-v2 v1.36.3
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.78.2
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.79.1
 	github.com/cespare/xxhash v1.1.0
-	github.com/sst/sst/v3 v3.10.4
+	github.com/sst/sst/v3 v3.13.0
 )
 
 require (
@@ -22,5 +22,5 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.12.15 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.18.15 // indirect
 	github.com/aws/smithy-go v1.22.3 // indirect
-	golang.org/x/net v0.37.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
 )

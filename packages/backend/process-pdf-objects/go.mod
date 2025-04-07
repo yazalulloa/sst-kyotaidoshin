@@ -4,5 +4,5 @@ go 1.24.1
 
 require (
 	github.com/aws/aws-lambda-go v1.47.0
-	github.com/sst/sst/v3 v3.10.4
+	github.com/sst/sst/v3 v3.13.0
 )

@@ -57,7 +57,7 @@
        hidden="hidden"
        hx-get="/api/rates/search"
        hx-include="[name='date_input'],[name='currency_input'],[name='sort_order']"
-       hx-trigger="load, update-rates delay:300ms"
+       hx-trigger="load, update-rates"
        hx-target="#rates-table"
        hx-swap="innerHTML"
        hx-sync="this:replace"
