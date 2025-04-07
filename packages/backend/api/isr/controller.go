@@ -11,6 +11,7 @@ func Routes(holder *api.RouterHolder) {
 	holder.GET("/api/isr/rates/currencies.html", renderObj(GetRatesCurrencies))
 	holder.GET("/api/isr/receipts/buildings.html", renderObj(GetReceiptsBuildings))
 	holder.GET("/api/isr/receipts/years.html", renderObj(GetReceiptsYears))
+	holder.GET("/api/isr/receipts/apartments.html", renderObj(GetReceiptsApartments))
 	holder.GET("/api/isr/apartments/buildings.html", renderObj(GetApartmentsBuildings))
 }
 

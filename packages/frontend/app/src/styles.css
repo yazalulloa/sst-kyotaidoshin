@@ -24,7 +24,7 @@
 
 .fade-me-out .htmx-swapping {
   opacity: 0;
-  transition: opacity 1s ease-out;
+  transition: opacity 800ms ease-out;
 }
 
 .fade-out-element {
@@ -49,9 +49,8 @@
 
 .fade-me-in {
   opacity: 1;
-  transition: opacity 500ms ease-out;
+  transition: opacity 300ms ease-out;
 }
-
 
 
 @plugin "daisyui/theme" {
@@ -88,15 +87,6 @@
   --depth: 0;
   --noise: 0;
 }
-
-
-
-
-
-
-
-
-
 
 
 /*!* Hide input arrows for Chrome, Safari and Opera *!*/

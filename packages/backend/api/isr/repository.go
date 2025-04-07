@@ -4,6 +4,8 @@ import (
 	"db"
 	"db/gen/model"
 	. "db/gen/table"
+	"encoding/base64"
+	"encoding/json"
 	"log"
 	"slices"
 )
@@ -97,4 +99,38 @@ func receiptYears() ([]int16, error) {
 	}
 
 	return dest, nil
+}
+
+type Apt struct {
+	Number string `json:"number"`
+	Name   string `json:"name"`
+}
+
+func receiptApts() (*string, error) {
+	stmt := Apartments.SELECT(Apartments.BuildingID, Apartments.Number, Apartments.Name).FROM(Apartments).
+		ORDER_BY(Apartments.BuildingID.ASC(), Apartments.Number.ASC())
+
+	var array []model.Apartments
+	err := stmt.Query(db.GetDB().DB, &array)
+	if err != nil {
+		return nil, err
+	}
+
+	apts := make(map[string][]Apt)
+
+	for _, apt := range array {
+		apts[apt.BuildingID] = append(apts[apt.BuildingID], Apt{
+			Number: apt.Number,
+			Name:   apt.Name,
+		})
+	}
+
+	bytes, err := json.Marshal(apts)
+	if err != nil {
+		return nil, err
+	}
+
+	base64Str := base64.URLEncoding.EncodeToString(bytes)
+	return &base64Str, nil
+
 }

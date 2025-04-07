@@ -217,7 +217,6 @@ func aptPut(w http.ResponseWriter, r *http.Request) {
 			err = update(apartment)
 		} else {
 			err = insert(apartment)
-			defer isr.Invoke(r.Context())
 		}
 
 		if err != nil {
@@ -227,6 +226,7 @@ func aptPut(w http.ResponseWriter, r *http.Request) {
 		}
 
 		defer receiptPdf.PublishBuilding(r.Context(), keys.BuildingId)
+		defer isr.Invoke(r.Context())
 
 		if isUpdate {
 			item, err := toItem(&apartment, &keys.CardId)

@@ -75,6 +75,8 @@ func putInBucket(ctx context.Context, objectKey string, component templ.Componen
 		//CacheControl: aws.String("max-age=0,no-cache,no-store,must-revalidate"), //Works but no 304
 	})
 
+	log.Printf("Updated %s %d", objectKey, contentLength)
+
 	if err != nil {
 		return err
 	}
@@ -177,6 +179,21 @@ func updateReceiptsYears(ctx context.Context) error {
 	return putInBucket(ctx, receiptsYearsObjectKey, XInitView(builder.String()))
 }
 
+const receiptApartmentsObjectKey = "/receipts/apartments.html"
+
+func GetReceiptsApartments(ctx context.Context) ([]byte, error) {
+	return getObject(ctx, receiptApartmentsObjectKey, updateReceiptsApartments)
+}
+
+func updateReceiptsApartments(ctx context.Context) error {
+	apts, err := receiptApts()
+	if err != nil {
+		return err
+	}
+
+	return putInBucket(ctx, receiptApartmentsObjectKey, SendAptsView(*apts))
+}
+
 const apartmentsBuildingsObjectKey = "/apartments/buildings.html"
 
 func GetApartmentsBuildings(ctx context.Context) ([]byte, error) {
@@ -200,6 +217,7 @@ func UpdateAll(ctx context.Context) error {
 		updateReceiptsBuildings,
 		updateReceiptsYears,
 		updateApartmentsBuildings,
+		updateReceiptsApartments,
 	}
 
 	for _, f := range functions {

@@ -3,3 +3,13 @@ package isr
 templ XInitView(init string) {
 	<div x-init={ init } hidden="hidden"></div>
 }
+
+templ SendAptsView(encoded string) {
+	<div
+		data-apts={ encoded }
+		x-init="
+	 $dispatch('event-update-apts', { apts: $el.getAttribute('data-apts') });
+	$el.remove();
+	 "
+	></div>
+}

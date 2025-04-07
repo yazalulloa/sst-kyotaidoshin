@@ -38,10 +38,9 @@
      "
 >
   <div hidden="hidden"
-       hx-get="/api/receipts/apts"
+       x-bind:hx-get="withIsrPrefix('/receipts/apartments.html')"
        hx-trigger="load"
        hx-swap="outerHTML">
-
   </div>
 
   <dialog class="modal modal-bottom sm:modal-middle">

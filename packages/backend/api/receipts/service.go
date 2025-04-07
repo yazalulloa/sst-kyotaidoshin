@@ -838,28 +838,3 @@ func duplicate(key Keys) (*string, error) {
 
 	return util.Encode(keys(*receipt, "")), nil
 }
-
-func getApts() (*string, error) {
-
-	array, err := apartments.SelectAllNumberAndName()
-	if err != nil {
-		return nil, err
-	}
-
-	apts := make(map[string][]apartments.Apt)
-
-	for _, apt := range array {
-		apts[apt.BuildingID] = append(apts[apt.BuildingID], apartments.Apt{
-			Number: apt.Number,
-			Name:   apt.Name,
-		})
-	}
-
-	bytes, err := json.Marshal(apts)
-	if err != nil {
-		return nil, err
-	}
-
-	base64Str := base64.URLEncoding.EncodeToString(bytes)
-	return &base64Str, nil
-}

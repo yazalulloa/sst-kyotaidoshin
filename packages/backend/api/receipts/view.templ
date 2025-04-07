@@ -347,13 +347,3 @@ templ ShowNewReceiptsDialog(encoded string) {
 		></div>
 	</div>
 }
-
-templ SendAptsView(encoded string) {
-	<div
-		data-apts={ encoded }
-		x-init="
-	 $dispatch('event-update-apts', { apts: $el.getAttribute('data-apts') });
-	$el.remove();
-	 "
-	></div>
-}

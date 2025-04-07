@@ -62,7 +62,6 @@ func Routes(holder *api.RouterHolder) {
 	holder.GET(_PATH+"/upload_form", getUploadForm, api.RECEIPTS_UPLOAD_BACKUP)
 	holder.POST(_PATH+"/new_from_file", newFromFile, api.RECEIPTS_WRITE)
 	holder.POST(_DUPLICATE+"/{key}", duplicateReceipt, api.RECEIPTS_WRITE)
-	holder.GET(_PATH+"/apts", getSendApts, api.RECEIPTS_READ)
 	holder.POST(_PATH+"/send/pdfs", sendPdfsApt, api.RECEIPTS_WRITE)
 
 }
@@ -1016,22 +1015,6 @@ func duplicateReceipt(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-}
-
-func getSendApts(w http.ResponseWriter, r *http.Request) {
-
-	str, err := getApts()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	err = SendAptsView(*str).Render(r.Context(), w)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
 }
 
 func sendPdfsApt(w http.ResponseWriter, r *http.Request) {
