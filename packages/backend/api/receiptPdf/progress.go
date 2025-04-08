@@ -26,10 +26,12 @@ type ProgressUpdate struct {
 	Finished  bool   `json:"finished"`
 	CardId    string `json:"cardId"`
 	Cancelled bool   `json:"cancelled"`
+
+	Etag *string
 }
 
-func PutProgress(ctx context.Context, update ProgressUpdate) error {
-	byteArray, err := json.Marshal(update)
+func PutProgress(ctx context.Context, update *ProgressUpdate) error {
+	byteArray, err := json.Marshal(*update)
 	if err != nil {
 		return err
 	}
@@ -85,6 +87,8 @@ func GetProgress(ctx context.Context, objectKey string) (*ProgressUpdate, error)
 	if err != nil {
 		return nil, err
 	}
+
+	progress.Etag = res.ETag
 
 	return &progress, nil
 

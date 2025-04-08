@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"github.com/sst/sst/v3/sdk/golang/resource"
 	"github.com/wneessen/go-mail"
+	"log"
+	"os"
 	"sync"
 	"time"
 )
@@ -63,8 +65,9 @@ func loadConfigMap() (map[string]MailerConfig, error) {
 }
 
 type MsgWithCallBack struct {
-	Msg      *mail.Msg
-	Callback func()
+	Msg            *mail.Msg
+	Callback       func()
+	ShouldContinue func() bool
 }
 
 func GetFromEmail(emailKey string) (string, error) {
@@ -101,16 +104,6 @@ func SendEmail(ctx context.Context, emailKey string, messages []*MsgWithCallBack
 		}
 	}
 
-	// todo remove this
-	if false {
-		for _, m := range messages {
-			time.Sleep(1 * time.Second)
-			m.Callback()
-		}
-
-		return nil
-	}
-
 	client, err := mail.NewClient(config.Host, mail.WithTLSPortPolicy(mail.TLSMandatory),
 		mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(config.Username), mail.WithPassword(config.Password))
 
@@ -131,19 +124,29 @@ func clientSend(c *mail.Client, ctx context.Context, messages []*MsgWithCallBack
 		return fmt.Errorf("dial failed: %w", err)
 	}
 	defer func() {
-		_ = c.CloseWithSMTPClient(client)
+		err = c.CloseWithSMTPClient(client)
+		if err != nil {
+			log.Printf("failed to close connection: %s", err)
+		}
 	}()
 
 	for _, msg := range messages {
-		if err = c.SendWithSMTPClient(client, msg.Msg); err != nil {
-			return fmt.Errorf("send failed: %w", err)
+
+		if !msg.ShouldContinue() {
+			log.Printf("Cancelled")
+			break
+		}
+
+		if os.Getenv("SEND_MAIL") == "true" {
+			if err = c.SendWithSMTPClient(client, msg.Msg); err != nil {
+				return fmt.Errorf("send failed: %w", err)
+			}
+		} else {
+			time.Sleep(1 * time.Second)
 		}
 
 		msg.Callback()
 	}
-
-	if err = c.CloseWithSMTPClient(client); err != nil {
-		return fmt.Errorf("failed to close connection: %w", err)
-	}
+	
 	return nil
 }

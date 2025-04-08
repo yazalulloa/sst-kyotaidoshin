@@ -206,6 +206,9 @@ export default $config({
         altEmailsRecipientSecret,
         htmlToPdfFunction,
       ],
+      environment: {
+        SEND_MAIL: isLocal ? "false" : "true",
+      },
       runtime: "go",
       handler: "packages/backend/process-pdf-objects/",
       timeout: "300 seconds",

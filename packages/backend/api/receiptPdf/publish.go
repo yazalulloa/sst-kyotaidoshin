@@ -103,7 +103,7 @@ func PublishSendPdfs(ctx context.Context, buildingId, receiptId, cardId string, 
 	}
 
 	update := ProgressUpdate{ObjectKey: deduplicationId, CardId: "sent-" + cardId}
-	err := PutProgress(ctx, update)
+	err := PutProgress(ctx, &update)
 	if err != nil {
 		log.Printf("Error putting progress: %v", err)
 		return "", err

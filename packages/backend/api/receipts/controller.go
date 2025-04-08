@@ -42,6 +42,7 @@ const _DOWNLOAD_PDF_FILE = _PATH + "/download/pdf"
 const _DOWNLOAD_HTML_FILE = _PATH + "/download/html"
 const _SEND_PDFS = _PATH + "/send_pdfs"
 const _SEND_PDFS_PROGRESS = _SEND_PDFS + "/progress"
+const _CANCEL_SEND_PDFS = _SEND_PDFS + "/cancel"
 const _DUPLICATE = _PATH + "/duplicate"
 
 func Routes(holder *api.RouterHolder) {
@@ -60,6 +61,7 @@ func Routes(holder *api.RouterHolder) {
 	holder.GET(_DOWNLOAD_HTML_FILE+"/{key}", getHtml, api.RECEIPTS_READ)
 	holder.GET(_SEND_PDFS+"/{key}", sendPdfs, api.RECEIPTS_WRITE)
 	holder.GET(_SEND_PDFS_PROGRESS+"/{key}", sendPdfsProgress, api.RECEIPTS_WRITE)
+	holder.PUT(_CANCEL_SEND_PDFS+"/{key}", cancelSendPdfs, api.RECEIPTS_WRITE)
 	holder.GET(_PATH+"/upload_form", getUploadForm, api.RECEIPTS_WRITE)
 	holder.POST(_PATH+"/new_from_file", newFromFile, api.RECEIPTS_WRITE)
 	holder.POST(_DUPLICATE+"/{key}", duplicateReceipt, api.RECEIPTS_WRITE)
@@ -978,6 +980,39 @@ func sendPdfsProgress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+
+func cancelSendPdfs(w http.ResponseWriter, r *http.Request) {
+	keyStr := mux.Vars(r)["key"]
+	if keyStr == "" {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	var progressId string
+	err := util.Decode(keyStr, &progressId)
+	if err != nil {
+		log.Printf("failed to decode key: %v", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	progress, err := receiptPdf.GetProgress(r.Context(), progressId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	progress.Cancelled = true
+	progress.Finished = true
+
+	err = receiptPdf.PutProgress(r.Context(), progress)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func getUploadForm(w http.ResponseWriter, r *http.Request) {

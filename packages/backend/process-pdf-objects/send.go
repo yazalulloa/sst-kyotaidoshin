@@ -14,6 +14,36 @@ import (
 	"time"
 )
 
+type Holder struct {
+	ctx        context.Context
+	progressId string
+}
+
+func (h *Holder) update(pf func(update *receiptPdf.ProgressUpdate) error) (bool, error) {
+	progressUpdate, err := receiptPdf.GetProgress(h.ctx, h.progressId)
+	if err != nil {
+		return false, err
+	}
+
+	if progressUpdate.Cancelled {
+		return false, nil
+	}
+
+	err = pf(progressUpdate)
+	if err != nil {
+		progressUpdate.ErrMsg = err.Error()
+		progressUpdate.Finished = true
+	}
+
+	err = receiptPdf.PutProgress(h.ctx, progressUpdate)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+
+}
+
 func sendPdfs(ctx context.Context, event receiptPdf.QueueEvent) error {
 	altEmailsRecipient, err := resource.Get("AltEmailsRecipient", "value")
 	if err != nil {
@@ -27,42 +57,49 @@ func sendPdfs(ctx context.Context, event receiptPdf.QueueEvent) error {
 		return err
 	}
 
-	progressUpdate, err := receiptPdf.GetProgress(ctx, event.ProgressId)
+	holder := Holder{
+		ctx:        ctx,
+		progressId: event.ProgressId,
+	}
+
+	shouldContinue, err := holder.update(func(update *receiptPdf.ProgressUpdate) error {
+		update.Building = receipt.Building.Name
+		update.Month = receipt.MonthStr
+		update.Date = receipt.Receipt.Date.Format(time.DateOnly)
+		return nil
+	})
+
 	if err != nil {
 		return err
 	}
 
-	// TODO TTL
-	//defer func(ctx context.Context, objectKey string) {
-	//	err := receiptPdf.DeleteProgress(ctx, objectKey)
-	//	if err != nil {
-	//		log.Printf("Error deleting progress: %s %v", objectKey, err)
-	//	}
-	//}(ctx, event.ProgressId)
-
-	progressUpdate.Building = receipt.Building.Name
-	progressUpdate.Month = receipt.MonthStr
-	progressUpdate.Date = receipt.Receipt.Date.Format(time.DateOnly)
-
-	err = receiptPdf.PutProgress(ctx, *progressUpdate)
-	if err != nil {
-		return err
+	if !shouldContinue {
+		log.Printf("Cancelled")
+		return nil
 	}
 
 	parts, err := receipts.GetParts(receipt, ctx, true, &receipts.DownloadKeys{
 		Parts:  event.Apartments,
 		AllApt: len(event.Apartments) == 0,
 	})
+
 	if err != nil {
 		return err
 	}
 
-	progressUpdate.Size = len(parts)
-	progressUpdate.Counter = 0
+	shouldContinue, err = holder.update(func(update *receiptPdf.ProgressUpdate) error {
+		update.Size = len(parts)
+		update.Counter = 0
+		return nil
+	})
 
-	err = receiptPdf.PutProgress(ctx, *progressUpdate)
 	if err != nil {
 		return err
+	}
+
+	if !shouldContinue {
+		log.Printf("Cancelled")
+		return nil
 	}
 
 	log.Printf("Parts %d", len(parts))
@@ -71,6 +108,8 @@ func sendPdfs(ctx context.Context, event receiptPdf.QueueEvent) error {
 	messages := make([]*email_h.MsgWithCallBack, len(parts))
 	wg.Add(len(parts))
 	errChan := make(chan error, len(parts))
+
+	sentMsgs := 0
 
 	for i, part := range parts {
 		go func() {
@@ -103,15 +142,24 @@ func sendPdfs(ctx context.Context, event receiptPdf.QueueEvent) error {
 			messages[i] = &email_h.MsgWithCallBack{
 				Msg: msg,
 				Callback: func() {
-					progressUpdate.Counter++
-					progressUpdate.Apt = part.Apt.Number
-					progressUpdate.Name = part.Apt.Name
-					progressUpdate.To = part.Apt.Emails
-					err := receiptPdf.PutProgress(ctx, *progressUpdate)
+
+					sentMsgs++
+
+					shouldContinue, err = holder.update(func(update *receiptPdf.ProgressUpdate) error {
+						update.Counter++
+						update.Apt = part.Apt.Number
+						update.Name = part.Apt.Name
+						update.To = part.Apt.Emails
+						return nil
+					})
+
 					if err != nil {
 						log.Printf("Error updating progress: %v", err)
 					}
 
+				},
+				ShouldContinue: func() bool {
+					return shouldContinue
 				},
 			}
 		}()
@@ -131,7 +179,19 @@ func sendPdfs(ctx context.Context, event receiptPdf.QueueEvent) error {
 		return err
 	}
 
-	progressUpdate.From = from
+	shouldContinue, err = holder.update(func(update *receiptPdf.ProgressUpdate) error {
+		update.From = from
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	if !shouldContinue {
+		log.Printf("Cancelled")
+		return nil
+	}
 
 	err = email_h.SendEmail(ctx, receipt.Building.EmailConfig, messages)
 	if err != nil {
@@ -139,14 +199,22 @@ func sendPdfs(ctx context.Context, event receiptPdf.QueueEvent) error {
 		return err
 	}
 
-	log.Printf("Sent %d", len(parts))
+	if !shouldContinue {
+		log.Printf("Cancelled before last sent")
+		return nil
+	}
+
+	log.Printf("Sent %d", sentMsgs)
 	_, err = receipts.UpdateLastSent(event.ReceiptId)
 	if err != nil {
 		return err
 	}
 
-	progressUpdate.Finished = true
-	err = receiptPdf.PutProgress(ctx, *progressUpdate)
+	_, err = holder.update(func(update *receiptPdf.ProgressUpdate) error {
+		update.Finished = true
+		return nil
+	})
+
 	if err != nil {
 		return err
 	}

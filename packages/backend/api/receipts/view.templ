@@ -303,7 +303,7 @@ form.classList.remove('border', 'border-success');
 templ SendPdfsView(progressId string, closeModal bool) {
 	<div id="receipts-email-progress" hx-swap-oob="beforeend">
 		<div
-			class="pb-2 w-full flex justify-center"
+			class="pb-2 w-full flex justify-center gap-2"
 			x-data={ fmt.Sprintf("{ url: '%s/%s' }", _SEND_PDFS_PROGRESS, progressId) }
 		>
 			<div
@@ -311,6 +311,21 @@ templ SendPdfsView(progressId string, closeModal bool) {
 				hx-trigger="load"
 				hx-swap="outerHTML"
 			></div>
+			<div class="flex justify-center">
+				<button
+					type="button"
+					class="btn btn-sm btn-outline btn-error btn-circle"
+					if !util.IsDevMode() {
+						hx-headers={ util.CrsfHeaders(ctx) }
+					}
+					hx-put={ fmt.Sprintf(_CANCEL_SEND_PDFS+"/%s", progressId) }
+					hx-indicator=".htmx-indicator"
+					hx-disabled-elt="this"
+					hx-swap="none"
+				>
+					<svg x-bind:data-src="deleteIconUrl" data-cache="21600" class="h-6 w-6"></svg>
+				</button>
+			</div>
 		</div>
 	</div>
 	if closeModal {
