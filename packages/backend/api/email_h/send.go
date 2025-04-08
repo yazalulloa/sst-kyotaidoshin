@@ -102,7 +102,7 @@ func SendEmail(ctx context.Context, emailKey string, messages []*MsgWithCallBack
 	}
 
 	// todo remove this
-	if true {
+	if false {
 		for _, m := range messages {
 			time.Sleep(1 * time.Second)
 			m.Callback()
