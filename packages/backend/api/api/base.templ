@@ -47,8 +47,8 @@ templ DeleteBtn(deleteUrl string, cardIdRef string, attrs templ.Attributes) {
 			hx-target={ "#" + cardIdRef }
 			hx-indicator=".htmx-indicator"
 			hx-disabled-elt="this"
-			hx-trigger="mousedown"
 			hx-swap="delete swap:300ms"
+			@click.stop=""
 			{ attrs... }
 		>
 			<svg x-bind:data-src="deleteIconUrl" data-cache="21600" class="h-6 w-6"></svg>

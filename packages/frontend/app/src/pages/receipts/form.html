@@ -29,7 +29,6 @@
         errMsg: '',
         }"
       @event-receipt-form-update="
-         console.log('detail', $event.detail);
          let base64 = $event.detail.params;
          let decodedString = decodeBase64UrlStr(base64);
          let jsonObject = JSON.parse(decodedString);

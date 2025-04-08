@@ -122,7 +122,6 @@
                themes = themes = await fetchAndParseCSS()
                selected = localStorage.getItem('theme') ?? 'kyo'
                if (!themes.includes(selected)) {
-                console.log('overriding theme')
                 selected = 'kyo'
                 localStorage.setItem('theme', selected)
                }
