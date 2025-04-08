@@ -132,7 +132,7 @@ templ FormView(dto FormDto) {
   emailConfig = $el.getAttribute('data-building-email-config');
 
   let base64 = $el.getAttribute('data-apts');
-  let decodedString = atob(base64);
+  let decodedString = decodeBase64UrlStr(base64);
   let array = JSON.parse(decodedString);
 
   array.forEach((apt) => {

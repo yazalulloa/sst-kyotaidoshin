@@ -53,37 +53,13 @@ templ ItemView(item Item) {
 		<span x-text={ fmt.Sprintf("$t('main-months-%d')", item.Item.Month) }></span>
 		<span>{ fmt.Sprint(item.Item.Year) }</span>
 		<span>{ item.Item.Date.Format(time.DateOnly) }</span>
-		<div class="flex justify-center">
-			{{
-			condition := item.LastSent != nil
-			}}
-			<span
-				class={
-					"w-fit inline-flex overflow-hidden rounded-(--radius-selector) border text-xs font-medium tracking-wide",
-					templ.KV("border-success text-success", condition),
-					templ.KV("border-error text-error", !condition),
-				}
-			>
-				<span
-					class={
-						"flex items-center gap-1 px-2 py-1",
-						templ.KV("bg-success/10", condition),
-						templ.KV("bg-error/10", !condition),
-					}
-				>
-					<span
-						class={
-							"size-1.5 rounded-full",
-							templ.KV("bg-success", condition),
-							templ.KV("bg-error", !condition),
-						}
-					></span>
-					@api.SpanWitX_Text("$t('main-title-sent')")
-					if condition {
-						@api.SpanFormatDate(fmt.Sprint(*item.LastSent))
-					}
-				</span>
-			</span>
+		<div
+			class="flex justify-center"
+			hx-get={ fmt.Sprintf("/api/receipts/sent/%s", item.Key) }
+			hx-trigger={ fmt.Sprintf("sent-%s from:body", item.CardId) }
+			hx-swap="innerHTML"
+		>
+			@SentView(item)
 		</div>
 		@api.SpanFormatDate(fmt.Sprint(item.CreatedAt))
 		<div class="dropdown dropdown-hover dropdown-left w-fit md:m-auto ml-auto">
@@ -220,6 +196,39 @@ templ ItemView(item Item) {
 	</li>
 }
 
+templ SentView(item Item) {
+	{{
+			condition := item.LastSent != nil
+	}}
+	<span
+		class={
+			"w-fit inline-flex overflow-hidden rounded-(--radius-selector) border text-xs font-medium tracking-wide fade-me-in fade-me-out",
+			templ.KV("border-success text-success", condition),
+			templ.KV("border-error text-error", !condition),
+		}
+	>
+		<span
+			class={
+				"flex items-center gap-1 px-2 py-1",
+				templ.KV("bg-success/10", condition),
+				templ.KV("bg-error/10", !condition),
+			}
+		>
+			<span
+				class={
+					"size-1.5 rounded-full",
+					templ.KV("bg-success", condition),
+					templ.KV("bg-error", !condition),
+				}
+			></span>
+			@api.SpanWitX_Text("$t('main-title-sent')")
+			if condition {
+				@api.SpanFormatDate(fmt.Sprint(*item.LastSent))
+			}
+		</span>
+	</span>
+}
+
 templ CountersView(counters Counters) {
 	<div
 		id="receipts-counters"
@@ -250,23 +259,7 @@ templ FormView(dto FormDto) {
 		data-params={ dto.updateParams }
 		data-apts={ dto.apts }
 		x-init="
-		$dispatch('event-receipt-form-update', { params: $el.getAttribute('data-params') });
-
-		mainCurrency = $el.getAttribute('data-main-currency');
-    debtCurrency = $el.getAttribute('data-debt-currency');
-
-		let base64 = $el.getAttribute('data-apts');
-    let decodedString = atob(base64);
-    let array = JSON.parse(decodedString);
-
-    array.forEach((apt) => {
-        apartments.push(apt);
-    });
-
-    apartments.forEach((apt) => {
-      aptMap.set(apt.number, apt.name);
-    });
-
+		$dispatch('event-receipt-form-update', $el.dataset);
     $el.remove();
 		"
 	></div>
@@ -330,8 +323,14 @@ templ SendPdfsView(progressId string, closeModal bool) {
 	}
 }
 
-templ SendPdfsProgressView(update string) {
+templ SendPdfsProgressView(progressId, update string, finished bool) {
 	<div
+		hidden="hidden"
+		if !finished {
+			hx-get={ fmt.Sprintf(_SEND_PDFS_PROGRESS+"/%s", progressId) }
+			hx-trigger="load delay:500ms"
+			hx-swap="outerHTML"
+		}
 		data-progress-update={ update }
 		x-init="$dispatch('event-update-params', { params: $el.getAttribute('data-progress-update') });"
 	></div>

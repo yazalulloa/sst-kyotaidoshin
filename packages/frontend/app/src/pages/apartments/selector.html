@@ -10,7 +10,7 @@
            })"
 >
   <!-- Open the modal using ID.showModal() method -->
-  <button class="btn btn-neutral w-full" @click="$el.nextElementSibling.showModal()">
+  <button class="btn btn-neutral w-full" type="button" @click="$el.nextElementSibling.showModal()">
     <div class="flex flex-row gap-0">
       <span x-text="$t('main-title-apartments')"></span><span>:&nbsp;</span><span
         x-text="apartmentsSelected.length"></span>

@@ -24,6 +24,8 @@ type ProgressUpdate struct {
 	To        string `json:"to"`
 	ErrMsg    string `json:"errMsg"`
 	Finished  bool   `json:"finished"`
+	CardId    string `json:"cardId"`
+	Cancelled bool   `json:"cancelled"`
 }
 
 func PutProgress(ctx context.Context, update ProgressUpdate) error {

@@ -162,7 +162,7 @@ export default $config({
         ],
         allowCredentials: true,
         maxAge: isLocal ? "1 minute" : "1 day",
-        exposeHeaders: ["HX-Redirect", "hx-location"],
+        exposeHeaders: ["HX-Redirect", "hx-location", "hx-trigger"],
       },
     });
 

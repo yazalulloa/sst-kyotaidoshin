@@ -437,6 +437,8 @@ func parseDebts(rows *[][]string) ([]model.Debts, error) {
 				return nil, err
 			}
 
+			apt = strings.TrimSuffix(apt, ".")
+
 			debt := model.Debts{
 				AptNumber:                     apt,
 				Receipts:                      receipts,

@@ -380,6 +380,24 @@ func toItem(item *model.Receipts, oldCardId *string) (*Item, error) {
 	}, nil
 }
 
+func getItem(id string, oldCardId *string) (*Item, error) {
+	receipt, err := selectById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	item, err := toItem(receipt, oldCardId)
+	if err != nil {
+		return nil, err
+	}
+
+	if receipt == nil {
+		return nil, errors.New("receipt not found")
+	}
+
+	return item, nil
+}
+
 func getFormDto(keys Keys) (*FormDto, error) {
 	formDto := FormDto{}
 

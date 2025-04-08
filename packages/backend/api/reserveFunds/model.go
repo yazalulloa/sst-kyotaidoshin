@@ -83,7 +83,7 @@ type FormRequest struct {
 	Name          string  `form:"name" validate:"required,min=3,max=200"`
 	Fund          float64 `form:"fund"`
 	Expense       float64 `form:"expense"`
-	Pay           float64 `form:"pay" validate:"required,gt=0"`
+	Pay           float64 `form:"pay" validate:"required,gte=0"`
 	Active        bool    `form:"active"`
 	Type          string  `form:"type" validate:"required,oneof=FIXED_PAY PERCENTAGE"`
 	ExpenseType   string  `form:"expenseType" validate:"required,oneof=COMMON UNCOMMON"`

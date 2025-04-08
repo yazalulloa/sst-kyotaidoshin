@@ -16,6 +16,7 @@ import (
 	"github.com/gorilla/mux"
 	"golang.org/x/sync/syncmap"
 	"io"
+	"kyotaidoshin/apartments"
 	"kyotaidoshin/api"
 	"kyotaidoshin/debts"
 	"kyotaidoshin/expenses"
@@ -34,7 +35,7 @@ import (
 
 const _PATH = "/api/receipts"
 const _SEARCH = _PATH + "/search"
-const _UPLOAD_BACKUP_FORM = _PATH + "/uploadBackupForm" // todo remove
+const _UPLOAD_BACKUP_FORM = _PATH + "/uploadBackupForm"
 const _UPLOAD_BACKUP = _PATH + "/upload/backup"
 const _DOWNLOAD_ZIP_FILE = _PATH + "/download/zip"
 const _DOWNLOAD_PDF_FILE = _PATH + "/download/pdf"
@@ -59,10 +60,11 @@ func Routes(holder *api.RouterHolder) {
 	holder.GET(_DOWNLOAD_HTML_FILE+"/{key}", getHtml, api.RECEIPTS_READ)
 	holder.GET(_SEND_PDFS+"/{key}", sendPdfs, api.RECEIPTS_WRITE)
 	holder.GET(_SEND_PDFS_PROGRESS+"/{key}", sendPdfsProgress, api.RECEIPTS_WRITE)
-	holder.GET(_PATH+"/upload_form", getUploadForm, api.RECEIPTS_UPLOAD_BACKUP)
+	holder.GET(_PATH+"/upload_form", getUploadForm, api.RECEIPTS_WRITE)
 	holder.POST(_PATH+"/new_from_file", newFromFile, api.RECEIPTS_WRITE)
 	holder.POST(_DUPLICATE+"/{key}", duplicateReceipt, api.RECEIPTS_WRITE)
 	holder.POST(_PATH+"/send/pdfs", sendPdfsApt, api.RECEIPTS_WRITE)
+	holder.GET(_PATH+"/sent/{key}", getReceiptSent, api.RECEIPTS_READ)
 
 }
 
@@ -391,7 +393,38 @@ func receiptPost(w http.ResponseWriter, r *http.Request) {
 
 		go func() {
 			defer wg.Done()
-			_, err = debts.InsertBulk(parsedReceipt.Debts)
+
+			apts, err := apartments.SelectByBuilding(receipt.BuildingID)
+			if err != nil {
+				errorChan <- err
+				return
+			}
+
+			debtArray := make([]model.Debts, len(apts))
+
+			for i, apt := range apts {
+
+				debt := model.Debts{
+					BuildingID: receipt.BuildingID,
+					ReceiptID:  receipt.ID,
+					AptNumber:  apt.Number,
+				}
+
+				for _, d := range parsedReceipt.Debts {
+					if d.AptNumber == apt.Number {
+						debt.Receipts = d.Receipts
+						debt.Amount = d.Amount
+						debt.Months = d.Months
+						debt.PreviousPaymentAmount = d.PreviousPaymentAmount
+						debt.PreviousPaymentAmountCurrency = d.PreviousPaymentAmountCurrency
+						break
+					}
+				}
+
+				debtArray[i] = debt
+			}
+
+			_, err = debts.InsertBulk(debtArray)
 			if err != nil {
 				errorChan <- err
 				return
@@ -434,6 +467,8 @@ func receiptPost(w http.ResponseWriter, r *http.Request) {
 	response := createReceipt()
 
 	if response.errorStr == "" {
+
+		defer isr.Invoke(r.Context())
 
 		//w.Header().Add("HX-Location", fmt.Sprintf("/receipts/edit/%s", *response.Key))
 		//w.WriteHeader(http.StatusOK)
@@ -889,7 +924,7 @@ func sendPdfs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	clientId, err := receiptPdf.PublishSendPdfs(r.Context(), keys.BuildingId, keys.Id, nil)
+	clientId, err := receiptPdf.PublishSendPdfs(r.Context(), keys.BuildingId, keys.Id, keys.CardId, nil)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -933,7 +968,11 @@ func sendPdfsProgress(w http.ResponseWriter, r *http.Request) {
 
 	encoded := base64.URLEncoding.EncodeToString(byteArray)
 
-	err = SendPdfsProgressView(encoded).Render(r.Context(), w)
+	if progress.Finished {
+		w.Header().Add("HX-Trigger", progress.CardId)
+	}
+
+	err = SendPdfsProgressView(keyStr, encoded, progress.Finished).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -979,8 +1018,6 @@ func newFromFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	encoded := base64.URLEncoding.EncodeToString(byteArray)
-
-	defer isr.Invoke(r.Context())
 
 	err = ShowNewReceiptsDialog(encoded).Render(r.Context(), w)
 	if err != nil {
@@ -1044,7 +1081,7 @@ func sendPdfsApt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	clientId, err := receiptPdf.PublishSendPdfs(r.Context(), keys.BuildingId, keys.Id, request.Apartments)
+	clientId, err := receiptPdf.PublishSendPdfs(r.Context(), keys.BuildingId, keys.Id, keys.CardId, request.Apartments)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -1058,4 +1095,32 @@ func sendPdfsApt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+}
+
+func getReceiptSent(w http.ResponseWriter, r *http.Request) {
+	keyStr := mux.Vars(r)["key"]
+	if keyStr == "" {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
+	var keys Keys
+	err := util.Decode(keyStr, &keys)
+	if err != nil {
+		log.Printf("failed to decode key: %v", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	item, err := getItem(keys.Id, &keys.CardId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = SentView(*item).Render(r.Context(), w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }

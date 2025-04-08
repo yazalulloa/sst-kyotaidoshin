@@ -278,7 +278,7 @@
         <button
             x-text="is_edit ? $t('main-action-update') : $t('main-action-create')"
             x-effect="
-                  let v = !(name?.trim()?.length > 0 && parseFloat(pay) > 0);
+                  let v = !(name?.trim()?.length > 0 && parseFloat(pay) >= 0);
                   $el.disabled=v;
                   "
             class="btn btn-primary"

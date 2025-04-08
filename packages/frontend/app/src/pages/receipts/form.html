@@ -11,8 +11,7 @@
    debtCurrency: '',
 
 
-  }"
-     x-show="open">
+  }" x-show="open">
 
   <form
       id="receipts-form"
@@ -30,6 +29,7 @@
         errMsg: '',
         }"
       @event-receipt-form-update="
+         console.log('detail', $event.detail);
          let base64 = $event.detail.params;
          let decodedString = decodeBase64UrlStr(base64);
          let jsonObject = JSON.parse(decodedString);
@@ -39,6 +39,18 @@
          year = jsonObject.year;
          month = jsonObject.month;
 
+         	mainCurrency = $event.detail.mainCurrency;
+          debtCurrency = $event.detail.debtCurrency;
+
+          let array = JSON.parse(decodeBase64UrlStr($event.detail.apts));
+
+          array.forEach((apt) => {
+            apartments.push(apt);
+          });
+
+          apartments.forEach((apt) => {
+            aptMap.set(apt.number, apt.name);
+          });
       ">
 
     <div x-bind:hx-get="'/api/receipts/formData/' + getLastPathSegment()"

@@ -22,13 +22,7 @@
             }
         })
         "
->
-  <div
-      hidden="hidden"
-      x-bind:hx-get="url"
-      hx-trigger="every 1s"
-      hx-swap="innerHTML"
-      @event-update-params="
+    @event-update-params="
         jsonObject = JSON.parse(decodeBase64UrlStr($event.detail.params))
 	      building = jsonObject.building
 	      month = jsonObject.month
@@ -41,14 +35,17 @@
 	      from = jsonObject.from
 	      to = jsonObject.to
 	      finished = jsonObject.finished
-
-	      if (finished) {
-	          $el.remove()
-	      }
-
       "
-  >
+>
+  <div
+      hidden="hidden"
+      x-bind:hx-get="url"
+      hx-trigger="load"
+      hx-swap="outerHTML">
   </div>
+  <template x-if="!building || building === ''">
+
+  </template>
   <template x-if="building && building !== ''">
     <div class="flex w-full flex-row justify-center gap-2">
       <span x-text="building"></span>

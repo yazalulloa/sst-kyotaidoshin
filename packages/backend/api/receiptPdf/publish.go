@@ -37,7 +37,7 @@ const sendPdfsMessageGroupId = "SendPdfs"
 
 func PublishBuilding(ctx context.Context, buildingId string) {
 	event := QueueEvent{
-		Type:       ReceiptChanges,
+		Type:       BuildingChanges,
 		BuildingId: buildingId,
 		ReceiptId:  "",
 	}
@@ -50,7 +50,7 @@ func PublishBuilding(ctx context.Context, buildingId string) {
 
 func PublishReceipt(ctx context.Context, buildingId string, receiptId string) {
 	event := QueueEvent{
-		Type:       BuildingChanges,
+		Type:       ReceiptChanges,
 		BuildingId: buildingId,
 		ReceiptId:  receiptId,
 	}
@@ -92,7 +92,7 @@ func publishEvent(ctx context.Context, event QueueEvent, messageGroupId string, 
 	return nil
 }
 
-func PublishSendPdfs(ctx context.Context, buildingId, receiptId string, apartments []string) (string, error) {
+func PublishSendPdfs(ctx context.Context, buildingId, receiptId, cardId string, apartments []string) (string, error) {
 	deduplicationId := uuid.NewString()
 	event := QueueEvent{
 		Type:       SendPdfs,
@@ -102,7 +102,7 @@ func PublishSendPdfs(ctx context.Context, buildingId, receiptId string, apartmen
 		Apartments: apartments,
 	}
 
-	update := ProgressUpdate{ObjectKey: deduplicationId}
+	update := ProgressUpdate{ObjectKey: deduplicationId, CardId: "sent-" + cardId}
 	err := PutProgress(ctx, update)
 	if err != nil {
 		log.Printf("Error putting progress: %v", err)
