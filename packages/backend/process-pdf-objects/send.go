@@ -15,12 +15,12 @@ import (
 )
 
 type Holder struct {
-	ctx        context.Context
-	progressId string
+	ctx   context.Context
+	event receiptPdf.QueueEvent
 }
 
-func (h *Holder) update(pf func(update *receiptPdf.ProgressUpdate) error) (bool, error) {
-	progressUpdate, err := receiptPdf.GetProgress(h.ctx, h.progressId)
+func (holder *Holder) update(pf func(update *receiptPdf.ProgressUpdate) error) (bool, error) {
+	progressUpdate, err := receiptPdf.GetProgress(holder.ctx, holder.event.ProgressId)
 	if err != nil {
 		return false, err
 	}
@@ -35,7 +35,7 @@ func (h *Holder) update(pf func(update *receiptPdf.ProgressUpdate) error) (bool,
 		progressUpdate.Finished = true
 	}
 
-	err = receiptPdf.PutProgress(h.ctx, progressUpdate)
+	err = receiptPdf.PutProgress(holder.ctx, progressUpdate)
 	if err != nil {
 		return false, err
 	}
@@ -44,7 +44,7 @@ func (h *Holder) update(pf func(update *receiptPdf.ProgressUpdate) error) (bool,
 
 }
 
-func sendPdfs(ctx context.Context, event receiptPdf.QueueEvent) error {
+func (holder *Holder) _sendPdfs() error {
 	altEmailsRecipient, err := resource.Get("AltEmailsRecipient", "value")
 	if err != nil {
 		return fmt.Errorf("altEmailsRecipient: %v", err)
@@ -52,14 +52,9 @@ func sendPdfs(ctx context.Context, event receiptPdf.QueueEvent) error {
 
 	altRecipient := altEmailsRecipient.(string)
 
-	receipt, err := receipts.CalculateReceipt(event.BuildingId, event.ReceiptId, event.KeyStr)
+	receipt, err := receipts.CalculateReceipt(holder.event.BuildingId, holder.event.ReceiptId, holder.event.KeyStr)
 	if err != nil {
 		return err
-	}
-
-	holder := Holder{
-		ctx:        ctx,
-		progressId: event.ProgressId,
 	}
 
 	shouldContinue, err := holder.update(func(update *receiptPdf.ProgressUpdate) error {
@@ -78,9 +73,9 @@ func sendPdfs(ctx context.Context, event receiptPdf.QueueEvent) error {
 		return nil
 	}
 
-	parts, err := receipts.GetParts(receipt, ctx, true, &receipts.DownloadKeys{
-		Parts:  event.Apartments,
-		AllApt: len(event.Apartments) == 0,
+	parts, err := receipts.GetParts(receipt, holder.ctx, true, &receipts.DownloadKeys{
+		Parts:  holder.event.Apartments,
+		AllApt: len(holder.event.Apartments) == 0,
 	})
 
 	if err != nil {
@@ -134,7 +129,7 @@ func sendPdfs(ctx context.Context, event receiptPdf.QueueEvent) error {
 				EmailKey:      receipt.Building.EmailConfig,
 			}
 
-			msg, err := receiptPdf.BuildMsg(ctx, req)
+			msg, err := receiptPdf.BuildMsg(holder.ctx, req)
 			if err != nil {
 				errChan <- err
 				return
@@ -193,7 +188,7 @@ func sendPdfs(ctx context.Context, event receiptPdf.QueueEvent) error {
 		return nil
 	}
 
-	err = email_h.SendEmail(ctx, receipt.Building.EmailConfig, messages)
+	err = email_h.SendEmail(holder.ctx, receipt.Building.EmailConfig, messages)
 	if err != nil {
 		log.Printf("Error sending email: %v", err)
 		return err
@@ -205,7 +200,7 @@ func sendPdfs(ctx context.Context, event receiptPdf.QueueEvent) error {
 	}
 
 	log.Printf("Sent %d", sentMsgs)
-	_, err = receipts.UpdateLastSent(event.ReceiptId)
+	_, err = receipts.UpdateLastSent(holder.event.ReceiptId)
 	if err != nil {
 		return err
 	}
@@ -217,6 +212,24 @@ func sendPdfs(ctx context.Context, event receiptPdf.QueueEvent) error {
 
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (holder *Holder) sendPdfs() error {
+	err := holder._sendPdfs()
+	if err != nil {
+		log.Printf("Error sending PDFs: %v", err)
+		_, updateErr := holder.update(func(update *receiptPdf.ProgressUpdate) error {
+			update.ErrMsg = err.Error()
+			update.Finished = true
+			return nil
+		})
+		if updateErr != nil {
+			log.Printf("Error updating progress: %v", err)
+			return updateErr
+		}
 	}
 
 	return nil

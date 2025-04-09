@@ -37,7 +37,12 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 				continue
 			}
 
-			err = sendPdfs(ctx, event)
+			holder := Holder{
+				ctx:   ctx,
+				event: event,
+			}
+
+			err = holder.sendPdfs()
 			if err != nil {
 				return err
 			}

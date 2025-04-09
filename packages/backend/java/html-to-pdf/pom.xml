@@ -72,6 +72,11 @@
       <artifactId>openhtmltopdf-java2d</artifactId>
       <version>${openhtmltopdf.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-blackbird</artifactId>
+    </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-rx-java3</artifactId>

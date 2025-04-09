@@ -2,15 +2,10 @@ package com.kyotaidoshin;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.openhtmltopdf.pdfboxout.PdfBoxRenderer;
-import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import io.reactivex.rxjava3.core.Single;
 import io.vertx.core.json.Json;
-import io.vertx.core.json.jackson.DatabindCodec;
-import io.vertx.rxjava3.core.Vertx;
 import io.vertx.rxjava3.core.buffer.Buffer;
-import io.vertx.rxjava3.ext.web.client.WebClient;
 import jakarta.inject.Named;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,16 +20,15 @@ import org.slf4j.LoggerFactory;
 @Named("html_to_pdf")
 public class HtmlToPdfLambda implements RequestStreamHandler {
 
-  private final Logger logger = LoggerFactory.getLogger(getClass());
+  private static final Logger logger = LoggerFactory.getLogger(HtmlToPdfLambda.class);
 
-  private final ObjectReader reader = DatabindCodec.mapper().readerFor(HtmlToPdfRequest.class);
-
-  private final Vertx vertx = Vertx.vertx();
-  private final WebClient webClient = WebClient.create(vertx);
-  private final PdfRendererBuilder builder = new PdfRendererBuilder();
 
   @Override
   public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
+
+    final var builder = Util.getPdfRendererBuilder();
+    final var reader = Util.getObjectReader();
+    final var webClient = Util.getWebClient();
 
     builder.withProducer("kyotaidoshin");
     final var singles = new ArrayList<Single<String>>();

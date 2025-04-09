@@ -380,6 +380,13 @@ func receiptPost(w http.ResponseWriter, r *http.Request) {
 			parsedReceipt.ExtraCharges[i].ParentReference = receipt.ID
 		}
 
+		apts, err := apartments.SelectByBuilding(receipt.BuildingID)
+		if err != nil {
+			log.Printf("Error getting apartments: %v", err)
+			response.errorStr = err.Error()
+			return response
+		}
+
 		var wg sync.WaitGroup
 		wg.Add(4)
 		errorChan := make(chan error, 4)
@@ -395,12 +402,6 @@ func receiptPost(w http.ResponseWriter, r *http.Request) {
 
 		go func() {
 			defer wg.Done()
-
-			apts, err := apartments.SelectByBuilding(receipt.BuildingID)
-			if err != nil {
-				errorChan <- err
-				return
-			}
 
 			debtArray := make([]model.Debts, len(apts))
 
@@ -444,7 +445,19 @@ func receiptPost(w http.ResponseWriter, r *http.Request) {
 
 		go func() {
 			defer wg.Done()
-			_, err = extraCharges.InsertBulk(parsedReceipt.ExtraCharges)
+
+			extraChargesArray := make([]model.ExtraCharges, 0)
+
+			for _, extraCharge := range parsedReceipt.ExtraCharges {
+				for _, apt := range apts {
+					if strings.Contains(extraCharge.Apartments, apt.Number) {
+						extraChargesArray = append(extraChargesArray, extraCharge)
+						break
+					}
+				}
+			}
+
+			_, err = extraCharges.InsertBulk(extraChargesArray)
 			if err != nil {
 				errorChan <- err
 				return
