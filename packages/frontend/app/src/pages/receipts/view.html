@@ -83,16 +83,18 @@
 
 </div>
 
-<div id="container" class="fade-me-out fade-me-in px-2 overflow-x-auto whitespace-nowrap w-full inline-block"
+<div id="container" class="fade-me-out fade-me-in"
      hx-swap-oob="true"
      x-data="{
        selected: ''
        }"
      @event-receipt-tab-selected.window="selected = $event.detail?.selected;">
+
   <div x-bind:hx-get="'/api/receipts/view/' + getLastPathSegment()"
        hx-trigger="load"
        hx-indicator=".htmx-indicator"
        hx-target="this"
        hx-swap="outerHTML">
   </div>
+
 </div>

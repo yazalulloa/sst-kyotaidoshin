@@ -66,8 +66,10 @@ templ Views(key string, dto CalculatedReceipt, idMap map[string]string, tabs str
 				class="size-5 animate-spin motion-reduce:animate-none fill-on-primary dark:fill-on-primary-dark"
 			></svg>
 		</button>
-		<div class="bg-white px-6 py-2 text-black overflow-x-auto whitespace-nowrap w-full">
-			@BuildingView(dto)
+		<div class="container mx-auto min-w-full overflow-x-scroll">
+			<div class="bg-white px-6 py-2 text-black overflow-x-auto whitespace-nowrap min-w-full flex flex-col gap-1 w-fit">
+				@BuildingView(dto)
+			</div>
 		</div>
 	</div>
 	for _,apt := range dto.Apartments {
@@ -101,8 +103,10 @@ templ Views(key string, dto CalculatedReceipt, idMap map[string]string, tabs str
 					class="size-5 animate-spin motion-reduce:animate-none fill-on-primary dark:fill-on-primary-dark"
 				></svg>
 			</button>
-			<div class="bg-white px-6 py-2 text-black overflow-x-auto whitespace-nowrap w-full">
-				@AptView(dto, apt)
+			<div class="container mx-auto min-w-full overflow-x-scroll">
+				<div class="bg-white px-6 py-2 text-black overflow-x-auto whitespace-nowrap min-w-full flex flex-col gap-1 w-fit">
+					@AptView(dto, apt)
+				</div>
 			</div>
 		</div>
 	}
@@ -463,38 +467,42 @@ templ BuildingView(dto CalculatedReceipt) {
 	<div class="w-full flex flex-col  items-center">
 		<div class="w-fit flex flex-col  items-center gap-1">
 			<table>
-				<tr>
-					<th class="font-bold text-start">APTO</th>
-					<th class="font-bold text-start">PROPIETARIO</th>
-					if multipleCurrencies {
-						for _,currency := range dto.CurrenciesToShowAmountToPay {
-							<th class="font-bold text-end">MONTO { currency.Name() }</th>
-						}
-					} else {
-						<th class="font-bold text-end">MONTO</th>
-					}
-				</tr>
-				for _,aptTotal := range dto.Apartments {
+				<thead>
 					<tr>
-						<td class="text-start">{ aptTotal.Apartment.Number }</td>
-						<td class="text-start">{ aptTotal.Apartment.Name }</td>
+						<th class="font-bold text-start">APTO</th>
+						<th class="font-bold text-start">PROPIETARIO</th>
 						if multipleCurrencies {
 							for _,currency := range dto.CurrenciesToShowAmountToPay {
+								<th class="font-bold text-end">MONTO { currency.Name() }</th>
+							}
+						} else {
+							<th class="font-bold text-end">MONTO</th>
+						}
+					</tr>
+				</thead>
+				<tbody>
+					for _,aptTotal := range dto.Apartments {
+						<tr>
+							<td class="text-start">{ aptTotal.Apartment.Number }</td>
+							<td class="text-start">{ aptTotal.Apartment.Name }</td>
+							if multipleCurrencies {
+								for _,currency := range dto.CurrenciesToShowAmountToPay {
+									for _,amount := range aptTotal.Amounts {
+										if currency == amount.Currency {
+											<td class="text-end">{ amount.Currency.Format(amount.Amount) }</td>
+										}
+									}
+								}
+							} else {
 								for _,amount := range aptTotal.Amounts {
-									if currency == amount.Currency {
+									if mainCurrency == amount.Currency {
 										<td class="text-end">{ amount.Currency.Format(amount.Amount) }</td>
 									}
 								}
 							}
-						} else {
-							for _,amount := range aptTotal.Amounts {
-								if mainCurrency == amount.Currency {
-									<td class="text-end">{ amount.Currency.Format(amount.Amount) }</td>
-								}
-							}
-						}
-					</tr>
-				}
+						</tr>
+					}
+				</tbody>
 			</table>
 			<br/>
 			<p class="w-full font-bold text-end">TOTAL: { mainCurrency.Format(dto.ApartmentsTotal) }</p>
@@ -530,16 +538,20 @@ templ AptView(dto CalculatedReceipt, apt AptTotal) {
 			<div class="w-fit flex flex-col gap-2  items-center">
 				<p class="text-center font-bold">CARGOS EXTRA</p>
 				<table>
-					<tr>
-						<th class="font-bold">DESCRIPCIÓN</th>
-						<th class="font-bold">MONTO</th>
-					</tr>
-					for _,extraCharge := range apt.ExtraCharges {
+					<thead>
 						<tr>
-							<td class="text-start">{ extraCharge.Description }</td>
-							<td class="text-end">{ util.GetAllowedCurrency(extraCharge.Currency).Format(extraCharge.Amount) }</td>
+							<th class="font-bold">DESCRIPCIÓN</th>
+							<th class="font-bold">MONTO</th>
 						</tr>
-					}
+					</thead>
+					<tbody>
+						for _,extraCharge := range apt.ExtraCharges {
+							<tr>
+								<td class="text-start">{ extraCharge.Description }</td>
+								<td class="text-end">{ util.GetAllowedCurrency(extraCharge.Currency).Format(extraCharge.Amount) }</td>
+							</tr>
+						}
+					</tbody>
 				</table>
 			</div>
 			<br/>
@@ -554,18 +566,22 @@ templ ExpenseView(dto CalculatedReceipt) {
 		<div class="w-fit flex flex-col gap-2  items-center">
 			<p class="text-center font-bold">GASTOS COMUNES</p>
 			<table>
-				<tr>
-					<th class="font-bold">DESCRIPCIÓN</th>
-					<th class="font-bold">MONTO</th>
-				</tr>
-				for _,exp := range dto.Expenses {
-					if expenses.COMMON.ExpenseIs(exp.Expense) {
-						<tr>
-							<td class="text-start">{ exp.Expense.Description }</td>
-							<td class="text-end px-4">{ util.GetAllowedCurrency(exp.Expense.Currency).Format(exp.Expense.Amount) }</td>
-						</tr>
+				<thead>
+					<tr>
+						<th class="font-bold">DESCRIPCIÓN</th>
+						<th class="font-bold">MONTO</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _,exp := range dto.Expenses {
+						if expenses.COMMON.ExpenseIs(exp.Expense) {
+							<tr>
+								<td class="text-start">{ exp.Expense.Description }</td>
+								<td class="text-end px-4">{ util.GetAllowedCurrency(exp.Expense.Currency).Format(exp.Expense.Amount) }</td>
+							</tr>
+						}
 					}
-				}
+				</tbody>
 			</table>
 			<br/>
 			<p class="w-full font-bold text-end">TOTAL GASTOS COMUNES: { dto.TotalCommonExpensesCurrency.Format(dto.TotalCommonExpenses) }</p>
@@ -576,18 +592,22 @@ templ ExpenseView(dto CalculatedReceipt) {
 		<div class="w-fit flex flex-col gap-2  items-center">
 			<p class="text-center font-bold">GASTOS NO COMUNES</p>
 			<table>
-				<tr>
-					<th class="font-bold">DESCRIPCIÓN</th>
-					<th class="font-bold">MONTO</th>
-				</tr>
-				for _,exp := range dto.Expenses {
-					if expenses.UNCOMMON.ExpenseIs(exp.Expense) {
-						<tr>
-							<td class="text-start">{ exp.Expense.Description }</td>
-							<td class="text-end px-4">{ util.GetAllowedCurrency(exp.Expense.Currency).Format(exp.Expense.Amount) }</td>
-						</tr>
+				<thead>
+					<tr>
+						<th class="font-bold">DESCRIPCIÓN</th>
+						<th class="font-bold">MONTO</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _,exp := range dto.Expenses {
+						if expenses.UNCOMMON.ExpenseIs(exp.Expense) {
+							<tr>
+								<td class="text-start">{ exp.Expense.Description }</td>
+								<td class="text-end px-4">{ util.GetAllowedCurrency(exp.Expense.Currency).Format(exp.Expense.Amount) }</td>
+							</tr>
+						}
 					}
-				}
+				</tbody>
 			</table>
 			<br/>
 			<p class="w-full font-bold text-end">TOTAL GASTOS NO COMUNES: { dto.TotalUnCommonExpensesCurrency.Format(dto.TotalUnCommonExpenses) }</p>
@@ -601,26 +621,30 @@ templ ReserveFundView(dto CalculatedReceipt) {
 		<div class="w-fit flex flex-col gap-2  items-center">
 			<p class="text-center font-bold">MES DE { strings.ToUpper(dto.MonthStr) }/{ fmt.Sprint(dto.Receipt.Year) }</p>
 			<table>
-				<tr>
-					<th class="font-bold text-start">PATRIMONIO</th>
-					<th class="font-bold text-end">+FACT.MES.ANT</th>
-					if dto.ThereIsReserveFundExpense {
-						<th class="font-bold text-end">CARGOS</th>
-					}
-					<th class="font-bold text-end">+FAC.MES.ACT</th>
-					<th class="font-bold text-end">SALDO/MES</th>
-				</tr>
-				for _,fund := range dto.ReserveFunds {
+				<thead>
 					<tr>
-						<td class="text-start">{ fund.Fund.Name } </td>
-						<td class="text-end">{ fund.FundFormatted } </td>
+						<th class="font-bold text-start">PATRIMONIO</th>
+						<th class="font-bold text-end">+FACT.MES.ANT</th>
 						if dto.ThereIsReserveFundExpense {
-							<td class="text-end">{ fund.ExpenseFormatted }</td>
+							<th class="font-bold text-end">CARGOS</th>
 						}
-						<td class="text-end">{ fund.AmountToPay } </td>
-						<td class="text-end">{ fund.NewReserveFund } </td>
+						<th class="font-bold text-end">+FAC.MES.ACT</th>
+						<th class="font-bold text-end">SALDO/MES</th>
 					</tr>
-				}
+				</thead>
+				<tbody>
+					for _,fund := range dto.ReserveFunds {
+						<tr>
+							<td class="text-start">{ fund.Fund.Name } </td>
+							<td class="text-end">{ fund.FundFormatted } </td>
+							if dto.ThereIsReserveFundExpense {
+								<td class="text-end">{ fund.ExpenseFormatted }</td>
+							}
+							<td class="text-end">{ fund.AmountToPay } </td>
+							<td class="text-end">{ fund.NewReserveFund } </td>
+						</tr>
+					}
+				</tbody>
 			</table>
 		</div>
 		<br/>
@@ -633,24 +657,28 @@ templ DebtView(dto CalculatedReceipt) {
 			<p class="text-center font-bold">DEUDAS</p>
 			{{ debtCurrency := util.GetAllowedCurrency(dto.Building.DebtCurrency) }}
 			<table>
-				<tr>
-					<th class="font-bold text-start">APTO</th>
-					<th class="font-bold text-start">PROPIETARIO</th>
-					<th class="font-bold text-end">RECIBOS</th>
-					<th class="font-bold text-end">DEUDA</th>
-					<th class="font-bold text-center">MESES</th>
-					<th class="font-bold text-end">ABONO</th>
-				</tr>
-				for _,apt := range dto.Apartments {
+				<thead>
 					<tr>
-						<td class="text-start">{ apt.Apartment.Number }</td>
-						<td class="text-start">{ apt.Apartment.Name }</td>
-						<td class="text-end">{ fmt.Sprint(apt.Debt.Receipts) }</td>
-						<td class="text-end">{ debtCurrency.Format(apt.Debt.Amount) }</td>
-						<td class="text-center">{ apt.DebtMonthStr }</td>
-						<td class="text-end">{ util.GetAllowedCurrency(apt.Debt.PreviousPaymentAmountCurrency).Format(apt.Debt.PreviousPaymentAmount) }</td>
+						<th class="font-bold text-start">APTO</th>
+						<th class="font-bold text-start">PROPIETARIO</th>
+						<th class="font-bold text-end">RECIBOS</th>
+						<th class="font-bold text-end">DEUDA</th>
+						<th class="font-bold text-center">MESES</th>
+						<th class="font-bold text-end">ABONO</th>
 					</tr>
-				}
+				</thead>
+				<tbody>
+					for _,apt := range dto.Apartments {
+						<tr>
+							<td class="text-start">{ apt.Apartment.Number }</td>
+							<td class="text-start">{ apt.Apartment.Name }</td>
+							<td class="text-end">{ fmt.Sprint(apt.Debt.Receipts) }</td>
+							<td class="text-end">{ debtCurrency.Format(apt.Debt.Amount) }</td>
+							<td class="text-center">{ apt.DebtMonthStr }</td>
+							<td class="text-end">{ util.GetAllowedCurrency(apt.Debt.PreviousPaymentAmountCurrency).Format(apt.Debt.PreviousPaymentAmount) }</td>
+						</tr>
+					}
+				</tbody>
 			</table>
 			<br/>
 			<p class="w-full font-bold text-end">NÚMERO DE RECIBOS: { fmt.Sprint(dto.DebtReceiptsAmount) }</p>

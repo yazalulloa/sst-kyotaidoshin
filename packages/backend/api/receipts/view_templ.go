@@ -939,7 +939,7 @@ func SendPdfsView(progressId string, closeModal bool) templ.Component {
 			templ_7745c5c3_Var48 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, "<div id=\"receipts-email-progress\" hx-swap-oob=\"beforeend\"><div class=\"pb-2 w-full flex justify-center\" x-data=\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 64, "<div id=\"receipts-email-progress\" hx-swap-oob=\"beforeend\"><div class=\"pb-2 w-full flex justify-center gap-2\" x-data=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
