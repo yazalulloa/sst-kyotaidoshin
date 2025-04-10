@@ -153,7 +153,6 @@ type CalculatedReceipt struct {
 	Receipt                       model.Receipts
 	MonthStr                      string
 	BuildingDownloadKeys          string
-	Key                           string
 }
 
 type AptTotal struct {

@@ -15,8 +15,10 @@ import (
 )
 
 type Holder struct {
-	ctx   context.Context
-	event receiptPdf.QueueEvent
+	ctx     context.Context
+	event   receiptPdf.QueueEvent
+	Subject string
+	Message string
 }
 
 func (holder *Holder) update(pf func(update *receiptPdf.ProgressUpdate) error) (bool, error) {
@@ -52,7 +54,7 @@ func (holder *Holder) _sendPdfs() error {
 
 	altRecipient := altEmailsRecipient.(string)
 
-	receipt, err := receipts.CalculateReceipt(holder.event.BuildingId, holder.event.ReceiptId, holder.event.KeyStr)
+	receipt, err := receipts.CalculateReceipt(holder.event.BuildingId, holder.event.ReceiptId)
 	if err != nil {
 		return err
 	}
@@ -123,8 +125,8 @@ func (holder *Holder) _sendPdfs() error {
 				Year:          receipt.Receipt.Year,
 				BuildingName:  receipt.Building.Name,
 				AptNumber:     part.Apt.Number,
-				SubjectPrefix: "",
-				Text:          "",
+				SubjectPrefix: holder.Subject,
+				Text:          holder.Message,
 				ObjectKey:     part.ObjectKey,
 				EmailKey:      receipt.Building.EmailConfig,
 			}

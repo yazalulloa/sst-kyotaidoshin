@@ -25,7 +25,8 @@ type QueueEvent struct {
 	ReceiptId  string   `json:"receiptId"`
 	ProgressId string   `json:"progressId"`
 	Apartments []string `json:"apartments"`
-	KeyStr     string   `json:"keyStr"`
+	Subject    string   `json:"subject"`
+	Message    string   `json:"message"`
 }
 
 func (receiver QueueEvent) IsChanges() bool {
@@ -92,24 +93,36 @@ func publishEvent(ctx context.Context, event QueueEvent, messageGroupId string, 
 	return nil
 }
 
-func PublishSendPdfs(ctx context.Context, buildingId, receiptId, cardId string, apartments []string) (string, error) {
+type PublishSendPdfsRequest struct {
+	Ctx        context.Context
+	BuildingId string
+	ReceiptId  string
+	CardId     string
+	Apartments []string
+	Subject    string
+	Message    string
+}
+
+func PublishSendPdfs(req PublishSendPdfsRequest) (string, error) {
 	deduplicationId := uuid.NewString()
 	event := QueueEvent{
 		Type:       SendPdfs,
-		BuildingId: buildingId,
-		ReceiptId:  receiptId,
+		BuildingId: req.BuildingId,
+		ReceiptId:  req.ReceiptId,
 		ProgressId: deduplicationId,
-		Apartments: apartments,
+		Apartments: req.Apartments,
+		Subject:    req.Subject,
+		Message:    req.Message,
 	}
 
 	update := ProgressUpdate{ObjectKey: deduplicationId, CardId: "sent-" + cardId}
-	err := PutProgress(ctx, &update)
+	err := PutProgress(req.Ctx, &update)
 	if err != nil {
 		log.Printf("Error putting progress: %v", err)
 		return "", err
 	}
 
-	err = publishEvent(ctx, event, sendPdfsMessageGroupId+deduplicationId, &deduplicationId)
+	err = publishEvent(req.Ctx, event, sendPdfsMessageGroupId+deduplicationId, &deduplicationId)
 	if err != nil {
 		log.Printf("Error publishing send pdfs: %v", err)
 		return "", err

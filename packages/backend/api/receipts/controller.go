@@ -659,7 +659,7 @@ func getReceiptView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id, keyStr)
+	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -729,7 +729,7 @@ func getZip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id, keyStr)
+	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -803,7 +803,7 @@ func getPdf(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id, keyStr)
+	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -856,7 +856,7 @@ func getHtml(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id, keyStr)
+	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -939,7 +939,12 @@ func sendPdfs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	clientId, err := receiptPdf.PublishSendPdfs(r.Context(), keys.BuildingId, keys.Id, keys.CardId, nil)
+	clientId, err := receiptPdf.PublishSendPdfs(receiptPdf.PublishSendPdfsRequest{
+		Ctx:        r.Context(),
+		BuildingId: keys.BuildingId,
+		ReceiptId:  keys.Id,
+		CardId:     keys.CardId,
+	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -1129,7 +1134,15 @@ func sendPdfsApt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	clientId, err := receiptPdf.PublishSendPdfs(r.Context(), keys.BuildingId, keys.Id, keys.CardId, request.Apartments)
+	clientId, err := receiptPdf.PublishSendPdfs(receiptPdf.PublishSendPdfsRequest{
+		Ctx:        r.Context(),
+		BuildingId: keys.BuildingId,
+		ReceiptId:  keys.Id,
+		CardId:     keys.CardId,
+		Apartments: request.Apartments,
+		Subject:    request.Subject,
+		Message:    request.Message,
+	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

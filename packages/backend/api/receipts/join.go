@@ -130,15 +130,13 @@ func GetReceiptExpensesDto(receiptId string, expenseArray []expenses.Item, reser
 	}
 }
 
-func CalculateReceipt(buildingId, receiptId, keyStr string) (*CalculatedReceipt, error) {
+func CalculateReceipt(buildingId, receiptId string) (*CalculatedReceipt, error) {
 
 	var wg sync.WaitGroup
 	wg.Add(8)
 	errorChan := make(chan error, 8)
 
-	calculatedReceipt := CalculatedReceipt{
-		Key: keyStr,
-	}
+	calculatedReceipt := CalculatedReceipt{}
 
 	var reserveFundArray []model.ReserveFunds
 	var apartmentArray []model.Apartments

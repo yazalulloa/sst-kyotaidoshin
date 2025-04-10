@@ -38,8 +38,10 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 			}
 
 			holder := Holder{
-				ctx:   ctx,
-				event: event,
+				ctx:     ctx,
+				event:   event,
+				Subject: event.Subject,
+				Message: event.Message,
 			}
 
 			err = holder.sendPdfs()
