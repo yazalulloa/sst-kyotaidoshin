@@ -26,10 +26,10 @@ TODOS:
 - [x] Cleanup Frontend
 - [x] Focus edit on click
 - [x] Scroll forms
-- [ ] Custom Login
+- [x] Custom Login
 - [ ] My Profile
 - [ ] Language Selector
 - [x] Themes
 - [ ] Sessions
 - [x] Fix Z index of tooltips and dialogs (Receipts)
-- [ ] Redirect after login
+- [x] Redirect after login
