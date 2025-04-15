@@ -38,7 +38,7 @@ func GetTelegramBot() (*bot.Bot, error) {
 
 	var _err error
 	_telegramBotOnce.Do(func() {
-		timestamp := time.Now().UnixMilli()
+		//timestamp := time.Now().UnixMilli()
 		token, err := resource.Get("TelegramBotToken", "value")
 		if err != nil {
 			_err = fmt.Errorf("GetWebhook TelegramBotToken error: %w", err)
@@ -85,7 +85,7 @@ func GetTelegramBot() (*bot.Bot, error) {
 			return
 		}
 
-		log.Printf("Elapsed time: %d", time.Now().UnixMilli()-timestamp)
+		//log.Printf("Elapsed time: %d", time.Now().UnixMilli()-timestamp)
 	})
 	return _telegramBotInstance, _err
 
