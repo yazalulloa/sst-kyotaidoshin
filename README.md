@@ -6,12 +6,13 @@ Tech:
 - [SST](https://sst.dev/)
 - [HTMX](https://htmx.org/)
 - [AlpineJs](https://alpinejs.dev/)
-- Vite
-- TailwindCSS
+- [Vite](https://vite.dev/)
+- [TailwindCSS](https://tailwindcss.com/)
 - [Turso](https://turso.tech/)
 - [DaisyUI](https://daisyui.com/)
 
 TODOS:
+
 - [x] Send Pdfs by selection
 - [x] Copy Receipt
 - [ ] Optimize SELECT on Calculate Receipt
