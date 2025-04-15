@@ -5,7 +5,7 @@ import {subjects} from "./subjects"
 import {GoogleProvider} from "@openauthjs/openauth/provider/google";
 import {Resource} from "sst";
 import {Select} from "@openauthjs/openauth/ui/select"
-import {THEME_OPENAUTH} from "@openauthjs/openauth/ui/theme"
+import type {Theme} from "@openauthjs/openauth/ui/theme"
 import {InvokeCommand, LambdaClient} from "@aws-sdk/client-lambda";
 import {DynamoStorage} from "@openauthjs/openauth/storage/dynamo"
 
@@ -16,6 +16,22 @@ const storage = DynamoStorage({
   pk: "pk",
   sk: "sk"
 })
+
+const MY_THEME: Theme = {
+  title: "Kyotaidoshin",
+  radius: "md",
+  favicon: "https://kyotaidoshin.com/favicon.ico",
+  primary: {
+    light: "#FFF",
+    dark: "#000"
+  },
+  background: {
+    light: "#FFF",
+    dark: "#000"
+  },
+  logo: "https://kyotaidoshin.com/favicon.ico",
+  // ...
+}
 
 const app = issuer({
   subjects,
@@ -37,7 +53,7 @@ const app = issuer({
       scopes: ["openid", "profile", "email"],
     })
   },
-  theme: THEME_OPENAUTH,
+  theme: MY_THEME,
   select: Select({
     providers: {
       github: {display: "GitHub"},

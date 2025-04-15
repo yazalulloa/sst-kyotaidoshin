@@ -10,6 +10,17 @@
   <link href="styles.css" rel="stylesheet">
   <script>
     document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'kyo')
+
+    if (window.location.pathname === "/logged_in") {
+      console.log("Logged in")
+      let redirectTo = localStorage.getItem('redirect_to')
+      if (redirectTo !== null) {
+        window.location.pathname = redirectTo
+        localStorage.removeItem('redirect_to')
+      }
+    } else {
+      localStorage.setItem('redirect_to', window.location.pathname)
+    }
   </script>
   <script src="index.js" type="module"></script>
 </head>
@@ -56,6 +67,7 @@
 
           if (page) {
             document.getElementById(page.Id).click()
+            localStorage.removeItem('redirect_to')
             return
           }
 
@@ -64,6 +76,7 @@
 
           if (subRoute) {
             sendEvent(subRoute.Id, 'navigate')
+            localStorage.removeItem('redirect_to')
            return;
           }
 
@@ -72,6 +85,7 @@
          let lastNav = getLastNav()
          let nextNav =  lastNav && value.find(page => page.Id === lastNav) ? lastNav : value[0].Id
          document.getElementById(nextNav).click()
+         localStorage.removeItem('redirect_to')
          })
 
          ">

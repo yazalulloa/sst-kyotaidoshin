@@ -21,6 +21,8 @@ function getIsLocal(): boolean {
   return false
 }
 
+const redirectUrl = (isLocal ? "http://localhost:5173" : Resource.WebApp.url) + "/logged_in"
+
 const app = new Hono()
 .get("/authorize", async (c) => {
   const origin = new URL(c.req.url).origin
@@ -39,7 +41,7 @@ const app = new Hono()
       })
     setSession(c, exchanged.tokens.access, exchanged.tokens.refresh)
 
-    return c.redirect(isLocal ? "http://localhost:5173" : Resource.WebApp.url, 302)
+    return c.redirect(redirectUrl, 302)
     // return c.redirect("/", 302)
   } catch (e: any) {
     return new Response(e.toString())
@@ -63,7 +65,7 @@ const app = new Hono()
       setSession(c, verified.tokens.access, verified.tokens.refresh)
 
 
-    return c.redirect(isLocal ? "http://localhost:5173" : Resource.WebApp.url, 302)
+    return c.redirect(redirectUrl, 302)
     // return c.json(verified.subject)
   } catch (e) {
     console.error(e)

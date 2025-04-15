@@ -59,7 +59,7 @@ func router() http.Handler {
 		w.Header().Add("HX-Redirect", url)
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("Logout"))
-		log.Printf("Logging out")
+		//log.Printf("Logging out")
 
 		//
 		//http.Redirect(w, r, url, http.StatusTemporaryRedirect)
