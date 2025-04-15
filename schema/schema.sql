@@ -110,6 +110,8 @@ CREATE INDEX IF NOT EXISTS extra_charges_building_id_idx ON extra_charges (build
 CREATE INDEX IF NOT EXISTS extra_charges_parent_reference_building_id_idx ON extra_charges (parent_reference, building_id);
 CREATE INDEX IF NOT EXISTS extra_charges_type_idx ON extra_charges (type);
 
+CREATE INDEX IF NOT EXISTS extra_charges_parent_reference_type_idx ON extra_charges (parent_reference, type);
+
 CREATE TRIGGER IF NOT EXISTS extra_charges_updated_at_trigger
     AFTER UPDATE
                                 ON extra_charges

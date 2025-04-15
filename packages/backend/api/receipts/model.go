@@ -80,6 +80,13 @@ type ReceiptRecord struct {
 	Debts        []debts.DebtDto               `json:"debts"`
 }
 
+type ReceiptBackup struct {
+	Receipt      ReceiptDto                    `json:"receipt"`
+	ExtraCharges []extraCharges.ExtraChargeDto `json:"extra_charges"`
+	Expenses     []expenses.ExpenseBackup      `json:"expenses"`
+	Debts        []debts.DebtBackup            `json:"debts"`
+}
+
 type ReceiptDto struct {
 	BuildingID string  `json:"building_id"`
 	Year       int16   `json:"year"`

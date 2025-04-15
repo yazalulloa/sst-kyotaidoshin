@@ -187,6 +187,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 		Months:    months,
 		Years:     years,
 		Limit:     31,
+		SortOrder: util.SortOrderTypeDESC,
 	}
 
 	response, err := getTableResponse(requestQuery)

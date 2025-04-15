@@ -5,6 +5,7 @@ import (
 	"db/gen/model"
 	. "db/gen/table"
 	"github.com/go-jet/jet/v2/sqlite"
+	"kyotaidoshin/extraCharges"
 	"kyotaidoshin/util"
 )
 
@@ -60,6 +61,54 @@ func selectList(req RequestQuery) ([]struct {
 	if req.Limit > 0 {
 		stmt = stmt.LIMIT(int64(req.Limit))
 	}
+
+	err := stmt.Query(db.GetDB().DB, &dest)
+	if err != nil {
+		return nil, err
+	}
+
+	return dest, nil
+}
+
+//type ExtraChargesArray []model.ExtraCharges
+//type ReserveFundsArray []model.ReserveFunds
+
+func selectRecords(lastId string, limit int64) ([]struct {
+	model.Buildings
+	ExtraCharges []model.ExtraCharges
+	ReserveFunds []model.ReserveFunds
+}, error) {
+	condition := sqlite.Bool(true)
+
+	if lastId != "" {
+		condition = condition.AND(Buildings.ID.GT(sqlite.String(lastId)))
+	}
+
+	var dest []struct {
+		model.Buildings
+		ExtraCharges []model.ExtraCharges
+		ReserveFunds []model.ReserveFunds
+	}
+
+	paginatedBuildings := sqlite.CTE("paginated_buildings")
+	idColumn := sqlite.StringColumn("id").From(paginatedBuildings)
+
+	stmt := sqlite.WITH(paginatedBuildings.AS(
+		Buildings.SELECT(sqlite.StringColumn("id")).FROM(Buildings).
+			WHERE(condition).
+			ORDER_BY(Buildings.ID.ASC()).
+			LIMIT(limit),
+	))(
+		paginatedBuildings.SELECT(Buildings.AllColumns, ExtraCharges.AllColumns, ReserveFunds.AllColumns).
+			FROM(paginatedBuildings.
+				INNER_JOIN(Buildings, idColumn.EQ(Buildings.ID)).
+				LEFT_JOIN(ExtraCharges, ExtraCharges.BuildingID.EQ(Buildings.ID).
+					AND(ExtraCharges.ParentReference.EQ(Buildings.ID)).
+					AND(ExtraCharges.Type.EQ(sqlite.String(extraCharges.TypeBuilding)))).
+				LEFT_JOIN(ReserveFunds, ReserveFunds.BuildingID.EQ(Buildings.ID)),
+			).
+			ORDER_BY(Buildings.ID.ASC()),
+	)
 
 	err := stmt.Query(db.GetDB().DB, &dest)
 	if err != nil {

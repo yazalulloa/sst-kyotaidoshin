@@ -32,6 +32,7 @@
       amountErr: '',
       receiptsErr: '',
       previousPaymentAmountErr: '',
+      debtMonthsTotalErr : '',
       errMsg: ''
   }"
        @event-debt-form-update="
@@ -95,73 +96,82 @@
         <span x-text="apartment"></span><span x-text="aptMap.get(apartment)"></span>
       </div>
 
-      <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-        <label for="debtsAmountInput"
-               x-bind:class="amountErr !== '' ? 'text-danger' : ''"
-               class="flex w-fit items-center gap-1 text-sm pl-0.5">
-
-          <svg x-show="amountErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
-          <span x-text="$t('main-title-amount')"></span>
-        </label>
-        <input
-            id="debtsAmountInput"
-            class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
-            type="number"
-            name="amount"
-            maxlength="14"
-            step=".01"
-            x-model="amount"
-            x-bind:class="amountErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
-            disabled-x-trap.noreturn="apartment !== ''"
-            x-init="
+      <div class="grid grid-cols-2 gap-2">
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend text-start w-full"
+                  x-text="$t('main-title-amount')">
+          </legend>
+          <input type="number"
+                 class="input w-full"
+                 x-bind:class="amountErr !== '' ? 'input-error' : ''"
+                 name="amount"
+                 maxlength="14"
+                 step=".01"
+                 x-model="amount"
+                 x-init="
             limitInputToMaxLength($el)
             configureCurrencyInput($el)
-            "
-            required
-        />
-        <small x-model="amountErr"
-               x-bind:class="amountErr !== '' ? 'text-danger' : ''"
-               class="text-start pl-0.5">
-        </small>
-      </div>
+              "
+                 required/>
+          <p class="fieldset-label"
+             x-bind:class="amountErr !== '' ? 'text-error' : ''"
+             x-text="amountErr">
+          </p>
+        </fieldset>
 
-      <fieldset class="fieldset">
-        <legend class="fieldset-legend" x-text="$t('main-title-currency')"></legend>
-        <select class="select"
-                name="previousPaymentAmountCurrency"
-                x-model="previousPaymentAmountCurrency">
-          <template x-for="value in CURRENCIES_GLOBAL">
-            <option x-bind:value="value" x-text="value"></option>
-          </template>
-        </select>
-      </fieldset>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend" x-text="$t('main-title-currency')"></legend>
+          <select class="select"
+                  name="previousPaymentAmountCurrency"
+                  x-model="previousPaymentAmountCurrency">
+            <template x-for="value in CURRENCIES_GLOBAL">
+              <option x-bind:value="value" x-text="value"></option>
+            </template>
+          </select>
+        </fieldset>
 
-      <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-        <label for="debtsReceiptInput"
-               x-bind:class="receiptsErr !== '' ? 'text-danger' : ''"
-               class="flex w-fit items-center gap-1 text-sm pl-0.5">
-
-          <svg x-show="receiptsErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
-          <span x-text="$t('main-title-receipts')"></span>
-        </label>
-        <input
-            id="debtsReceiptInput"
-            class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
-            type="number"
-            name="receipts"
-            maxlength="14"
-            x-model="receipts"
-            x-bind:class="receiptsErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
-            x-init="
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend text-start w-full"
+                  x-text="$t('main-title-receipts')">
+          </legend>
+          <input class="input w-full"
+                 x-bind:class="receiptsErr !== '' ? 'input-error' : ''"
+                 type="number"
+                 name="receipts"
+                 maxlength="14"
+                 x-model="amount"
+                 x-init="
             configureNumberInput($el)
             limitInputToMaxLength($el)
-            "
-            required
-        />
-        <small x-model="receiptsErr"
-               x-bind:class="receiptsErr !== '' ? 'text-danger' : ''"
-               class="text-start pl-0.5">
-        </small>
+              "
+                 required/>
+          <p class="fieldset-label"
+             x-bind:class="receiptsErr !== '' ? 'text-error' : ''"
+             x-text="receiptsErr">
+          </p>
+        </fieldset>
+
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend text-start w-full"
+                  x-text="$t('main-month-totals')">
+          </legend>
+          <input class="input w-full"
+                 x-bind:class="debtMonthsTotalErr !== '' ? 'input-error' : ''"
+                 type="number"
+                 name="debtMonthsTotal"
+                 maxlength="5"
+                 x-model="debtMonthsTotal"
+                 x-init="
+            configureNumberInput($el)
+            limitInputToMaxLength($el)
+              "
+                 required/>
+          <p class="fieldset-label"
+             x-bind:class="debtMonthsTotalErr !== '' ? 'text-error' : ''"
+             x-text="debtMonthsTotalErr">
+          </p>
+        </fieldset>
+
       </div>
 
       <div x-bind:hx-get="debtMonthsPartialUrl"

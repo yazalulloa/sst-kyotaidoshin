@@ -36,6 +36,16 @@ type ExpenseDto struct {
 	Type        string  `json:"type"`
 }
 
+type ExpenseBackup struct {
+	BuildingID  string  `json:"building_id"`
+	ReceiptID   string  `json:"receipt_id"`
+	Description string  `json:"description"`
+	Amount      float64 `json:"amount"`
+	Currency    string  `json:"currency"`
+	ReserveFund bool    `json:"reserve_fund"`
+	Type        string  `json:"type"`
+}
+
 type FormDto struct {
 	Key   string
 	Items []Item

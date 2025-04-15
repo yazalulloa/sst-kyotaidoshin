@@ -11,10 +11,16 @@ import (
 	"github.com/go-jet/jet/v2/sqlite"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
+	"kyotaidoshin/apartments"
+	"kyotaidoshin/api"
+	"kyotaidoshin/backup"
+	"kyotaidoshin/buildings"
 	"kyotaidoshin/rates"
+	"kyotaidoshin/receipts"
 	"kyotaidoshin/users"
 	"kyotaidoshin/util"
 	"log"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -115,7 +121,7 @@ func optionsHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 				{
 					{
 						Text:         "Backups",
-						CallbackData: "backups",
+						CallbackData: _BACKUPS_CALLBACK,
 					},
 				},
 			},
@@ -172,22 +178,6 @@ func lastRateCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
 	go func() {
 		defer wg.Done()
 
-		_, err = b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
-			CallbackQueryID: update.CallbackQuery.ID,
-			//Text:            msg,
-			//ShowAlert:       false, //show modal
-			//CacheTime:       0,
-		})
-
-		if err != nil {
-			errorChan <- fmt.Errorf("error answering callback query: %v", err)
-			return
-		}
-	}()
-
-	go func() {
-		defer wg.Done()
-
 		msgParams := &bot.SendMessageParams{
 			ChatID: update.CallbackQuery.From.ID,
 			Text:   msg,
@@ -203,6 +193,22 @@ func lastRateCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
 		}
 	}()
 
+	go func() {
+		defer wg.Done()
+
+		_, err = b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+			CallbackQueryID: update.CallbackQuery.ID,
+			//Text:            msg,
+			//ShowAlert:       false, //show modal
+			//CacheTime:       0,
+		})
+
+		if err != nil {
+			errorChan <- fmt.Errorf("error answering callback query: %v", err)
+			return
+		}
+	}()
+
 	wg.Wait()
 	close(errorChan)
 
@@ -211,4 +217,212 @@ func lastRateCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
 		log.Printf("Error: %v", err)
 		return
 	}
+}
+
+func backupsCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+	errorChan := make(chan error, 2)
+
+	go func() {
+		defer wg.Done()
+		_, err := b.EditMessageText(ctx, &bot.EditMessageTextParams{
+			ChatID:    update.CallbackQuery.From.ID,
+			MessageID: update.CallbackQuery.Message.Message.ID,
+			Text:      "Choose a backup",
+			ReplyMarkup: &models.InlineKeyboardMarkup{
+				InlineKeyboard: [][]models.InlineKeyboardButton{
+					{
+						{
+							Text:         "Apartments",
+							CallbackData: _BACKUP_APARTMENTS_CALLBACK,
+						},
+					},
+					{
+						{
+							Text:         "Buildings",
+							CallbackData: _BACKUP_BUILDINGS_CALLBACK,
+						},
+					},
+					{
+						{
+							Text:         "Receipts",
+							CallbackData: _BACKUP_RECEIPTS_CALLBACK,
+						},
+					},
+					{
+						{
+							Text:         "All",
+							CallbackData: _BACKUP_ALL_CALLBACK,
+						},
+					},
+				},
+			},
+		})
+
+		if err != nil {
+			errorChan <- fmt.Errorf("error answering callback query: %v", err)
+			return
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		_, err := b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+			CallbackQueryID: update.CallbackQuery.ID,
+			//Text:            msg,
+			//ShowAlert:       false, //show modal
+			//CacheTime:       0,
+		})
+
+		if err != nil {
+			errorChan <- fmt.Errorf("error answering callback query: %v", err)
+			return
+		}
+	}()
+
+	wg.Wait()
+	close(errorChan)
+
+	err := util.HasErrors(errorChan)
+	if err != nil {
+		log.Printf("Error: %v", err)
+		return
+	}
+
+}
+
+func sendBackup(filepath, filename string, ctx context.Context, b *bot.Bot, update *models.Update) {
+	file, err := os.Open(filepath)
+	if err != nil {
+		log.Printf("Error reading apartments backup file: %v", err)
+		return
+	}
+
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			log.Printf("Error closing file: %s", err)
+			return
+		}
+	}(file)
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+	errorChan := make(chan error, 2)
+
+	go func() {
+		defer wg.Done()
+
+		_, err = b.SendDocument(ctx, &bot.SendDocumentParams{
+			ChatID: update.CallbackQuery.From.ID,
+			Document: &models.InputFileUpload{
+				Filename: filename,
+				Data:     file,
+			},
+		})
+
+		if err != nil {
+			errorChan <- fmt.Errorf("error sending apartments backup: %v", err)
+			return
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		_, err = b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+			CallbackQueryID: update.CallbackQuery.ID,
+			//Text:            msg,
+			//ShowAlert:       false, //show modal
+			//CacheTime:       0,
+		})
+
+		if err != nil {
+			errorChan <- fmt.Errorf("error answering callback query: %v", err)
+			return
+		}
+	}()
+
+	wg.Wait()
+	close(errorChan)
+
+	err = util.HasErrors(errorChan)
+	if err != nil {
+		log.Printf("Error: %v", err)
+		return
+	}
+}
+
+func backupApartmentsCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
+
+	filepath, err := apartments.Backup()
+	if err != nil {
+		log.Printf("Error getting apartments backup: %v", err)
+		return
+	}
+	defer func() {
+		err := os.Remove(filepath)
+		if err != nil {
+			log.Printf("Error removing file: %s", err)
+			return
+		}
+	}()
+
+	sendBackup(filepath, api.BACKUP_APARTMENTS_FILE, ctx, b, update)
+}
+
+func backupBuildingsCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
+
+	filepath, err := buildings.Backup()
+	if err != nil {
+		log.Printf("Error getting buildings backup: %v", err)
+		return
+	}
+	defer func() {
+		err := os.Remove(filepath)
+		if err != nil {
+			log.Printf("Error removing file: %s", err)
+			return
+		}
+	}()
+
+	sendBackup(filepath, api.BACKUP_BUILDINGS_FILE, ctx, b, update)
+}
+
+func backupReceiptsCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
+	filepath, err := receipts.Backup()
+	if err != nil {
+		log.Printf("Error getting receipts backup: %v", err)
+		return
+	}
+	defer func() {
+		err := os.Remove(filepath)
+		if err != nil {
+			log.Printf("Error removing file: %s", err)
+			return
+		}
+	}()
+
+	sendBackup(filepath, api.BACKUP_RECEIPTS_FILE, ctx, b, update)
+}
+
+func backupAllCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
+
+	filepath, err := backup.AllBackup(api.BACKUP_ALL_FILE)
+	if err != nil {
+		log.Printf("Error getting all backup: %v", err)
+		return
+	}
+	defer func() {
+		err := os.Remove(filepath)
+		if err != nil {
+			log.Printf("Error removing file: %s", err)
+			return
+		}
+	}()
+
+	sendBackup(filepath, api.BACKUP_ALL_FILE, ctx, b, update)
 }

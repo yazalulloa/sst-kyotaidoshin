@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"kyotaidoshin/apartments"
+	"kyotaidoshin/api"
 	"kyotaidoshin/buildings"
 	"kyotaidoshin/debts"
 	"kyotaidoshin/expenses"
@@ -855,4 +856,168 @@ func duplicate(key Keys) (*string, error) {
 	log.Printf("Inserted %d records", sum)
 
 	return util.Encode(keys(*receipt, "")), nil
+}
+
+func Backup() (string, error) {
+
+	requestQuery := RequestQuery{
+		Limit:     30,
+		SortOrder: util.SortOrderTypeASC,
+	}
+	selectListDtos := func() ([]ReceiptBackup, error) {
+		list, err := selectList(requestQuery)
+		if err != nil {
+			return nil, err
+		}
+
+		ids := make([]string, len(list))
+
+		for i, item := range list {
+			ids[i] = item.ID
+
+			if i == len(list)-1 {
+				requestQuery.LastId = item.ID
+			}
+
+		}
+
+		var extraChargesArray []model.ExtraCharges
+		var expensesArray []model.Expenses
+		var debtsArray []model.Debts
+
+		var wg sync.WaitGroup
+		wg.Add(3)
+		errorChan := make(chan error, 3)
+
+		go func() {
+			defer wg.Done()
+
+			extraChargesArray, err = extraCharges.SelectByReceipts(ids)
+
+			if err != nil {
+				errorChan <- err
+				return
+			}
+		}()
+
+		go func() {
+			defer wg.Done()
+
+			expensesArray, err = expenses.SelectByReceipts(ids)
+			if err != nil {
+				errorChan <- err
+				return
+			}
+
+		}()
+
+		go func() {
+			defer wg.Done()
+
+			debtsArray, err = debts.SelectByReceipts(ids)
+			if err != nil {
+				errorChan <- err
+				return
+			}
+
+		}()
+
+		wg.Wait()
+		close(errorChan)
+
+		err = util.HasErrors(errorChan)
+
+		if err != nil {
+			return nil, err
+		}
+
+		dtos := make([]ReceiptBackup, len(list))
+
+		for i, receipt := range list {
+
+			extraChargesBackup := make([]extraCharges.ExtraChargeDto, 0)
+
+			for _, extraCharge := range extraChargesArray {
+
+				if extraCharge.ParentReference == receipt.ID {
+					apts := strings.Split(extraCharge.Apartments, ",")
+
+					aptsDto := make([]extraCharges.AptDto, len(apts))
+					for k, apt := range apts {
+						aptsDto[k] = extraCharges.AptDto{
+							Number: apt,
+						}
+					}
+
+					extraChargesBackup = append(extraChargesBackup, extraCharges.ExtraChargeDto{
+						BuildingID:      extraCharge.BuildingID,
+						ParentReference: extraCharge.ParentReference,
+						Type:            extraCharge.Type,
+						Description:     extraCharge.Description,
+						Amount:          extraCharge.Amount,
+						Currency:        extraCharge.Currency,
+						Active:          extraCharge.Active,
+						Apartments:      aptsDto,
+					})
+
+				}
+
+			}
+
+			expensesBackup := make([]expenses.ExpenseBackup, 0)
+
+			for _, expense := range expensesArray {
+				if expense.ReceiptID == receipt.ID {
+					expensesBackup = append(expensesBackup, expenses.ExpenseBackup{
+						BuildingID:  expense.BuildingID,
+						ReceiptID:   expense.ReceiptID,
+						Description: expense.Description,
+						Amount:      expense.Amount,
+						Currency:    expense.Currency,
+						Type:        expense.Type,
+					})
+				}
+			}
+
+			debtsBackup := make([]debts.DebtBackup, 0)
+
+			for _, debt := range debtsArray {
+				if debt.ReceiptID == receipt.ID {
+					debtsBackup = append(debtsBackup, debts.DebtBackup{
+						BuildingID:                    debt.BuildingID,
+						ReceiptID:                     debt.ReceiptID,
+						AptNumber:                     debt.AptNumber,
+						Receipts:                      debt.Receipts,
+						Amount:                        debt.Amount,
+						PreviousPaymentAmount:         debt.PreviousPaymentAmount,
+						PreviousPaymentAmountCurrency: debt.PreviousPaymentAmountCurrency,
+					})
+				}
+			}
+
+			lastSent := ""
+
+			if receipt.LastSent != nil {
+				lastSent = receipt.LastSent.Format(time.RFC3339)
+			}
+
+			dtos[i] = ReceiptBackup{
+				Receipt: ReceiptDto{
+					BuildingID: receipt.BuildingID,
+					Year:       receipt.Year,
+					Month:      receipt.Month,
+					Date:       receipt.Date.Format(time.DateOnly),
+					Sent:       receipt.Sent,
+					LastSent:   &lastSent,
+				},
+				ExtraCharges: extraChargesBackup,
+				Expenses:     expensesBackup,
+				Debts:        debtsBackup,
+			}
+		}
+
+		return dtos, nil
+	}
+
+	return api.Backup(api.BACKUP_RECEIPTS_FILE, selectListDtos)
 }

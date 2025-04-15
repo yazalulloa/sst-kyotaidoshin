@@ -89,17 +89,17 @@
 }
 
 
-/*!* Hide input arrows for Chrome, Safari and Opera *!*/
-/*input::-webkit-outer-spin-button,*/
-/*input::-webkit-inner-spin-button {*/
-/*  -webkit-appearance: none;*/
-/*  margin: 0;*/
-/*}*/
+/* Hide input arrows for Chrome, Safari and Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 
-/*!* Hide input arrows for Firefox *!*/
-/*input[type=number] {*/
-/*  -moz-appearance: textfield;*/
-/*}*/
+/* Hide input arrows for Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
 
 * {
   scrollbar-width: thin;

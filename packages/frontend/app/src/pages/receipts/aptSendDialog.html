@@ -113,22 +113,24 @@
 
         <div class="flex w-full flex-col gap-2 overflow-auto px-4 py-2">
 
-          <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-            <label for="subjectInput" class="w-fit pl-0.5 text-sm" x-text="$t('main-title-subject')"></label>
-            <input id="subjectInput" type="text"
-                   class="w-full rounded-(--radius-selector) border border-outline bg-surface-alt px-2 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
-                   name="subject" placeholder="AVISO DE COBRO" autocomplete="subject"/>
-          </div>
+          <fieldset class="fieldset *:w-full">
+            <legend class="fieldset-legend" x-text="$t('main-title-subject')"></legend>
+            <input type="text"
+                   class="input"
+                   name="subject"
+                   placeholder="AVISO DE COBRO"
+                   autocomplete="subject"/>
+            <div class="fieldset-label" hidden="hidden">Optional</div>
+          </fieldset>
 
-          <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark pb-1">
-            <label for="messageTextArea" class="w-fit pl-0.5 text-sm" x-text="$t('main-title-msg')"></label>
-            <textarea id="messageTextArea"
-                      class="w-full rounded-(--radius-selector) border border-outline bg-surface-alt px-2.5 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-75 dark:border-outline-dark dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
-                      name="message" rows="3"
+          <fieldset class="fieldset">
+            <legend class="fieldset-legend" x-text="$t('main-title-msg')"></legend>
+            <textarea class="textarea h-24"
+                      name="message"
                       placeholder="AVISO DE COBRO">
-          </textarea>
-          </div>
-
+            </textarea>
+            <div class="fieldset-label" hidden="hidden">Optional</div>
+          </fieldset>
 
           <div class="flex flex-col w-full">
             <template x-for="apt in apts">

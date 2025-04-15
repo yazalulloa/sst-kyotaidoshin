@@ -105,93 +105,76 @@
           <span class="hidden fieldset-label">Optional</span>
         </fieldset>
 
-        <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-          <label for="aptNumberInput"
-                 x-bind:class="numberErr !== '' ? 'text-danger' : ''"
-                 class="flex w-fit items-center gap-1 text-sm pl-0.5">
-            <svg x-show="numberErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
-            <span x-text="$t('main-title-apt-number')"></span>
-          </label>
-          <input
-              id="aptNumberInput"
-              type="text"
-              class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
-              name="number"
-              maxlength="20"
-              x-model="number"
-              x-bind:class="numberErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
-              x-init="
-              trimInput($el);
-              limitInputToMaxLength($el)"
-              x-bind:disabled="key !== ''"
-              required
-          />
-          <small x-model="numberErr"
-                 x-bind:class="numberErr !== '' ? 'text-danger' : ''"
-                 class="text-start pl-0.5">
-          </small>
-        </div>
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend text-start w-full"
+                  x-text="$t('main-title-apt-number')">
+          </legend>
+          <input type="text"
+                 class="input w-full"
+                 x-bind:class="numberErr !== '' ? 'input-error' : ''"
+                 name="number"
+                 maxlength="20"
+                 x-model="number"
+                 x-bind:disabled="key !== ''"
+                 x-init="
+                   trimInput($el);
+                   limitInputToMaxLength($el)
+                 "
+                 required/>
+          <p class="fieldset-label"
+             x-bind:class="numberErr !== '' ? 'text-error' : ''"
+             x-text="numberErr">
+          </p>
+        </fieldset>
 
-        <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-          <label for="aptNameInput"
-                 x-bind:class="nameErr !== '' ? 'text-danger' : ''"
-                 class="flex w-fit items-center gap-1 text-sm pl-0.5">
-            <svg x-show="nameErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
-            <span x-text="$t('main-title-name')"></span>
-          </label>
-          <input
-              id="aptNameInput"
-              type="text"
-              class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
-              name="name"
-              maxlength="100"
-              x-model="name"
-              x-bind:class="nameErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
-              x-init="
-              limitInputToMaxLength($el)"
-              @input="
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend text-start w-full"
+                  x-text="$t('main-title-name')">
+          </legend>
+          <input type="text"
+                 class="input w-full"
+                 x-bind:class="nameErr !== '' ? 'input-error' : ''"
+                 name="name"
+                 maxlength="100"
+                 x-model="name"
+                 x-init="
+                    limitInputToMaxLength($el)"
+                 @input="
               let hasSpaceAtEnd = name.endsWith(' ');
               name = name.trim();
               if (hasSpaceAtEnd) {
                 name += ' ';
               }
               "
-              required
-          />
-          <small x-model="nameErr"
-                 x-bind:class="nameErr !== '' ? 'text-danger' : ''"
-                 class="text-start pl-0.5">
-          </small>
-        </div>
+                 required/>
+          <p class="fieldset-label"
+             x-bind:class="nameErr !== '' ? 'text-error' : ''"
+             x-text="nameErr">
+          </p>
+        </fieldset>
 
-        <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-          <label for="aptAliquotInput"
-                 x-bind:class="aliquotErr !== '' ? 'text-danger' : ''"
-                 class="flex w-fit items-center gap-1 text-sm pl-0.5">
-            <svg x-show="aliquotErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
-            <span x-text="$t('main-title-aliquot')"></span>
-          </label>
-          <input
-              id="aptAliquotInput"
-              type="text"
-              class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
-              name="aliquot"
-              data-gt="0"
-              maxlength="16"
-              x-model="aliquot"
-              x-bind:class="aliquotErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
-              x-init="
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend text-start w-full"
+                  x-text="$t('main-title-aliquot')">
+          </legend>
+          <input type="number"
+                 class="input w-full"
+                 x-bind:class="aliquotErr !== '' ? 'input-error' : ''"
+                 name="aliquot"
+                 data-gt="0"
+                 maxlength="16"
+                 x-model="aliquot"
+                 x-init="
               trimInput($el);
               limitInputToMaxLength($el)
               configureCurrencyInput($el)
               "
-              required
-          />
-          <small x-model="aliquotErr"
-                 x-bind:class="aliquotErr !== '' ? 'text-danger' : ''"
-                 class="text-start pl-0.5">
-          </small>
-        </div>
+                 required/>
+          <p class="fieldset-label"
+             x-bind:class="aliquotErr !== '' ? 'text-error' : ''"
+             x-text="aliquotErr">
+          </p>
+        </fieldset>
 
         <ol>
           <template x-for="value in Array.from(emails)">
@@ -213,37 +196,19 @@
 
         </ol>
 
-        <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark"
-             x-data="{ email: '', emailErr: '' }"
-             x-effect="
+        <fieldset class="fieldset">
+          <legend class="fieldset-legend text-start w-full"
+                  x-text="$t('main-title-email')">
+          </legend>
+          <div class="join"
+               x-data="{ email: '', emailErr: '' }"
+               x-effect="
              if (email === '') {
                 emailErr = '';
               }
              "
-        >
-          <label x-bind:class="emailErr !== '' ? 'text-danger' : ''"
-                 class="flex w-full flex-col items-center gap-1 text-sm pl-0.5">
-            <div class="flex w-full flex-row items-start justify-items-start gap-1">
-              <svg x-show="emailErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
-              <span x-text="$t('main-title-email')"></span>
-            </div>
-
-            <div class="relative w-full">
-              <input
-                  id="aptEmailInput"
-                  type="email"
-                  autocomplete="email"
-                  class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50"
-                  maxlength="30"
-                  x-model="email"
-                  x-bind:class="emailErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark focus-visible:outline-primary dark:focus-visible:outline-primary-dark'"
-                  x-init="
-              trimInput($el);
-              limitInputToMaxLength($el)"
-                  @focus="emailIsFocused = true"
-                  @blur="emailIsFocused = false"
-                  @keyup.enter.prevent="
-                  emailErr = '';
+               @event-add-apt-email="
+                   emailErr = '';
                   if (email !== '') {
                     if (isValidEmail(email)) {
                       emails.add(email);
@@ -252,22 +217,47 @@
                       emailErr = $t('main-error-invalid-email');
                     }
                   }
-                  "
-              />
-              <button type="button"
-                      class="absolute top-1/2 -translate-y-1/2 right-2.5 text-on-surface dark:text-on-surface-dark"
-                      aria-label="clear value"
-                      @click.prevent="email = ''">
-                <svg x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
-              </button>
+               "
+          >
+            <div class="w-full">
+              <label class="input join-item w-full"
+                     x-bind:class="emailErr !== '' ? 'input-error' : ''"
+              >
+                <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none"
+                     stroke="currentColor">
+                    <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+                  </g>
+                </svg>
+                <input type="email"
+                       x-model="email"
+                       placeholder="apt@mail.com"
+                       x-init="
+              trimInput($el);
+              limitInputToMaxLength($el)"
+                       @focus="emailIsFocused = true"
+                       @blur="emailIsFocused = false"
+                       @keyup.enter.prevent="$dispatch('event-add-apt-email')"
+                />
+                <button type="button"
+                        class="absolute top-1/2 -translate-y-1/2 right-2.5 text-on-surface dark:text-on-surface-dark"
+                        aria-label="clear value"
+                        @click.prevent="email = ''">
+                  <svg x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
+                </button>
+              </label>
+              <div x-text="emailErr" x-show="emailErr !== ''"
+                   class="validator-hint text-error">
+              </div>
             </div>
-            <small x-text="emailErr"
-                   x-show="emailErr !== ''"
-                   class="w-full text-start pl-0.5 text-danger">
-            </small>
-          </label>
-        </div>
+            <button type="button" class="btn btn-neutral join-item"
+                    x-text="$t('main-action-add')"
+                    @click.prevent="$dispatch('event-add-apt-email')">
+            </button>
+          </div>
 
+        </fieldset>
 
         <span x-show="errMsg !== ''" x-text="errMsg" class="p-2 border text-danger border-danger"></span>
 

@@ -115,7 +115,7 @@ func PublishSendPdfs(req PublishSendPdfsRequest) (string, error) {
 		Message:    req.Message,
 	}
 
-	update := ProgressUpdate{ObjectKey: deduplicationId, CardId: "sent-" + cardId}
+	update := ProgressUpdate{ObjectKey: deduplicationId, CardId: "sent-" + req.CardId}
 	err := PutProgress(req.Ctx, &update)
 	if err != nil {
 		log.Printf("Error putting progress: %v", err)

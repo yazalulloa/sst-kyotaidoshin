@@ -4,6 +4,7 @@ import (
 	"db/gen/model"
 	"encoding/base64"
 	"encoding/json"
+	"kyotaidoshin/api"
 	"kyotaidoshin/util"
 	"strings"
 	"sync"
@@ -167,4 +168,39 @@ func insertDtos(apts []ApartmentDto) (int64, error) {
 	}
 
 	return insertBulk(array)
+}
+
+func Backup() (string, error) {
+
+	requestQuery := RequestQuery{
+		Limit: 30,
+	}
+
+	selectListDtos := func() ([]ApartmentDto, error) {
+		list, err := selectList(requestQuery)
+		if err != nil {
+			return nil, err
+		}
+
+		dtos := make([]ApartmentDto, len(list))
+
+		for i, item := range list {
+			dtos[i] = ApartmentDto{
+				BuildingID: item.BuildingID,
+				Number:     item.Number,
+				Name:       item.Name,
+				Aliquot:    item.Aliquot,
+				Emails:     strings.Split(item.Emails, ","),
+			}
+
+			if i == len(list)-1 {
+				requestQuery.lastBuildingId = item.BuildingID
+				requestQuery.lastNumber = item.Number
+			}
+		}
+
+		return dtos, nil
+	}
+
+	return api.Backup(api.BACKUP_APARTMENTS_FILE, selectListDtos)
 }

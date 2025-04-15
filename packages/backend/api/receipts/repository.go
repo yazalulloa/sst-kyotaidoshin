@@ -5,6 +5,8 @@ import (
 	"db/gen/model"
 	. "db/gen/table"
 	"github.com/go-jet/jet/v2/sqlite"
+	"kyotaidoshin/extraCharges"
+	"kyotaidoshin/util"
 	"strings"
 )
 
@@ -110,8 +112,19 @@ func queryCondition(requestQuery RequestQuery) *sqlite.BoolExpression {
 func selectList(requestQuery RequestQuery) ([]model.Receipts, error) {
 	condition := sqlite.Bool(true)
 
+	sortOrder := util.SortOrderTypeDESC
+
+	if requestQuery.SortOrder == util.SortOrderTypeASC {
+		sortOrder = util.SortOrderTypeASC
+	}
+
 	if requestQuery.LastId != "" {
-		condition = condition.AND(Receipts.ID.LT(sqlite.String(requestQuery.LastId)))
+		if sortOrder == util.SortOrderTypeDESC {
+			condition = condition.AND(Receipts.ID.LT(sqlite.String(requestQuery.LastId)))
+		} else {
+			condition = condition.AND(Receipts.ID.GT(sqlite.String(requestQuery.LastId)))
+		}
+
 	}
 
 	commonQueryCondition := queryCondition(requestQuery)
@@ -120,8 +133,13 @@ func selectList(requestQuery RequestQuery) ([]model.Receipts, error) {
 	}
 
 	stmt := Receipts.SELECT(Receipts.AllColumns).FROM(Receipts).WHERE(condition).
-		ORDER_BY(Receipts.ID.DESC()).
 		LIMIT(requestQuery.Limit)
+
+	if sortOrder == util.SortOrderTypeDESC {
+		stmt = stmt.ORDER_BY(Receipts.ID.DESC())
+	} else {
+		stmt = stmt.ORDER_BY(Receipts.ID.ASC())
+	}
 
 	var list []model.Receipts
 
@@ -232,4 +250,72 @@ func insert(receipt model.Receipts) (int64, error) {
 	}
 
 	return rowsAffected, nil
+}
+
+func selectIds(lastId string, limit int64) ([]string, error) {
+	condition := sqlite.Bool(true)
+
+	if lastId != "" {
+		condition = condition.AND(Receipts.ID.LT(sqlite.String(lastId)))
+	}
+
+	stmt := Receipts.SELECT(Receipts.ID).FROM(Receipts).WHERE(condition).ORDER_BY(Receipts.ID.ASC()).LIMIT(limit)
+
+	var dest []string
+	err := stmt.Query(db.GetDB().DB, &dest)
+	if err != nil {
+		return nil, err
+	}
+	return dest, nil
+}
+
+func selectRecords(lastId string, limit int64) ([]struct {
+	model.Receipts
+	Expenses     []model.Expenses
+	ExtraCharges []model.ExtraCharges
+	Debts        []model.Debts
+}, error) {
+
+	condition := sqlite.Bool(true)
+
+	if lastId != "" {
+		condition = condition.AND(Receipts.ID.LT(sqlite.String(lastId)))
+	}
+
+	var dest []struct {
+		model.Receipts
+		Expenses     []model.Expenses
+		ExtraCharges []model.ExtraCharges
+		Debts        []model.Debts
+	}
+
+	paginatedReceipts := sqlite.CTE("paginated_receipts")
+	idColumn := sqlite.StringColumn("id").From(paginatedReceipts)
+
+	stmt := sqlite.WITH(paginatedReceipts.AS(
+		Receipts.SELECT(sqlite.StringColumn("id")).FROM(Receipts).
+			WHERE(condition).
+			ORDER_BY(Receipts.ID.ASC()).
+			LIMIT(limit),
+	))(
+		paginatedReceipts.SELECT(Receipts.AllColumns, Expenses.AllColumns, ExtraCharges.AllColumns, Debts.AllColumns).
+			FROM(paginatedReceipts.
+				INNER_JOIN(Receipts, idColumn.EQ(Receipts.ID)).
+				LEFT_JOIN(Expenses, Expenses.BuildingID.EQ(Receipts.BuildingID).
+					AND(Expenses.ReceiptID.EQ(Receipts.ID))).
+				LEFT_JOIN(ExtraCharges, ExtraCharges.BuildingID.EQ(Receipts.BuildingID).
+					AND(ExtraCharges.ParentReference.EQ(Receipts.ID)).
+					AND(ExtraCharges.Type.EQ(sqlite.String(extraCharges.TypeReceipt)))).
+				LEFT_JOIN(Debts, Debts.BuildingID.EQ(Receipts.BuildingID).
+					AND(Debts.ReceiptID.EQ(Receipts.ID))),
+			).
+			ORDER_BY(Receipts.ID.ASC()),
+	)
+
+	err := stmt.Query(db.GetDB().DB, &dest)
+	if err != nil {
+		return nil, err
+	}
+
+	return dest, nil
 }

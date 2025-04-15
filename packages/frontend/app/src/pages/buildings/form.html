@@ -3,13 +3,13 @@
     open: false,
     isEdit: false,
    currencies: CURRENCIES_GLOBAL,
-   apartments: [],
+   apts: [],
    aptMap: new Map(),
   }"
      x-show="open">
   <form
       id="buildings-form"
-      class="flex flex-col justify-center gap-4 rounded-lg p-4"
+      class="flex flex-col justify-center gap-2 rounded-lg p-4"
       hx-put="/api/buildings"
       hx-disabled-elt="this, #buildings-form * > input:not([disabled]), #buildings-form * > button:not([disabled]), #buildings-form * > select:not([disabled])"
       hx-indicator=".htmx-indicator"
@@ -32,7 +32,33 @@
     rifErr: '',
     fixedPayAmountErr: '',
     errMsg: ''
-    }">
+    }"
+      @event-building-form-update="
+      isEdit = true;
+      let base64 = $event.detail.apts;
+      let decodedString = decodeBase64UrlStr(base64);
+      let array = JSON.parse(decodedString);
+
+      array.forEach((apt) => {
+        apts.push(apt);
+      });
+      apts.forEach((apt) => {
+        aptMap.set(apt.number, apt.name);
+      });
+
+      id = $event.detail.id;
+      name = $event.detail.name;
+      rif = $event.detail.rif;
+      mainCurrency = $event.detail.mainCurrency;
+      debtCurrency = $event.detail.debtCurrency;
+      fixedPay = $event.detail.fixedPay === 'true';
+      fixedPayAmount = $event.detail.fixedPayAmount;
+      roundUpPayments = $event.detail.roundUpPayments === 'true';
+      emailConfig = $event.detail.emailConfig;
+      currenciesToShowAmountToPay = $event.detail.currenciesToShowAmountToPay;
+
+      "
+  >
 
     <div x-bind:hx-get="'/api/buildings/formData?id=' + getLastPathSegment()"
          hx-trigger="load"
@@ -42,80 +68,61 @@
 
     <div id="building-form-error" hidden="hidden"></div>
 
-    <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-      <label for="buildingIdInput"
-             x-bind:class="idErr !== '' ? 'text-danger' : ''"
-             class="flex w-fit items-center gap-1 text-sm pl-0.5">
+    <fieldset class="fieldset"
+              x-bind:disabled="isEdit">
+      <legend class="fieldset-legend text-start w-full"
+              x-text="$t('main-buildings-id')">
+      </legend>
+      <input class="input w-full"
+             x-bind:class="idErr !== '' ? 'input-error' : ''"
+             type="text"
+             name="id"
+             maxlength="20"
+             x-model="id"
+             @input="$el.value = $el.value.replace(/[^\p{Letter}\p{Mark}\p{Number}]+/gu, '')"
+             x-init="limitInputToMaxLength($el)"
+             required/>
+      <p class="fieldset-label"
+         x-bind:class="idErr !== '' ? 'text-error' : ''"
+         x-text="idErr">
+      </p>
+    </fieldset>
 
-        <svg x-show="idErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
-        <span x-text="$t('main-buildings-id')"></span>
-      </label>
-      <input
-          id="buildingIdInput"
-          type="text"
-          maxlength="20"
-          class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
-          name="id"
-          x-model="id"
-          x-bind:class="idErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
-          @input="$el.value = $el.value.replace(/[^\p{Letter}\p{Mark}\p{Number}]+/gu, '')"
-          x-init="limitInputToMaxLength($el)"
-          x-bind:disabled="isEdit"
-          required
-      />
-      <small x-model="idErr"
-             x-bind:class="idErr !== '' ? 'text-danger' : ''"
-             class="text-start pl-0.5">
-      </small>
-    </div>
+    <fieldset class="fieldset">
+      <legend class="fieldset-legend text-start w-full"
+              x-text="$t('main-title-name')">
+      </legend>
+      <input class="input w-full"
+             x-bind:class="nameErr !== '' ? 'input-error' : ''"
+             type="text"
+             name="name"
+             maxlength="100"
+             x-model="name"
+             x-init="limitInputToMaxLength($el)"
+             required/>
+      <p class="fieldset-label"
+         x-bind:class="nameErr !== '' ? 'text-error' : ''"
+         x-text="nameErr">
+      </p>
+    </fieldset>
 
-    <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-      <label for="buildingNameInput"
-             x-bind:class="nameErr !== '' ? 'text-danger' : ''"
-             class="flex w-fit items-center gap-1 text-sm pl-0.5">
-        <svg x-show="nameErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
-        <span x-text="$t('main-title-name')"></span>
-      </label>
-      <input
-          id="buildingNameInput"
-          type="text"
-          class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
-          name="name"
-          maxlength="100"
-          x-model="name"
-          x-bind:class="nameErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
-          x-init="limitInputToMaxLength($el)"
-          required
-      />
-      <small x-model="nameErr"
-             x-bind:class="nameErr !== '' ? 'text-danger' : ''"
-             class="text-start pl-0.5">
-      </small>
-    </div>
-
-    <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-      <label for="buildingRifInput"
-             x-bind:class="rifErr !== '' ? 'text-danger' : ''"
-             class="flex w-fit items-center gap-1 text-sm pl-0.5">
-        <svg x-show="rifErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
-        <span x-text="$t('main-buildings-rif')"></span>
-      </label>
-      <input
-          id="buildingRifInput"
-          type="text"
-          maxlength="20"
-          class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
-          name="rif"
-          x-model="rif"
-          x-bind:class="rifErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
-          x-init="limitInputToMaxLength($el)"
-          required
-      />
-      <small x-model="rifErr"
-             x-bind:class="rifErr !== '' ? 'text-danger' : ''"
-             class="text-start pl-0.5">
-      </small>
-    </div>
+    <fieldset class="fieldset">
+      <legend class="fieldset-legend text-start w-full"
+              x-text="$t('main-buildings-rif')">
+      </legend>
+      <input class="input w-full"
+             x-bind:class="rifErr !== '' ? 'input-error' : ''"
+             type="text"
+             name="rif"
+             maxlength="20"
+             x-model="rif"
+             x-init="limitInputToMaxLength($el)"
+             required/>
+      <p class="fieldset-label"
+         x-bind:class="rifErr !== '' ? 'text-error' : ''"
+         x-text="rifErr">
+      </p>
+    </fieldset>
 
     <div class="grid grid-cols-2 gap-4">
       <fieldset class="fieldset">
@@ -141,87 +148,64 @@
       </fieldset>
     </div>
 
-    <div class="flex flex-col items-center justify-center gap-2">
-      <span class="font-medium bold" x-text="$t('main-buildings-currencies-show-pay')"></span>
-      <div class="flex flex-row gap-4">
+    <fieldset class="fieldset p-3 bg-base-100 border border-base-300 rounded-box">
+      <legend class="fieldset-legend" x-text="$t('main-buildings-currencies-show-pay')"></legend>
+      <div class="flex flex-row gap-4 justify-center">
         <template x-for="value in currencies">
-          <label x-bind:for="value"
-                 class="flex has-disabled:cursor-not-allowed items-center gap-2 text-sm font-medium has-disabled:opacity-75 text-on-surface has-checked:text-on-surface-strong dark:has-checked:text-on-surface-dark-strong dark:text-on-surface-dark">
-            <div class="relative flex items-center">
-              <input x-bind:id="value"
-                     x-bind:value="value"
-                     x-bind:checked="currenciesToShowAmountToPay.includes(value)"
-                     @click="currenciesToShowAmountToPay.includes(value) ? currenciesToShowAmountToPay = currenciesToShowAmountToPay.filter(v => v !== value) : currenciesToShowAmountToPay.push(value)"
-                     type="checkbox"
-                     name="currenciesToShowAmountToPay"
-                     class="before:content[''] peer relative size-4 appearance-none overflow-hidden rounded-sm border border-outline bg-surface-alt before:absolute before:inset-0 checked:border-primary checked:before:bg-primary focus:outline-2 focus:outline-offset-2 focus:outline-outline-strong checked:focus:outline-primary active:outline-offset-0 disabled:cursor-not-allowed dark:border-outline-dark dark:bg-surface-dark-alt dark:checked:border-primary-dark dark:checked:before:bg-primary-dark dark:focus:outline-outline-dark-strong dark:checked:focus:outline-primary-dark"
-              />
-              <svg x-bind:data-src="checkBoxIconUrl" data-cache="21600"></svg>
-            </div>
-            <span x-text="value"></span>
+          <label class="fieldset-label">
+            <input type="checkbox"
+                   class="checkbox"
+                   name="currenciesToShowAmountToPay"
+                   x-bind:value="value"
+                   x-bind:checked="currenciesToShowAmountToPay.includes(value)"
+                   @click="currenciesToShowAmountToPay.includes(value) ? currenciesToShowAmountToPay = currenciesToShowAmountToPay.filter(v => v !== value) : currenciesToShowAmountToPay.push(value)"
+            />
+            <span class="text-sm" x-text="value"></span>
           </label>
         </template>
       </div>
+    </fieldset>
 
-    </div>
-
-    <label for="roundUpPayments"
-           class="flex has-disabled:cursor-not-allowed items-center gap-2 text-sm font-medium has-disabled:opacity-75 text-on-surface has-checked:text-on-surface-strong dark:has-checked:text-on-surface-dark-strong dark:text-on-surface-dark">
-      <div class="relative flex items-center">
-        <input id="roundUpPayments"
-               type="checkbox"
-               name="roundUpPayments"
-               x-model="roundUpPayments"
-               value="true"
-               class="before:content[''] peer relative size-4 appearance-none overflow-hidden rounded-sm border border-outline bg-surface-alt before:absolute before:inset-0 checked:border-primary checked:before:bg-primary focus:outline-2 focus:outline-offset-2 focus:outline-outline-strong checked:focus:outline-primary active:outline-offset-0 disabled:cursor-not-allowed dark:border-outline-dark dark:bg-surface-dark-alt dark:checked:border-primary-dark dark:checked:before:bg-primary-dark dark:focus:outline-outline-dark-strong dark:checked:focus:outline-primary-dark"/>
-        <svg x-bind:data-src="checkBoxIconUrl" data-cache="21600"></svg>
-      </div>
+    <label class="fieldset-label p-2">
+      <input type="checkbox"
+             class="checkbox"
+             name="roundUpPayments"
+             x-model="roundUpPayments"
+             value="true"
+      />
       <span x-text="$t('main-buildings-round-up-payments')"></span>
     </label>
 
-    <div class="flex flex-row gap-2">
-      <label for="fixedPay"
-             class="flex has-disabled:cursor-not-allowed items-center gap-2 text-sm font-medium has-disabled:opacity-75 text-on-surface has-checked:text-on-surface-strong dark:has-checked:text-on-surface-dark-strong dark:text-on-surface-dark">
-        <div class="relative flex items-center">
-          <input id="fixedPay"
-                 type="checkbox"
-                 name="fixedPay"
-                 x-model="fixedPay"
-                 value="true"
-                 class="before:content[''] peer relative size-4 appearance-none overflow-hidden rounded-sm border border-outline bg-surface-alt before:absolute before:inset-0 checked:border-primary checked:before:bg-primary focus:outline-2 focus:outline-offset-2 focus:outline-outline-strong checked:focus:outline-primary active:outline-offset-0 disabled:cursor-not-allowed dark:border-outline-dark dark:bg-surface-dark-alt dark:checked:border-primary-dark dark:checked:before:bg-primary-dark dark:focus:outline-outline-dark-strong dark:checked:focus:outline-primary-dark"
-          />
-          <svg x-bind:data-src="checkBoxIconUrl" data-cache="21600"></svg>
-        </div>
-        <span x-text="$t('main-buildings-fixed-payment')"></span>
+    <fieldset class="fieldset flex flex-row gap-2">
+      <label class="fieldset-label p-2">
+        <input type="checkbox"
+               class="checkbox"
+               name="fixedPay"
+               x-model="fixedPay"
+               value="true"
+        />
+
+        <span class="text-base" x-text="$t('main-buildings-fixed-payment')"></span>
       </label>
 
-      <div class="flex w-full flex-col gap-4 text-on-surface dark:text-on-surface-dark">
-        <label for="buildingFixedPayAmount"
-               x-bind:class="fixedPayAmountErr !== '' ? 'text-danger' : ''"
-               class="flex w-fit items-center gap-1 text-sm pl-0.5">
-        </label>
-        <input
-            id="buildingFixedPayAmount"
-            type="number"
-            min="0"
-            maxlength="10"
-            step=".01"
-            x-init="
+      <label class="fieldset-label"
+             x-bind:disabled="!fixedPay">
+        <input type="number"
+               min="0"
+               maxlength="10"
+               step=".01"
+               data-gt="0"
+               class="input"
+               name="fixedPayAmount"
+               x-model="fixedPayAmount"
+               x-bind:disabled="!fixedPay"
+               x-init="
             limitInputToMaxLength($el)
             configureCurrencyInput($el)
             "
-            class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
-            name="fixedPayAmount"
-            x-model="fixedPayAmount"
-            x-bind:class="fixedPayAmountErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
-            x-bind:disabled="!fixedPay"
         />
-        <small x-model="fixedPayAmountErr"
-               x-bind:class="fixedPayAmountErr !== '' ? 'text-danger' : ''"
-               class="text-start pl-0.5">
-        </small>
-      </div>
-    </div>
+      </label>
+    </fieldset>
 
     <fieldset class="fieldset">
       <legend class="fieldset-legend" x-text="$t('main-buildings-email-config')"></legend>

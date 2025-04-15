@@ -54,6 +54,19 @@ func SelectByReceipt(receiptID string) ([]model.Expenses, error) {
 	return dest, nil
 }
 
+func SelectByReceipts(ids []string) ([]model.Expenses, error) {
+	receipts := make([]sqlite.Expression, len(ids))
+	for i, p := range ids {
+		receipts[i] = sqlite.String(p)
+	}
+	var dest []model.Expenses
+	err := Expenses.SELECT(Expenses.AllColumns).WHERE(Expenses.ReceiptID.IN(receipts...)).Query(db.GetDB().DB, &dest)
+	if err != nil {
+		return nil, err
+	}
+	return dest, nil
+}
+
 func DeleteByReceipt(receiptID string) (int64, error) {
 	stmt := Expenses.DELETE().WHERE(Expenses.ReceiptID.EQ(sqlite.String(receiptID)))
 	res, err := stmt.Exec(db.GetDB().DB)

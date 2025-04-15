@@ -151,6 +151,23 @@ func SelectByReceipt(receiptID string) ([]model.ExtraCharges, error) {
 	return dest, nil
 }
 
+func SelectByReceipts(ids []string) ([]model.ExtraCharges, error) {
+	receipts := make([]sqlite.Expression, len(ids))
+	for i, p := range ids {
+		receipts[i] = sqlite.String(p)
+	}
+
+	stmt := ExtraCharges.SELECT(ExtraCharges.AllColumns).WHERE(ExtraCharges.Type.EQ(sqlite.String(TypeReceipt)).
+		AND(ExtraCharges.ParentReference.IN(receipts...)))
+
+	var dest []model.ExtraCharges
+	err := stmt.Query(db.GetDB().DB, &dest)
+	if err != nil {
+		return nil, err
+	}
+	return dest, nil
+}
+
 func DeleteByReceipt(receiptID string) (int64, error) {
 
 	stmt := ExtraCharges.DELETE().WHERE(ExtraCharges.ParentReference.EQ(sqlite.String(receiptID)))

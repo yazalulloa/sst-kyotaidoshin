@@ -107,44 +107,21 @@ templ FormView(dto FormDto) {
 	if dto.building != nil {
 		<div
 			hidden="hidden"
-			data-building-id={ fmt.Sprint(dto.building.ID) }
-			data-building-name={ dto.building.Name }
-			data-building-rif={ dto.building.Rif }
-			data-building-main-currency={ dto.building.MainCurrency }
-			data-building-debt-currency={ dto.building.DebtCurrency }
-			data-building-currencies-to-show-amount-to-pay={ dto.currenciesToShowAmountToPay }
-			data-building-fixed-pay={ fmt.Sprint(dto.building.FixedPay) }
-			data-building-fixed-pay-amount={ fmt.Sprint(dto.building.FixedPayAmount) }
-			data-building-round-up-payments={ fmt.Sprint(dto.building.RoundUpPayments) }
-			data-building-email-config={ dto.building.EmailConfig }
+			data-id={ fmt.Sprint(dto.building.ID) }
+			data-name={ dto.building.Name }
+			data-rif={ dto.building.Rif }
+			data-main-currency={ dto.building.MainCurrency }
+			data-debt-currency={ dto.building.DebtCurrency }
+			data-currencies-to-show-amount-to-pay={ dto.currenciesToShowAmountToPay }
+			data-fixed-pay={ fmt.Sprint(dto.building.FixedPay) }
+			data-fixed-pay-amount={ fmt.Sprint(dto.building.FixedPayAmount) }
+			data-round-up-payments={ fmt.Sprint(dto.building.RoundUpPayments) }
+			data-email-config={ dto.building.EmailConfig }
 			data-apts={ dto.apts }
 			x-init="
-	isEdit = true;
-	id = $el.getAttribute('data-building-id');
-	name = $el.getAttribute('data-building-name');
-  rif = $el.getAttribute('data-building-rif');
-  mainCurrency = $el.getAttribute('data-building-main-currency');
-  debtCurrency = $el.getAttribute('data-building-debt-currency');
-  currenciesToShowAmountToPay = $el.getAttribute('data-building-currencies-to-show-amount-to-pay');
-  fixedPay = 'true' === $el.getAttribute('data-building-fixed-pay');
-  fixedPayAmount = $el.getAttribute('data-building-fixed-pay-amount');
-  roundUpPayments = 'true' === $el.getAttribute('data-building-round-up-payments');
-  emailConfig = $el.getAttribute('data-building-email-config');
-
-  let base64 = $el.getAttribute('data-apts');
-  let decodedString = decodeBase64UrlStr(base64);
-  let array = JSON.parse(decodedString);
-
-  array.forEach((apt) => {
-    apartments.push(apt);
-  });
-
-  apartments.forEach((apt) => {
-    aptMap.set(apt.number, apt.name);
-  });
-
- $el.remove();
-	"
+      		$dispatch('event-building-form-update', $el.dataset);
+          $el.remove();
+      		"
 		></div>
 		@reserveFunds.FormView(dto.reserveFundFormDto)
 		@extraCharges.FormView(dto.extraChargesFormDto)

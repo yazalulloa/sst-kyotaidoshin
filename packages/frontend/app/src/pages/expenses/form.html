@@ -94,9 +94,9 @@
       <div
           class="grid border-b font-bold grid-cols-[3fr_1fr_1fr_1fr] border-surface-dark dark:border-surface dark:text-surface">
         <span x-text="$t('main-title-description')"></span>
-        <span x-text="$t('main-title-amount')"></span>
-        <span x-text="$t('main-title-type')"></span>
-        <span x-text="$t('main-title-actions')"></span>
+        <span class="text-end" x-text="$t('main-title-amount')"></span>
+        <span class="text-center" x-text="$t('main-title-type')"></span>
+        <span class="text-center" x-text="$t('main-title-actions')"></span>
       </div>
       <ol id="expenses-reserve-funds-list"
           class="*:grid *:grid-cols-[3fr_1fr_1fr_1fr] *:gap-2 *:p-2 *:items-center *:text-center *:border-b *:border-surface-dark *:dark:border-surface *:dark:text-surface *:hover:bg-primary/5 *:hover:text-on-surface-strong *:dark:hover:bg-primary-dark/5 *:dark:hover:text-on-surface-dark-strong">
@@ -122,65 +122,58 @@
 
       <input hidden="hidden" name="key" x-model="key">
 
-      <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-        <label for="expensesDescriptionInput"
-               x-bind:class="descriptionErr !== '' ? 'text-danger' : ''"
-               class="flex w-fit items-center gap-1 text-sm pl-0.5">
-          <svg x-show="descriptionErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
-          <span x-text="$t('main-title-description')"></span>
-        </label>
-        <input
-            id="expensesDescriptionInput"
-            type="text"
-            class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
-            name="description"
-            maxlength="100"
-            x-model="description"
-            x-bind:class="descriptionErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
-            x-init="
-          trimInput($el);
-          limitInputToMaxLength($el);
-          "
-            disabled-x-trap.noreturn="description !== ''"
-            required
-        />
-        <small x-model="descriptionErr"
-               x-bind:class="descriptionErr !== '' ? 'text-danger' : ''"
-               class="text-start pl-0.5">
-        </small>
-      </div>
+      <fieldset class="fieldset">
+        <legend class="fieldset-legend text-start w-full"
+                x-text="$t('main-title-description')">
+        </legend>
+        <input id="expensesDescriptionInput"
+               type="text"
+               class="input w-full"
+               x-bind:class="descriptionErr !== '' ? 'input-error' : ''"
+               name="aliquot"
+               maxlength="100"
+               x-model="description"
+               x-init="
+                    limitInputToMaxLength($el)"
+               @input="
+              let hasSpaceAtEnd = description.endsWith(' ');
+              description = description.trim();
+              if (hasSpaceAtEnd) {
+                description += ' ';
+              }
+              "
+               required/>
+        <p class="fieldset-label"
+           x-bind:class="descriptionErr !== '' ? 'text-error' : ''"
+           x-text="descriptionErr">
+        </p>
+      </fieldset>
 
-      <div class="flex w-full flex-col gap-1 text-on-surface dark:text-on-surface-dark">
-        <label for="expensesAmountInput"
-               x-bind:class="amountErr !== '' ? 'text-danger' : ''"
-               class="flex w-fit items-center gap-1 text-sm pl-0.5">
+      <div class="flex flex-row gap-2">
 
-          <svg x-show="amountErr !== ''" x-bind:data-src="crossIconUrl" data-cache="21600" class="size-4"></svg>
-          <span x-text="$t('main-title-amount')"></span>
-        </label>
-        <input
-            id="expensesAmountInput"
-            class="w-full border px-2 py-2 text-sm rounded-(--radius-selector) bg-surface-alt focus-visible:outline-primary focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-75 dark:bg-surface-dark-alt/50 dark:focus-visible:outline-primary-dark"
-            type="number"
-            name="amount"
-            maxlength="14"
-            step=".01"
-            x-model="amount"
-            x-bind:class="amountErr !== '' ? 'border-danger' : 'order-outline dark:border-outline-dark'"
-            x-init="
-            limitInputToMaxLength($el)
-            configureCurrencyInput($el)
-            "
-            required
-        />
-        <small x-model="amountErr"
-               x-bind:class="amountErr !== '' ? 'text-danger' : ''"
-               class="text-start pl-0.5">
-        </small>
-      </div>
+        <fieldset class="fieldset flex-grow">
+          <legend class="fieldset-legend text-start w-full"
+                  x-text="$t('main-title-amount')">
+          </legend>
+          <input class="input w-full"
+                 x-bind:class="amountErr !== '' ? 'input-error' : ''"
+                 type="number"
+                 name="amount"
+                 maxlength="14"
+                 step=".01"
+                 x-model="amount"
+                 x-init="
+                    limitInputToMaxLength($el)
+                    configureCurrencyInput($el)
+                 "
+                 required/>
+          <p class="fieldset-label"
+             x-bind:class="amountErr !== '' ? 'text-error' : ''"
+             x-text="amountErr">
+          </p>
+        </fieldset>
 
-      <div class="grid grid-cols-2 gap-2 w-full">
-        <fieldset class="fieldset">
+        <fieldset class="fieldset w-20">
           <legend class="fieldset-legend" x-text="$t('main-title-currency')"></legend>
           <select class="select"
                   name="currency"
@@ -191,7 +184,7 @@
           </select>
         </fieldset>
 
-        <fieldset class="fieldset">
+        <fieldset class="fieldset w-30">
           <legend class="fieldset-legend" x-text="$t('main-title-type')"></legend>
           <select class="select"
                   name="type"
@@ -202,7 +195,6 @@
           </select>
         </fieldset>
       </div>
-
 
       <p x-show="errMsg !== ''" x-text="errMsg" class="border text-danger border-danger"></p>
 
