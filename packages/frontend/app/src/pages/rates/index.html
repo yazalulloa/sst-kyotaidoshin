@@ -1,73 +1,86 @@
 <div id="header-container" hx-swap-oob="true"
-     class="flex flex-row flex-wrap items-center justify-start gap-2 text-center fade-me-out fade-me-in">
+     class="flex flex-col flex-wrap items-center text-center fade-me-out fade-me-in w-full">
 
-  <div class="flex flex-row gap-2 justify-center min-w-[7rem]"
-       x-data="{
+  <div class="flex flex-row flex-wrap w-full items-center justify-start gap-2 text-center">
+    <div class="flex flex-row gap-2 justify-center min-w-[7rem]"
+         x-data="{
    total: null,
    query: null
   }">
-    <div id="rates-counters" hidden="hidden"></div>
-    <div x-show="total" class="flex flex-row gap-0">
-      <span x-text="$t('main-title-rates')"></span><span>:&nbsp;</span><span x-text="total"></span>
+      <div id="rates-counters" hidden="hidden"></div>
+      <div x-show="total" class="flex flex-row gap-0">
+        <span x-text="$t('main-title-rates')"></span><span>:&nbsp;</span><span x-text="total"></span>
+      </div>
+      <div x-show="query" class="flex flex-row gap-0">
+        <span x-text="$t('main-title-items')"></span><span>:&nbsp;</span><span x-text="query"></span>
+      </div>
     </div>
-    <div x-show="query" class="flex flex-row gap-0">
-      <span x-text="$t('main-title-items')"></span><span>:&nbsp;</span><span x-text="query"></span>
-    </div>
-  </div>
 
-  <div
-      data-change-element="rates-updater"
-      data-change-event="update-rates"
-      x-data="{
+    <div
+        data-change-element="rates-updater"
+        data-change-event="update-rates"
+        x-data="{
    currencies: []
   }"
-  >
+    >
 
-    <div x-bind:hx-get="withIsrPrefix('/rates/currencies.html')"
-         hx-trigger="load"
-         hx-swap="outerHTML"
-         hidden="hidden">
+      <div x-bind:hx-get="withIsrPrefix('/rates/currencies.html')"
+           hx-trigger="load"
+           hx-swap="outerHTML"
+           hidden="hidden">
+      </div>
+
+      <div x-bind:hx-get="currencyPickerPartialUrl"
+           hx-trigger="load"
+           hx-swap="outerHTML"
+           hidden="hidden">
+      </div>
     </div>
 
-    <div x-bind:hx-get="currencyPickerPartialUrl"
-         hx-trigger="load"
-         hx-swap="outerHTML"
-         hidden="hidden">
+    <label class="w-34">
+      <input type="date"
+             class="input"
+             name="date_input"
+             x-on:change="sendEvent('rates-updater', 'update-rates')"
+      />
+    </label>
+
+    <label class="w-22">
+      <select class="select"
+              name="sort_order"
+              x-on:change="sendEvent('rates-updater', 'update-rates')">
+        <option>DESC</option>
+        <option>ASC</option>
+      </select>
+    </label>
+
+    <div id="rates-updater"
+         hidden="hidden"
+         hx-get="/api/rates/search"
+         hx-include="[name='date_input'],[name='currency_input'],[name='sort_order']"
+         hx-trigger="load, update-rates"
+         hx-target="#rates-table"
+         hx-swap="innerHTML"
+         hx-sync="this:replace"
+         hx-indicator=".htmx-indicator">
     </div>
   </div>
 
-  <label class="w-34">
-    <input type="date"
-           class="input"
-           name="date_input"
-           x-on:change="sendEvent('rates-updater', 'update-rates')"
-    />
-  </label>
-
-  <label class="w-22">
-    <select class="select"
-            name="sort_order"
-            x-on:change="sendEvent('rates-updater', 'update-rates')">
-      <option>DESC</option>
-      <option>ASC</option>
-    </select>
-  </label>
-
-  <div id="rates-updater"
-       hidden="hidden"
-       hx-get="/api/rates/search"
-       hx-include="[name='date_input'],[name='currency_input'],[name='sort_order']"
-       hx-trigger="load, update-rates"
-       hx-target="#rates-table"
-       hx-swap="innerHTML"
-       hx-sync="this:replace"
-       hx-indicator=".htmx-indicator">
+  <div class="grid w-full font-bold items-center text-center border-b pt-2"
+       x-bind:class="hasPerm('rates:write') ? 'md:grid-cols-[3fr_1fr_1fr_1fr_3fr_1fr]' : 'md:grid-cols-[3fr_1fr_1fr_1fr_3fr]'">
+    <span x-text="$t('main-title-id')"></span>
+    <span x-text="$t('main-title-currency')"></span>
+    <span x-text="$t('main-title-rate')"></span>
+    <span x-text="$t('main-title-date')"></span>
+    <span x-text="$t('main-title-creation-date')"></span>
+    <span x-show="hasPerm('rates:write')" x-text="$t('main-title-actions')"></span>
   </div>
+
 </div>
 
 <div id="container" hx-swap-oob="true" class="fade-me-out fade-me-in">
   <ul id="rates-table"
-      class="flex flex-col gap-1 p-1 *:md:grid *:md:grid-cols-[3fr_1fr_3fr_2fr_3fr_1fr] *:flex *:flex-row *:flex-wrap *:gap-4 *:justify-between *:items-center">
+      class="flex flex-col gap-1 p-1 *:md:grid *:flex *:flex-row *:flex-wrap *:gap-4 *:justify-between *:items-center">
 
   </ul>
 

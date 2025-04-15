@@ -232,7 +232,7 @@ func ItemView(item Item) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div><div><span x-text=\"$t(&#39;main-title-role&#39;)\"></span> <span>:&nbsp;</span> ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</div><div class=\"flex flex-row justify-center\"><span x-text=\"$t(&#39;main-title-role&#39;)\"></span> <span>:&nbsp;</span> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
