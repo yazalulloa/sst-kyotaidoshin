@@ -60,6 +60,10 @@
          "
          x-init="
          $watch('pages', value => {
+         if (value.length === 0) {
+            localStorage.removeItem('redirect_to')
+            return
+         }
 
          if (IsTherePathName()) {
           let pathname = window.location.pathname;

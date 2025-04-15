@@ -104,7 +104,7 @@
           <select class="select w-full"
                   name="role"
                   x-model="roleSelected">
-            <option selected x-text="$t('main-title-select-role')"></option>
+            <option selected x-text="$t('main-title-select-role')" value="0"></option>
             <template x-for="role in roles" class="flex flex-row">
               <option x-bind:value="role.id" x-text="role.name + ':&nbsp;' + role.perms"></option>
             </template>
