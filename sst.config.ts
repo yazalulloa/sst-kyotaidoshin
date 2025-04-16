@@ -297,6 +297,20 @@ export default $config({
           // }
         ],
       },
+      transform: {
+        cdn: (args) => {
+
+          args.transform = {
+            distribution: (disArgs) => {
+              disArgs.httpVersion = "http2and3";
+            }
+
+          }
+          // Modify CloudFront distribution arguments here
+
+          // Add other CloudFront-specific configurations
+        }
+      }
     });
 
 

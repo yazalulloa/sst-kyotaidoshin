@@ -103,7 +103,7 @@
     </div>
   </div>
 
-  <div class="grid w-full font-bold items-center text-center border-b"
+  <div class="hidden md:grid w-full font-bold items-center text-center border-b"
        x-bind:class="hasPerm('apartments:write') ? 'md:grid-cols-[2fr_1fr_4fr_1fr_5fr_1fr]' : 'md:grid-cols-[2fr_1fr_4fr_1fr_5fr]'">
     <span x-text="$t('main-title-building')"></span>
     <span x-text="$t('main-title-apt')"></span>
