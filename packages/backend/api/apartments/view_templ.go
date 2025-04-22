@@ -221,7 +221,7 @@ func ItemView(item Item) templ.Component {
 		}
 		if hasWritePerm {
 			templ_7745c5c3_Err = api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{
-				"hx-include": "[name='building_input'],[name='apt_search_input']"}).Render(ctx, templ_7745c5c3_Buffer)
+				"hx-include": "[name='building_input'],[name='apt_search_input']", "data-recaptcha-action": "apartments_delete"}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

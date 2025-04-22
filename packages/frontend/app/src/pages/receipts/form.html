@@ -5,7 +5,7 @@
    currencies: CURRENCIES_GLOBAL,
    months: MONTHS_GLOBAL,
    years: GetSelectYears(),
-   apartments: [],
+   apts: [],
    aptMap: new Map(),
    mainCurrency: '',
    debtCurrency: '',
@@ -21,6 +21,7 @@
       hx-indicator=".htmx-indicator"
       hx-target="#receipts-form-error"
       hx-swap="innerHTML"
+      data-recaptcha-action="receipts_update"
       x-data="{
 
         date: '',
@@ -44,10 +45,10 @@
           let array = JSON.parse(decodeBase64UrlStr($event.detail.apts));
 
           array.forEach((apt) => {
-            apartments.push(apt);
+            apts.push(apt);
           });
 
-          apartments.forEach((apt) => {
+          apts.forEach((apt) => {
             aptMap.set(apt.number, apt.name);
           });
       ">

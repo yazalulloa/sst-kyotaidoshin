@@ -18,8 +18,8 @@ const _PATH = "/api/extraCharges"
 
 func Routes(holder *api.RouterHolder) {
 
-	holder.PUT(_PATH, extraChargesPut, api.RECEIPTS_WRITE, api.BUILDINGS_WRITE)
-	holder.DELETE(_PATH+"/{key}", extraChargesDelete, api.RECEIPTS_WRITE, api.BUILDINGS_WRITE)
+	holder.PUT(_PATH, extraChargesPut, api.ExtraChargesUpsertRecaptchaAction, api.RECEIPTS_WRITE, api.BUILDINGS_WRITE)
+	holder.DELETE(_PATH+"/{key}", extraChargesDelete, api.ExtraChargesDeleteRecaptchaAction, api.RECEIPTS_WRITE, api.BUILDINGS_WRITE)
 }
 
 func extraChargesPut(w http.ResponseWriter, r *http.Request) {

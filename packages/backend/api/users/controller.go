@@ -18,8 +18,8 @@ const _SEARCH = _PATH + "/search"
 func Routes(holder *api.RouterHolder) {
 
 	holder.GET(_SEARCH, search, api.USERS_READ)
-	holder.DELETE(_PATH+"/{key}", userDelete, api.USERS_WRITE)
-	holder.PUT(_PATH+"/role", userRolePatch, api.USERS_WRITE)
+	holder.DELETE(_PATH+"/{key}", userDelete, api.UsersDeleteRecaptchaAction, api.USERS_WRITE)
+	holder.PUT(_PATH+"/role", userRolePatch, api.UserRolesSetRecaptchaAction, api.USERS_WRITE)
 }
 
 func search(w http.ResponseWriter, r *http.Request) {

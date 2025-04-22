@@ -11,21 +11,6 @@ import (
 	"time"
 )
 
-templ InitView(dto InitDto) {
-	if dto.UploadBackupParams != nil {
-		@api.UploadBackupForm(*dto.UploadBackupParams)
-	}
-	<div
-		x-init={ fmt.Sprintf("buildings = %s; $el.remove()", dto.BuildingIds) }
-	></div>
-}
-
-templ BuildingIdsView(ids string) {
-	<div
-		x-init={ fmt.Sprintf("buildings = %s; $el.remove()", ids) }
-	></div>
-}
-
 templ Search(res TableResponse) {
 	for _, item := range res.Results {
 		@ItemView(item)
@@ -108,6 +93,7 @@ templ ItemView(item Item) {
 							hx-target="#default-anchor"
 							hx-swap="innerHTML"
 							class="flex items-center gap-2"
+							data-recaptcha-action="receipts_duplicate"
 						>
 							<svg x-bind:data-src="duplicateIconUrl" data-cache="21600" class="size-5"></svg>
 							<span x-text="$t('main-action-copy')"></span>

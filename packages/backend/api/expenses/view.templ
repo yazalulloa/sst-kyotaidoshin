@@ -41,7 +41,7 @@ templ ItemView(item Item) {
 		@api.SpanFormatCurrency(item.Item.Amount, item.Item.Currency)
 		<span x-text={ fmt.Sprintf("$t('main-title-%s')", strings.ToLower(item.Item.Type)) }></span>
 		if item.Key != "" {
-			@api.DeleteBtn(fmt.Sprintf(PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
+			@api.DeleteBtn(fmt.Sprintf(PATH+"/%s", item.Key), item.CardId, templ.Attributes{"data-recaptcha-action" : "expenses_delete"})
 		} else {
 			<div></div>
 		}

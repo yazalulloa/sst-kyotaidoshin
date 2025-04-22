@@ -56,10 +56,11 @@ templ Search(res TableResponse) {
 						hx-indicator=".htmx-indicator"
 						hx-swap="none"
 						hx-trigger="mousedown"
+						data-recaptcha-action="bcv_bucket_process"
 					>
 						<svg x-bind:data-src="processIconUrl" data-cache="21600" class="h-6 w-6"></svg>
 					</button>
-					@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
+					@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{"data-recaptcha-action" : "bcv_bucket_delete"})
 				</div>
 			}
 		</li>

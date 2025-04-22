@@ -85,7 +85,8 @@
           hx-indicator=".htmx-indicator"
           hx-target="#extra-charges-form-error"
           hx-swap="innerHTML"
-          hx-disabled-elt="this, #extra-charges-form * > input:not([disabled]), #extra-charges-form * > button:not([disabled]), #extra-charges-form * > select:not([disabled])">
+          hx-disabled-elt="this, #extra-charges-form * > input:not([disabled]), #extra-charges-form * > button:not([disabled]), #extra-charges-form * > select:not([disabled])"
+          data-recaptcha-action="extra_charges_upsert">
 
 
       <div id="extra-charges-form-error" hidden="hidden"></div>

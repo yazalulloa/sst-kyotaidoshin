@@ -4,14 +4,6 @@
             file: '',
           }"
     x-init="
-            $watch('file', (value) => {
-              if (value && value !== '') {
-               if (false) {
-               $el.firstElementChild.dispatchEvent(new CustomEvent('get_form'))
-               }
-
-              }
-            })
             $watch('url', (value) => {
               htmx.process($el)
               if (value) {
@@ -24,14 +16,11 @@
           url = ''
 
           if ($event.detail.status === 204) {
-          $el.children[1].dispatchEvent(new CustomEvent('upload'))
+             $el.children[1].dispatchEvent(new CustomEvent('fire_callback'))
           } else {
-           //todo show toast
-          console.log('Response', $event.detail)
-          $dispatch('notify', { variant: 'danger', title: 'Error Uploading',  message: $event.detail })
+             console.log('Response', $event.detail)
+             $dispatch('notify', { variant: 'danger', title: 'Error Uploading',  message: $event.detail })
           }
-
-          $el.firstElementChild.innerHTML = ''
 
         "
     x-bind:id="formId"
@@ -50,7 +39,6 @@
         "
 >
 
-
   <div
       x-bind:hx-get="uploadFormPath"
       hx-trigger="get_form"
@@ -62,11 +50,16 @@
 
   <div
       x-bind:hx-post="uploadFileCallback"
-      hx-trigger="upload"
+      hx-trigger="fire_callback"
       x-bind:hx-disabled-elt="`#${formId}, this, #${formId} * > input:not([disabled]), #${formId} * > label:not([disabled])`"
-      hx-params="key"
       x-bind:hx-swap="callBackSwap"
-      hidden="hidden">
+      x-bind:data-recaptcha-action="recaptchaAction"
+      hx-params="key"
+      hidden="hidden"
+      hx-on::after-request="
+       this.previousElementSibling.innerHTML = ''
+      "
+  >
   </div>
 
   <label

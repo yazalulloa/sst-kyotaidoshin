@@ -34,6 +34,14 @@ declare module "sst" {
       "type": "sst.aws.Queue"
       "url": string
     }
+    "CaptchaSecretKey": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "CaptchaSiteKey": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "GithubClientId": {
       "type": "sst.sst.Secret"
       "value": string

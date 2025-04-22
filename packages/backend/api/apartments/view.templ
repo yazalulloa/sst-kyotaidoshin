@@ -43,7 +43,7 @@ templ ItemView(item Item) {
 		</div>
 		if hasWritePerm {
 			@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{
-				"hx-include": "[name='building_input'],[name='apt_search_input']"})
+				"hx-include": "[name='building_input'],[name='apt_search_input']", "data-recaptcha-action" : "apartments_delete" })
 		}
 	</li>
 }

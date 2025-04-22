@@ -13,8 +13,8 @@ import (
 
 func Routes(holder *api.RouterHolder) {
 
-	holder.PUT(reserveFunds.PATH, reserveFundPut, api.RECEIPTS_WRITE, api.BUILDINGS_WRITE)
-	holder.DELETE(reserveFunds.PATH+"/{key}", reserveFundDelete, api.RECEIPTS_WRITE, api.BUILDINGS_WRITE)
+	holder.PUT(reserveFunds.PATH, reserveFundPut, api.ReserveFundsUpsertRecaptchaAction, api.RECEIPTS_WRITE, api.BUILDINGS_WRITE)
+	holder.DELETE(reserveFunds.PATH+"/{key}", reserveFundDelete, api.ReserveFundsDeleteRecaptchaAction, api.RECEIPTS_WRITE, api.BUILDINGS_WRITE)
 }
 
 func reserveFundPut(w http.ResponseWriter, r *http.Request) {

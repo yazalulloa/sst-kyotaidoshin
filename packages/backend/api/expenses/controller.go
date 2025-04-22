@@ -125,7 +125,7 @@ func DeleteAndReturnKeys(r *http.Request) (string, Keys, error) {
 	}
 
 	if keys.ID == nil {
-		return key, keys, fmt.Errorf("id is required")
+		return key, keys, fmt.Errorf("keys id is required")
 	}
 
 	_, err = deleteById(*keys.ID)

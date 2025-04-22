@@ -97,7 +97,8 @@
         uploadFileCallback: '/api/receipts/new_from_file',
         callBackSwap: 'none',
         btnText: 'main-action-upload-receipt',
-        fileAccept: '.xlsx'
+        fileAccept: '.xlsx',
+        recaptchaAction: 'receipts_parse_file'
        }">
       <div hidden="hidden"
            x-bind:hx-get="uploadFormPartialUrl"
@@ -114,7 +115,8 @@
             hx-indicator=".htmx-indicator"
             hx-disabled-elt="this"
             hx-trigger="click"
-            hx-swap="none">
+            hx-swap="none"
+            data-recaptcha-action="receipts_delete_pdfs">
     </button>
 
     <div x-show="hasPerm('receipts:upload_backup')"
@@ -124,7 +126,8 @@
         uploadFileCallback: '/api/receipts/upload/backup',
         callBackSwap: 'innerHTML',
         btnText: 'main-action-upload-backup',
-        fileAccept: '.json.gz'
+        fileAccept: '.json.gz',
+        recaptchaAction: 'receipts_upload_backup',
        }">
       <div hidden="hidden"
            x-bind:hx-get="uploadFormPartialUrl"
@@ -147,7 +150,8 @@
        hidden="hidden">
   </div>
 
-  <div class="hidden md:grid md:grid-cols-[1fr_1fr_1fr_1fr_2fr_2fr_1fr] w-full font-bold items-center text-center border-b pt-2">
+  <div
+      class="hidden md:grid md:grid-cols-[1fr_1fr_1fr_1fr_2fr_2fr_1fr] w-full font-bold items-center text-center border-b pt-2">
     <span x-text="$t('main-title-building')"></span>
     <span x-text="$t('main-title-month')"></span>
     <span x-text="$t('main-title-year')"></span>

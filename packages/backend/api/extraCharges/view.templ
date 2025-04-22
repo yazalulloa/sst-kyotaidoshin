@@ -48,7 +48,7 @@ templ ItemView(item Item) {
 				<span class="text-start" data-apt={ apt } x-text="aptMap.get($el.getAttribute('data-apt'))"></span>
 			}
 		</div>
-		@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
+		@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{"data-recaptcha-action" : "extra_charges_delete"})
 	</li>
 }
 

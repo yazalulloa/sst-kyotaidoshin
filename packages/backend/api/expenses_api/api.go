@@ -10,8 +10,8 @@ import (
 
 func Routes(holder *api.RouterHolder) {
 
-	holder.PUT(expenses.PATH, expensesPut, api.RECEIPTS_WRITE)
-	holder.DELETE(expenses.PATH+"/{key}", expensesDelete, api.RECEIPTS_WRITE)
+	holder.PUT(expenses.PATH, expensesPut, api.ExpensesUpsertRecaptchaAction, api.RECEIPTS_WRITE)
+	holder.DELETE(expenses.PATH+"/{key}", expensesDelete, api.ExpensesDeleteRecaptchaAction, api.RECEIPTS_WRITE)
 }
 
 func expensesPut(w http.ResponseWriter, r *http.Request) {

@@ -71,7 +71,7 @@ templ Search(res TableResponse) {
 							<svg x-bind:data-src="editIconUrl" data-cache="21600" class="h-6 w-6"></svg>
 						</button>
 					</a>
-					@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
+					@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{"data-recaptcha-action" : "buildings_delete"})
 				</div>
 			}
 		</li>

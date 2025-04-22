@@ -29,8 +29,8 @@ const _SEARCH = _PATH + "/search"
 func Routes(holder *api.RouterHolder) {
 
 	holder.GET(_SEARCH, search, api.BCV_FILES_READ)
-	holder.DELETE(_PATH+"/{id}", bcvBucketDelete, api.BCV_FILES_WRITE)
-	holder.POST(_PATH+"/process/{id}", process, api.BCV_FILES_WRITE)
+	holder.DELETE(_PATH+"/{id}", bcvBucketDelete, api.BcvBucketDeleteRecaptchaAction, api.BCV_FILES_WRITE)
+	holder.POST(_PATH+"/process/{id}", process, api.BcvBucketProcessRecaptchaAction, api.BCV_FILES_WRITE)
 	holder.GET(_PATH+"/process-all", processAll, api.BCV_FILES_WRITE)
 	holder.GET(_PATH+"/look-up", lookUp, api.BCV_FILES_WRITE)
 }

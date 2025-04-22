@@ -30,7 +30,8 @@
         uploadFileCallback: '/api/buildings/upload/backup',
         callBackSwap: 'innerHTML',
         btnText: 'main-action-upload-backup',
-        fileAccept: '.json.gz'
+        fileAccept: '.json.gz',
+        recaptchaAction: 'buildings_upload_backup'
        }">
     <div hidden="hidden"
          x-bind:hx-get="uploadFormPartialUrl"

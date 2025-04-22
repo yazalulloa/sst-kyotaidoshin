@@ -21,8 +21,8 @@ const _SEARCH = _PATH + "/search"
 func Routes(holder *api.RouterHolder) {
 
 	holder.GET(_SEARCH, search, api.ROLES_READ)
-	holder.PUT(_PATH, rolesPut, api.ROLES_WRITE)
-	holder.DELETE(_PATH+"/{key}", roleDelete, api.ROLES_WRITE)
+	holder.PUT(_PATH, rolesPut, api.RolesUpsertRecaptchaAction, api.ROLES_WRITE)
+	holder.DELETE(_PATH+"/{key}", roleDelete, api.RolesDeleteRecaptchaAction, api.ROLES_WRITE)
 	holder.GET(_PATH+"/all", getAll, api.ROLES_READ)
 	holder.GET(_PATH+"/all/min", getAllMin, api.ROLES_READ)
 }

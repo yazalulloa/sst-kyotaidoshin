@@ -94,7 +94,7 @@
       <div
           class="grid border-b font-bold grid-cols-[3fr_1fr_1fr_1fr] border-surface-dark dark:border-surface dark:text-surface">
         <span x-text="$t('main-title-description')"></span>
-        <span class="text-end" x-text="$t('main-title-amount')"></span>
+        <span class="text-end" x-text="$t('main-title-pay')"></span>
         <span class="text-center" x-text="$t('main-title-type')"></span>
         <span class="text-center" x-text="$t('main-title-actions')"></span>
       </div>
@@ -115,7 +115,8 @@
           hx-indicator=".htmx-indicator"
           hx-target="#expenses-form-error"
           hx-swap="innerHTML"
-          hx-disabled-elt="this, #expenses-form * > input:not([disabled]), #expenses-form * > button:not([disabled]), #expenses-form * > select:not([disabled])">
+          hx-disabled-elt="this, #expenses-form * > input:not([disabled]), #expenses-form * > button:not([disabled]), #expenses-form * > select:not([disabled])"
+          data-recaptcha-action="expenses_upsert">
 
 
       <div id="expenses-form-error" hidden="hidden"></div>
@@ -130,7 +131,7 @@
                type="text"
                class="input w-full"
                x-bind:class="descriptionErr !== '' ? 'input-error' : ''"
-               name="aliquot"
+               name="description"
                maxlength="100"
                x-model="description"
                x-init="

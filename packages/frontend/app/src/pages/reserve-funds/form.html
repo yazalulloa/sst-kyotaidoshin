@@ -99,7 +99,8 @@
           hx-indicator=".htmx-indicator"
           hx-target="#reserve-funds-form-error"
           hx-swap="innerHTML"
-          hx-disabled-elt="this, #reserve-fund-form * > input:not([disabled]), #reserve-fund-form * > button:not([disabled]), #reserve-fund-form * > select:not([disabled])">
+          hx-disabled-elt="this, #reserve-fund-form * > input:not([disabled]), #reserve-fund-form * > button:not([disabled]), #reserve-fund-form * > select:not([disabled])"
+          data-recaptcha-action="reserve_funds_upsert">
 
 
       <div id="reserve-funds-form-error" hidden="hidden"></div>

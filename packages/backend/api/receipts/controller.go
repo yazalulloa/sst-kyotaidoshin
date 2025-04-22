@@ -48,12 +48,12 @@ const _DUPLICATE = _PATH + "/duplicate"
 func Routes(holder *api.RouterHolder) {
 
 	holder.GET(_SEARCH, search, api.RECEIPTS_READ)
-	holder.POST(_PATH, receiptPost, api.RECEIPTS_WRITE)
-	holder.PUT(_PATH, receiptPut, api.RECEIPTS_WRITE)
-	holder.DELETE(_PATH+"/clear_pdfs", clearPdfs, api.RECEIPTS_DELETE_PDFS)
-	holder.DELETE(_PATH+"/{key}", receiptDelete, api.RECEIPTS_WRITE)
+	holder.POST(_PATH, receiptPost, api.ReceiptsCreateRecaptchaAction, api.RECEIPTS_WRITE)
+	holder.PUT(_PATH, receiptPut, api.ReceiptsUpdateRecaptchaAction, api.RECEIPTS_WRITE)
+	holder.DELETE(_PATH+"/clear_pdfs", clearPdfs, api.ReceiptsDeletePdfsRecaptchaAction, api.RECEIPTS_DELETE_PDFS)
+	holder.DELETE(_PATH+"/{key}", receiptDelete, api.ReceiptsDeleteRecaptchaAction, api.RECEIPTS_WRITE)
 	holder.GET(_UPLOAD_BACKUP_FORM, getUploadBackupForm, api.RECEIPTS_UPLOAD_BACKUP)
-	holder.POST(_UPLOAD_BACKUP, uploadBackup, api.RECEIPTS_UPLOAD_BACKUP)
+	holder.POST(_UPLOAD_BACKUP, uploadBackup, api.ReceiptsUploadBackupRecaptchaAction, api.RECEIPTS_UPLOAD_BACKUP)
 	holder.GET(_PATH+"/formData/{key}", formData, api.RECEIPTS_WRITE)
 	holder.GET(_PATH+"/view/{key}", getReceiptView, api.RECEIPTS_READ)
 	holder.GET(_DOWNLOAD_ZIP_FILE+"/{key}", getZip, api.RECEIPTS_READ)
@@ -61,11 +61,11 @@ func Routes(holder *api.RouterHolder) {
 	holder.GET(_DOWNLOAD_HTML_FILE+"/{key}", getHtml, api.RECEIPTS_READ)
 	holder.GET(_SEND_PDFS+"/{key}", sendPdfs, api.RECEIPTS_WRITE)
 	holder.GET(_SEND_PDFS_PROGRESS+"/{key}", sendPdfsProgress, api.RECEIPTS_WRITE)
-	holder.PUT(_CANCEL_SEND_PDFS+"/{key}", cancelSendPdfs, api.RECEIPTS_WRITE)
+	holder.PUT(_CANCEL_SEND_PDFS+"/{key}", cancelSendPdfs, "", api.RECEIPTS_WRITE)
 	holder.GET(_PATH+"/upload_form", getUploadForm, api.RECEIPTS_WRITE)
-	holder.POST(_PATH+"/new_from_file", newFromFile, api.RECEIPTS_WRITE)
-	holder.POST(_DUPLICATE+"/{key}", duplicateReceipt, api.RECEIPTS_WRITE)
-	holder.POST(_PATH+"/send/pdfs", sendPdfsApt, api.RECEIPTS_WRITE)
+	holder.POST(_PATH+"/new_from_file", newFromFile, api.ReceiptsParseFileRecaptchaAction, api.RECEIPTS_WRITE)
+	holder.POST(_DUPLICATE+"/{key}", duplicateReceipt, api.ReceiptsDuplicateRecaptchaAction, api.RECEIPTS_WRITE)
+	holder.POST(_PATH+"/send/pdfs", sendPdfsApt, api.ReceiptsSendAptsRecaptchaAction, api.RECEIPTS_WRITE)
 	holder.GET(_PATH+"/sent/{key}", getReceiptSent, api.RECEIPTS_READ)
 
 }

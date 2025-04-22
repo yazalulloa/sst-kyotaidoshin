@@ -39,6 +39,8 @@ export default $config({
     const htmlToPdfFunction = new sst.Secret("HtmlToPdfFunction")
     const telegramBotToken = new sst.Secret("TelegramBotToken")
     const telegramBotApiKey = new sst.Secret("TelegramBotApiKey")
+    const captchaSiteKey = new sst.Secret("CaptchaSiteKey")
+    const captchaSecretKey = new sst.Secret("CaptchaSecretKey")
 
     const processUserFunction = new sst.aws.Function("ProcessUser", {
       link: [secretTursoUrl],
@@ -159,6 +161,7 @@ export default $config({
           "hx-trigger",
           "hx-target",
           "Location",
+          "X-Recaptcha-Token",
         ],
         allowCredentials: true,
         maxAge: isLocal ? "1 minute" : "1 day",
@@ -240,6 +243,7 @@ export default $config({
         telegramBotToken,
         telegramBotApiKey,
         telegramWebhookFunction,
+        captchaSecretKey,
       ],
       environment: {
         ISR_PREFIX: isrPrefix
@@ -268,7 +272,8 @@ export default $config({
         // Accessible in the browser
         VITE_VAR_ENV: `https://${apiDomain}`,
         VITE_IS_DEV: isLocal.toString(),
-        VITE_ISR_PREFIX: isrPrefix
+        VITE_ISR_PREFIX: isrPrefix,
+        VITE_RECAPTCHA_SITE_KEY: captchaSiteKey.value,
       },
       build: {
         command: "bun run build",

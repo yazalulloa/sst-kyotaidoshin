@@ -15,10 +15,10 @@ const _PATH = "/api/permissions"
 
 func Routes(holder *api.RouterHolder) {
 
-	holder.POST(_PATH+"/all", permissionsAll, api.PERMISSIONS_WRITE)
+	holder.POST(_PATH+"/all", permissionsAll, api.PermissionsInsertAllRecaptchaAction, api.PERMISSIONS_WRITE)
 	holder.GET(_PATH+"/all", getAllWithLabels, api.PERMISSIONS_READ)
 	holder.GET(_PATH+"/search", search, api.PERMISSIONS_READ)
-	holder.DELETE(_PATH+"/{id}", permissionsDelete, api.PERMISSIONS_WRITE)
+	holder.DELETE(_PATH+"/{id}", permissionsDelete, api.PermissionsDeleteRecaptchaAction, api.PERMISSIONS_WRITE)
 }
 
 func permissionsAll(w http.ResponseWriter, r *http.Request) {

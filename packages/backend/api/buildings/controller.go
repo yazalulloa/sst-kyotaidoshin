@@ -33,11 +33,11 @@ const _UPLOAD_BACKUP = _PATH + "/upload/backup"
 func Routes(holder *api.RouterHolder) {
 
 	holder.GET(_SEARCH, search, api.BUILDINGS_READ)
-	holder.DELETE(_PATH+"/{id}", buildingDelete, api.BUILDINGS_WRITE)
-	holder.PUT(_PATH, buildingPut, api.BUILDINGS_WRITE)
+	holder.DELETE(_PATH+"/{id}", buildingDelete, api.BuildingsDeleteRecaptchaAction, api.BUILDINGS_WRITE)
+	holder.PUT(_PATH, buildingPut, api.BuildingsUpsertRecaptchaAction, api.BUILDINGS_WRITE)
 	holder.GET(_PATH+"/formData", formData, api.BUILDINGS_WRITE)
 	holder.GET(_UPLOAD_BACKUP_FORM, getUploadBackupForm, api.BUILDINGS_READ)
-	holder.POST(_UPLOAD_BACKUP, uploadBackup, api.BUILDINGS_WRITE)
+	holder.POST(_UPLOAD_BACKUP, uploadBackup, api.BuildingsUploadBackupRecaptchaAction, api.BUILDINGS_UPLOAD_BACKUP)
 }
 
 func search(w http.ResponseWriter, r *http.Request) {

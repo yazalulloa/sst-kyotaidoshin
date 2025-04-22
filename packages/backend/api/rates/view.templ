@@ -30,7 +30,7 @@ templ Search(res TableResponse) {
 			<span class="text-center">{ item.DateOfRate }</span>
 			@api.SpanFormatDate(fmt.Sprint(item.DateOfFile))
 			if hasWritePerm {
-				@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{"hx-include": "[name='currency_input'],[name='date_input']"})
+				@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{"hx-include": "[name='currency_input'],[name='date_input']", "data-recaptcha-action" : "rates_delete"})
 			}
 		</li>
 	}

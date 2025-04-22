@@ -60,7 +60,68 @@ window.withIsrPrefix = function (path) {
   return "/" + import.meta.env.VITE_ISR_PREFIX + path;
 }
 
-document.body.addEventListener('htmx:configRequest', function (evt) {
+async function executeRecaptcha(action) {
+  return new Promise((resolve, reject) => {
+    grecaptcha.ready(() => {
+      grecaptcha.execute(import.meta.env.VITE_RECAPTCHA_SITE_KEY,
+          {action: action})
+      .then((token) => {
+        resolve(token);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+    });
+  });
+}
+
+window.getRecaptchaToken = function (action) {
+  return executeRecaptcha(action);
+}
+
+document.body.addEventListener('htmx:confirm', (evt) => {
+
+  const action = evt.detail.elt.dataset.recaptchaAction
+
+  if (!action) {
+    return
+  }
+
+  console.log('Elm', evt.detail.elt)
+  evt.preventDefault()
+
+  const toDisable = evt.detail.elt.querySelectorAll(
+      evt.detail.elt.getAttribute('hx-disabled-elt'))
+
+  evt.detail.elt.disabled = true
+  toDisable.forEach((input) => {
+    input.disabled = true
+  });
+
+  executeRecaptcha(action).then((token) => {
+
+    evt.detail.elt.setAttribute('hx-headers',
+        `{"X-Recaptcha-Token": "${token}"}`)
+
+    toDisable.forEach((input) => {
+      input.disabled = false
+    });
+    evt.detail.elt.disabled = false
+
+    evt.detail.issueRequest()
+  }).catch((error) => {
+    console.error('Error executing reCAPTCHA:', error);
+    evt.detail.cancelRequest()
+
+    toDisable.forEach((input) => {
+      input.disabled = false
+    });
+
+    evt.detail.elt.disabled = false
+  });
+});
+
+document.body.addEventListener('htmx:configRequest', async (evt) => {
 
   if (isDev) {
     if (evt.detail.path.includes(import.meta.env.VITE_ISR_PREFIX)) {
@@ -73,6 +134,7 @@ document.body.addEventListener('htmx:configRequest', function (evt) {
     evt.detail.withCredentials = true;
     evt.detail.path = import.meta.env.VITE_VAR_ENV + evt.detail.path;
   }
+
 });
 
 window.sendEvent = function (id, eventName) {

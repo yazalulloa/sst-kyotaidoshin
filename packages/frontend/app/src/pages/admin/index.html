@@ -31,7 +31,8 @@
               hx-indicator=".htmx-indicator"
               type="button"
               class="btn btn-neutral"
-              x-text="$t('main-action-set-webhook')">
+              x-text="$t('main-action-set-webhook')"
+              data-recaptcha-action="telegram_set_webhook">
       </button>
 
       <button x-show="hasPerm('admin:admin')"
@@ -42,7 +43,8 @@
               hx-indicator=".htmx-indicator"
               type="button"
               class="btn btn-neutral"
-              x-text="$t('main-action-delete-webhook')">
+              x-text="$t('main-action-delete-webhook')"
+              data-recaptcha-action="telegram_delete_webhook">
       </button>
     </div>
 

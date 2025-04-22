@@ -87,7 +87,8 @@
           hx-indicator=".htmx-indicator"
           hx-target="#debts-form-error"
           hx-swap="innerHTML"
-          hx-disabled-elt="this, #debts-form * > input:not([disabled]), #debts-form * > button:not([disabled]), #debts-form * > select:not([disabled])">
+          hx-disabled-elt="this, #debts-form * > input:not([disabled]), #debts-form * > button:not([disabled]), #debts-form * > select:not([disabled])"
+          data-recaptcha-action="debts_upsert">
 
       <div id="debts-form-error" hidden="hidden"></div>
       <input hidden="hidden" name="key" x-model="key">
@@ -101,7 +102,8 @@
           <legend class="fieldset-legend text-start w-full"
                   x-text="$t('main-title-amount')">
           </legend>
-          <input type="number"
+          <input id="debtsAmountInput"
+                 type="number"
                  class="input w-full"
                  x-bind:class="amountErr !== '' ? 'input-error' : ''"
                  name="amount"
@@ -139,7 +141,7 @@
                  type="number"
                  name="receipts"
                  maxlength="14"
-                 x-model="amount"
+                 x-model="receipts"
                  x-init="
             configureNumberInput($el)
             limitInputToMaxLength($el)

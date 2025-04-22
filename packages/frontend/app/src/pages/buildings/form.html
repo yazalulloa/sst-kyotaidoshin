@@ -15,6 +15,7 @@
       hx-indicator=".htmx-indicator"
       hx-target="#building-form-error"
       hx-swap="innerHTML"
+      data-recaptcha-action="buildings_upsert"
       x-data="{
     id: '',
     name: '',
@@ -231,7 +232,7 @@
           $el.disabled=!(id?.trim()?.length > 0 && name?.trim()?.length > 0 && rif?.trim()?.length > 0 && (fixedPay ? fixedPayAmount > 0 : true))
           "
           @click="
-          let form = $el.closest('form');
+          const form = $el.closest('form');
           form.classList.remove('border', 'border-success')
           errMsg = '';
           "

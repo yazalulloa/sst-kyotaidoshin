@@ -171,7 +171,7 @@ func ItemView(item Item) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if item.Key != "" {
-			templ_7745c5c3_Err = api.DeleteBtn(fmt.Sprintf(PATH+"/%s", item.Key), item.CardId, templ.Attributes{}).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = api.DeleteBtn(fmt.Sprintf(PATH+"/%s", item.Key), item.CardId, templ.Attributes{"data-recaptcha-action": "expenses_delete"}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

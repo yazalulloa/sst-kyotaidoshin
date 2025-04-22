@@ -17,7 +17,7 @@ const _PATH = "/api/debts"
 
 func Routes(holder *api.RouterHolder) {
 
-	holder.PUT(_PATH, debtPut, api.RECEIPTS_WRITE)
+	holder.PUT(_PATH, debtPut, api.DebtsUpsertRecaptchaAction, api.RECEIPTS_WRITE)
 }
 
 func debtPut(w http.ResponseWriter, r *http.Request) {

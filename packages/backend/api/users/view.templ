@@ -61,7 +61,7 @@ templ ItemView(item Item) {
 			}
 		</div>
 		if hasWritePerm {
-			@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
+			@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{"data-recaptcha-action" : "users_delete"})
 		}
 	</li>
 }

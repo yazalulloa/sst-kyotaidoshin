@@ -15,7 +15,7 @@ templ SearchView(res TableResponse) {
 			<span>{ fmt.Sprint(*item.Item.ID) }</span>
 			<span>{ item.Item.Name }</span>
 			if hasWritePerm {
-				@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
+				@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{"data-recaptcha-action" : "permissions_delete"})
 			}
 		</li>
 	}

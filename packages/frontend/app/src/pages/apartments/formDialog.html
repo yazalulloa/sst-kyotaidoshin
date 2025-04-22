@@ -65,7 +65,8 @@
           hx-disabled-elt="this, * > input:not([disabled]), * > button:not([disabled]), * > select:not([disabled])"
           hx-indicator=".htmx-indicator"
           hx-target="#apt-form-error"
-          hx-swap="innerHTML">
+          hx-swap="innerHTML"
+          data-recaptcha-action="apartments_upsert">
 
       <!-- Dialog Header -->
       <div class="sticky top-0 z-30 flex items-center justify-between gap-2 border-b p-4 border-outline bg-base-200">
@@ -163,6 +164,7 @@
                  name="aliquot"
                  data-gt="0"
                  maxlength="16"
+                 step=".01"
                  x-model="aliquot"
                  x-init="
               trimInput($el);

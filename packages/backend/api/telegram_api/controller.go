@@ -13,8 +13,8 @@ const _WEBHOOK_PATH = _PATH + "/webhook"
 
 func Routes(holder *api.RouterHolder) {
 
-	holder.POST(_WEBHOOK_PATH, postWebhook)
-	holder.DELETE(_WEBHOOK_PATH, deleteWebhook)
+	holder.POST(_WEBHOOK_PATH, postWebhook, api.TelegramSetWebhookRecaptchaAction)
+	holder.DELETE(_WEBHOOK_PATH, deleteWebhook, api.TelegramDeleteWebhookRecaptchaAction)
 	holder.GET(_WEBHOOK_PATH, getWebhook)
 	holder.GET(_PATH+"/start", getStartUrl)
 	holder.GET(_PATH+"/info", getInfo)

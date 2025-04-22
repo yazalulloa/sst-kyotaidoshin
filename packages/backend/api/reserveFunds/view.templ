@@ -60,7 +60,7 @@ templ ItemView(item Item) {
 			@api.BadgeIndicatorWithTooltip(item.Item.Active, "", api.SpanWitX_Text(fmt.Sprintf("$t('main-title-%s')", strings.ToLower(item.Item.Type))), nil)
 			@api.BadgeIndicatorWithTooltip(item.Item.AddToExpenses, "", api.SpanWitX_Text(fmt.Sprintf("$t('main-title-%s')", strings.ToLower(item.Item.ExpenseType))), nil)
 		</div>
-		@api.DeleteBtn(fmt.Sprintf(PATH+"/%s", item.Key), item.CardId, templ.Attributes{})
+		@api.DeleteBtn(fmt.Sprintf(PATH+"/%s", item.Key), item.CardId, templ.Attributes{"data-recaptcha-action" : "reserve_funds_delete"})
 	</li>
 }
 
