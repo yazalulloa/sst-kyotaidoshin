@@ -4,15 +4,15 @@ go 1.24.1
 
 require (
 	github.com/a-h/templ v0.3.857
-	github.com/aws/aws-lambda-go v1.47.0
+	github.com/aws/aws-lambda-go v1.48.0
 	github.com/aws/aws-sdk-go-v2 v1.36.3
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.79.1
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.79.2
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
 	github.com/go-jet/jet/v2 v2.13.0
 	github.com/google/uuid v1.6.0
-	github.com/gorilla/csrf v1.7.2
+	github.com/gorilla/csrf v1.7.3
 	github.com/gorilla/mux v1.8.1
-	github.com/sst/sst/v3 v3.13.0
+	github.com/sst/sst/v3 v3.13.17
 )
 
 require (

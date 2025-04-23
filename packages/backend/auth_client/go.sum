@@ -4,6 +4,8 @@ github.com/go-jose/go-jose/v4 v4.0.1 h1:QVEPDE3OluqXBQZDcnNvQrInro2h0e4eqNbnZSWq
 github.com/go-jose/go-jose/v4 v4.0.1/go.mod h1:WVf9LFMHh/QVrmqrOfqun0C45tMe3RoiKJMPvgWwLfY=
 github.com/go-jose/go-jose/v4 v4.0.5 h1:M6T8+mKZl/+fNNuFHvGIzDz7BTLQPIounk/b9dw3AaE=
 github.com/go-jose/go-jose/v4 v4.0.5/go.mod h1:s3P1lRrkT8igV8D9OjyL4WRyHvjB6a4JSllnOrmmBOA=
+github.com/go-jose/go-jose/v4 v4.1.0 h1:cYSYxd3pw5zd2FSXk2vGdn9igQU2PS8MuxrCOCl0FdY=
+github.com/go-jose/go-jose/v4 v4.1.0/go.mod h1:GG/vqmYm3Von2nYiB2vGTXzdoNKE5tix5tuc6iAd+sw=
 github.com/golang-jwt/jwt/v5 v5.2.0 h1:d/ix8ftRUorsN+5eMIlF4T6J8CAt9rch3My2winC1Jw=
 github.com/golang-jwt/jwt/v5 v5.2.0/go.mod h1:pqrtFR0X4osieyHYxtmOUWsAWrfe1Q5UVIyoH402zdk=
 github.com/golang-jwt/jwt/v5 v5.2.1 h1:OuVbFODueb089Lh128TAcimifWaLhJwVflnrgM17wHk=
@@ -18,6 +20,8 @@ github.com/sst/sst/v3 v3.10.4 h1:qKVT4EFcTUj8KFVGAhWBLD+/ohAtJDnFy5IAitpJ3kc=
 github.com/sst/sst/v3 v3.10.4/go.mod h1:t0+Krbn45bPEvo19BNbP3TACUS6J7TLbM04YvuoX3Gg=
 github.com/sst/sst/v3 v3.13.0 h1:aAIfxkmAvtWOHt3zTbgCLSZ8EIl1wKMR1iE1ytc6hw4=
 github.com/sst/sst/v3 v3.13.0/go.mod h1:t0+Krbn45bPEvo19BNbP3TACUS6J7TLbM04YvuoX3Gg=
+github.com/sst/sst/v3 v3.13.17 h1:zEQQRJ5FeO0S509vz2sezQ0dUUdRc+d7QFIymiH/XHc=
+github.com/sst/sst/v3 v3.13.17/go.mod h1:t0+Krbn45bPEvo19BNbP3TACUS6J7TLbM04YvuoX3Gg=
 golang.org/x/crypto v0.19.0 h1:ENy+Az/9Y1vSrlrvBSyna3PITt4tiZLf7sgCjZBX7Wo=
 golang.org/x/crypto v0.19.0/go.mod h1:Iy9bg/ha4yyC70EfRS8jz+B6ybOBKMaSxLj6P6oBDfU=
 golang.org/x/crypto v0.35.0 h1:b15kiHdrGCHrP6LvwaQ3c03kgNhhiMgvlhxHQhmg2Xs=

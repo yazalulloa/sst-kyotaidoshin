@@ -65,6 +65,7 @@ templ ItemView(item Item) {
 							hx-disabled-elt="this"
 							hx-trigger="mousedown"
 							hx-swap="delete swap:300ms"
+							data-recaptcha-action="receipts_delete"
 							class="flex items-center gap-2"
 						>
 							<div class="rounded-full border border-error p-1 text-error">
@@ -142,6 +143,7 @@ templ ItemView(item Item) {
 							hx-disabled-elt="this"
 							hx-trigger="mousedown"
 							hx-swap="none"
+							data-recaptcha-action="receipts_send_apts"
 							class="flex items-center gap-2"
 						>
 							<svg x-bind:data-src="sendMailIconUrl" data-cache="21600" class="size-5"></svg>
