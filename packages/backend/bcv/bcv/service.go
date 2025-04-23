@@ -28,14 +28,14 @@ const MetadataRatesParsedKey = "ratesparsed"
 var (
 	netTransport = &http.Transport{
 		DialContext: (&net.Dialer{
-			Timeout: 10 * time.Second,
+			Timeout: time.Second * 10,
 		}).DialContext,
-		TLSHandshakeTimeout: 8 * time.Second,
+		TLSHandshakeTimeout: time.Second * 8,
 		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
 	}
 
 	netClient = &http.Client{
-		Timeout:   time.Minute * 7,
+		Timeout:   time.Second * 10,
 		Transport: netTransport,
 	}
 )
