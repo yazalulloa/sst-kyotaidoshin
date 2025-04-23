@@ -21,7 +21,9 @@ import (
 	"log"
 	"net/http"
 	"slices"
+	"strings"
 	"sync"
+	"time"
 )
 
 type HttpMethod string
@@ -208,6 +210,8 @@ func (rec RouteParams) routeHandler() func(http.ResponseWriter,
 
 		go func() {
 			defer wg.Done()
+			timestamp := time.Now().UnixMilli()
+			defer func() { log.Printf("CheckPerms took %d ms", time.Now().UnixMilli()-timestamp) }()
 
 			userPerms, err := checkPerms(r, rec.Perms)
 			if err != nil {
@@ -223,6 +227,9 @@ func (rec RouteParams) routeHandler() func(http.ResponseWriter,
 		}()
 
 		go func() {
+			timestamp := time.Now().UnixMilli()
+			defer func() { log.Printf("CheckRecaptcha took %d ms", time.Now().UnixMilli()-timestamp) }()
+
 			defer wg.Done()
 
 			if rec.RecaptchaAction == "" {
@@ -236,6 +243,7 @@ func (rec RouteParams) routeHandler() func(http.ResponseWriter,
 			}
 		}()
 
+		timestamp := time.Now().UnixMilli()
 		wg.Wait()
 		close(errorChan)
 
@@ -247,11 +255,18 @@ func (rec RouteParams) routeHandler() func(http.ResponseWriter,
 			return
 		}
 
+		log.Printf("Middleware took %d ms", time.Now().UnixMilli()-timestamp)
 		rec.Handler(w, r)
 	}
 }
 
 func getUserPermissions(ctx context.Context, userId string) ([]string, error) {
+	permsMap := GetPermsMap()
+
+	cachedPerms := permsMap.Get(userId)
+	if cachedPerms != "" {
+		return strings.Split(cachedPerms, ","), nil
+	}
 
 	stmt := Permissions.SELECT(Permissions.Name).
 		FROM(
@@ -274,8 +289,21 @@ func getUserPermissions(ctx context.Context, userId string) ([]string, error) {
 		permissions[i] = p.Name
 	}
 
+	permsMap.Put(userId, strings.Join(permissions, ","))
+
 	return permissions, nil
 
+}
+
+var permsMap *TTLMap
+var permsMapOnce sync.Once
+
+func GetPermsMap() *TTLMap {
+
+	permsMapOnce.Do(func() {
+		permsMap = New(5, time.Second*60)
+	})
+	return permsMap
 }
 
 func checkPerms(r *http.Request, perm []PERM) ([]string, error) {

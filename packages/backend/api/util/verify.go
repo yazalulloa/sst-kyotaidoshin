@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
 	"github.com/sst/sst/v3/sdk/golang/resource"
 	"log"
+	"time"
 )
 
 const USER_ID = "userID"
@@ -24,6 +25,8 @@ type UserPayload struct {
 }
 
 func Verify(ctx context.Context, accessToken, refreshToken string) (context.Context, error) {
+	timestamp := time.Now().UnixMilli()
+	defer func() { log.Printf("Verify took %d ms", time.Now().UnixMilli()-timestamp) }()
 
 	verifyAccessFunction, err := resource.Get("VerifyAccess", "name")
 	if err != nil {

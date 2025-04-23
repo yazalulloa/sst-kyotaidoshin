@@ -42,7 +42,11 @@
       name = jsonObject.name;
       aliquot = jsonObject.aliquot;
       emails.clear();
-      jsonObject.emails.split(',').forEach(email => emails.add(email));
+      jsonObject.emails.split(',').forEach(email => {
+         if (email !== '') {
+           emails.add(email);
+         }
+      });
      $el.querySelector('dialog').showModal();
      "
      @event-apartment-form-close="

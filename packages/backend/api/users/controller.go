@@ -84,6 +84,8 @@ func userDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	defer api.GetPermsMap().Delete(keys.ID)
+
 	err = CountersView(*counters).Render(r.Context(), w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -163,6 +165,8 @@ func userRolePatch(w http.ResponseWriter, r *http.Request) {
 			response.errorStr = err.Error()
 			return response
 		}
+
+		defer api.GetPermsMap().Delete(keys.ID)
 
 		log.Printf("Updated userRole: %d", rowsAffected)
 

@@ -75,10 +75,6 @@ async function executeRecaptcha(action) {
   });
 }
 
-window.getRecaptchaToken = function (action) {
-  return executeRecaptcha(action);
-}
-
 document.body.addEventListener('htmx:confirm', (evt) => {
 
   const action = evt.detail.elt.dataset.recaptchaAction
@@ -98,26 +94,39 @@ document.body.addEventListener('htmx:confirm', (evt) => {
     input.disabled = true
   });
 
+  const disableBack = () => {
+    evt.detail.elt.disabled = false
+    toDisable.forEach((input) => {
+      input.disabled = false
+    });
+  }
+
+  const indicators = document.querySelectorAll(".htmx-indicator")
+  indicators.forEach((indicator) => {
+    indicator.classList.add("htmx-request")
+  })
+
+  const removeIndicators = () => {
+    indicators.forEach((indicator) => {
+      indicator.classList.remove("htmx-request")
+    })
+  }
+
   executeRecaptcha(action).then((token) => {
 
     evt.detail.elt.setAttribute('hx-headers',
         `{"X-Recaptcha-Token": "${token}"}`)
 
-    toDisable.forEach((input) => {
-      input.disabled = false
-    });
-    evt.detail.elt.disabled = false
+    disableBack()
+    removeIndicators()
 
     evt.detail.issueRequest()
   }).catch((error) => {
     console.error('Error executing reCAPTCHA:', error);
     evt.detail.cancelRequest()
 
-    toDisable.forEach((input) => {
-      input.disabled = false
-    });
-
-    evt.detail.elt.disabled = false
+    disableBack()
+    removeIndicators()
   });
 });
 

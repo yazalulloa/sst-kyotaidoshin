@@ -67,6 +67,7 @@ func permissionsDelete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	defer api.GetPermsMap().Clear()
 
 	w.WriteHeader(http.StatusNoContent)
 }

@@ -153,6 +153,8 @@ func rolesPut(w http.ResponseWriter, r *http.Request) {
 			return response
 		}
 
+		defer api.GetPermsMap().Clear()
+
 		if isUpdate {
 			item, err := getItem(*role.ID, &keys.CardId)
 			if err != nil {
@@ -197,6 +199,7 @@ func roleDelete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	defer api.GetPermsMap().Clear()
 
 	err = CountersView(*counters).Render(r.Context(), w)
 	if err != nil {
