@@ -214,6 +214,8 @@ CREATE TABLE IF NOT EXISTS debts
     PRIMARY KEY (building_id, receipt_id, apt_number)
 );
 
+
+
 CREATE TABLE IF NOT EXISTS users
 (
 
@@ -226,12 +228,16 @@ CREATE TABLE IF NOT EXISTS users
     name          VARCHAR(200)                            NOT NULL,
     picture       VARCHAR(500)                            NOT NULL,
     data          JSONB                                   NOT NULL,
+    notification_events TEXT,
     created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
     last_login_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 );
 
+-- ALTER TABLE users ADD COLUMN notification_events TEXT;
+
 CREATE INDEX IF NOT EXISTS users_provider_id_idx ON users (provider, provider_id);
+CREATE INDEX IF NOT EXISTS users_notification_events_idx ON users (notification_events);
 
 
 CREATE TABLE IF NOT EXISTS roles  (

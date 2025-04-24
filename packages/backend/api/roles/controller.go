@@ -137,6 +137,9 @@ func rolesPut(w http.ResponseWriter, r *http.Request) {
 		if isUpdate {
 			role.ID = &keys.ID
 			_, err = updateRole(role, request.Perms)
+			if err == nil {
+				defer api.GetPermsMap().Clear()
+			}
 		} else {
 			roleId, err := insertRole(request.Name, request.Perms)
 
@@ -152,8 +155,6 @@ func rolesPut(w http.ResponseWriter, r *http.Request) {
 			response.errorStr = err.Error()
 			return response
 		}
-
-		defer api.GetPermsMap().Clear()
 
 		if isUpdate {
 			item, err := getItem(*role.ID, &keys.CardId)

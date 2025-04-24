@@ -230,3 +230,32 @@ func (repo Repository) UpdateTelegramChat(id string, chatId int64, username, fir
 
 	return res.RowsAffected()
 }
+
+func (repo Repository) updateNotificationEvents(id, events string) (int64, error) {
+	stmt := Users.UPDATE(Users.NotificationEvents).
+		SET(sqlite.String(events)).
+		WHERE(Users.ID.EQ(sqlite.String(id)))
+
+	res, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
+	if err != nil {
+		return 0, err
+	}
+
+	return res.RowsAffected()
+}
+
+func (repo Repository) GetTelegramIdsByNotificationEvent(event EventNotifications) ([]int64, error) {
+
+	stmt := TelegramChats.SELECT(TelegramChats.ChatID).
+		FROM(
+			TelegramChats.LEFT_JOIN(Users, TelegramChats.UserID.EQ(Users.ID)),
+		).WHERE(Users.NotificationEvents.LIKE(sqlite.String("%" + event.Name() + "%")))
+
+	var dest []int64
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
+	if err != nil {
+		return nil, err
+	}
+
+	return dest, nil
+}

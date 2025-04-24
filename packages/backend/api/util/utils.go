@@ -224,3 +224,16 @@ func ObjToJsonBase64(obj any) (string, error) {
 func TzCss() (*time.Location, error) {
 	return time.LoadLocation("America/Caracas")
 }
+
+func RemoveDuplicates(xs *[]int64) {
+	found := make(map[int64]bool)
+	j := 0
+	for i, x := range *xs {
+		if !found[x] {
+			found[x] = true
+			(*xs)[j] = (*xs)[i]
+			j++
+		}
+	}
+	*xs = (*xs)[:j]
+}

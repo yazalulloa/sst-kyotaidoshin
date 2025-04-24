@@ -2,17 +2,28 @@ package main
 
 import (
 	"context"
+	"db/gen/model"
 	"errors"
+	"fmt"
 	"github.com/aws/aws-lambda-go/lambda"
+	"kyotaidoshin/users"
 	"log"
+	"telegram-webhook/telegram"
+	"time"
 )
 
-type UserInfo struct {
+type UserSubject struct {
 	UserId      string `json:"userId"`
 	WorkspaceID string `json:"workspaceId"`
 }
 
-func handler(ctx context.Context, input Input) (*UserInfo, error) {
+type UserInfo struct {
+	User        *model.Users
+	WorkspaceID string
+	isNewUser   bool
+}
+
+func handler(ctx context.Context, input Input) (*UserSubject, error) {
 
 	userInfo, err := func() (*UserInfo, error) {
 		switch input.Provider {
@@ -25,7 +36,41 @@ func handler(ctx context.Context, input Input) (*UserInfo, error) {
 		}
 	}()
 
-	return userInfo, err
+	if err != nil {
+		log.Printf("Error getting user info: %v", err)
+		return nil, err
+	}
+
+	if userInfo.isNewUser {
+		go func() {
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+			defer cancel()
+
+			userRepo := users.NewRepository(ctx)
+
+			ids, err := userRepo.GetTelegramIdsByNotificationEvent(users.NEW_USER)
+			if err != nil {
+				log.Printf("Error getting telegram ids: %v", err)
+				return
+			}
+
+			service := telegram.NewService(ctx)
+
+			msg := fmt.Sprintf("New User: %s %s %s", userInfo.User.Provider, userInfo.User.Email, userInfo.User.Name)
+
+			err = service.SendBulkMessage(msg, ids)
+			if err != nil {
+				log.Printf("Error sending bulk message: %v", err)
+				return
+			}
+
+		}()
+	}
+
+	return &UserSubject{
+		UserId:      userInfo.User.ID,
+		WorkspaceID: userInfo.WorkspaceID,
+	}, err
 }
 
 func main() {

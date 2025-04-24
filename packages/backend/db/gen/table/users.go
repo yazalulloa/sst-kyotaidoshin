@@ -17,16 +17,17 @@ type usersTable struct {
 	sqlite.Table
 
 	// Columns
-	ID          sqlite.ColumnString
-	ProviderID  sqlite.ColumnString
-	Provider    sqlite.ColumnString
-	Email       sqlite.ColumnString
-	Username    sqlite.ColumnString
-	Name        sqlite.ColumnString
-	Picture     sqlite.ColumnString
-	Data        sqlite.ColumnString
-	CreatedAt   sqlite.ColumnTimestamp
-	LastLoginAt sqlite.ColumnTimestamp
+	ID                 sqlite.ColumnString
+	ProviderID         sqlite.ColumnString
+	Provider           sqlite.ColumnString
+	Email              sqlite.ColumnString
+	Username           sqlite.ColumnString
+	Name               sqlite.ColumnString
+	Picture            sqlite.ColumnString
+	Data               sqlite.ColumnString
+	NotificationEvents sqlite.ColumnString
+	CreatedAt          sqlite.ColumnTimestamp
+	LastLoginAt        sqlite.ColumnTimestamp
 
 	AllColumns     sqlite.ColumnList
 	MutableColumns sqlite.ColumnList
@@ -67,34 +68,36 @@ func newUsersTable(schemaName, tableName, alias string) *UsersTable {
 
 func newUsersTableImpl(schemaName, tableName, alias string) usersTable {
 	var (
-		IDColumn          = sqlite.StringColumn("id")
-		ProviderIDColumn  = sqlite.StringColumn("provider_id")
-		ProviderColumn    = sqlite.StringColumn("provider")
-		EmailColumn       = sqlite.StringColumn("email")
-		UsernameColumn    = sqlite.StringColumn("username")
-		NameColumn        = sqlite.StringColumn("name")
-		PictureColumn     = sqlite.StringColumn("picture")
-		DataColumn        = sqlite.StringColumn("data")
-		CreatedAtColumn   = sqlite.TimestampColumn("created_at")
-		LastLoginAtColumn = sqlite.TimestampColumn("last_login_at")
-		allColumns        = sqlite.ColumnList{IDColumn, ProviderIDColumn, ProviderColumn, EmailColumn, UsernameColumn, NameColumn, PictureColumn, DataColumn, CreatedAtColumn, LastLoginAtColumn}
-		mutableColumns    = sqlite.ColumnList{ProviderIDColumn, ProviderColumn, EmailColumn, UsernameColumn, NameColumn, PictureColumn, DataColumn, CreatedAtColumn, LastLoginAtColumn}
+		IDColumn                 = sqlite.StringColumn("id")
+		ProviderIDColumn         = sqlite.StringColumn("provider_id")
+		ProviderColumn           = sqlite.StringColumn("provider")
+		EmailColumn              = sqlite.StringColumn("email")
+		UsernameColumn           = sqlite.StringColumn("username")
+		NameColumn               = sqlite.StringColumn("name")
+		PictureColumn            = sqlite.StringColumn("picture")
+		DataColumn               = sqlite.StringColumn("data")
+		NotificationEventsColumn = sqlite.StringColumn("notification_events")
+		CreatedAtColumn          = sqlite.TimestampColumn("created_at")
+		LastLoginAtColumn        = sqlite.TimestampColumn("last_login_at")
+		allColumns               = sqlite.ColumnList{IDColumn, ProviderIDColumn, ProviderColumn, EmailColumn, UsernameColumn, NameColumn, PictureColumn, DataColumn, NotificationEventsColumn, CreatedAtColumn, LastLoginAtColumn}
+		mutableColumns           = sqlite.ColumnList{ProviderIDColumn, ProviderColumn, EmailColumn, UsernameColumn, NameColumn, PictureColumn, DataColumn, NotificationEventsColumn, CreatedAtColumn, LastLoginAtColumn}
 	)
 
 	return usersTable{
 		Table: sqlite.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:          IDColumn,
-		ProviderID:  ProviderIDColumn,
-		Provider:    ProviderColumn,
-		Email:       EmailColumn,
-		Username:    UsernameColumn,
-		Name:        NameColumn,
-		Picture:     PictureColumn,
-		Data:        DataColumn,
-		CreatedAt:   CreatedAtColumn,
-		LastLoginAt: LastLoginAtColumn,
+		ID:                 IDColumn,
+		ProviderID:         ProviderIDColumn,
+		Provider:           ProviderColumn,
+		Email:              EmailColumn,
+		Username:           UsernameColumn,
+		Name:               NameColumn,
+		Picture:            PictureColumn,
+		Data:               DataColumn,
+		NotificationEvents: NotificationEventsColumn,
+		CreatedAt:          CreatedAtColumn,
+		LastLoginAt:        LastLoginAtColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

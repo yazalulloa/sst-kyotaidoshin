@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"kyotaidoshin/util"
-	"log"
+	"strings"
 	"sync"
 )
 
@@ -101,9 +101,16 @@ func toItem(user model.Users, role *model.Roles, chat *model.TelegramChats, oldC
 		roleId = role.ID
 	}
 
+	events := make([]string, 0)
+
+	if user.NotificationEvents != nil {
+		events = strings.Split(*user.NotificationEvents, ",")
+	}
+
 	params := UpdateParams{
-		Key:    key,
-		RoleId: roleId,
+		Key:                key,
+		RoleId:             roleId,
+		NotificationEvents: events,
 
 		Provider: user.Provider,
 		Email:    user.Email,
@@ -186,38 +193,66 @@ func (service Service) deleteRateReturnCounters(id string, requestQuery RequestQ
 
 }
 
-func (service Service) updateRole(id string, roleId *int32) (int64, error) {
+func (service Service) updateUser(id string, roleId *int32, notificationEvents string) (int64, error) {
 
-	if roleId == nil {
-		log.Printf("roleId is nil, deleting user role")
-		return service.repo.deleteUserRole(id, nil)
+	justDeleteRole := roleId == nil
+	numberOfWorkers := 2
+	if !justDeleteRole {
+		numberOfWorkers = 3
 	}
 
 	var wg sync.WaitGroup
-	wg.Add(2)
-	rowsChan := make(chan int64, 2)
-	errorChan := make(chan error, 2)
+	wg.Add(numberOfWorkers)
+	rowsChan := make(chan int64, numberOfWorkers)
+	errorChan := make(chan error, numberOfWorkers)
+
+	if justDeleteRole {
+		go func() {
+			defer wg.Done()
+			rowsAffected, err := service.repo.deleteUserRole(id, nil)
+			if err != nil {
+				errorChan <- err
+				return
+			}
+
+			rowsChan <- rowsAffected
+		}()
+
+	} else {
+
+		go func() {
+			defer wg.Done()
+			rowsAffected, err := service.repo.insertUserRole(id, *roleId)
+			if err != nil {
+				errorChan <- err
+				return
+			}
+
+			rowsChan <- rowsAffected
+		}()
+
+		go func() {
+			defer wg.Done()
+			rowsAffected, err := service.repo.deleteUserRole(id, roleId)
+			if err != nil {
+				errorChan <- err
+				return
+			}
+
+			rowsChan <- rowsAffected
+		}()
+	}
 
 	go func() {
 		defer wg.Done()
-		rowsAffected, err := service.repo.insertUserRole(id, *roleId)
+		rowsAffected, err := service.repo.updateNotificationEvents(id, notificationEvents)
 		if err != nil {
 			errorChan <- err
 			return
 		}
 
 		rowsChan <- rowsAffected
-	}()
 
-	go func() {
-		defer wg.Done()
-		rowsAffected, err := service.repo.deleteUserRole(id, roleId)
-		if err != nil {
-			errorChan <- err
-			return
-		}
-
-		rowsChan <- rowsAffected
 	}()
 
 	wg.Wait()

@@ -2,7 +2,10 @@ package telegram
 
 import (
 	"fmt"
+	"github.com/go-telegram/bot"
+	"kyotaidoshin/util"
 	"log"
+	"sync"
 )
 
 func (service Service) StartUrl(userId string) (string, error) {
@@ -45,4 +48,42 @@ func (service Service) Info() (*Info, error) {
 	info.Webhook = webhookInfo
 
 	return info, nil
+}
+
+func (service Service) SendBulkMessage(msg string, chatIds []int64) error {
+	telegramBot, err := GetTelegramBot()
+	if err != nil {
+		return err
+	}
+
+	util.RemoveDuplicates(&chatIds)
+
+	var wg sync.WaitGroup
+	workers := len(chatIds)
+	wg.Add(workers)
+	errorChan := make(chan error, workers)
+
+	for _, chatId := range chatIds {
+		go func() {
+			defer wg.Done()
+			_, err := telegramBot.SendMessage(service.ctx, &bot.SendMessageParams{
+				ChatID: chatId,
+				Text:   msg,
+			})
+			if err != nil {
+				errorChan <- fmt.Errorf("failed to send message to chat %d: %w", chatId, err)
+				return
+			}
+		}()
+	}
+
+	wg.Wait()
+	close(errorChan)
+
+	err = util.HasErrors(errorChan)
+	if err != nil {
+		return fmt.Errorf("failed to send bulk message: %w", err)
+	}
+
+	return nil
 }

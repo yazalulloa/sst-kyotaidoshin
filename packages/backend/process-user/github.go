@@ -293,7 +293,7 @@ func githubUserInfo(ctx context.Context, input Input) (*UserInfo, error) {
 		}
 
 		return &UserInfo{
-			UserId:      user.ID,
+			User:        user,
 			WorkspaceID: "workspace-" + uuid.NewString(),
 		}, nil
 	}
@@ -311,7 +311,8 @@ func githubUserInfo(ctx context.Context, input Input) (*UserInfo, error) {
 	}
 
 	return &UserInfo{
-		UserId:      newId,
+		User:        &newUser,
+		isNewUser:   true,
 		WorkspaceID: "workspace-" + uuid.NewString(),
 	}, nil
 }

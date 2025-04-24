@@ -43,7 +43,7 @@ export default $config({
     const captchaSecretKey = new sst.Secret("CaptchaSecretKey")
 
     const processUserFunction = new sst.aws.Function("ProcessUser", {
-      link: [secretTursoUrl],
+      link: [secretTursoUrl, telegramBotToken, telegramBotApiKey],
       handler: "packages/backend/process-user/",
       runtime: "go",
     });

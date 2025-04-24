@@ -6,6 +6,8 @@
        roles: [],
        roleSelected: '',
        params: {},
+       notificationEvents: ['new_rate', 'new_user'],
+       notificationEventsSelected: new Set(),
 
        roleErr: '',
        errMsg: ''
@@ -24,16 +26,20 @@
      $el.firstElementChild.dispatchEvent(new CustomEvent('asd-get-roles'))
 
      isEdit = true
-
-     let base64 = $event.detail.params;
-     let decodedString = decodeBase64UrlStr(base64);
-     let jsonObject = JSON.parse(decodedString);
+     let jsonObject = JSON.parse(decodeBase64UrlStr($event.detail.params));
 
       key = jsonObject.key;
       params = jsonObject;
 
       if (params.role_id) {
         roleSelected = params.role_id;
+      }
+
+      notificationEventsSelected.clear();
+      if (params.notification_events) {
+        params.notification_events.forEach((event) => {
+          notificationEventsSelected.add(event);
+        });
       }
 
      $el.querySelector('dialog').showModal();
@@ -90,13 +96,16 @@
         <div id="users-form-error" hidden="hidden"></div>
         <input hidden="hidden" name="key" x-model="key"/>
 
-        <div class="grid grid-cols-2 px-4">
+        <div class="grid grid-cols-[1fr_4fr] px-4">
           <div class="w-full flex justify-center">
-            <img x-bind:src="params.picture" alt="Avatar" class="h-8 w-8 rounded-full p-1"
+            <img x-bind:src="params.picture" alt="Avatar" class="size-8 rounded-full p-1"
                  referrerpolicy="no-referrer"/>
           </div>
           <span x-text="params.email"></span>
-          <span x-text="params.provider"></span>
+
+          <div class="flex justify-center">
+            <svg x-bind:data-src="PROVIDER_ICONS.get(params.provider.toLowerCase())" class="size-8 rounded-full p-1"></svg>
+          </div>
           <span x-text="params.username"></span>
         </div>
 
@@ -110,6 +119,32 @@
               <option x-bind:value="role.id" x-text="role.name + ':&nbsp;' + role.perms"></option>
             </template>
           </select>
+        </fieldset>
+
+        <fieldset class="fieldset bg-base-100 border-base-300 rounded-box border p-4">
+          <legend class="fieldset-legend text-start w-full" x-text="$t('main-title-notifications')"></legend>
+          <div class="grid grid-cols-2 gap-4">
+            <template x-for="event in notificationEvents">
+              <label class="label text-base">
+                <input type="checkbox"
+                       class="checkbox checkbox-neutral"
+                       x-bind:value="event" name="notification_events"
+                       x-bind:checked="notificationEventsSelected.has(event)"
+                       @click="
+                if (notificationEventsSelected.has(event)) {
+                  notificationEventsSelected.delete(event);
+                } else {
+                  notificationEventsSelected.add(event);
+                }
+                       "
+                />
+                <span x-bind:class="notificationEventsSelected.has(event) ? 'font-bold text-neutral-content' : ''" x-text="event"></span>
+              </label>
+
+            </template>
+          </div>
+
+
         </fieldset>
 
         <span x-show="errMsg !== ''" x-text="errMsg" class="p-2 border text-danger border-danger"></span>

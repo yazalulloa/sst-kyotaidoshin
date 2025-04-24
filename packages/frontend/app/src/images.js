@@ -22,6 +22,8 @@ import permissionsIconUrl from './assets/images/permissions-icon.svg?no-inline'
 import usersIconUrl from './assets/images/users.svg?no-inline'
 import telegramIconUrl from './assets/images/telegram_logo.svg?no-inline'
 import menuVerticalIconUrl from './assets/images/menu-vertical.svg?no-inline'
+import googleIconUrl from './assets/images/google.svg?no-inline'
+import githubIconUrl from './assets/images/github.svg?no-inline'
 
 window.deleteIconUrl = deleteIconUrl;
 window.processIconUrl = processIconUrl;
@@ -48,6 +50,8 @@ window.apartmentsIconUrl = apartmentsIconUrl;
 window.permissionsIconUrl = permissionsIconUrl;
 window.usersIconUrl = usersIconUrl;
 window.telegramIconUrl = telegramIconUrl;
+window.googleIconUrl = googleIconUrl;
+window.githubIconUrl = githubIconUrl;
 
 window.menuVerticalIconUrl = menuVerticalIconUrl;
 
@@ -61,4 +65,9 @@ window.NAV_ICONS = new Map([
   ['nav-permissions', permissionsIconUrl],
   ['nav-roles', permissionsIconUrl],
   ['nav-admin', permissionsIconUrl],
+]);
+
+window.PROVIDER_ICONS = new Map([
+  ['google', googleIconUrl],
+  ['github', githubIconUrl],
 ]);

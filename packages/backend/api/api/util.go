@@ -289,7 +289,9 @@ func getUserPermissions(ctx context.Context, userId string) ([]string, error) {
 		permissions[i] = p.Name
 	}
 
-	permsMap.Put(userId, strings.Join(permissions, ","))
+	if len(permissions) > 0 {
+		permsMap.Put(userId, strings.Join(permissions, ","))
+	}
 
 	return permissions, nil
 

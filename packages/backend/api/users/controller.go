@@ -158,8 +158,19 @@ func userRolePatch(w http.ResponseWriter, r *http.Request) {
 			roleId = &request.RoleId
 		}
 
+		var builder strings.Builder
+		for i, v := range request.NotificationEvents {
+			if isEventNotifications(v) {
+				builder.WriteString(v)
+				if i != len(request.NotificationEvents)-1 {
+					builder.WriteString(",")
+				}
+			}
+
+		}
+
 		service := NewService(r.Context())
-		rowsAffected, err := service.updateRole(keys.ID, roleId)
+		rowsAffected, err := service.updateUser(keys.ID, roleId, builder.String())
 
 		if err != nil {
 			response.errorStr = err.Error()
