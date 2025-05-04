@@ -4,7 +4,7 @@ go 1.24.1
 
 require (
 	github.com/ROU-Technology/openauth-go v0.0.7
-	github.com/sst/sst/v3 v3.13.17
+	github.com/sst/sst/v3 v3.14.11
 )
 
 require (

@@ -63,6 +63,8 @@ BEGIN
     UPDATE apartments SET updated_at = CURRENT_TIMESTAMP WHERE building_id = OLD.building_id AND number = OLD.number;
 END;
 
+ALTER TABLE buildings ADD COLUMN debts_currencies_to_show TEXT NOT NULL DEFAULT '';
+
 -- DROP TABLE IF EXISTS buildings;
 CREATE TABLE IF NOT EXISTS buildings
 (
@@ -72,6 +74,7 @@ CREATE TABLE IF NOT EXISTS buildings
     main_currency                    TEXT CHECK ( main_currency IN ('USD', 'VED') ) NOT NULL,
     debt_currency                    TEXT CHECK ( debt_currency IN ('USD', 'VED') ) NOT NULL,
     currencies_to_show_amount_to_pay TEXT                                           NOT NULL,
+    debts_currencies_to_show         TEXT                                           NOT NULL,
     fixed_pay                        BOOL                                           NOT NULL,
     fixed_pay_amount                 DECIMAL(16, 2)                                 NOT NULL,
     round_up_payments                BOOL                                           NOT NULL,

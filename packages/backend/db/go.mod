@@ -4,7 +4,7 @@ go 1.24.1
 
 require (
 	github.com/go-jet/jet/v2 v2.13.0
-	github.com/sst/sst/v3 v3.13.17
+	github.com/sst/sst/v3 v3.14.11
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240902231107-85af5b9d094d
 )
 
