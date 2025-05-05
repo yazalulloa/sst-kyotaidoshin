@@ -176,6 +176,21 @@ func CalculateReceipt(buildingId, receiptId string) (*CalculatedReceipt, error) 
 		}
 		calculatedReceipt.CurrenciesToShowAmountToPay = currencies
 
+		split = strings.Split(building.DebtsCurrenciesToShow, ",")
+		currencies = make([]util.AllowedCurrencies, 0)
+		for _, v := range split {
+			if v == "" {
+				continue
+			}
+			currencies = append(currencies, util.GetAllowedCurrency(v))
+		}
+
+		if len(currencies) == 0 {
+			currencies = append(currencies, util.GetAllowedCurrency(building.DebtCurrency))
+		}
+
+		calculatedReceipt.DebtsCurrenciesToShow = currencies
+
 	}()
 
 	go func() {
@@ -222,6 +237,8 @@ func CalculateReceipt(buildingId, receiptId string) (*CalculatedReceipt, error) 
 		calculatedReceipt.Expenses = expensesArray
 	}()
 
+	var debtTotal float64 = 0
+
 	go func() {
 		defer wg.Done()
 
@@ -234,14 +251,13 @@ func CalculateReceipt(buildingId, receiptId string) (*CalculatedReceipt, error) 
 		debtArray = array
 
 		var receiptsAmount int16 = 0
-		var debtTotal float64 = 0
 		for _, debt := range debtArray {
 			receiptsAmount += debt.Receipts
 			debtTotal += debt.Amount
 		}
 
 		calculatedReceipt.DebtReceiptsAmount = receiptsAmount
-		calculatedReceipt.DebtTotal = util.RoundFloat(debtTotal, 2)
+		debtTotal = util.RoundFloat(debtTotal, 2)
 	}()
 
 	go func() {
@@ -348,20 +364,30 @@ func CalculateReceipt(buildingId, receiptId string) (*CalculatedReceipt, error) 
 			if fund.Name == "FONDO DE RESERVA" || fund.Name == "FONDO/RESERVA" && !debtTableAdded {
 				debtTableAdded = true
 
-				modifiedDebt := calculatedReceipt.DebtTotal
+				modifiedDebt := debtTotal
 
 				if debtCurrency != util.VED {
-					modifiedDebt = toVed(calculatedReceipt.DebtTotal)
+					modifiedDebt = toVed(debtTotal)
 				}
 
 				modifiedDebt -= newFund
 				modifiedDebt = util.RoundFloat(modifiedDebt, 2)
 
+				fundFormatted := debtCurrency.Format(debtTotal)
+
+				// TODO maybe refactor
+				if buildingId == "MENDI" {
+					if debtCurrency == util.USD {
+						fundFormatted = util.VED.Format(toVed(debtTotal))
+					}
+
+				}
+
 				fundWithAmounts = append(fundWithAmounts, ReserveFundWithCalculatedAmount{
 					Fund: model.ReserveFunds{
 						Name: fmt.Sprintf("P/Cobrar > Recibos  %d", calculatedReceipt.DebtReceiptsAmount),
 					},
-					FundFormatted:  debtCurrency.Format(calculatedReceipt.DebtTotal),
+					FundFormatted:  fundFormatted,
 					AmountToPay:    "DEFICIT/Patrimonio",
 					NewReserveFund: util.VED.Format(modifiedDebt),
 				})
@@ -550,16 +576,86 @@ func CalculateReceipt(buildingId, receiptId string) (*CalculatedReceipt, error) 
 			}
 		}
 
+		debtAmounts := make([]AmountWithCurrency, 0)
+		for _, currency := range calculatedReceipt.DebtsCurrenciesToShow {
+			if currency.Is(calculatedReceipt.Building.DebtCurrency) {
+				debtAmounts = append(debtAmounts, AmountWithCurrency{
+					Amount:   debt.Amount,
+					Currency: currency,
+				})
+				continue
+			}
+
+			if util.USD.Is(calculatedReceipt.Building.DebtCurrency) && util.VED == currency {
+				debtAmounts = append(debtAmounts, AmountWithCurrency{
+					Amount:   toVed(debt.Amount),
+					Currency: currency,
+				})
+
+				continue
+			}
+
+			if util.VED.Is(calculatedReceipt.Building.DebtCurrency) && util.USD == currency {
+				debtAmounts = append(debtAmounts, AmountWithCurrency{
+					Amount:   toUsd(debt.Amount),
+					Currency: currency,
+				})
+
+				continue
+			}
+
+			panic("Unknown currency: " + currency.Name())
+
+		}
+
+		debtTotal := DebtTotal{
+			Debt:    debt,
+			Amounts: debtAmounts,
+		}
+
 		aptTotals = append(aptTotals, AptTotal{
 			Apartment:    apt,
 			Amounts:      amounts,
 			ExtraCharges: aptExtraCharges,
-			Debt:         debt,
+			Debt:         debtTotal,
 			DebtMonthStr: debtMonthStr,
 		})
 
 	}
 
+	debtTotals := make([]AmountWithCurrency, 0)
+	for _, currency := range calculatedReceipt.DebtsCurrenciesToShow {
+		if currency.Is(calculatedReceipt.Building.DebtCurrency) {
+			debtTotals = append(debtTotals, AmountWithCurrency{
+				Amount:   debtTotal,
+				Currency: currency,
+			})
+			continue
+		}
+
+		if util.USD.Is(calculatedReceipt.Building.DebtCurrency) && util.VED == currency {
+			debtTotals = append(debtTotals, AmountWithCurrency{
+				Amount:   toVed(debtTotal),
+				Currency: currency,
+			})
+
+			continue
+		}
+
+		if util.VED.Is(calculatedReceipt.Building.DebtCurrency) && util.USD == currency {
+			debtTotals = append(debtTotals, AmountWithCurrency{
+				Amount:   toUsd(debtTotal),
+				Currency: currency,
+			})
+
+			continue
+		}
+
+		panic("Unknown currency: " + currency.Name())
+
+	}
+
+	calculatedReceipt.DebtTotals = debtTotals
 	calculatedReceipt.Apartments = aptTotals
 	calculatedReceipt.ApartmentsTotal = util.RoundFloat(aptTotal, 2)
 

@@ -227,14 +227,15 @@ func (rec RouteParams) routeHandler() func(http.ResponseWriter,
 		}()
 
 		go func() {
-			timestamp := time.Now().UnixMilli()
-			defer func() { log.Printf("CheckRecaptcha took %d ms", time.Now().UnixMilli()-timestamp) }()
 
 			defer wg.Done()
 
 			if rec.RecaptchaAction == "" {
 				return
 			}
+
+			timestamp := time.Now().UnixMilli()
+			defer func() { log.Printf("CheckRecaptcha took %d ms", time.Now().UnixMilli()-timestamp) }()
 
 			err := rec.checkCaptcha(r)
 			if err != nil {

@@ -134,19 +134,19 @@ func deleteById(id string) (int64, error) {
 }
 
 func insert(building model.Buildings) error {
-	stmt := Buildings.INSERT(Buildings.ID, Buildings.Name, Buildings.Rif, Buildings.MainCurrency, Buildings.DebtCurrency, Buildings.CurrenciesToShowAmountToPay, Buildings.FixedPay, Buildings.FixedPayAmount, Buildings.RoundUpPayments, Buildings.EmailConfig).
-		VALUES(building.ID, building.Name, building.Rif, building.MainCurrency, building.DebtCurrency, building.CurrenciesToShowAmountToPay, building.FixedPay, building.FixedPayAmount, building.RoundUpPayments, building.EmailConfig)
+	stmt := Buildings.INSERT(Buildings.ID, Buildings.Name, Buildings.Rif, Buildings.MainCurrency, Buildings.DebtCurrency, Buildings.CurrenciesToShowAmountToPay, Buildings.DebtsCurrenciesToShow, Buildings.FixedPay, Buildings.FixedPayAmount, Buildings.RoundUpPayments, Buildings.EmailConfig).
+		VALUES(building.ID, building.Name, building.Rif, building.MainCurrency, building.DebtCurrency, building.CurrenciesToShowAmountToPay, building.DebtsCurrenciesToShow, building.FixedPay, building.FixedPayAmount, building.RoundUpPayments, building.EmailConfig)
 
 	_, err := stmt.Exec(db.GetDB().DB)
 	return err
 }
 
 func insertBackup(buildings []model.Buildings) (int64, error) {
-	stmt := Buildings.INSERT(Buildings.ID, Buildings.Name, Buildings.Rif, Buildings.MainCurrency, Buildings.DebtCurrency, Buildings.CurrenciesToShowAmountToPay, Buildings.FixedPay, Buildings.FixedPayAmount, Buildings.RoundUpPayments, Buildings.EmailConfig).
+	stmt := Buildings.INSERT(Buildings.ID, Buildings.Name, Buildings.Rif, Buildings.MainCurrency, Buildings.DebtCurrency, Buildings.CurrenciesToShowAmountToPay, Buildings.DebtsCurrenciesToShow, Buildings.FixedPay, Buildings.FixedPayAmount, Buildings.RoundUpPayments, Buildings.EmailConfig).
 		ON_CONFLICT().DO_NOTHING()
 
 	for _, building := range buildings {
-		stmt = stmt.VALUES(building.ID, building.Name, building.Rif, building.MainCurrency, building.DebtCurrency, building.CurrenciesToShowAmountToPay, building.FixedPay, building.FixedPayAmount, building.RoundUpPayments, building.EmailConfig)
+		stmt = stmt.VALUES(building.ID, building.Name, building.Rif, building.MainCurrency, building.DebtCurrency, building.CurrenciesToShowAmountToPay, building.DebtsCurrenciesToShow, building.FixedPay, building.FixedPayAmount, building.RoundUpPayments, building.EmailConfig)
 	}
 
 	result, err := stmt.Exec(db.GetDB().DB)
@@ -165,9 +165,9 @@ func insertBackup(buildings []model.Buildings) (int64, error) {
 func update(building model.Buildings) error {
 
 	stmt := Buildings.UPDATE(
-		Buildings.Name, Buildings.Rif, Buildings.MainCurrency, Buildings.DebtCurrency, Buildings.CurrenciesToShowAmountToPay, Buildings.FixedPay, Buildings.FixedPayAmount, Buildings.RoundUpPayments, Buildings.EmailConfig).
+		Buildings.Name, Buildings.Rif, Buildings.MainCurrency, Buildings.DebtCurrency, Buildings.CurrenciesToShowAmountToPay, Buildings.DebtsCurrenciesToShow, Buildings.FixedPay, Buildings.FixedPayAmount, Buildings.RoundUpPayments, Buildings.EmailConfig).
 		WHERE(Buildings.ID.EQ(sqlite.String(building.ID))).
-		SET(building.Name, building.Rif, building.MainCurrency, building.DebtCurrency, building.CurrenciesToShowAmountToPay, building.FixedPay, building.FixedPayAmount, building.RoundUpPayments, building.EmailConfig)
+		SET(building.Name, building.Rif, building.MainCurrency, building.DebtCurrency, building.CurrenciesToShowAmountToPay, building.DebtsCurrenciesToShow, building.FixedPay, building.FixedPayAmount, building.RoundUpPayments, building.EmailConfig)
 
 	_, err := stmt.Exec(db.GetDB().DB)
 	return err

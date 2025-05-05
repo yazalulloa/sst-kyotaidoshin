@@ -86,7 +86,7 @@ func GetAllowedCurrency(str string) AllowedCurrencies {
 		return USD
 	}
 
-	panic("Currency not allowed: " + str)
+	panic("GetAllowedCurrency Currency not allowed: " + str)
 }
 
 func AllowedCurrenciesStringArray() []string {

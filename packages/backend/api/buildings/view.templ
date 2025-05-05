@@ -71,7 +71,7 @@ templ Search(res TableResponse) {
 							<svg x-bind:data-src="editIconUrl" data-cache="21600" class="h-6 w-6"></svg>
 						</button>
 					</a>
-					@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{"data-recaptcha-action" : "buildings_delete"})
+					@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{"data-recaptcha-action": "buildings_delete"})
 				</div>
 			}
 		</li>
@@ -100,31 +100,22 @@ templ CountersView(counters Counters) {
 
 templ FormView(dto FormDto) {
 	@api.CSRF()
-	<div x-init={ fmt.Sprintf("open = true; currencies = %s", dto.currencies) }></div>
-	if dto.key != nil {
-		<input type="hidden" name="key" value={ *dto.key }/>
+	if dto.Key != nil {
+		<input type="hidden" name="key" value={ *dto.Key }/>
 	}
-	if dto.building != nil {
+	if dto.UpdateParams != nil {
 		<div
 			hidden="hidden"
-			data-id={ fmt.Sprint(dto.building.ID) }
-			data-name={ dto.building.Name }
-			data-rif={ dto.building.Rif }
-			data-main-currency={ dto.building.MainCurrency }
-			data-debt-currency={ dto.building.DebtCurrency }
-			data-currencies-to-show-amount-to-pay={ dto.currenciesToShowAmountToPay }
-			data-fixed-pay={ fmt.Sprint(dto.building.FixedPay) }
-			data-fixed-pay-amount={ fmt.Sprint(dto.building.FixedPayAmount) }
-			data-round-up-payments={ fmt.Sprint(dto.building.RoundUpPayments) }
-			data-email-config={ dto.building.EmailConfig }
-			data-apts={ dto.apts }
+			data-params={ *dto.UpdateParams }
 			x-init="
-      		$dispatch('event-building-form-update', $el.dataset);
+      		$dispatch('event-building-form-update', $el.dataset.params);
           $el.remove();
       		"
 		></div>
 		@reserveFunds.FormView(dto.reserveFundFormDto)
 		@extraCharges.FormView(dto.extraChargesFormDto)
+	} else {
+	 <div x-init="open = true"></div>
 	}
 	<div id="emailConfigSelect" hx-swap-oob="innerHTML">
 		for _,emailConfig := range dto.emailConfigs {

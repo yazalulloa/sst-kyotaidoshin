@@ -176,16 +176,27 @@ func buildingPut(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		currencies := make(map[string]bool)
+		currenciesToShowAmountToPayMap := make(map[string]bool)
 		for _, currency := range request.CurrenciesToShowAmountToPay {
-			currencies[currency] = true
+			currenciesToShowAmountToPayMap[currency] = true
 		}
 
-		if len(currencies) == 0 {
-			currencies[request.MainCurrency] = true
+		if len(currenciesToShowAmountToPayMap) == 0 {
+			currenciesToShowAmountToPayMap[request.MainCurrency] = true
 		}
 
-		currenciesToShowAmountToPay := strings.Join(slices.Collect(maps.Keys(currencies)), ",")
+		currenciesToShowAmountToPay := strings.Join(slices.Collect(maps.Keys(currenciesToShowAmountToPayMap)), ",")
+
+		debtsCurrenciesToShowMap := make(map[string]bool)
+		for _, currency := range request.DebtsCurrenciesToShow {
+			debtsCurrenciesToShowMap[currency] = true
+		}
+
+		if len(debtsCurrenciesToShowMap) == 0 {
+			debtsCurrenciesToShowMap[request.DebtCurrency] = true
+		}
+
+		debtsCurrenciesToShow := strings.Join(slices.Collect(maps.Keys(debtsCurrenciesToShowMap)), ",")
 
 		building := model.Buildings{
 			ID:                          request.Id,
@@ -194,6 +205,7 @@ func buildingPut(w http.ResponseWriter, r *http.Request) {
 			MainCurrency:                request.MainCurrency,
 			DebtCurrency:                request.DebtCurrency,
 			CurrenciesToShowAmountToPay: currenciesToShowAmountToPay,
+			DebtsCurrenciesToShow:       debtsCurrenciesToShow,
 			FixedPay:                    request.FixedPay,
 			FixedPayAmount:              request.FixedPayAmount,
 			RoundUpPayments:             request.RoundUpPayments,
@@ -246,29 +258,6 @@ func buildingPut(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-const idMinLen = 3
-const idMaxLen = 20
-const nameMinLen = 3
-const nameMaxLen = 100
-const rifMinLen = 7
-const rifMaxLen = 20
-const currencyMaxLen = 3
-const fixedPayAmountMaxLen = 18
-
-type FormRequest struct {
-	Key                         *string  `form:"key"`
-	Id                          string   `form:"id" validate:"required_if=Key nil,min=3,max=20,alphanumunicode"`
-	Name                        string   `form:"name" validate:"required,min=3,max=100"`
-	Rif                         string   `form:"rif" validate:"required,min=7,max=20"`
-	MainCurrency                string   `form:"mainCurrency" validate:"required,oneof=USD VED"`
-	DebtCurrency                string   `form:"debtCurrency" validate:"required,oneof=USD VED"`
-	CurrenciesToShowAmountToPay []string `form:"currenciesToShowAmountToPay" validate:"dive,oneof=USD VED"`
-	RoundUpPayments             bool     `form:"roundUpPayments"`
-	FixedPay                    bool     `form:"fixedPay"`
-	FixedPayAmount              float64  `form:"fixedPayAmount" validate:"required_if=fixedPay true"`
-	EmailConfig                 string   `form:"emailConfig" validate:"required"`
-}
-
 func formData(w http.ResponseWriter, r *http.Request) {
 	idParam := r.URL.Query().Get("id")
 
@@ -290,12 +279,12 @@ func formData(w http.ResponseWriter, r *http.Request) {
 		return strings.Compare(a.email, b.email)
 	})
 
+	updateParams := UpdateParams{
+		Apts: make([]apartments.Apt, 0),
+	}
+
 	formDto := FormDto{
-		isEdit:                      false,
-		emailConfigs:                emailConfigs,
-		currencies:                  util.HtmlCurrencies(),
-		currenciesToShowAmountToPay: "[]",
-		reserveFundFormDto:          reserveFunds.FormDto{},
+		emailConfigs: emailConfigs,
 	}
 
 	if idParam != "" {
@@ -306,38 +295,52 @@ func formData(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var oErr error
 		var wg sync.WaitGroup
-		var once sync.Once
-		handleErr := func(e error) {
-			if e != nil {
-				once.Do(func() {
-					oErr = e
-				})
-			}
-		}
 		wg.Add(4)
+		errChan := make(chan error, 4)
 
 		go func() {
 			defer wg.Done()
 			building, err := selectById(id)
 			if err != nil {
-				handleErr(err)
+				errChan <- err
 				return
 			}
 			if building == nil {
-				handleErr(errors.New("Building not found"))
+				errChan <- errors.New("building not found")
 				return
 			}
 
-			formDto.building = building
+			formDto.Key = &idParam
+			updateParams.ID = building.ID
+			updateParams.Name = building.Name
+			updateParams.Rif = building.Rif
+			updateParams.MainCurrency = building.MainCurrency
+			updateParams.DebtCurrency = building.DebtCurrency
+			updateParams.CurrenciesToShowAmountToPay = strings.Split(building.CurrenciesToShowAmountToPay, ",")
+			updateParams.DebtsCurrenciesToShow = strings.Split(building.DebtsCurrenciesToShow, ",")
+			updateParams.FixedPay = building.FixedPay
+			updateParams.FixedPayAmount = building.FixedPayAmount
+			updateParams.RoundUpPayments = building.RoundUpPayments
+			updateParams.EmailConfig = building.EmailConfig
+
+			byteArray, err := json.Marshal(updateParams)
+
+			if err != nil {
+				errChan <- err
+				return
+			}
+
+			base64Str := base64.URLEncoding.EncodeToString(byteArray)
+			formDto.UpdateParams = &base64Str
+
 		}()
 
 		go func() {
 			defer wg.Done()
 			reserveFundFormDto, err := reserveFunds.GetFormDto(id, "")
 			if err != nil {
-				handleErr(err)
+				errChan <- err
 				return
 			}
 
@@ -348,7 +351,7 @@ func formData(w http.ResponseWriter, r *http.Request) {
 			defer wg.Done()
 			extraChargesFormDto, err := extraCharges.GetBuildingFormDto(id)
 			if err != nil {
-				handleErr(err)
+				errChan <- err
 				return
 			}
 
@@ -359,31 +362,22 @@ func formData(w http.ResponseWriter, r *http.Request) {
 			defer wg.Done()
 			apts, err := apartments.SelectNumberAndNameByBuildingId(id)
 			if err != nil {
-				handleErr(err)
+				errChan <- err
 				return
 			}
 
-			aptStr, err := json.Marshal(apts)
-			if err != nil {
-				handleErr(err)
-				return
-			}
-
-			base64Str := base64.URLEncoding.EncodeToString(aptStr)
-
-			formDto.apts = base64Str
+			updateParams.Apts = apts
 		}()
 
 		wg.Wait()
+		close(errChan)
 
-		if oErr != nil {
-			http.Error(w, oErr.Error(), http.StatusInternalServerError)
+		err = util.HasErrors(errChan)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
-		formDto.isEdit = true
-		formDto.key = &idParam
-		formDto.currenciesToShowAmountToPay = util.StringArrayToString(strings.Split(formDto.building.CurrenciesToShowAmountToPay, ","))
 
 	}
 

@@ -2,6 +2,7 @@ package buildings
 
 import (
 	"db/gen/model"
+	"kyotaidoshin/apartments"
 	"kyotaidoshin/extraCharges"
 	"kyotaidoshin/reserveFunds"
 	"kyotaidoshin/util"
@@ -33,16 +34,27 @@ type Item struct {
 	CreatedAt int64
 }
 
+type UpdateParams struct {
+	ID                          string           `json:"id"`
+	Name                        string           `json:"name"`
+	Rif                         string           `json:"rif"`
+	MainCurrency                string           `json:"mainCurrency"`
+	DebtCurrency                string           `json:"debtCurrency"`
+	CurrenciesToShowAmountToPay []string         `json:"currenciesToShowAmountToPay"`
+	DebtsCurrenciesToShow       []string         `json:"debtsCurrenciesToShow"`
+	FixedPay                    bool             `json:"fixedPay"`
+	FixedPayAmount              float64          `json:"fixedPayAmount"`
+	RoundUpPayments             bool             `json:"roundUpPayments"`
+	EmailConfig                 string           `json:"emailConfig"`
+	Apts                        []apartments.Apt `json:"apts"`
+}
+
 type FormDto struct {
-	isEdit                      bool
-	key                         *string
-	emailConfigs                []EmailConfig
-	building                    *model.Buildings
-	reserveFundFormDto          reserveFunds.FormDto
-	extraChargesFormDto         extraCharges.FormDto
-	apts                        string
-	currencies                  string
-	currenciesToShowAmountToPay string
+	emailConfigs        []EmailConfig
+	reserveFundFormDto  reserveFunds.FormDto
+	extraChargesFormDto extraCharges.FormDto
+	UpdateParams        *string
+	Key                 *string
 }
 
 type EmailConfig struct {
@@ -54,4 +66,28 @@ type FormResponse struct {
 	createdNew *bool
 	key        *string
 	errorStr   string
+}
+
+const idMinLen = 3
+const idMaxLen = 20
+const nameMinLen = 3
+const nameMaxLen = 100
+const rifMinLen = 7
+const rifMaxLen = 20
+const currencyMaxLen = 3
+const fixedPayAmountMaxLen = 18
+
+type FormRequest struct {
+	Key                         *string  `form:"key"`
+	Id                          string   `form:"id" validate:"required_if=Key nil,min=3,max=20,alphanumunicode"`
+	Name                        string   `form:"name" validate:"required,min=3,max=100"`
+	Rif                         string   `form:"rif" validate:"required,min=7,max=20"`
+	MainCurrency                string   `form:"mainCurrency" validate:"required,oneof=USD VED"`
+	DebtCurrency                string   `form:"debtCurrency" validate:"required,oneof=USD VED"`
+	CurrenciesToShowAmountToPay []string `form:"currenciesToShowAmountToPay" validate:"dive,oneof=USD VED"`
+	DebtsCurrenciesToShow       []string `form:"debtsCurrenciesToShow" validate:"dive,oneof=USD VED"`
+	RoundUpPayments             bool     `form:"roundUpPayments"`
+	FixedPay                    bool     `form:"fixedPay"`
+	FixedPayAmount              float64  `form:"fixedPayAmount" validate:"required_if=fixedPay true"`
+	EmailConfig                 string   `form:"emailConfig" validate:"required"`
 }

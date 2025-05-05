@@ -138,7 +138,7 @@ templ ItemView(item Item) {
 				if hasWritePerm {
 					<li>
 						<a
-							hx-get={ fmt.Sprintf(_SEND_PDFS+"/%s", item.Key) }
+							hx-post={ fmt.Sprintf(_SEND_PDFS+"/%s", item.Key) }
 							hx-indicator=".htmx-indicator"
 							hx-disabled-elt="this"
 							hx-trigger="mousedown"

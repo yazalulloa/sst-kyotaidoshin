@@ -83,7 +83,6 @@ document.body.addEventListener('htmx:confirm', (evt) => {
     return
   }
 
-  console.log('Elm', evt.detail.elt)
   evt.preventDefault()
 
   const toDisable = evt.detail.elt.querySelectorAll(

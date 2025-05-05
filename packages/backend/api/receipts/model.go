@@ -151,12 +151,13 @@ type CalculatedReceipt struct {
 	Apartments                    []AptTotal
 	ApartmentsTotal               float64
 	DebtReceiptsAmount            int16
-	DebtTotal                     float64
+	DebtTotals                    []AmountWithCurrency
 	Rate                          model.Rates
 	ReserveFunds                  []ReserveFundWithCalculatedAmount
 	ThereIsReserveFundExpense     bool
 	Building                      model.Buildings
 	CurrenciesToShowAmountToPay   []util.AllowedCurrencies
+	DebtsCurrenciesToShow         []util.AllowedCurrencies
 	Receipt                       model.Receipts
 	MonthStr                      string
 	BuildingDownloadKeys          string
@@ -166,9 +167,14 @@ type AptTotal struct {
 	Apartment    model.Apartments
 	Amounts      []AmountWithCurrency
 	ExtraCharges []model.ExtraCharges
-	Debt         model.Debts
+	Debt         DebtTotal
 	DebtMonthStr string
 	DownloadKeys string
+}
+
+type DebtTotal struct {
+	Debt    model.Debts
+	Amounts []AmountWithCurrency
 }
 
 type ReserveFundWithCalculatedAmount struct {

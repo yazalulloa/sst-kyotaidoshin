@@ -18,6 +18,7 @@ type Buildings struct {
 	MainCurrency                string
 	DebtCurrency                string
 	CurrenciesToShowAmountToPay string
+	DebtsCurrenciesToShow       string
 	FixedPay                    bool
 	FixedPayAmount              float64
 	RoundUpPayments             bool

@@ -13,13 +13,13 @@ import (
 
 func DeleteByBuilding(ctx context.Context, buildingId string) error {
 
-	prefix := buildingId + "/"
+	prefix := fmt.Sprintf("RECEIPTS/%s/", buildingId)
 	return DeleteObjects(ctx, &prefix)
 }
 
 func DeleteByReceipt(ctx context.Context, buildingId string, receiptId string) error {
 
-	prefix := fmt.Sprintf("%s/%s/", buildingId, receiptId)
+	prefix := fmt.Sprintf("RECEIPTS/%s/%s/", buildingId, receiptId)
 	return DeleteObjects(ctx, &prefix)
 }
 
@@ -52,9 +52,19 @@ func DeleteObjects(ctx context.Context, prefix *string) error {
 		return err
 	}
 
+	str := ""
+
+	if prefix != nil {
+		str = *prefix
+	}
+
 	if len(s3List.Contents) == 0 {
+
+		log.Printf("No objects found in bucket %s with prefix %s", bucketName, str)
 		return nil
 	}
+
+	log.Printf("Deleting %d objects from bucket %s with prefix %s", len(s3List.Contents), bucketName, str)
 
 	list := make([]types.ObjectIdentifier, len(s3List.Contents))
 	for i, item := range s3List.Contents {

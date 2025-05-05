@@ -23,6 +23,7 @@ type buildingsTable struct {
 	MainCurrency                sqlite.ColumnString
 	DebtCurrency                sqlite.ColumnString
 	CurrenciesToShowAmountToPay sqlite.ColumnString
+	DebtsCurrenciesToShow       sqlite.ColumnString
 	FixedPay                    sqlite.ColumnBool
 	FixedPayAmount              sqlite.ColumnFloat
 	RoundUpPayments             sqlite.ColumnBool
@@ -75,14 +76,15 @@ func newBuildingsTableImpl(schemaName, tableName, alias string) buildingsTable {
 		MainCurrencyColumn                = sqlite.StringColumn("main_currency")
 		DebtCurrencyColumn                = sqlite.StringColumn("debt_currency")
 		CurrenciesToShowAmountToPayColumn = sqlite.StringColumn("currencies_to_show_amount_to_pay")
+		DebtsCurrenciesToShowColumn       = sqlite.StringColumn("debts_currencies_to_show")
 		FixedPayColumn                    = sqlite.BoolColumn("fixed_pay")
 		FixedPayAmountColumn              = sqlite.FloatColumn("fixed_pay_amount")
 		RoundUpPaymentsColumn             = sqlite.BoolColumn("round_up_payments")
 		EmailConfigColumn                 = sqlite.StringColumn("email_config")
 		CreatedAtColumn                   = sqlite.TimestampColumn("created_at")
 		UpdatedAtColumn                   = sqlite.TimestampColumn("updated_at")
-		allColumns                        = sqlite.ColumnList{IDColumn, NameColumn, RifColumn, MainCurrencyColumn, DebtCurrencyColumn, CurrenciesToShowAmountToPayColumn, FixedPayColumn, FixedPayAmountColumn, RoundUpPaymentsColumn, EmailConfigColumn, CreatedAtColumn, UpdatedAtColumn}
-		mutableColumns                    = sqlite.ColumnList{NameColumn, RifColumn, MainCurrencyColumn, DebtCurrencyColumn, CurrenciesToShowAmountToPayColumn, FixedPayColumn, FixedPayAmountColumn, RoundUpPaymentsColumn, EmailConfigColumn, CreatedAtColumn, UpdatedAtColumn}
+		allColumns                        = sqlite.ColumnList{IDColumn, NameColumn, RifColumn, MainCurrencyColumn, DebtCurrencyColumn, CurrenciesToShowAmountToPayColumn, DebtsCurrenciesToShowColumn, FixedPayColumn, FixedPayAmountColumn, RoundUpPaymentsColumn, EmailConfigColumn, CreatedAtColumn, UpdatedAtColumn}
+		mutableColumns                    = sqlite.ColumnList{NameColumn, RifColumn, MainCurrencyColumn, DebtCurrencyColumn, CurrenciesToShowAmountToPayColumn, DebtsCurrenciesToShowColumn, FixedPayColumn, FixedPayAmountColumn, RoundUpPaymentsColumn, EmailConfigColumn, CreatedAtColumn, UpdatedAtColumn}
 	)
 
 	return buildingsTable{
@@ -95,6 +97,7 @@ func newBuildingsTableImpl(schemaName, tableName, alias string) buildingsTable {
 		MainCurrency:                MainCurrencyColumn,
 		DebtCurrency:                DebtCurrencyColumn,
 		CurrenciesToShowAmountToPay: CurrenciesToShowAmountToPayColumn,
+		DebtsCurrenciesToShow:       DebtsCurrenciesToShowColumn,
 		FixedPay:                    FixedPayColumn,
 		FixedPayAmount:              FixedPayAmountColumn,
 		RoundUpPayments:             RoundUpPaymentsColumn,

@@ -26,7 +26,8 @@
     fixedPayAmount: '0.00',
     roundUpPayments: false,
     emailConfig: '',
-    currenciesToShowAmountToPay: [],
+    currenciesToShowAmountToPay: new Set(),
+    debtsCurrenciesToShow: new Set(),
 
     idErr: '',
     nameErr: '',
@@ -36,28 +37,31 @@
     }"
       @event-building-form-update="
       isEdit = true;
-      let base64 = $event.detail.apts;
-      let decodedString = decodeBase64UrlStr(base64);
-      let array = JSON.parse(decodedString);
 
-      array.forEach((apt) => {
+      let jsonObject = JSON.parse(decodeBase64UrlStr($event.detail));
+
+      jsonObject.apts.forEach((apt) => {
         apts.push(apt);
-      });
-      apts.forEach((apt) => {
         aptMap.set(apt.number, apt.name);
       });
 
-      id = $event.detail.id;
-      name = $event.detail.name;
-      rif = $event.detail.rif;
-      mainCurrency = $event.detail.mainCurrency;
-      debtCurrency = $event.detail.debtCurrency;
-      fixedPay = $event.detail.fixedPay === 'true';
-      fixedPayAmount = $event.detail.fixedPayAmount;
-      roundUpPayments = $event.detail.roundUpPayments === 'true';
-      emailConfig = $event.detail.emailConfig;
-      currenciesToShowAmountToPay = $event.detail.currenciesToShowAmountToPay;
+      currenciesToShowAmountToPay.clear()
+      debtsCurrenciesToShow.clear()
 
+      id = jsonObject.id;
+      name = jsonObject.name;
+      rif = jsonObject.rif;
+      mainCurrency = jsonObject.mainCurrency;
+      debtCurrency = jsonObject.debtCurrency;
+      fixedPay = jsonObject.fixedPay;
+      fixedPayAmount = jsonObject.fixedPayAmount;
+      roundUpPayments = jsonObject.roundUpPayments;
+      emailConfig = jsonObject.emailConfig;
+
+      jsonObject.currenciesToShowAmountToPay.forEach((s) => currenciesToShowAmountToPay.add(s))
+      jsonObject.debtsCurrenciesToShow.forEach((s) => debtsCurrenciesToShow.add(s))
+
+      open = true
       "
   >
 
@@ -158,8 +162,40 @@
                    class="checkbox"
                    name="currenciesToShowAmountToPay"
                    x-bind:value="value"
-                   x-bind:checked="currenciesToShowAmountToPay.includes(value)"
-                   @click="currenciesToShowAmountToPay.includes(value) ? currenciesToShowAmountToPay = currenciesToShowAmountToPay.filter(v => v !== value) : currenciesToShowAmountToPay.push(value)"
+                   x-bind:checked="currenciesToShowAmountToPay.has(value)"
+                   @click="
+                    if (currenciesToShowAmountToPay.has(value)) {
+                      currenciesToShowAmountToPay.delete(value);
+                    } else {
+                      currenciesToShowAmountToPay.add(value);
+                    }
+
+                   "
+            />
+            <span class="text-sm" x-text="value"></span>
+          </label>
+        </template>
+      </div>
+    </fieldset>
+
+    <fieldset class="fieldset p-3 bg-base-100 border border-base-300 rounded-box">
+      <legend class="fieldset-legend" x-text="$t('main-buildings-debt-currencies-show')"></legend>
+      <div class="flex flex-row gap-4 justify-center">
+        <template x-for="value in currencies">
+          <label class="fieldset-label">
+            <input type="checkbox"
+                   class="checkbox"
+                   name="debtsCurrenciesToShow"
+                   x-bind:value="value"
+                   x-bind:checked="debtsCurrenciesToShow.has(value)"
+                   @click="
+                    if (debtsCurrenciesToShow.has(value)) {
+                      debtsCurrenciesToShow.delete(value);
+                    } else {
+                      debtsCurrenciesToShow.add(value);
+                    }
+
+                   "
             />
             <span class="text-sm" x-text="value"></span>
           </label>

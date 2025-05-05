@@ -652,17 +652,24 @@ templ ReserveFundView(dto CalculatedReceipt) {
 }
 
 templ DebtView(dto CalculatedReceipt) {
+{{ multipleCurrencies := len(dto.DebtsCurrenciesToShow) > 0 }}
 	<div class="break-inside-avoid whitespace-nowrap w-full flex flex-col  items-center">
 		<div class="w-fit flex flex-col gap-2  items-center">
 			<p class="text-center font-bold">DEUDAS</p>
-			{{ debtCurrency := util.GetAllowedCurrency(dto.Building.DebtCurrency) }}
 			<table>
 				<thead>
 					<tr>
 						<th class="font-bold text-start">APTO</th>
 						<th class="font-bold text-start">PROPIETARIO</th>
 						<th class="font-bold text-end">RECIBOS</th>
-						<th class="font-bold text-end">DEUDA</th>
+						if multipleCurrencies {
+              for _,currency := range dto.DebtsCurrenciesToShow {
+                <th class="font-bold text-end">DEUDA { currency.Name() }</th>
+              }
+            } else {
+             <th class="font-bold text-end">DEUDA</th>
+            }
+
 						<th class="font-bold text-center">MESES</th>
 						<th class="font-bold text-end">ABONO</th>
 					</tr>
@@ -672,17 +679,25 @@ templ DebtView(dto CalculatedReceipt) {
 						<tr>
 							<td class="text-start">{ apt.Apartment.Number }</td>
 							<td class="text-start">{ apt.Apartment.Name }</td>
-							<td class="text-end">{ fmt.Sprint(apt.Debt.Receipts) }</td>
-							<td class="text-end">{ debtCurrency.Format(apt.Debt.Amount) }</td>
+							<td class="text-end">{ fmt.Sprint(apt.Debt.Debt.Receipts) }</td>
+							for _,debt := range apt.Debt.Amounts {
+                <td class="text-end">{ debt.Currency.Format(debt.Amount) }</td>
+              }
+
 							<td class="text-center">{ apt.DebtMonthStr }</td>
-							<td class="text-end">{ util.GetAllowedCurrency(apt.Debt.PreviousPaymentAmountCurrency).Format(apt.Debt.PreviousPaymentAmount) }</td>
+							<td class="text-end">{ util.GetAllowedCurrency(apt.Debt.Debt.PreviousPaymentAmountCurrency).Format(apt.Debt.Debt.PreviousPaymentAmount) }</td>
 						</tr>
 					}
 				</tbody>
 			</table>
 			<br/>
+
 			<p class="w-full font-bold text-end">NÚMERO DE RECIBOS: { fmt.Sprint(dto.DebtReceiptsAmount) }</p>
-			<p class="w-full font-bold text-end">DEUDA TOTAL: { debtCurrency.Format(dto.DebtTotal) }</p>
+
+			for _,debt := range dto.DebtTotals {
+			<p class="w-full font-bold text-end">DEUDA TOTAL: { debt.Currency.Format(debt.Amount) }</p>
+      }
+
 		</div>
 	</div>
 }

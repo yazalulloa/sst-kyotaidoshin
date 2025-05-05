@@ -22,6 +22,8 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 			return err
 		}
 
+		log.Printf("Event %v", event)
+
 		if event.IsChanges() {
 			err = receiptPdf.DeleteByEvent(ctx, event)
 			if err != nil {
