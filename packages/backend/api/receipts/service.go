@@ -51,18 +51,9 @@ func loadRates(records []ReceiptRecord, ratesHolder *RatesHolder) error {
 
 	log.Printf("Looking up rates for dates: %d", len(ratesToLookUp))
 
-	var oErr error
 	var wg sync.WaitGroup
-	var once sync.Once
-	handleErr := func(e error) {
-		if e != nil {
-			once.Do(func() {
-				oErr = e
-			})
-		}
-	}
-
 	wg.Add(len(ratesToLookUp))
+	errorChan := make(chan error, len(ratesToLookUp))
 
 	for _, date := range ratesToLookUp {
 
@@ -71,13 +62,13 @@ func loadRates(records []ReceiptRecord, ratesHolder *RatesHolder) error {
 
 			parsedDate, err := time.Parse(time.DateOnly, date)
 			if err != nil {
-				handleErr(err)
+				errorChan <- fmt.Errorf("error parsing date %s: %w", date, err)
 				return
 			}
 
 			rate, err := rates.GetFirstBeforeDate(util.USD.Name(), parsedDate)
 			if err != nil {
-				handleErr(err)
+				errorChan <- fmt.Errorf("error getting rate for date %s: %w", date, err)
 				return
 			}
 
@@ -86,10 +77,11 @@ func loadRates(records []ReceiptRecord, ratesHolder *RatesHolder) error {
 	}
 
 	wg.Wait()
+	close(errorChan)
 
-	if oErr != nil {
-		log.Printf("Error getting rates: %s", oErr)
-		return oErr
+	err := util.HasErrors(errorChan)
+	if err != nil {
+		return fmt.Errorf("error loading rates: %v", err)
 	}
 
 	return nil
@@ -415,24 +407,16 @@ func getItem(id string, oldCardId *string) (*Item, error) {
 func getFormDto(keys Keys) (*FormDto, error) {
 	formDto := FormDto{}
 
-	var oErr error
 	var wg sync.WaitGroup
-	var once sync.Once
-	handleErr := func(e error) {
-		if e != nil {
-			once.Do(func() {
-				oErr = e
-			})
-		}
-	}
 	wg.Add(7)
+	errorChan := make(chan error, 7)
 
 	go func() {
 		defer wg.Done()
 
 		building, err := buildings.SelectById(keys.BuildingId)
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 
@@ -444,18 +428,18 @@ func getFormDto(keys Keys) (*FormDto, error) {
 
 		receipt, err := selectById(keys.Id)
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 
 		if receipt == nil {
-			handleErr(errors.New("receipt not found"))
+			errorChan <- fmt.Errorf("receipt not found: %s", keys.Id)
 			return
 		}
 
 		ratesDtos, err := getRatesDtos(&receipt.Date)
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 
@@ -476,7 +460,7 @@ func getFormDto(keys Keys) (*FormDto, error) {
 		byteArray, err := json.Marshal(updateParams)
 
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 
@@ -493,7 +477,7 @@ func getFormDto(keys Keys) (*FormDto, error) {
 
 		dto, err := expenses.GetFormDto(keys.BuildingId, keys.Id)
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 
@@ -505,7 +489,7 @@ func getFormDto(keys Keys) (*FormDto, error) {
 
 		reserveFundFormDto, err := reserveFunds.GetFormDto(keys.BuildingId, keys.Id)
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 
@@ -517,7 +501,7 @@ func getFormDto(keys Keys) (*FormDto, error) {
 
 		dto, err := extraCharges.GetReceiptFormDto(keys.BuildingId, keys.Id)
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 
@@ -529,7 +513,7 @@ func getFormDto(keys Keys) (*FormDto, error) {
 
 		dto, err := debts.GetFormDto(keys.BuildingId, keys.Id)
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 
@@ -540,13 +524,13 @@ func getFormDto(keys Keys) (*FormDto, error) {
 		defer wg.Done()
 		apts, err := apartments.SelectNumberAndNameByBuildingId(keys.BuildingId)
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 
 		aptStr, err := json.Marshal(apts)
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 
@@ -556,9 +540,11 @@ func getFormDto(keys Keys) (*FormDto, error) {
 	}()
 
 	wg.Wait()
+	close(errorChan)
 
-	if oErr != nil {
-		return nil, oErr
+	err := util.HasErrors(errorChan)
+	if err != nil {
+		return nil, err
 	}
 
 	var rate float64 = 0
@@ -582,17 +568,10 @@ func getFormDto(keys Keys) (*FormDto, error) {
 }
 
 func getRatesDtos(date *time.Time) ([]RateDto, error) {
-	var oErr error
+
 	var wg sync.WaitGroup
-	var once sync.Once
-	handleErr := func(e error) {
-		if e != nil {
-			once.Do(func() {
-				oErr = e
-			})
-		}
-	}
 	wg.Add(2)
+	errorChan := make(chan error, 2)
 
 	var firstRateArray []model.Rates
 	var secondRateArray []model.Rates
@@ -602,7 +581,7 @@ func getRatesDtos(date *time.Time) ([]RateDto, error) {
 		arr, err := rates.GetFromDate(util.USD.Name(), *date, 5, true)
 
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 
@@ -615,7 +594,7 @@ func getRatesDtos(date *time.Time) ([]RateDto, error) {
 		arr, err := rates.GetFromDate(util.USD.Name(), *date, 5, false)
 
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 
@@ -623,9 +602,11 @@ func getRatesDtos(date *time.Time) ([]RateDto, error) {
 	}()
 
 	wg.Wait()
+	close(errorChan)
 
-	if oErr != nil {
-		return nil, oErr
+	err := util.HasErrors(errorChan)
+	if err != nil {
+		return nil, err
 	}
 
 	firstLen := len(firstRateArray)

@@ -8,7 +8,7 @@ import (
 	"kyotaidoshin/util"
 )
 
-templ Search(res TableResponse) {
+templ Search(res *TableResponse) {
 	{{ hasWritePerm := api.HasPerms(ctx, api.BUILDINGS_WRITE) }}
 	for _, item := range res.Results {
 		<li

@@ -17,7 +17,6 @@ import (
 	"net/http"
 	"slices"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -165,125 +164,6 @@ func Check(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-func AllFiles() ([]FileInfo, error) {
-
-	links, err := AllFileLinks()
-	if err != nil {
-		return nil, err
-	}
-
-	var wg sync.WaitGroup
-	var once sync.Once
-	resultChan := make(chan FileInfo, len(links))
-
-	handleErr := func(e error) {
-		if e != nil {
-			once.Do(func() {
-				err = e
-			})
-		}
-	}
-
-	wg.Add(len(links))
-	timestamp := time.Now().UnixMilli()
-
-	getFileInfo := func(pos int, link string, wg *sync.WaitGroup, resultChan chan<- FileInfo) {
-		defer wg.Done()
-
-		res, wgErr := netClient.Head(link)
-		//log.Errorf("Downloaded: %s %v", processor.Filepath, wgErr)
-		if wgErr != nil {
-			handleErr(wgErr)
-			return
-		}
-
-		defer func(Body io.ReadCloser) {
-			err := Body.Close()
-			if err != nil {
-				log.Println("Error closing response body:", err)
-				return
-			}
-		}(res.Body)
-
-		etagWorks := false
-		etag := res.Header.Get("ETag")
-
-		if etag != "" && false {
-			req, err := http.NewRequest("HEAD", link, nil)
-			if err != nil {
-				handleErr(err)
-				return
-			}
-			req.Header.Add("If-None-Match", res.Header.Get("ETag"))
-			etagRes, err := netClient.Do(req)
-			if err != nil {
-				handleErr(err)
-				return
-			}
-
-			if etagRes.StatusCode == 304 {
-				etagWorks = true
-			}
-
-			defer func(Body io.ReadCloser) {
-				err := Body.Close()
-				if err != nil {
-					log.Println("Error closing response body:", err)
-					return
-				}
-			}(etagRes.Body)
-		}
-
-		res, err := netClient.Get(link)
-		if err != nil {
-			handleErr(err)
-			return
-		}
-
-		defer func(Body io.ReadCloser) {
-			err := Body.Close()
-			if err != nil {
-				log.Println("Error closing response body:", err)
-				return
-			}
-		}(res.Body)
-
-		hash, err := FileHash(res.Body)
-		if err != nil {
-			handleErr(err)
-			return
-		}
-
-		//s3Client.PutObjectTagging()
-
-		resultChan <- FileInfo{
-			Pos:       pos,
-			Url:       link,
-			Size:      res.ContentLength,
-			Etag:      etag,
-			EtagWorks: etagWorks,
-			//Headers:   res.Header,
-			Hash: hash,
-		}
-	}
-
-	for pos, link := range links {
-		go getFileInfo(pos, link, &wg, resultChan)
-	}
-
-	wg.Wait()
-	close(resultChan)
-
-	results := make([]FileInfo, len(links))
-	for result := range resultChan {
-		results[result.Pos] = result
-	}
-
-	log.Printf("AllFiles took %d ms", time.Now().UnixMilli()-timestamp)
-
-	return results, nil
 }
 
 func AllFileLinks() ([]string, error) {

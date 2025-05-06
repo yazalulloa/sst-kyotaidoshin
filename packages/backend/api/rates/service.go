@@ -5,8 +5,6 @@ import (
 	"db/gen/model"
 	"github.com/google/uuid"
 	"kyotaidoshin/util"
-	"log"
-	"slices"
 	"sync"
 	"time"
 )
@@ -59,49 +57,6 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 	return tableResponse, oErr
 }
 
-func CheckRateInsert(ratesArr *[]model.Rates) ([]model.Rates, error) {
-	var wg sync.WaitGroup
-	var once sync.Once
-	var err error
-	handleErr := func(e error) {
-		if e != nil {
-			once.Do(func() {
-				err = e
-			})
-		}
-	}
-
-	wg.Add(len(*ratesArr))
-
-	ratesToInsert := make([]model.Rates, len(*ratesArr))
-	for i, rateToCheck := range *ratesArr {
-		go func(rate model.Rates) {
-			defer wg.Done()
-			exists, err := CheckRateExist(*rate.ID)
-			if err != nil {
-				log.Printf("Error checking rate: %v", err)
-				handleErr(err)
-				return
-			}
-			if !exists {
-				ratesToInsert[i] = rate
-			}
-		}(rateToCheck)
-	}
-
-	wg.Wait()
-
-	if err != nil {
-		return nil, err
-	}
-
-	ratesToInsert = slices.DeleteFunc(ratesToInsert, func(rate model.Rates) bool {
-		return rate.FromCurrency == ""
-	})
-
-	return ratesToInsert, nil
-}
-
 func deleteRateReturnCounters(ctx context.Context, id int64, requestQuery RequestQuery) (*Counters, error) {
 
 	_, err := deleteRateById(id)
@@ -111,22 +66,14 @@ func deleteRateReturnCounters(ctx context.Context, id int64, requestQuery Reques
 
 	var counters Counters
 	var wg sync.WaitGroup
-	var once sync.Once
-	var oErr error
-	handleErr := func(e error) {
-		if e != nil {
-			once.Do(func() {
-				oErr = e
-			})
-		}
-	}
-
 	wg.Add(2)
+	errorChan := make(chan error, 2)
+
 	go func() {
 		defer wg.Done()
 		totalCount, err := getTotalCount()
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 		counters.TotalCount = totalCount
@@ -136,16 +83,17 @@ func deleteRateReturnCounters(ctx context.Context, id int64, requestQuery Reques
 		defer wg.Done()
 		queryCount, err := getQueryCount(requestQuery)
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 		counters.QueryCount = queryCount
 	}()
 
 	wg.Wait()
+	close(errorChan)
 
-	if oErr != nil {
-		return nil, oErr
+	if err := util.HasErrors(errorChan); err != nil {
+		return nil, err
 	}
 
 	return &counters, nil

@@ -273,16 +273,8 @@ func processAll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var wg sync.WaitGroup
-	var once sync.Once
-	handleErr := func(e error) {
-		if e != nil {
-			once.Do(func() {
-				err = e
-			})
-		}
-	}
-
 	wg.Add(len(s3List.Contents))
+	errorChan := make(chan error, len(s3List.Contents))
 
 	for _, item := range s3List.Contents {
 
@@ -303,7 +295,7 @@ func processAll(w http.ResponseWriter, r *http.Request) {
 			})
 
 			if err != nil {
-				handleErr(err)
+				errorChan <- err
 				return
 			}
 
@@ -311,8 +303,11 @@ func processAll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	wg.Wait()
+	close(errorChan)
 
+	err = util.HasErrors(errorChan)
 	if err != nil {
+		log.Printf("Error processing files: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

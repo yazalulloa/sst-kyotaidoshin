@@ -19,18 +19,10 @@ import (
 )
 
 func JoinExpensesAndReserveFunds(buildingId string, receiptId string) (*expenses.ReceiptExpensesDto, error) {
-	var oErr error
-	var wg sync.WaitGroup
-	var once sync.Once
-	handleErr := func(e error) {
-		if e != nil {
-			once.Do(func() {
-				oErr = e
-			})
-		}
-	}
 
+	var wg sync.WaitGroup
 	wg.Add(2)
+	errorChan := make(chan error, 2)
 
 	var fundFormDto *reserveFunds.FormDto
 	var expenseFormDto *expenses.FormDto
@@ -39,7 +31,7 @@ func JoinExpensesAndReserveFunds(buildingId string, receiptId string) (*expenses
 		defer wg.Done()
 		dto, err := reserveFunds.GetFormDto(buildingId, receiptId)
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 
@@ -50,16 +42,18 @@ func JoinExpensesAndReserveFunds(buildingId string, receiptId string) (*expenses
 		defer wg.Done()
 		dto, err := expenses.GetFormDto(buildingId, receiptId)
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 		expenseFormDto = dto
 	}()
 
 	wg.Wait()
+	close(errorChan)
 
-	if oErr != nil {
-		return nil, oErr
+	err := util.HasErrors(errorChan)
+	if err != nil {
+		return nil, err
 	}
 
 	dto := GetReceiptExpensesDto(receiptId, expenseFormDto.Items, fundFormDto.Items)

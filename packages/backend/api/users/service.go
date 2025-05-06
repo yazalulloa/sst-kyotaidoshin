@@ -152,22 +152,14 @@ func (service Service) deleteRateReturnCounters(id string, requestQuery RequestQ
 
 	var counters Counters
 	var wg sync.WaitGroup
-	var once sync.Once
-	var oErr error
-	handleErr := func(e error) {
-		if e != nil {
-			once.Do(func() {
-				oErr = e
-			})
-		}
-	}
-
 	wg.Add(2)
+	errorChan := make(chan error, 2)
+
 	go func() {
 		defer wg.Done()
 		totalCount, err := service.repo.getTotalCount()
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 		counters.TotalCount = totalCount
@@ -177,16 +169,18 @@ func (service Service) deleteRateReturnCounters(id string, requestQuery RequestQ
 		defer wg.Done()
 		queryCount, err := service.repo.getQueryCount(requestQuery)
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 		counters.QueryCount = queryCount
 	}()
 
 	wg.Wait()
+	close(errorChan)
 
-	if oErr != nil {
-		return nil, oErr
+	err = util.HasErrors(errorChan)
+	if err != nil {
+		return nil, err
 	}
 
 	return &counters, nil

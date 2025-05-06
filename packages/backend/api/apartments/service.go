@@ -116,36 +116,40 @@ func toItem(item *model.Apartments, oldCardId *string) (*Item, error) {
 func deleteAndReturnCounters(keys Keys) (*Counters, error) {
 	counters := Counters{}
 	var rowsDeleted int64 = 0
-	var oErr error
-	var once sync.Once
-	handleErr := func(e error) {
-		if e != nil {
-			once.Do(func() {
-				oErr = e
-			})
-		}
-	}
+
 	var wg sync.WaitGroup
 	wg.Add(2)
+	errorChan := make(chan error, 2)
 
 	go func() {
 		defer wg.Done()
 		rowsAffected, err := deleteByKeys(keys)
-		handleErr(err)
+		if err != nil {
+			errorChan <- err
+			return
+		}
+
 		rowsDeleted = rowsAffected
 	}()
 
 	go func() {
 		defer wg.Done()
 		totalCount, err := getTotalCount()
+
+		if err != nil {
+			errorChan <- err
+			return
+		}
+
 		counters.TotalCount = totalCount
-		handleErr(err)
 	}()
 
 	wg.Wait()
+	close(errorChan)
 
-	if oErr != nil {
-		return nil, oErr
+	err := util.HasErrors(errorChan)
+	if err != nil {
+		return nil, err
 	}
 
 	counters.TotalCount -= rowsDeleted

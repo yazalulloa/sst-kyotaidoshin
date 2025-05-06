@@ -11,24 +11,18 @@ import (
 	"sync"
 )
 
-func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
+func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 	var rateTableResponse TableResponse
-	var oErr error
+
 	var wg sync.WaitGroup
-	var once sync.Once
-	handleErr := func(e error) {
-		if e != nil {
-			once.Do(func() {
-				oErr = e
-			})
-		}
-	}
 	wg.Add(2)
+	errorChan := make(chan error, 2)
+
 	go func() {
 		defer wg.Done()
 		array, err := selectList(requestQuery)
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 
@@ -52,14 +46,21 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 		defer wg.Done()
 		totalCount, err := getTotalCount()
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 		rateTableResponse.Counters.TotalCount = totalCount
 	}()
 
 	wg.Wait()
-	return rateTableResponse, oErr
+	close(errorChan)
+
+	err := util.HasErrors(errorChan)
+	if err != nil {
+		return nil, err
+	}
+
+	return &rateTableResponse, nil
 }
 
 func deleteAndReturnCounters(id string) (*Counters, error) {
