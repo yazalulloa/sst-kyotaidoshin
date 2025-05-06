@@ -54,11 +54,17 @@
       </select>
     </label>
 
+    <button type="button"
+            class="btn btn-sm btn-ghost btn-circle btn-outline"
+            @click="sendEvent('rates-updater','refresh')">
+      <svg x-bind:data-src="processIconUrl" data-cache="21600" class="h-6 w-6"></svg>
+    </button>
+
     <div id="rates-updater"
          hidden="hidden"
          hx-get="/api/rates/search"
          hx-include="[name='date_input'],[name='currency_input'],[name='sort_order']"
-         hx-trigger="load, update-rates"
+         hx-trigger="load,update-rates,refresh"
          hx-target="#rates-table"
          hx-swap="innerHTML"
          hx-sync="this:replace"

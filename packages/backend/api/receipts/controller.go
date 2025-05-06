@@ -147,6 +147,10 @@ func ProcessDecoder(decoder *json.Decoder) (int64, error) {
 }
 
 func search(w http.ResponseWriter, r *http.Request) {
+
+	//start := time.Now()
+	//defer func() { log.Printf("Elapsed time search receipts: %v\n", time.Since(start)) }()
+
 	nextPage := util.GetQueryParamAsString(r, "next_page")
 	var keys Keys
 	if nextPage != "" {

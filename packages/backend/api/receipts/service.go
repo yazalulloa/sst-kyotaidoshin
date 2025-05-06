@@ -275,24 +275,25 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 	return counter, nil
 }
 
-func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
+func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
+
+	//start := time.Now()
+	//defer func() { log.Printf("Elapsed time getTableResponse receipts: %v\n", time.Since(start)) }()
+
 	var tableResponse TableResponse
-	var oErr error
-	var once sync.Once
-	handleErr := func(e error) {
-		if e != nil {
-			once.Do(func() {
-				oErr = e
-			})
-		}
-	}
+
 	var wg sync.WaitGroup
 	wg.Add(3)
+	errorChan := make(chan error, 3)
+
 	go func() {
 		defer wg.Done()
+		//start := time.Now()
+		//defer func() { log.Printf("Elapsed time selectList: %v\n", time.Since(start)) }()
+
 		array, err := selectList(requestQuery)
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 
@@ -301,7 +302,7 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 
 			obj, err := toItem(&item, nil)
 			if err != nil {
-				handleErr(err)
+				errorChan <- err
 				return
 			}
 
@@ -313,9 +314,12 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 
 	go func() {
 		defer wg.Done()
+		//start := time.Now()
+		//defer func() { log.Printf("Elapsed time getTotalCount: %v\n", time.Since(start)) }()
+
 		totalCount, err := getTotalCount()
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 		tableResponse.Counters.TotalCount = totalCount
@@ -323,9 +327,12 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 
 	go func() {
 		defer wg.Done()
+		//start := time.Now()
+		//defer func() { log.Printf("Elapsed time getQueryCount: %v\n", time.Since(start)) }()
+
 		queryCount, err := getQueryCount(requestQuery)
 		if err != nil {
-			handleErr(err)
+			errorChan <- err
 			return
 		}
 		if queryCount != nil {
@@ -334,8 +341,14 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 	}()
 
 	wg.Wait()
+	close(errorChan)
 
-	return tableResponse, oErr
+	err := util.HasErrors(errorChan)
+	if err != nil {
+		return nil, err
+	}
+
+	return &tableResponse, nil
 }
 
 func toItem(item *model.Receipts, oldCardId *string) (*Item, error) {

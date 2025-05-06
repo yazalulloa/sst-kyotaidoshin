@@ -1,4 +1,5 @@
-<div id="header-container" hx-swap-oob="true" class="flex flex-row items-center gap-2 text-center fade-me-out fade-me-in">
+<div id="header-container" hx-swap-oob="true"
+     class="flex flex-row items-center gap-2 text-center fade-me-out fade-me-in">
   <div class="flex flex-row gap-2 justify-center min-w-[7rem]"
        x-data="{
    total: null,
@@ -15,10 +16,16 @@
        hx-swap="outerHTML">
   </div>
 
+  <button type="button"
+          class="btn btn-sm btn-ghost btn-circle btn-outline"
+          @click="sendEvent('roles-updater', 'refresh')">
+    <svg x-bind:data-src="processIconUrl" data-cache="21600" class="h-6 w-6"></svg>
+  </button>
+
   <div hidden="hidden"
        id="roles-updater"
        hx-get="/api/roles/search"
-       hx-trigger="load,new-role"
+       hx-trigger="load,new-role,refresh"
        hx-target="#roles-table"
        hx-swap="innerHTML"
        hx-sync="this:replace"

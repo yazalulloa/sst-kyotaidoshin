@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-templ Search(res TableResponse) {
+templ Search(res *TableResponse) {
 	for _, item := range res.Results {
 		@ItemView(item)
 	}

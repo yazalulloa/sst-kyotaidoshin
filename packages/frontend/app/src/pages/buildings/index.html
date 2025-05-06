@@ -40,10 +40,16 @@
     </div>
   </div>
 
+  <button type="button"
+          class="btn btn-sm btn-ghost btn-circle btn-outline"
+          @click="sendEvent('buildings-updater','refresh')">
+    <svg x-bind:data-src="processIconUrl" data-cache="21600" class="h-6 w-6"></svg>
+  </button>
+
   <div id="buildings-updater"
        hidden="hidden"
        hx-get="/api/buildings/search"
-       hx-trigger="load, update-buildings"
+       hx-trigger="load,update-buildings,refresh"
        hx-target="#buildings-table"
        hx-swap="innerHTML"
        hx-sync="this:replace"

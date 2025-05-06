@@ -14,10 +14,16 @@
     </div>
   </div>
 
+  <button type="button"
+          class="btn btn-sm btn-ghost btn-circle btn-outline"
+          @click="sendEvent('users-updater', 'refresh')">
+    <svg x-bind:data-src="processIconUrl" data-cache="21600" class="h-6 w-6"></svg>
+  </button>
+
   <div id="users-updater"
        hidden="hidden"
        hx-get="/api/users/search"
-       hx-trigger="load, update-users"
+       hx-trigger="load,update-users,refresh"
        hx-target="#users-table"
        hx-swap="innerHTML"
        hx-sync="this:replace"

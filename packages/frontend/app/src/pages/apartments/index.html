@@ -72,7 +72,7 @@
     <div id="apartments-updater"
          hidden="hidden"
          hx-get="/api/apartments/search"
-         hx-trigger="load, update-apartments delay:300ms, new-apt"
+         hx-trigger="load, update-apartments delay:300ms, new-apt,refresh"
          hx-include="[name='building_input'],[name='apt_search_input']"
          hx-target="#apartments-table"
          hx-swap="innerHTML"
@@ -102,6 +102,12 @@
            hx-swap="outerHTML">
       </div>
     </div>
+
+    <button type="button"
+            class="btn btn-sm btn-ghost btn-circle btn-outline"
+            @click="sendEvent('apartments-updater','refresh')">
+      <svg x-bind:data-src="processIconUrl" data-cache="21600" class="h-6 w-6"></svg>
+    </button>
   </div>
 
   <div class="hidden md:grid w-full font-bold items-center text-center border-b"

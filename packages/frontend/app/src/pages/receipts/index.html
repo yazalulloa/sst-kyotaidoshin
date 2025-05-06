@@ -82,7 +82,7 @@
     <div id="receipts-updater"
          hidden="hidden"
          hx-get="/api/receipts/search"
-         hx-trigger="load, update-receipts delay:300ms, new-apt"
+         hx-trigger="load, update-receipts delay:300ms, new-apt,refresh"
          hx-include="[name='building_input'],[name='month_input'],[name='year_input']"
          hx-target="#receipts-table"
          hx-swap="innerHTML"
@@ -136,6 +136,11 @@
       </div>
     </div>
 
+    <button type="button"
+            class="btn btn-sm btn-ghost btn-circle btn-outline"
+            @click="sendEvent('receipts-updater','refresh')">
+      <svg x-bind:data-src="processIconUrl" data-cache="21600" class="h-6 w-6"></svg>
+    </button>
   </div>
 
   <div x-bind:hx-get="receiptNewDialogPartialUrl"
