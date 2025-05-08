@@ -433,13 +433,6 @@ window.decodeBase64UrlStr = function (encoded) {
   return decoder.decode(byteNumbers);
 }
 
-function prefetchUrl(url) {
-  const link = document.createElement('link');
-  link.rel = 'prefetch';
-  link.href = url;
-  document.head.appendChild(link);
-}
-
 function getVariablesWithSuffix(suffixes) {
   const result = [];
   for (const key in window) {
@@ -457,10 +450,17 @@ function getVariablesWithSuffix(suffixes) {
 document.addEventListener("DOMContentLoaded", function () {
 
   if (import.meta.env.VITE_IS_DEV !== 'true') {
-    const prefetchUrls = getVariablesWithSuffix(["PartialUrl", "IconUrl"])
-    prefetchUrls.forEach(url => {
-      prefetchUrl(window[url]);
-    });
+
+    getVariablesWithSuffix(["PartialUrl", "IconUrl"])
+    .map((variable) => window[variable])
+    .map((url) => {
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.href = url;
+      return link;
+    }).forEach((link) => {
+      document.head.appendChild(link);
+    })
   }
 });
 

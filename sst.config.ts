@@ -285,7 +285,8 @@ export default $config({
         fileOptions: [
           {
             files: "index.html",
-            cacheControl: "max-age=0,no-cache,no-store,must-revalidate",
+            cacheControl: "public,max-age=0,s-maxage=0,must-revalidate"
+            // cacheControl: "max-age=0,no-cache,no-store,must-revalidate",
           },
           {
             files: "isr/**/*",
