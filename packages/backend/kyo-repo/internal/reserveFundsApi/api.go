@@ -3,10 +3,10 @@ package reserveFundsApi
 import (
 	"context"
 	"github.com/a-h/templ"
-	"kyo-repo/internal/api"
-	"kyo-repo/internal/expenses"
-	"kyo-repo/internal/receipts"
-	"kyo-repo/internal/reserveFunds"
+	"github.com/yaz/kyo-repo/internal/api"
+	"github.com/yaz/kyo-repo/internal/expenses"
+	"github.com/yaz/kyo-repo/internal/receipts"
+	"github.com/yaz/kyo-repo/internal/reserveFunds"
 	"log"
 	"net/http"
 )

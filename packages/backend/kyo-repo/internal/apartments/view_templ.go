@@ -10,8 +10,8 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"kyo-repo/internal/api"
-	"kyo-repo/internal/util"
+	"github.com/yaz/kyo-repo/internal/api"
+	"github.com/yaz/kyo-repo/internal/util"
 )
 
 func Search(res TableResponse) templ.Component {

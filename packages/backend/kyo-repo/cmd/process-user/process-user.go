@@ -5,32 +5,21 @@ import (
 	"errors"
 	"fmt"
 	"github.com/aws/aws-lambda-go/lambda"
-	"kyo-repo/internal/db/gen/model"
-	"kyo-repo/internal/telegram"
-	"kyo-repo/internal/users"
+	"github.com/yaz/kyo-repo/internal/login"
+	"github.com/yaz/kyo-repo/internal/telegram"
+	"github.com/yaz/kyo-repo/internal/users"
 	"log"
 	"time"
 )
 
-type UserSubject struct {
-	UserId      string `json:"userId"`
-	WorkspaceID string `json:"workspaceId"`
-}
+func handler(ctx context.Context, input login.Input) (*login.UserSubject, error) {
 
-type UserInfo struct {
-	User        *model.Users
-	WorkspaceID string
-	isNewUser   bool
-}
-
-func handler(ctx context.Context, input Input) (*UserSubject, error) {
-
-	userInfo, err := func() (*UserInfo, error) {
+	userInfo, err := func() (*login.UserInfo, error) {
 		switch input.Provider {
 		case "github":
-			return githubUserInfo(ctx, input)
+			return login.GetGithubUserInfo(ctx, input)
 		case "google":
-			return googleUserInfo(ctx, input)
+			return login.GetGoogleUserInfo(ctx, input)
 		default:
 			return nil, errors.New("invalid provider")
 		}
@@ -41,7 +30,7 @@ func handler(ctx context.Context, input Input) (*UserSubject, error) {
 		return nil, err
 	}
 
-	if userInfo.isNewUser {
+	if userInfo.IsNewUser {
 		defer func() {
 			log.Printf("New user registered: %s, sending notification", userInfo.User.ProviderID)
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
@@ -70,7 +59,7 @@ func handler(ctx context.Context, input Input) (*UserSubject, error) {
 		}()
 	}
 
-	return &UserSubject{
+	return &login.UserSubject{
 		UserId:      userInfo.User.ID,
 		WorkspaceID: userInfo.WorkspaceID,
 	}, err
@@ -79,23 +68,4 @@ func handler(ctx context.Context, input Input) (*UserSubject, error) {
 func main() {
 	log.SetFlags(log.LstdFlags | log.Llongfile)
 	lambda.Start(handler)
-}
-
-type Input struct {
-	Provider string `json:"provider"`
-	ClientID string `json:"clientID"`
-	Tokenset struct {
-		Access  string `json:"access"`
-		Refresh string `json:"refresh"`
-		Expiry  int    `json:"expiry"`
-		Raw     struct {
-			AccessToken           string `json:"access_token"`
-			ExpiresIn             int    `json:"expires_in"`
-			RefreshToken          string `json:"refresh_token"`
-			RefreshTokenExpiresIn int    `json:"refresh_token_expires_in"`
-			TokenType             string `json:"token_type"`
-			Scope                 string `json:"scope"`
-			IdToken               string `json:"id_token"`
-		} `json:"raw"`
-	} `json:"tokenset"`
 }

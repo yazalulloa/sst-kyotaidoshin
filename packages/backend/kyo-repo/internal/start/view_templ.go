@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"kyo-repo/internal/db/gen/model"
+	"github.com/yaz/kyo-repo/internal/db/gen/model"
 )
 
 func Init(pages []Page, permStr, pagesStr string, user model.Users) templ.Component {

@@ -44,7 +44,7 @@ export default $config({
 
     const processUserFunction = new sst.aws.Function("ProcessUser", {
       link: [secretTursoUrl, telegramBotToken, telegramBotApiKey],
-      handler: "packages/backend/kyo-repo/cmd/process-user/",
+      handler: "packages/backend/kyo-repo/cmd/process-user/process-user.go",
       runtime: "go",
     });
 
@@ -95,14 +95,14 @@ export default $config({
       environment: {
         ISR_PREFIX: isrPrefix
       },
-      handler: "packages/backend/kyo-repo/cmd/isr-gen/",
+      handler: "packages/backend/kyo-repo/cmd/isr-gen/isr-gen.go",
       runtime: "go",
     });
 
     const processBcvFileFunction = new sst.aws.Function("ProcessBcvFile", {
       link: [secretTursoUrl, bucket, bcvQueue, webAssetsBucket],
       runtime: "go",
-      handler: "packages/backend/kyo-repo/cmd/process-bcv-file/",
+      handler: "packages/backend/kyo-repo/cmd/process-bcv-file/process-bcv-file.go",
       timeout: "90 seconds",
       // volume: {
       //   efs: efs,
@@ -129,7 +129,7 @@ export default $config({
       url: true,
       link: [bucket, bcvUrl, bcvFileStartPath],
       runtime: "go",
-      handler: "packages/backend/kyo-repo/cmd/bcv/",
+      handler: "packages/backend/kyo-repo/cmd/bcv/bcv.go",
       timeout: "90 seconds",
     });
     // https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-scheduled-rule-pattern.html
@@ -172,13 +172,13 @@ export default $config({
     const telegramWebhookFunction = new sst.aws.Function("TelegramWebhookFunction", {
       url: true,
       link: [telegramBotToken, telegramBotApiKey, secretTursoUrl],
-      handler: "packages/backend/kyo-repo/cmd/telegram-webhook/",
+      handler: "packages/backend/kyo-repo/cmd/telegram-webhook/telegram-webhook.go",
       runtime: "go",
     })
 
     const verifyAccessFunction = new sst.aws.Function("VerifyAccess", {
       link: [appClientId, auth],
-      handler: "packages/backend/kyo-repo/cmd/openauthclient/verify.handler",
+      handler: "packages/backend/openauthclient/verify.handler",
     });
     const receiptsBucket = new sst.aws.Bucket("ReceiptsBucket", {
       versioning: false,
@@ -213,7 +213,7 @@ export default $config({
         SEND_MAIL: isLocal ? "false" : "true",
       },
       runtime: "go",
-      handler: "packages/backend/kyo-repo/cmd/process-pdf-objects/",
+      handler: "packages/backend/kyo-repo/cmd/process-pdf-objects/process-pdf-objects.go",
       timeout: "300 seconds",
       permissions: [
         {
@@ -224,7 +224,7 @@ export default $config({
     });
 
     const mainApiFunction = new sst.aws.Function("MainApiFunction", {
-      handler: "packages/backend/kyo-repo/cmd/app/",
+      handler: "packages/backend/kyo-repo/cmd/app/app.go",
       runtime: "go",
       link: [
         bucket,
@@ -328,7 +328,7 @@ export default $config({
     // });
     const authClientFunction = new sst.aws.Function("AuthClient", {
       link: [appClientId, auth, site],
-      handler: "packages/backend/kyo-repo/cmd/openauthclient/index.handler",
+      handler: "packages/backend/openauthclient/index.handler",
       environment: {
         IS_LOCAL: isLocal.toString(),
       },

@@ -2,10 +2,10 @@ package users
 
 import (
 	"context"
-	"kyo-repo/internal/db/gen/model"
 	"encoding/base64"
 	"encoding/json"
-	"kyo-repo/internal/util"
+	"github.com/yaz/kyo-repo/internal/db/gen/model"
+	"github.com/yaz/kyo-repo/internal/util"
 	"strings"
 	"sync"
 )

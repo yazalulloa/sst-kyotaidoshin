@@ -1,13 +1,13 @@
-package main
+package send_pdf
 
 import (
 	"context"
 	"fmt"
 	"github.com/sst/sst/v3/sdk/golang/resource"
-	"kyo-repo/internal/email_h"
-	"kyo-repo/internal/receiptPdf"
-	"kyo-repo/internal/receipts"
-	"kyo-repo/internal/util"
+	"github.com/yaz/kyo-repo/internal/email_h"
+	"github.com/yaz/kyo-repo/internal/receiptPdf"
+	"github.com/yaz/kyo-repo/internal/receipts"
+	"github.com/yaz/kyo-repo/internal/util"
 	"log"
 	"strings"
 	"sync"
@@ -15,14 +15,14 @@ import (
 )
 
 type Holder struct {
-	ctx     context.Context
-	event   receiptPdf.QueueEvent
+	Ctx     context.Context
+	Event   receiptPdf.QueueEvent
 	Subject string
 	Message string
 }
 
 func (holder *Holder) update(pf func(update *receiptPdf.ProgressUpdate) error) (bool, error) {
-	progressUpdate, err := receiptPdf.GetProgress(holder.ctx, holder.event.ProgressId)
+	progressUpdate, err := receiptPdf.GetProgress(holder.Ctx, holder.Event.ProgressId)
 	if err != nil {
 		return false, err
 	}
@@ -37,7 +37,7 @@ func (holder *Holder) update(pf func(update *receiptPdf.ProgressUpdate) error) (
 		progressUpdate.Finished = true
 	}
 
-	err = receiptPdf.PutProgress(holder.ctx, progressUpdate)
+	err = receiptPdf.PutProgress(holder.Ctx, progressUpdate)
 	if err != nil {
 		return false, err
 	}
@@ -54,7 +54,7 @@ func (holder *Holder) _sendPdfs() error {
 
 	altRecipient := altEmailsRecipient.(string)
 
-	receipt, err := receipts.CalculateReceipt(holder.event.BuildingId, holder.event.ReceiptId)
+	receipt, err := receipts.CalculateReceipt(holder.Event.BuildingId, holder.Event.ReceiptId)
 	if err != nil {
 		return err
 	}
@@ -75,9 +75,9 @@ func (holder *Holder) _sendPdfs() error {
 		return nil
 	}
 
-	parts, err := receipts.GetParts(receipt, holder.ctx, true, &receipts.DownloadKeys{
-		Parts:  holder.event.Apartments,
-		AllApt: len(holder.event.Apartments) == 0,
+	parts, err := receipts.GetParts(receipt, holder.Ctx, true, &receipts.DownloadKeys{
+		Parts:  holder.Event.Apartments,
+		AllApt: len(holder.Event.Apartments) == 0,
 	})
 
 	if err != nil {
@@ -131,7 +131,7 @@ func (holder *Holder) _sendPdfs() error {
 				EmailKey:      receipt.Building.EmailConfig,
 			}
 
-			msg, err := receiptPdf.BuildMsg(holder.ctx, req)
+			msg, err := receiptPdf.BuildMsg(holder.Ctx, req)
 			if err != nil {
 				errChan <- err
 				return
@@ -190,7 +190,7 @@ func (holder *Holder) _sendPdfs() error {
 		return nil
 	}
 
-	err = email_h.SendEmail(holder.ctx, receipt.Building.EmailConfig, messages)
+	err = email_h.SendEmail(holder.Ctx, receipt.Building.EmailConfig, messages)
 	if err != nil {
 		log.Printf("Error sending email: %v", err)
 		return err
@@ -202,7 +202,7 @@ func (holder *Holder) _sendPdfs() error {
 	}
 
 	log.Printf("Sent %d", sentMsgs)
-	_, err = receipts.UpdateLastSent(holder.event.ReceiptId)
+	_, err = receipts.UpdateLastSent(holder.Event.ReceiptId)
 	if err != nil {
 		return err
 	}
@@ -219,7 +219,7 @@ func (holder *Holder) _sendPdfs() error {
 	return nil
 }
 
-func (holder *Holder) sendPdfs() error {
+func (holder *Holder) SendPdfs() error {
 	err := holder._sendPdfs()
 	if err != nil {
 		log.Printf("Error sending PDFs: %v", err)

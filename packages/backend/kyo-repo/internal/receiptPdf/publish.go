@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/google/uuid"
 	"github.com/sst/sst/v3/sdk/golang/resource"
-	"kyo-repo/internal/aws_h"
+	"github.com/yaz/kyo-repo/internal/aws_h"
 	"log"
 )
 

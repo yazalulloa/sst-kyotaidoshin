@@ -5,7 +5,8 @@ import (
 	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"kyo-repo/internal/receiptPdf"
+	"github.com/yaz/kyo-repo/internal/receiptPdf"
+	"github.com/yaz/kyo-repo/internal/send_pdf"
 	"log"
 )
 
@@ -39,14 +40,14 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 				continue
 			}
 
-			holder := Holder{
-				ctx:     ctx,
-				event:   event,
+			holder := send_pdf.Holder{
+				Ctx:     ctx,
+				Event:   event,
 				Subject: event.Subject,
 				Message: event.Message,
 			}
 
-			err = holder.sendPdfs()
+			err = holder.SendPdfs()
 			if err != nil {
 				return err
 			}

@@ -1,17 +1,17 @@
-package main
+package login
 
 import (
 	"context"
 	"encoding/json"
 	"github.com/google/uuid"
+	"github.com/yaz/kyo-repo/internal/db/gen/model"
+	"github.com/yaz/kyo-repo/internal/users"
 	xoauth "golang.org/x/oauth2"
 	"google.golang.org/api/oauth2/v2"
 	"google.golang.org/api/option"
-	"kyo-repo/internal/db/gen/model"
-	"kyo-repo/internal/users"
 )
 
-func googleUserInfo(ctx context.Context, input Input) (*UserInfo, error) {
+func GetGoogleUserInfo(ctx context.Context, input Input) (*UserInfo, error) {
 
 	service, err := oauth2.NewService(ctx, option.WithTokenSource(xoauth.StaticTokenSource(&xoauth.Token{AccessToken: input.Tokenset.Access})))
 	if err != nil {
@@ -75,7 +75,7 @@ func googleUserInfo(ctx context.Context, input Input) (*UserInfo, error) {
 
 	return &UserInfo{
 		User:        &newUser,
-		isNewUser:   true,
+		IsNewUser:   true,
 		WorkspaceID: "workspace-" + uuid.NewString(),
 	}, nil
 }

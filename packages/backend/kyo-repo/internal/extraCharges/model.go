@@ -1,8 +1,8 @@
 package extraCharges
 
 import (
-	"kyo-repo/internal/db/gen/model"
 	"github.com/google/uuid"
+	"github.com/yaz/kyo-repo/internal/db/gen/model"
 )
 
 const TypeBuilding string = "BUILDING"

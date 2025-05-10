@@ -6,7 +6,7 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/go-telegram/bot/models"
-	"kyo-repo/internal/telegram"
+	"github.com/yaz/kyo-repo/internal/telegram"
 	"log"
 	"strings"
 )

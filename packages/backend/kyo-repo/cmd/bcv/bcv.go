@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"github.com/aws/aws-lambda-go/lambda"
-	"kyo-repo/internal/bcv"
+	"github.com/yaz/kyo-repo/internal/bcv"
 	"log"
 )
 

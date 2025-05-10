@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"github.com/aws/aws-lambda-go/lambda"
-	"kyo-repo/internal/isr"
+	"github.com/yaz/kyo-repo/internal/isr"
 	"log"
 )
 

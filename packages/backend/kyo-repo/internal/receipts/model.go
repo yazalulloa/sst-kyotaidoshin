@@ -2,14 +2,14 @@ package receipts
 
 import (
 	"github.com/google/uuid"
+	"github.com/yaz/kyo-repo/internal/db/gen/model"
+	"github.com/yaz/kyo-repo/internal/debts"
+	"github.com/yaz/kyo-repo/internal/expenses"
+	"github.com/yaz/kyo-repo/internal/extraCharges"
+	"github.com/yaz/kyo-repo/internal/rates"
+	"github.com/yaz/kyo-repo/internal/reserveFunds"
+	"github.com/yaz/kyo-repo/internal/util"
 	"golang.org/x/sync/syncmap"
-	"kyo-repo/internal/db/gen/model"
-	"kyo-repo/internal/debts"
-	"kyo-repo/internal/expenses"
-	"kyo-repo/internal/extraCharges"
-	"kyo-repo/internal/rates"
-	"kyo-repo/internal/reserveFunds"
-	"kyo-repo/internal/util"
 )
 
 type RequestQuery struct {

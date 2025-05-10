@@ -1,4 +1,4 @@
-package main
+package login
 
 import (
 	"context"
@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
+	"github.com/yaz/kyo-repo/internal/db/gen/model"
+	"github.com/yaz/kyo-repo/internal/users"
+	"github.com/yaz/kyo-repo/internal/util"
 	"io"
-	"kyo-repo/internal/db/gen/model"
-	"kyo-repo/internal/users"
-	"kyo-repo/internal/util"
 	"log"
 	"net/http"
 	"sync"
@@ -124,7 +124,7 @@ type Email struct {
 	Visibility string `json:"visibility"`
 }
 
-func githubUserInfo(ctx context.Context, input Input) (*UserInfo, error) {
+func GetGithubUserInfo(ctx context.Context, input Input) (*UserInfo, error) {
 	httpClient := util.GetHttpClient()
 
 	var wg sync.WaitGroup
@@ -312,7 +312,7 @@ func githubUserInfo(ctx context.Context, input Input) (*UserInfo, error) {
 
 	return &UserInfo{
 		User:        &newUser,
-		isNewUser:   true,
+		IsNewUser:   true,
 		WorkspaceID: "workspace-" + uuid.NewString(),
 	}, nil
 }

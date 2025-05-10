@@ -2,8 +2,8 @@ package users
 
 import (
 	"github.com/google/uuid"
-	"kyo-repo/internal/db/gen/model"
-	"kyo-repo/internal/util"
+	"github.com/yaz/kyo-repo/internal/db/gen/model"
+	"github.com/yaz/kyo-repo/internal/util"
 )
 
 type Provider string

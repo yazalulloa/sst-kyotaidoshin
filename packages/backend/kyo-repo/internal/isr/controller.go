@@ -2,7 +2,7 @@ package isr
 
 import (
 	"context"
-	"kyo-repo/internal/api"
+	"github.com/yaz/kyo-repo/internal/api"
 	"net/http"
 )
 

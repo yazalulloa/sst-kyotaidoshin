@@ -6,8 +6,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/wneessen/go-mail"
-	"kyo-repo/internal/aws_h"
-	"kyo-repo/internal/util"
+	"github.com/yaz/kyo-repo/internal/aws_h"
+	"github.com/yaz/kyo-repo/internal/util"
 	"strings"
 )
 

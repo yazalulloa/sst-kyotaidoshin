@@ -3,8 +3,8 @@ package rates
 import (
 	"fmt"
 	"github.com/gorilla/mux"
-	"kyo-repo/internal/api"
-	"kyo-repo/internal/util"
+	"github.com/yaz/kyo-repo/internal/api"
+	"github.com/yaz/kyo-repo/internal/util"
 	"log"
 	"net/http"
 	"strings"

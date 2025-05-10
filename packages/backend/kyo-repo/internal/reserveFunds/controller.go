@@ -5,9 +5,9 @@ import (
 	"github.com/go-playground/form"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
-	"kyo-repo/internal/db/gen/model"
-	"kyo-repo/internal/receiptPdf"
-	"kyo-repo/internal/util"
+	"github.com/yaz/kyo-repo/internal/db/gen/model"
+	"github.com/yaz/kyo-repo/internal/receiptPdf"
+	"github.com/yaz/kyo-repo/internal/util"
 	"log"
 	"net/http"
 )

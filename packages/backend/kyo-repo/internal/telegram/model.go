@@ -7,7 +7,7 @@ import (
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	"github.com/sst/sst/v3/sdk/golang/resource"
-	"kyo-repo/internal/util"
+	"github.com/yaz/kyo-repo/internal/util"
 	"log"
 	"sync"
 	"time"

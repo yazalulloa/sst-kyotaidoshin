@@ -1,8 +1,8 @@
 package apartments
 
 import (
-	"kyo-repo/internal/db/gen/model"
 	"github.com/google/uuid"
+	"github.com/yaz/kyo-repo/internal/db/gen/model"
 )
 
 type Apt struct {

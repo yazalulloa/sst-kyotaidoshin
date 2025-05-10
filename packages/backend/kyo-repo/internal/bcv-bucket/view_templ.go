@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
-	"kyo-repo/internal/api"
+	"github.com/yaz/kyo-repo/internal/api"
 )
 
 func spanProcess(item Item) templ.Component {

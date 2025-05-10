@@ -147,6 +147,6 @@ func clientSend(c *mail.Client, ctx context.Context, messages []*MsgWithCallBack
 
 		msg.Callback()
 	}
-	
+
 	return nil
 }

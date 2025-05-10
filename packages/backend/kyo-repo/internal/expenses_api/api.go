@@ -1,9 +1,9 @@
 package expenses_api
 
 import (
-	"kyo-repo/internal/api"
-	"kyo-repo/internal/expenses"
-	"kyo-repo/internal/receipts"
+	"github.com/yaz/kyo-repo/internal/api"
+	"github.com/yaz/kyo-repo/internal/expenses"
+	"github.com/yaz/kyo-repo/internal/receipts"
 	"log"
 	"net/http"
 )

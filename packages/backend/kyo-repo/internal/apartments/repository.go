@@ -3,9 +3,9 @@ package apartments
 import (
 	"fmt"
 	"github.com/go-jet/jet/v2/sqlite"
-	"kyo-repo/internal/db"
-	"kyo-repo/internal/db/gen/model"
-	. "kyo-repo/internal/db/gen/table"
+	"github.com/yaz/kyo-repo/internal/db"
+	"github.com/yaz/kyo-repo/internal/db/gen/model"
+	. "github.com/yaz/kyo-repo/internal/db/gen/table"
 	"strings"
 )
 

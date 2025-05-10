@@ -10,7 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/sst/sst/v3/sdk/golang/resource"
-	"kyo-repo/internal/aws_h"
+	"github.com/yaz/kyo-repo/internal/aws_h"
 	"log"
 	"os"
 	"strings"

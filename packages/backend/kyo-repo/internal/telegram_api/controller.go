@@ -2,9 +2,9 @@ package telegram_api
 
 import (
 	"encoding/json"
-	"kyo-repo/internal/api"
-	"kyo-repo/internal/telegram"
-	"kyo-repo/internal/util"
+	"github.com/yaz/kyo-repo/internal/api"
+	"github.com/yaz/kyo-repo/internal/telegram"
+	"github.com/yaz/kyo-repo/internal/util"
 	"net/http"
 )
 

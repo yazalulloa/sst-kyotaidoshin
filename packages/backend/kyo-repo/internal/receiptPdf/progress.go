@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/yaz/kyo-repo/internal/aws_h"
+	"github.com/yaz/kyo-repo/internal/util"
 	"io"
-	"kyo-repo/internal/aws_h"
-	"kyo-repo/internal/util"
 )
 
 type ProgressUpdate struct {

@@ -3,7 +3,7 @@ package telegram
 import (
 	"fmt"
 	"github.com/go-telegram/bot"
-	"kyo-repo/internal/util"
+	"github.com/yaz/kyo-repo/internal/util"
 	"log"
 	"sync"
 )

@@ -1,8 +1,8 @@
 package receipts
 
 import (
-	"kyo-repo/internal/db/gen/model"
-	"kyo-repo/internal/util"
+	"github.com/yaz/kyo-repo/internal/db/gen/model"
+	"github.com/yaz/kyo-repo/internal/util"
 )
 
 type AmountWithCurrency struct {

@@ -3,9 +3,9 @@ package isr
 import (
 	"encoding/base64"
 	"encoding/json"
-	"kyo-repo/internal/db"
-	"kyo-repo/internal/db/gen/model"
-	. "kyo-repo/internal/db/gen/table"
+	"github.com/yaz/kyo-repo/internal/db"
+	"github.com/yaz/kyo-repo/internal/db/gen/model"
+	. "github.com/yaz/kyo-repo/internal/db/gen/table"
 	"log"
 	"slices"
 )

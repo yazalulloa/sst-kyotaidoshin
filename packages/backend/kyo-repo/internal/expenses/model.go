@@ -2,7 +2,7 @@ package expenses
 
 import (
 	"github.com/google/uuid"
-	"kyo-repo/internal/db/gen/model"
+	"github.com/yaz/kyo-repo/internal/db/gen/model"
 )
 
 const AliquotDifference = "DIFERENCIA DE ALIQUOTA"

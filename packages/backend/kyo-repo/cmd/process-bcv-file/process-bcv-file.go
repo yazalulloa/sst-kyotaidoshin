@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"kyo-repo/internal/file"
+	"github.com/yaz/kyo-repo/internal/file"
 	"log"
 	"strings"
 )

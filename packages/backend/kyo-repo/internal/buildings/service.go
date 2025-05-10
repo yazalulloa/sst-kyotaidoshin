@@ -2,10 +2,10 @@ package buildings
 
 import (
 	"github.com/google/uuid"
-	"kyo-repo/internal/api"
-	"kyo-repo/internal/extraCharges"
-	"kyo-repo/internal/reserveFunds"
-	"kyo-repo/internal/util"
+	"github.com/yaz/kyo-repo/internal/api"
+	"github.com/yaz/kyo-repo/internal/extraCharges"
+	"github.com/yaz/kyo-repo/internal/reserveFunds"
+	"github.com/yaz/kyo-repo/internal/util"
 	"log"
 	"strings"
 	"sync"

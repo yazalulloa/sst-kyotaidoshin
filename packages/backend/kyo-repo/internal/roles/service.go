@@ -3,8 +3,8 @@ package roles
 import (
 	"encoding/base64"
 	"encoding/json"
-	"kyo-repo/internal/db/gen/model"
-	"kyo-repo/internal/util"
+	"github.com/yaz/kyo-repo/internal/db/gen/model"
+	"github.com/yaz/kyo-repo/internal/util"
 	"log"
 	"sync"
 )

@@ -8,7 +8,7 @@ package telegram_api
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "kyo-repo/internal/telegram"
+import "github.com/yaz/kyo-repo/internal/telegram"
 import "fmt"
 
 func startUrl(url string) templ.Component {

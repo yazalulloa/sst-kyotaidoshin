@@ -3,9 +3,9 @@ package apartments
 import (
 	"encoding/base64"
 	"encoding/json"
-	"kyo-repo/internal/api"
-	"kyo-repo/internal/db/gen/model"
-	"kyo-repo/internal/util"
+	"github.com/yaz/kyo-repo/internal/api"
+	"github.com/yaz/kyo-repo/internal/db/gen/model"
+	"github.com/yaz/kyo-repo/internal/util"
 	"strings"
 	"sync"
 )

@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
 	"github.com/sst/sst/v3/sdk/golang/resource"
-	"kyo-repo/internal/aws_h"
+	"github.com/yaz/kyo-repo/internal/aws_h"
 	"log"
 	"time"
 )

@@ -1,6 +1,6 @@
 package permissions
 
-import "kyo-repo/internal/db/gen/model"
+import "github.com/yaz/kyo-repo/internal/db/gen/model"
 
 type Item struct {
 	CardId string

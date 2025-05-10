@@ -3,7 +3,7 @@ package permissions
 import (
 	"fmt"
 	"github.com/google/uuid"
-	"kyo-repo/internal/api"
+	"github.com/yaz/kyo-repo/internal/api"
 )
 
 func insertAll() (int64, error) {

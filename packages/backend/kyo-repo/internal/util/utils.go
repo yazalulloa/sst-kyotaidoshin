@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/uuid"
-	"kyo-repo/internal/aws_h"
+	"github.com/yaz/kyo-repo/internal/aws_h"
 	"log"
 	"net/http"
 	"strconv"
