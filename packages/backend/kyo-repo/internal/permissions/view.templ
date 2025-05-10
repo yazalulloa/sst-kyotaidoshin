@@ -1,0 +1,46 @@
+package permissions
+
+import "fmt"
+import "kyo-repo/internal/api"
+
+templ SearchView(res TableResponse) {
+	{{ hasWritePerm := api.HasPerms(ctx, api.PERMISSIONS_WRITE) }}
+	for _, item := range res.Results {
+		<li
+			id={ item.CardId }
+			class={ "fade-me-in fade-me-out ",
+            templ.KV("md:grid-cols-3", hasWritePerm),
+            templ.KV("md:grid-cols-2", !hasWritePerm) }
+		>
+			<span>{ fmt.Sprint(*item.Item.ID) }</span>
+			<span>{ item.Item.Name }</span>
+			if hasWritePerm {
+				@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{"data-recaptcha-action" : "permissions_delete"})
+			}
+		</li>
+	}
+	@CountersView(res.Counters)
+}
+
+templ CountersView(counters Counters) {
+	<div
+		id="permissions-counters"
+		hidden="hidden"
+		hx-swap-oob="true"
+		data-total-count={ fmt.Sprint(counters.TotalCount) }
+		if counters.QueryCount != nil {
+			data-query-count={ fmt.Sprint(*counters.QueryCount) }
+		}
+		x-init="
+	total = $el.getAttribute('data-total-count');
+	query = $el.getAttribute('data-query-count');
+	"
+	></div>
+}
+
+templ permsWithLabels(str string) {
+	<div
+		data-perms={ fmt.Sprint(str) }
+		x-init="$dispatch('event-roles-set-perms', { params: $el.dataset.perms }); $el.remove()"
+	></div>
+}

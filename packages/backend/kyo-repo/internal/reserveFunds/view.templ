@@ -1,0 +1,110 @@
+package reserveFunds
+
+import (
+	"fmt"
+	"kyo-repo/internal/api"
+	"kyo-repo/internal/util"
+	"strings"
+)
+
+templ FormView(dto FormDto) {
+	<div id="reserve-funds-list" hx-swap-oob="innerHTML">
+		for _, item := range dto.Items {
+			@ItemView(item)
+		}
+		<div
+			data-building-key={ dto.Key }
+			data-counter={ fmt.Sprint(len(dto.Items)) }
+			x-init="
+      		buildingKey = $el.getAttribute('data-building-key');
+      		key = buildingKey
+      		counter = parseInt($el.getAttribute('data-counter'));
+      		$el.remove()
+      		"
+		></div>
+	</div>
+}
+
+templ ItemView(item Item) {
+	<li
+		id={ item.CardId }
+		class="fade-me-in fade-me-out hover:opacity-75"
+		if item.isUpdate != nil && *item.isUpdate {
+			hx-swap-oob="true"
+		}
+		if item.UpdateParams != nil {
+			data-update-params={ *item.UpdateParams }
+			@click="$dispatch('event-reserve-fund-form-update', { params: $el.getAttribute('data-update-params') })"
+		}
+	>
+		<div class="flex flex-col gap-2 justify-center text-center items-center">
+			<div class="flex flex-row justify-center">
+				<span>{ item.Item.Name }</span>
+				<span>:&nbsp;</span>
+				@api.SpanFormatCurrency(item.Item.Fund, util.VED.Name())
+			</div>
+			<div class="flex flex-row justify-center font-light">
+				@api.SpanWitX_Text("$t('main-title-expense')")
+				<span>:&nbsp;</span>
+				@api.SpanFormatCurrency(item.Item.Expense, util.VED.Name())
+			</div>
+		</div>
+		<div class="flex justify-center items-center text-center">
+			if PERCENTAGE.FundIs(item.Item) {
+				<span>{ fmt.Sprint(item.Item.Pay) + " %" }</span>
+			} else {
+				@api.SpanFormatCurrency(item.Item.Pay, util.VED.Name())
+			}
+		</div>
+		<div class="flex flex-col gap-2 justify-center items-center text-center">
+			@api.BadgeIndicatorWithTooltip(item.Item.Active, "", api.SpanWitX_Text(fmt.Sprintf("$t('main-title-%s')", strings.ToLower(item.Item.Type))), nil)
+			@api.BadgeIndicatorWithTooltip(item.Item.AddToExpenses, "", api.SpanWitX_Text(fmt.Sprintf("$t('main-title-%s')", strings.ToLower(item.Item.ExpenseType))), nil)
+		</div>
+		@api.DeleteBtn(fmt.Sprintf(PATH+"/%s", item.Key), item.CardId, templ.Attributes{"data-recaptcha-action" : "reserve_funds_delete"})
+	</li>
+}
+
+templ FormResponseView(res FormResponse) {
+	<div
+		data-response-err={ res.ErrorStr }
+		data-counter={ fmt.Sprint(res.counter) }
+		x-init="
+ 		errMsg = $el.getAttribute('data-response-err');
+  		counter = parseInt($el.getAttribute('data-counter'));
+
+ 		if (errMsg === '') {
+ 		  $dispatch('event-reserve-fund-form-reset');
+ 		 }
+ 		"
+	></div>
+	if res.Item != nil {
+		if res.Item.isUpdate != nil {
+			if *res.Item.isUpdate {
+				@ItemView(*res.Item)
+			} else {
+				<div id="reserve-funds-list" hx-swap-oob="beforeend">
+					@ItemView(*res.Item)
+				</div>
+			}
+		}
+	}
+	{ children... }
+}
+
+templ DeleteResponse(counter int64, key string) {
+	<div
+		id="reserve-funds-list"
+		hx-swap-oob="beforeend"
+	>
+		<div
+			hidden="hidden"
+			data-counter={ fmt.Sprint(counter) }
+			x-init="
+        		counter = parseInt($el.getAttribute('data-counter'));
+        		$dispatch('event-reserve-fund-building-restart-after-deletion', { key: key });
+        		$el.remove()
+        		"
+		></div>
+	</div>
+	{ children... }
+}

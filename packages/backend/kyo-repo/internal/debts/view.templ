@@ -1,0 +1,116 @@
+package debts
+
+import (
+	"fmt"
+	"kyo-repo/internal/api"
+	"kyo-repo/internal/util"
+)
+
+templ FormView(dto FormDto) {
+	<div id="debts-list" hx-swap-oob="innerHTML">
+		for _, item := range dto.Items {
+			@ItemView(item)
+		}
+		@TotalsView(dto.Totals)
+	</div>
+}
+
+templ TotalsView(totals Totals) {
+	<div
+		data-counter={ fmt.Sprint(totals.Counter) }
+		data-total-amount={ util.FormatFloat2(totals.TotalAmount) }
+		data-total-receipts={ fmt.Sprint(totals.TotalReceipts) }
+		x-init="
+      		counter = parseInt($el.getAttribute('data-counter'));
+      		total = parseFloat($el.getAttribute('data-total-amount'));
+      		totalReceipts = parseInt($el.getAttribute('data-total-receipts'));
+      		$el.remove()
+      		"
+	></div>
+}
+
+templ ItemView(item Item) {
+	<li
+		id={ item.CardId }
+		class="fade-me-in fade-me-out hover:opacity-75"
+		if item.isUpdate != nil && *item.isUpdate {
+			hx-swap-oob="true"
+		}
+		if item.UpdateParams != nil {
+			data-update-params={ *item.UpdateParams }
+			@click="$dispatch('event-debt-form-update', { params: $el.getAttribute('data-update-params') })"
+		}
+	>
+		<div class="flex flex-row gap-1 justify-start">
+			<span class="text-start">{ item.Item.AptNumber }</span>
+			<span class="text-start" data-apt={ item.Item.AptNumber } x-text="aptMap.get($el.getAttribute('data-apt'))"></span>
+		</div>
+		<span>{ fmt.Sprint(item.Item.Receipts) }</span>
+		<span class="text-end" x-text={ fmt.Sprintf("FormatCurrency(parseFloat(%s), %s)", util.FormatFloat2(item.Item.Amount), "debtCurrency") }></span>
+		if item.Months.Amount > 0 {
+			<div class="flex justify-center">
+				<div class="flex flex-row">
+					<span x-text="$t('main-title-months')"></span>
+					<span>:&nbsp;</span>
+					<span>{ fmt.Sprint(item.Months.Amount) }</span>
+				</div>
+			</div>
+		} else {
+			<div class="flex flex-col gap-1 px-2">
+				for _,year := range item.Months.Years {
+					if year.Year > 0 {
+						<div class="grid grid-cols-[1fr_1fr_5fr] gap-1">
+							<span>{ fmt.Sprint(year.Year) }</span>
+							<div class="flex flex-row justify-center">
+								<span>(</span>
+								<span>{ fmt.Sprint(len(year.Months)) }</span>
+								<span>)</span>
+							</div>
+							<div class="flex flex-row flex-wrap gap-1 justify-center">
+								for _, month := range year.Months {
+									<span x-text={ fmt.Sprintf("$t('main-months-short-%d')", month) }></span>
+								}
+							</div>
+						</div>
+					} else {
+						<div class="flex flex-row flex-wrap gap-1 justify-center">
+							for _, month := range year.Months {
+								<span x-text={ fmt.Sprintf("$t('main-months-short-%d')", month) }></span>
+							}
+						</div>
+					}
+				}
+			</div>
+		}
+		<div class="flex justify-center items-center text-center">
+			@api.SpanFormatCurrency(item.Item.PreviousPaymentAmount, item.Item.PreviousPaymentAmountCurrency)
+		</div>
+	</li>
+}
+
+templ FormResponseView(res FormResponse) {
+	<div
+		data-response-err={ res.errorStr }
+		x-init="
+ 		  errMsg = $el.getAttribute('data-response-err');
+
+ 		if (errMsg === '') {
+ 		  $dispatch('event-debt-form-reset');
+ 		 }
+ 		"
+	></div>
+	if res.item != nil {
+		if res.item.isUpdate != nil {
+			if *res.item.isUpdate {
+				@ItemView(*res.item)
+			} else {
+				<div id="debts-list" hx-swap-oob="beforeend">
+					@ItemView(*res.item)
+				</div>
+			}
+		}
+	}
+	if res.Totals != nil {
+		@TotalsView(*res.Totals)
+	}
+}

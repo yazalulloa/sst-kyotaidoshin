@@ -1,0 +1,142 @@
+package buildings
+
+import (
+	"fmt"
+	"kyo-repo/internal/api"
+	"kyo-repo/internal/extraCharges"
+	"kyo-repo/internal/reserveFunds"
+	"kyo-repo/internal/util"
+)
+
+templ Search(res *TableResponse) {
+	{{ hasWritePerm := api.HasPerms(ctx, api.BUILDINGS_WRITE) }}
+	for _, item := range res.Results {
+		<li
+			id={ item.CardId }
+			class={ "fade-me-in fade-me-out ",
+        templ.KV("md:grid-cols-6", hasWritePerm),
+        templ.KV("md:grid-cols-5", !hasWritePerm) }
+		>
+			<div class="flex flex-col gap-2">
+				<span>{ fmt.Sprint(item.Item.ID) }</span>
+				<span>{ fmt.Sprint(item.Item.Name) }</span>
+				<span>{ fmt.Sprint(item.Item.Rif) }</span>
+			</div>
+			<div class="flex flex-col gap-2">
+				<span>
+					<span x-text="$t('main-buildings-main-currency')"></span>:
+					<span>{ fmt.Sprint(item.Item.MainCurrency) }</span>
+				</span>
+				<span>
+					<span x-text="$t('main-buildings-debt-currency')"></span>:
+					<span>{ fmt.Sprint(item.Item.DebtCurrency) }</span>
+				</span>
+				<span>
+					<span x-text="$t('main-buildings-show-currencies-amount-pay')"></span>:
+					<span>{ fmt.Sprint(item.Item.CurrenciesToShowAmountToPay) }</span>
+				</span>
+			</div>
+			<div class="flex flex-col gap-2 justify-center items-center text-center">
+				if item.Item.FixedPay && item.Item.FixedPayAmount != 0 {
+					<span class="flex flex-row">
+						<span x-text="$t('main-buildings-fixed-pay')"></span>
+						<span>:&nbsp;</span>
+						<span>{ util.FormatFloat64(item.Item.FixedPayAmount) }</span>
+					</span>
+				}
+				@api.Badge(item.Item.RoundUpPayments) {
+					<span x-text="$t('main-buildings-round-up-payments')"></span>
+				}
+			</div>
+			<div class="flex flex-col gap-2 justify-center items-center text-center">
+				<span class="flex flex-row">
+					<span x-text="$t('main-title-apartments')"></span>
+					<span>:&nbsp;</span>
+					<span>{ fmt.Sprint(item.AptCount) }</span>
+				</span>
+				<span class="flex flex-row">
+					<span x-text="$t('main-buildings-email-config')"></span>
+					<span>:&nbsp;</span>
+					<span>{ fmt.Sprint(item.Item.EmailConfig) }</span>
+				</span>
+			</div>
+			@api.SpanFormatDate(fmt.Sprint(item.CreatedAt))
+			if hasWritePerm {
+				<div class="flex flex-row flex-wrap gap-2 justify-center items-center">
+					<a href={ templ.URL(fmt.Sprintf("/buildings/edit/%s", item.Key)) }>
+						<button
+							type="button"
+							class="whitespace-nowrap bg-transparent rounded-full border border-success p-1 text-sm font-medium tracking-wide text-success transition hover:opacity-75 text-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-success active:opacity-100 active:outline-offset-0 disabled:opacity-75 disabled:cursor-not-allowed dark:border-success-dark dark:text-success-dark dark:focus-visible:outline-success-dark"
+						>
+							<svg x-bind:data-src="editIconUrl" data-cache="21600" class="h-6 w-6"></svg>
+						</button>
+					</a>
+					@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{"data-recaptcha-action": "buildings_delete"})
+				</div>
+			}
+		</li>
+	}
+	if res.NextPageUrl != "" {
+		@api.NextPageLi(res.NextPageUrl, templ.Attributes{})
+	}
+	@CountersView(res.Counters)
+}
+
+templ CountersView(counters Counters) {
+	<div
+		id="buildings-counters"
+		hidden="hidden"
+		hx-swap-oob="true"
+		data-total-count={ fmt.Sprint(counters.TotalCount) }
+		if counters.QueryCount != nil {
+			data-query-count={ fmt.Sprint(*counters.QueryCount) }
+		}
+		x-init="
+	total = $el.getAttribute('data-total-count');
+	query = $el.getAttribute('data-query-count');
+	"
+	></div>
+}
+
+templ FormView(dto FormDto) {
+	@api.CSRF()
+	if dto.Key != nil {
+		<input type="hidden" name="key" value={ *dto.Key }/>
+	}
+	if dto.UpdateParams != nil {
+		<div
+			hidden="hidden"
+			data-params={ *dto.UpdateParams }
+			x-init="
+      		$dispatch('event-building-form-update', $el.dataset.params);
+          $el.remove();
+      		"
+		></div>
+		@reserveFunds.FormView(dto.reserveFundFormDto)
+		@extraCharges.FormView(dto.extraChargesFormDto)
+	} else {
+	 <div x-init="open = true"></div>
+	}
+	<div id="emailConfigSelect" hx-swap-oob="innerHTML">
+		for _,emailConfig := range dto.emailConfigs {
+			<option value={ emailConfig.key }>{ emailConfig.email }</option>
+		}
+	</div>
+}
+
+templ FormResponseView(res FormResponse) {
+	<div
+		data-response-err={ res.errorStr }
+		x-init="
+errMsg = $el.getAttribute('data-response-err');
+
+if (errMsg === '') {
+let form = $el.closest('form')
+form.classList.add('border', 'border-success');
+await sleep(3000);
+form.classList.remove('border', 'border-success');
+}
+
+"
+	></div>
+}

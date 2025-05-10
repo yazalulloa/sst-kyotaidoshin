@@ -1,0 +1,108 @@
+package users
+
+import (
+	"fmt"
+	"kyo-repo/internal/api"
+)
+
+templ Search(res TableResponse) {
+	for _, item := range res.Results {
+		@ItemView(item)
+	}
+	if res.NextPageUrl != "" {
+		@api.NextPageLi(res.NextPageUrl, templ.Attributes{})
+	}
+	@CountersView(res.Counters)
+}
+
+templ ItemView(item Item) {
+	{{ hasWritePerm := api.HasPerms(ctx, api.USERS_WRITE) }}
+	<li
+		id={ item.CardId }
+		class="fade-me-in fade-me-out"
+		if item.isUpdate {
+			hx-swap-oob="true"
+		}
+		if hasWritePerm && item.UpdateParams != nil {
+			data-params={ *item.UpdateParams }
+			@dblclick.prevent="$dispatch('event-users-form-update', { params: $el.dataset.params })"
+		}
+	>
+		<div class="flex justify-center w-full gap-2">
+			<img src={ item.Item.Picture } alt="Avatar" class="h-8 w-8 rounded-full p-1" referrerpolicy="no-referrer"/>
+			<svg data-provider={ item.Item.Provider } x-bind:data-src="PROVIDER_ICONS.get($el.dataset.provider.toLowerCase())" class="h-8 w-8 rounded-full p-1"></svg>
+		</div>
+		<span>{ item.Item.Email }</span>
+		<div class="flex flex-col justify-center gap-2">
+			<span>{ item.Item.Username }</span>
+			if item.Item.Name != item.Item.Username {
+				<span>{ item.Item.Name }</span>
+			}
+			if item.Chat != nil && item.Chat.Username != nil {
+				<div class="flex flex-row gap-2 justify-center items-center text-center">
+					<svg x-bind:data-src="telegramIconUrl" class="h-4 w-4"></svg>
+					<span>{ *item.Chat.Username }</span>
+				</div>
+			}
+		</div>
+		<div class="flex flex-col justify-center gap-2">
+			<div class="flex flex-row justify-center">
+				<span x-text="$t('main-title-role')"></span>
+				<span>:&nbsp;</span>
+				if item.Role != nil {
+					<span>{ item.Role.Name }</span>
+				} else {
+					<span>N/A</span>
+				}
+			</div>
+			if item.Item.NotificationEvents != nil {
+				<div class="flex flex-row justify-center">
+					<span x-text="$t('main-title-notifications')"></span>
+					<span>:&nbsp;</span>
+					<span>{ *item.Item.NotificationEvents }</span>
+				</div>
+			}
+		</div>
+		<div class="flex flex-col gap-2 justify-center">
+			@api.SpanFormatDate(fmt.Sprint(item.CreatedAt))
+			if item.LastLoginAt > 0 {
+				@api.SpanFormatDate(fmt.Sprint(item.LastLoginAt))
+			}
+		</div>
+		if hasWritePerm {
+			@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{"data-recaptcha-action": "users_delete"})
+		}
+	</li>
+}
+
+templ CountersView(counters Counters) {
+	<div
+		id="users-counters"
+		hidden="hidden"
+		hx-swap-oob="true"
+		data-total-count={ fmt.Sprint(counters.TotalCount) }
+		if counters.QueryCount != nil {
+			data-query-count={ fmt.Sprint(*counters.QueryCount) }
+		}
+		x-init="
+	total = $el.getAttribute('data-total-count');
+	query = $el.getAttribute('data-query-count');
+	"
+	></div>
+}
+
+templ UserRoleFormResponseView(res FormResponse) {
+	<div
+		data-response-err={ res.errorStr }
+		x-init="
+  		errMsg = $el.getAttribute('data-response-err');
+
+  		if (errMsg === '') {
+  		  $dispatch('event-users-form-close');
+  		 }
+  		"
+	></div>
+	if res.item != nil && res.item.isUpdate {
+		@ItemView(*res.item)
+	}
+}

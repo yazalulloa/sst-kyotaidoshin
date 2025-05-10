@@ -1,0 +1,703 @@
+package receipts
+
+import (
+	"fmt"
+	"kyo-repo/internal/util"
+	"kyo-repo/internal/expenses"
+	"slices"
+	"strings"
+	"time"
+)
+
+templ ReceiptHeader(dto CalculatedReceipt) {
+	<p>{ dto.Building.Name }</p>
+	<p>{ dto.Building.Rif }</p>
+	<p>MES A PAGAR: { strings.ToUpper(dto.MonthStr) }</p>
+	<p>{ dto.Receipt.Date.Format(time.DateOnly) }</p>
+}
+
+templ Views(key string, dto CalculatedReceipt, idMap map[string]string, tabs string) {
+	<div id="receipt-info" hx-swap-oob="true" class="flex gap-2">
+		<span>{ dto.Building.Name }</span>
+		<span>{ dto.Receipt.Date.Format(time.DateOnly) }</span>
+		<span>{ fmt.Sprint(dto.Receipt.Year) }</span>
+		<span>{ strings.ToUpper(dto.MonthStr) }</span>
+	</div>
+	<div id="pdf-header" hx-swap-oob="beforeend">
+		<div
+			data-tabs={ tabs }
+			x-init="
+  		$dispatch('event-update-tabs', {tabs: $el.dataset.tabs})
+  		$el.remove()
+  		"
+		></div>
+	</div>
+	<div
+		x-cloak
+		x-show={ fmt.Sprintf("selected === '%s'", idMap[dto.Building.ID]) }
+		id={ fmt.Sprintf("tabpanel%s", idMap[dto.Building.ID]) }
+		role="tabpanel"
+		aria-label={ idMap[dto.Building.ID] }
+		x-transition.scale.origin.bottom
+		class="flex flex-col gap-2 w-full"
+	>
+		<button
+			hx-get={ fmt.Sprintf(_DOWNLOAD_PDF_FILE+"/%s", dto.BuildingDownloadKeys) }
+			todo-fix-hx-indicator=".htmx-indicator"
+			asd-hx-disabled-elt="this"
+			hx-trigger="mousedown"
+			hx-target="this"
+			hx-swap="none"
+			type="button"
+			class="btn btn-neutral"
+			hx-on:htmx:before-request="this.dispatchEvent(new CustomEvent('event-is-loading'))"
+			hx-on:htmx:after-request="this.dispatchEvent(new CustomEvent('event-is-not-loading'))"
+			@event-is-loading="isLoading = true"
+			@event-is-not-loading="isLoading = false"
+			x-data="{isLoading: false}"
+			x-bind:disabled="isLoading"
+		>
+			<svg x-bind:data-src="pdfIconUrl" data-cache="21600" class="size-5"></svg>
+			<span class="uppercase" x-text="$t('main-action-download')"></span>
+			<span>{ dto.Building.ID }</span>
+			<svg
+				x-show="isLoading"
+				x-bind:data-src="loadingIconUrl"
+				class="size-5 animate-spin motion-reduce:animate-none fill-on-primary dark:fill-on-primary-dark"
+			></svg>
+		</button>
+		<div class="container mx-auto min-w-full overflow-x-scroll">
+			<div class="bg-white px-6 py-2 text-black overflow-x-auto whitespace-nowrap min-w-full flex flex-col gap-1 w-fit">
+				@BuildingView(dto)
+			</div>
+		</div>
+	</div>
+	for _,apt := range dto.Apartments {
+		<div
+			x-show={ fmt.Sprintf("selected === '%s'", idMap[apt.Apartment.Number]) }
+			x-transition.scale.origin.bottom
+			class="flex flex-col gap-2 w-full"
+		>
+			<button
+				hx-get={ fmt.Sprintf(_DOWNLOAD_PDF_FILE+"/%s", apt.DownloadKeys) }
+				todo-fix-hx-indicator=".htmx-indicator"
+				asd-hx-disabled-elt="this"
+				hx-trigger="mousedown"
+				hx-target="this"
+				hx-swap="none"
+				type="button"
+				class="btn btn-neutral"
+				hx-on:htmx:before-request="this.dispatchEvent(new CustomEvent('event-is-loading'))"
+				hx-on:htmx:after-request="this.dispatchEvent(new CustomEvent('event-is-not-loading'))"
+				@event-is-loading="isLoading = true"
+				@event-is-not-loading="isLoading = false"
+				x-data="{isLoading: false}"
+				x-bind:disabled="isLoading"
+			>
+				<svg x-bind:data-src="pdfIconUrl" data-cache="21600" class="size-5"></svg>
+				<span class="uppercase" x-text="$t('main-action-download')"></span>
+				<span>{ apt.Apartment.Number }</span>
+				<svg
+					x-show="isLoading"
+					x-bind:data-src="loadingIconUrl"
+					class="size-5 animate-spin motion-reduce:animate-none fill-on-primary dark:fill-on-primary-dark"
+				></svg>
+			</button>
+			<div class="container mx-auto min-w-full overflow-x-scroll">
+				<div class="bg-white px-6 py-2 text-black overflow-x-auto whitespace-nowrap min-w-full flex flex-col gap-1 w-fit">
+					@AptView(dto, apt)
+				</div>
+			</div>
+		</div>
+	}
+}
+
+templ PrintView(title string, component templ.Component) {
+	<!DOCTYPE html>
+	<html lang="es">
+		<head>
+			<title>AVISO DE COBRO { title }</title>
+			<style>
+          @page {
+            size: A4 portrait;
+            margin: 1rem;
+          }
+
+          @media print {
+
+            html, body {
+              font-size: 10pt;
+            }
+          }
+
+          th {
+            padding-left: 15px;
+          }
+
+          td {
+            padding-left: 15px;
+          }
+
+          :root, :host {
+            --font-sans: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+            "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+            "Courier New", monospace;
+            --color-black: #000;
+            --color-white: #fff;
+            --spacing: 0.25rem;
+            --font-weight-bold: 700;
+            --default-font-family: var(--font-sans);
+            --default-font-feature-settings: var(--font-sans--font-feature-settings);
+            --default-font-variation-settings: var(
+                --font-sans--font-variation-settings
+            );
+            --default-mono-font-family: var(--font-mono);
+            --default-mono-font-feature-settings: var(
+                --font-mono--font-feature-settings
+            );
+            --default-mono-font-variation-settings: var(
+                --font-mono--font-variation-settings
+            );
+          }
+
+          *, ::after, ::before, ::backdrop, ::file-selector-button {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            border: 0 solid;
+          }
+
+          html, :host {
+            line-height: 1.5;
+            -webkit-text-size-adjust: 100%;
+            tab-size: 4;
+            font-family: var(--default-font-family, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji");
+            font-feature-settings: var(--default-font-feature-settings, normal);
+            font-variation-settings: var(--default-font-variation-settings, normal);
+            -webkit-tap-highlight-color: transparent;
+          }
+
+          body {
+            line-height: inherit;
+          }
+
+          hr {
+            height: 0;
+            color: inherit;
+            border-top-width: 1px;
+          }
+
+          abbr:where([title]) {
+            -webkit-text-decoration: underline dotted;
+            text-decoration: underline dotted;
+          }
+
+          h1, h2, h3, h4, h5, h6 {
+            font-size: inherit;
+            font-weight: inherit;
+          }
+
+          a {
+            color: inherit;
+            -webkit-text-decoration: inherit;
+            text-decoration: inherit;
+          }
+
+          b, strong {
+            font-weight: bolder;
+          }
+
+          code, kbd, samp, pre {
+            font-family: var(--default-mono-font-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+            font-feature-settings: var(--default-mono-font-feature-settings, normal);
+            font-variation-settings: var(--default-mono-font-variation-settings, normal);
+            font-size: 1em;
+          }
+
+          small {
+            font-size: 80%;
+          }
+
+          sub, sup {
+            font-size: 75%;
+            line-height: 0;
+            position: relative;
+            vertical-align: baseline;
+          }
+
+          sub {
+            bottom: -0.25em;
+          }
+
+          sup {
+            top: -0.5em;
+          }
+
+          table {
+            text-indent: 0;
+            border-color: inherit;
+            border-collapse: collapse;
+          }
+
+          :-moz-focusring {
+            outline: auto;
+          }
+
+          progress {
+            vertical-align: baseline;
+          }
+
+          summary {
+            display: list-item;
+          }
+
+          ol, ul, menu {
+            list-style: none;
+          }
+
+          img, svg, video, canvas, audio, iframe, embed, object {
+            display: block;
+            vertical-align: middle;
+          }
+
+          img, video {
+            max-width: 100%;
+            height: auto;
+          }
+
+          button, input, select, optgroup, textarea, ::file-selector-button {
+            font: inherit;
+            font-feature-settings: inherit;
+            font-variation-settings: inherit;
+            letter-spacing: inherit;
+            color: inherit;
+            border-radius: 0;
+            background-color: transparent;
+            opacity: 1;
+          }
+
+          :where(select:is([multiple], [size])) optgroup {
+            font-weight: bolder;
+          }
+
+          :where(select:is([multiple], [size])) optgroup option {
+            padding-inline-start: 20px;
+          }
+
+          ::file-selector-button {
+            margin-inline-end: 4px;
+          }
+
+          ::placeholder {
+            opacity: 1;
+            color: color-mix(in oklab, currentColor 50%, transparent);
+          }
+
+          textarea {
+            resize: vertical;
+          }
+
+          ::-webkit-search-decoration {
+            -webkit-appearance: none;
+          }
+
+          ::-webkit-date-and-time-value {
+            min-height: 1lh;
+            text-align: inherit;
+          }
+
+          ::-webkit-datetime-edit {
+            display: inline-flex;
+          }
+
+          ::-webkit-datetime-edit-fields-wrapper {
+            padding: 0;
+          }
+
+          ::-webkit-datetime-edit, ::-webkit-datetime-edit-year-field, ::-webkit-datetime-edit-month-field, ::-webkit-datetime-edit-day-field, ::-webkit-datetime-edit-hour-field, ::-webkit-datetime-edit-minute-field, ::-webkit-datetime-edit-second-field, ::-webkit-datetime-edit-millisecond-field, ::-webkit-datetime-edit-meridiem-field {
+            padding-block: 0;
+          }
+
+          :-moz-ui-invalid {
+            box-shadow: none;
+          }
+
+          button, input:where([type="button"], [type="reset"], [type="submit"]), ::file-selector-button {
+            appearance: button;
+          }
+
+          ::-webkit-inner-spin-button, ::-webkit-outer-spin-button {
+            height: auto;
+          }
+
+          [hidden]:where(:not([hidden="until-found"])) {
+            display: none !important;
+          }
+
+          .flex {
+            display: flex;
+            margin: 0; /* Reset margin */
+            padding: 0; /* Reset padding */
+          }
+
+          .flex p {
+            margin: 0; /* Remove default margin */
+            padding: 0; /* Remove default padding */
+          }
+
+          .flex p + p {
+            margin-top: 5px; /* Space between paragraphs (gap-1 equivalent) */
+          }
+
+          .w-fit {
+            width: fit-content;
+          }
+
+          .w-full {
+            width: 100%;
+          }
+
+          .break-inside-avoid {
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+
+          .flex-col {
+            flex-direction: column;
+          }
+
+          .items-center {
+            align-items: center;
+          }
+
+          .items-start {
+            align-items: flex-start;
+          }
+
+          .justify-center {
+            justify-content: center;
+          }
+
+          .justify-start {
+            justify-content: flex-start;
+          }
+
+          .gap-1 {
+            margin-top: .25rem;
+          }
+
+          .gap-2 {
+            margin-top: .50rem;
+          }
+
+          .gap-x-2 {
+            column-gap: .50rem;
+          }
+
+          .gap-x-3 {
+            column-gap: .75rem;
+          }
+
+          .bg-white {
+            background-color: white;
+          }
+
+          .px-4 {
+            padding-inline: 1rem
+          }
+
+          .py-1 {
+            padding-block: .25rem;
+          }
+
+          .text-center {
+            text-align: center;
+          }
+
+          .text-end {
+            text-align: right;
+          }
+
+          .text-start {
+            text-align: left;
+          }
+
+          .font-bold {
+            font-weight: 700;
+          }
+
+          .whitespace-nowrap {
+            white-space: nowrap;
+          }
+
+          .text-black {
+            color: black;
+          }
+
+          table {
+            margin-left: auto;
+            margin-right: auto;
+          }
+
+        </style>
+		</head>
+		<body class="bg-white px-4 py-1 text-black flex flex-col  items-center">
+			@component
+		</body>
+	</html>
+}
+
+templ BuildingView(dto CalculatedReceipt) {
+	{{ multipleCurrencies := len(dto.CurrenciesToShowAmountToPay) > 1 }}
+	{{ mainCurrency := util.GetAllowedCurrency(dto.Building.MainCurrency) }}
+	<h4 class="text-center font-bold">AVISO DE COBRO</h4>
+	<div class="w-full flex flex-col justify-start text-start items-start">
+		<p>{ dto.Building.Name }</p>
+		<p>{ dto.Building.Rif }</p>
+		<p>MES A PAGAR: { strings.ToUpper(dto.MonthStr) }</p>
+		<p>{ dto.Receipt.Date.Format(time.DateOnly) }</p>
+		if multipleCurrencies {
+			<p>TASA DE CAMBIO AL DÍA:		{ util.VED.Format(dto.Rate.Rate) }</p>
+			<p>FECHA DE TASA DE CAMBIO: { dto.Rate.DateOfRate.Format(time.DateOnly) }</p>
+		}
+	</div>
+	<br/>
+	<p class="font-bold">LISTADO A PAGAR</p>
+	<div class="w-full flex flex-col  items-center">
+		<div class="w-fit flex flex-col  items-center gap-1">
+			<table>
+				<thead>
+					<tr>
+						<th class="font-bold text-start">APTO</th>
+						<th class="font-bold text-start">PROPIETARIO</th>
+						if multipleCurrencies {
+							for _,currency := range dto.CurrenciesToShowAmountToPay {
+								<th class="font-bold text-end">MONTO { currency.Name() }</th>
+							}
+						} else {
+							<th class="font-bold text-end">MONTO</th>
+						}
+					</tr>
+				</thead>
+				<tbody>
+					for _,aptTotal := range dto.Apartments {
+						<tr>
+							<td class="text-start">{ aptTotal.Apartment.Number }</td>
+							<td class="text-start">{ aptTotal.Apartment.Name }</td>
+							if multipleCurrencies {
+								for _,currency := range dto.CurrenciesToShowAmountToPay {
+									for _,amount := range aptTotal.Amounts {
+										if currency == amount.Currency {
+											<td class="text-end">{ amount.Currency.Format(amount.Amount) }</td>
+										}
+									}
+								}
+							} else {
+								for _,amount := range aptTotal.Amounts {
+									if mainCurrency == amount.Currency {
+										<td class="text-end">{ amount.Currency.Format(amount.Amount) }</td>
+									}
+								}
+							}
+						</tr>
+					}
+				</tbody>
+			</table>
+			<br/>
+			<p class="w-full font-bold text-end">TOTAL: { mainCurrency.Format(dto.ApartmentsTotal) }</p>
+		</div>
+	</div>
+}
+
+templ AptView(dto CalculatedReceipt, apt AptTotal) {
+	<h4 class="text-center font-bold">AVISO DE COBRO</h4>
+	<div class="w-full flex flex-col justify-start text-start items-start gap-1">
+		@ReceiptHeader(dto)
+		<p>PROPIETARIO: { apt.Apartment.Name }</p>
+		<p>APT: { apt.Apartment.Number }</p>
+		for _,amount := range apt.Amounts {
+			if slices.Contains(dto.CurrenciesToShowAmountToPay, amount.Currency) {
+				<p>VALOR RECIBO: { amount.Currency.Format(amount.Amount) }</p>
+			}
+		}
+		if !dto.Building.FixedPay {
+			if slices.Contains(dto.CurrenciesToShowAmountToPay, util.VED) && slices.Contains(dto.CurrenciesToShowAmountToPay, util.USD) {
+				<p>
+					TASA DE CAMBIO AL DÍA { dto.Rate.DateOfRate.Format(time.DateOnly) } :
+					{ util.VED.Format(dto.Rate.Rate) }
+				</p>
+			}
+			<p>ALÍQUOTA: { util.FormatFloat64(apt.Apartment.Aliquot) }</p>
+		}
+	</div>
+	<br/>
+	@ExpenseView(dto)
+	if len(apt.ExtraCharges) > 0 {
+		<div class="break-inside-avoid w-full flex flex-col  items-center">
+			<div class="w-fit flex flex-col gap-2  items-center">
+				<p class="text-center font-bold">CARGOS EXTRA</p>
+				<table>
+					<thead>
+						<tr>
+							<th class="font-bold">DESCRIPCIÓN</th>
+							<th class="font-bold">MONTO</th>
+						</tr>
+					</thead>
+					<tbody>
+						for _,extraCharge := range apt.ExtraCharges {
+							<tr>
+								<td class="text-start">{ extraCharge.Description }</td>
+								<td class="text-end">{ util.GetAllowedCurrency(extraCharge.Currency).Format(extraCharge.Amount) }</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+			<br/>
+		</div>
+	}
+	@ReserveFundView(dto)
+	@DebtView(dto)
+}
+
+templ ExpenseView(dto CalculatedReceipt) {
+	<div class="break-inside-avoid w-full flex flex-col  items-center">
+		<div class="w-fit flex flex-col gap-2  items-center">
+			<p class="text-center font-bold">GASTOS COMUNES</p>
+			<table>
+				<thead>
+					<tr>
+						<th class="font-bold">DESCRIPCIÓN</th>
+						<th class="font-bold">MONTO</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _,exp := range dto.Expenses {
+						if expenses.COMMON.ExpenseIs(exp.Expense) {
+							<tr>
+								<td class="text-start">{ exp.Expense.Description }</td>
+								<td class="text-end px-4">{ util.GetAllowedCurrency(exp.Expense.Currency).Format(exp.Expense.Amount) }</td>
+							</tr>
+						}
+					}
+				</tbody>
+			</table>
+			<br/>
+			<p class="w-full font-bold text-end">TOTAL GASTOS COMUNES: { dto.TotalCommonExpensesCurrency.Format(dto.TotalCommonExpenses) }</p>
+		</div>
+		<br/>
+	</div>
+	<div class="break-inside-avoid w-full flex flex-col  items-center">
+		<div class="w-fit flex flex-col gap-2  items-center">
+			<p class="text-center font-bold">GASTOS NO COMUNES</p>
+			<table>
+				<thead>
+					<tr>
+						<th class="font-bold">DESCRIPCIÓN</th>
+						<th class="font-bold">MONTO</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _,exp := range dto.Expenses {
+						if expenses.UNCOMMON.ExpenseIs(exp.Expense) {
+							<tr>
+								<td class="text-start">{ exp.Expense.Description }</td>
+								<td class="text-end px-4">{ util.GetAllowedCurrency(exp.Expense.Currency).Format(exp.Expense.Amount) }</td>
+							</tr>
+						}
+					}
+				</tbody>
+			</table>
+			<br/>
+			<p class="w-full font-bold text-end">TOTAL GASTOS NO COMUNES: { dto.TotalUnCommonExpensesCurrency.Format(dto.TotalUnCommonExpenses) }</p>
+		</div>
+		<br/>
+	</div>
+}
+
+templ ReserveFundView(dto CalculatedReceipt) {
+	<div class="break-inside-avoid whitespace-nowrap w-full flex flex-col  items-center">
+		<div class="w-fit flex flex-col gap-2  items-center">
+			<p class="text-center font-bold">MES DE { strings.ToUpper(dto.MonthStr) }/{ fmt.Sprint(dto.Receipt.Year) }</p>
+			<table>
+				<thead>
+					<tr>
+						<th class="font-bold text-start">PATRIMONIO</th>
+						<th class="font-bold text-end">+FACT.MES.ANT</th>
+						if dto.ThereIsReserveFundExpense {
+							<th class="font-bold text-end">CARGOS</th>
+						}
+						<th class="font-bold text-end">+FAC.MES.ACT</th>
+						<th class="font-bold text-end">SALDO/MES</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _,fund := range dto.ReserveFunds {
+						<tr>
+							<td class="text-start">{ fund.Fund.Name } </td>
+							<td class="text-end">{ fund.FundFormatted } </td>
+							if dto.ThereIsReserveFundExpense {
+								<td class="text-end">{ fund.ExpenseFormatted }</td>
+							}
+							<td class="text-end">{ fund.AmountToPay } </td>
+							<td class="text-end">{ fund.NewReserveFund } </td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+		<br/>
+	</div>
+}
+
+templ DebtView(dto CalculatedReceipt) {
+{{ multipleCurrencies := len(dto.DebtsCurrenciesToShow) > 0 }}
+	<div class="break-inside-avoid whitespace-nowrap w-full flex flex-col  items-center">
+		<div class="w-fit flex flex-col gap-2  items-center">
+			<p class="text-center font-bold">DEUDAS</p>
+			<table>
+				<thead>
+					<tr>
+						<th class="font-bold text-start">APTO</th>
+						<th class="font-bold text-start">PROPIETARIO</th>
+						<th class="font-bold text-end">RECIBOS</th>
+						if multipleCurrencies {
+              for _,currency := range dto.DebtsCurrenciesToShow {
+                <th class="font-bold text-end">DEUDA { currency.Name() }</th>
+              }
+            } else {
+             <th class="font-bold text-end">DEUDA</th>
+            }
+
+						<th class="font-bold text-center">MESES</th>
+						<th class="font-bold text-end">ABONO</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _,apt := range dto.Apartments {
+						<tr>
+							<td class="text-start">{ apt.Apartment.Number }</td>
+							<td class="text-start">{ apt.Apartment.Name }</td>
+							<td class="text-end">{ fmt.Sprint(apt.Debt.Debt.Receipts) }</td>
+							for _,debt := range apt.Debt.Amounts {
+                <td class="text-end">{ debt.Currency.Format(debt.Amount) }</td>
+              }
+
+							<td class="text-center">{ apt.DebtMonthStr }</td>
+							<td class="text-end">{ util.GetAllowedCurrency(apt.Debt.Debt.PreviousPaymentAmountCurrency).Format(apt.Debt.Debt.PreviousPaymentAmount) }</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+			<br/>
+
+			<p class="w-full font-bold text-end">NÚMERO DE RECIBOS: { fmt.Sprint(dto.DebtReceiptsAmount) }</p>
+
+			for _,debt := range dto.DebtTotals {
+			<p class="w-full font-bold text-end">DEUDA TOTAL: { debt.Currency.Format(debt.Amount) }</p>
+      }
+
+		</div>
+	</div>
+}

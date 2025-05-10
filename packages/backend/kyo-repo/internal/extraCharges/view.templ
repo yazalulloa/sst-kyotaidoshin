@@ -1,0 +1,96 @@
+package extraCharges
+
+import (
+	"fmt"
+	"kyo-repo/internal/api"
+)
+
+templ FormView(dto FormDto) {
+	<div id="extra-charges-list" hx-swap-oob="innerHTML">
+		for _, item := range dto.Items {
+			@ItemView(item)
+		}
+		<div
+			data-building-key={ dto.Key }
+			data-counter={ fmt.Sprint(len(dto.Items)) }
+			x-init="
+      		buildingKey = $el.getAttribute('data-building-key');
+      		key = buildingKey
+      		counter = parseInt($el.getAttribute('data-counter'));
+      		$el.remove()
+      		"
+		></div>
+	</div>
+}
+
+templ ItemView(item Item) {
+	<li
+		id={ item.CardId }
+		class="fade-me-in fade-me-out hover:opacity-75"
+		if item.isUpdate != nil && *item.isUpdate {
+			hx-swap-oob="true"
+		}
+		if item.UpdateParams != nil {
+			data-update-params={ *item.UpdateParams }
+			@click="$dispatch('event-extra-charge-form-update', { params: $el.getAttribute('data-update-params') })"
+		}
+	>
+		<div class="flex flex-col items-center gap-2 text-center">
+			<span>{ item.Item.Description }</span>
+			@api.BadgeIndicator(item.Item.Active, "active")
+		</div>
+		<div class="flex justify-center items-center text-center">
+			@api.SpanFormatCurrency(item.Item.Amount, item.Item.Currency)
+		</div>
+		<div class="grid grid-cols-[1fr_6fr] gap-1">
+			for _, apt := range item.Apts {
+				<span>{ apt }</span>
+				<span class="text-start" data-apt={ apt } x-text="aptMap.get($el.getAttribute('data-apt'))"></span>
+			}
+		</div>
+		@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{"data-recaptcha-action" : "extra_charges_delete"})
+	</li>
+}
+
+templ FormResponseView(res FormResponse) {
+	<div
+		data-response-err={ res.errorStr }
+		data-counter={ fmt.Sprint(res.counter) }
+		x-init="
+ 		errMsg = $el.getAttribute('data-response-err');
+  		counter = parseInt($el.getAttribute('data-counter'));
+
+ 		if (errMsg === '') {
+ 		  $dispatch('event-extra-charge-form-reset');
+ 		 }
+ 		"
+	></div>
+	if res.item != nil {
+		if res.item.isUpdate != nil {
+			if *res.item.isUpdate {
+				@ItemView(*res.item)
+			} else {
+				<div id="extra-charges-list" hx-swap-oob="beforeend">
+					@ItemView(*res.item)
+				</div>
+			}
+		}
+	}
+}
+
+templ DeleteResponse(counter int64, key string) {
+	<div
+		id="extra-charges-list"
+		hx-swap-oob="beforeend"
+	>
+		<div
+			hidden="hidden"
+			data-counter={ fmt.Sprint(counter) }
+			x-init="
+        		counter = parseInt($el.getAttribute('data-counter'));
+        		$dispatch('event-extra-charge-form-restart-after-deletion', { key: key });
+        		$el.remove()
+        		"
+		></div>
+	</div>
+}
