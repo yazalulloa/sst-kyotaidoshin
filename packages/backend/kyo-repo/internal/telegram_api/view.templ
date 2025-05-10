@@ -1,0 +1,46 @@
+package telegram_api
+
+import "github.com/yaz/kyo-repo/internal/telegram"
+import "fmt"
+
+templ startUrl(url string) {
+	<a
+		href={ templ.SafeURL(url) }
+		target="_blank"
+		rel="noopener noreferrer"
+		hidden="hidden"
+		x-init="
+		  $el.click()
+	    $el.remove()
+	  "
+	></a>
+}
+
+templ infoView(info *telegram.Info) {
+	<div class="flex flex-col gap-1">
+		<h3 class="font-bold underline">Bot</h3>
+		if info.User == nil {
+			<p>No bot info</p>
+		} else {
+			<p>ID: { fmt.Sprint(info.User.ID) }</p>
+			<p>Username: { info.User.Username }</p>
+			<p>First Name: { info.User.FirstName }</p>
+			<p>Last Name: { info.User.LastName }</p>
+			<p>Language Code: { info.User.LanguageCode }</p>
+		}
+		<hr/>
+		<h3 class="font-bold underline">Webhook</h3>
+		if info.Webhook == nil {
+			<p>No webhook info</p>
+		} else {
+			<p>URL: { info.Webhook.URL }</p>
+			<p>Has Custom Certificate: { fmt.Sprint(info.Webhook.HasCustomCertificate) }</p>
+			<p>Pending Update Count: { fmt.Sprint(info.Webhook.PendingUpdateCount) }</p>
+			<p>IPAddress: { info.Webhook.IPAddress }</p>
+			<p>LastError Date: { fmt.Sprint(info.Webhook.LastErrorDate) }</p>
+			<p>LastError Message: { info.Webhook.LastErrorMessage }</p>
+			<p>Max Connections: { fmt.Sprint(info.Webhook.MaxConnections) }</p>
+			<p>Allowed Updates: { fmt.Sprint(info.Webhook.AllowedUpdates) }</p>
+		}
+	</div>
+}

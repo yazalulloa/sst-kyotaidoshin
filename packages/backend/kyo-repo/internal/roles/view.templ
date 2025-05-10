@@ -1,0 +1,91 @@
+package roles
+
+import "fmt"
+import "github.com/yaz/kyo-repo/internal/api"
+
+templ searchView(res TableResponse) {
+	for _, item := range res.Results {
+		@ItemView(item)
+	}
+	if res.NextPageUrl != "" {
+		@api.NextPageLi(res.NextPageUrl, templ.Attributes{})
+	}
+	@CountersView(res.Counters)
+}
+
+templ ItemView(item Item) {
+	{{ hasWritePerm := api.HasPerms(ctx, api.ROLES_WRITE) }}
+	<li
+		id={ item.CardId }
+		class={ "fade-me-in fade-me-out ",
+            templ.KV("md:grid-cols-[1fr_1fr_8fr_1fr]", hasWritePerm),
+            templ.KV("md:grid-cols-[1fr_1fr_8fr]", !hasWritePerm) }
+		if item.isUpdate {
+			hx-swap-oob="true"
+		}
+		if hasWritePerm && item.UpdateParams != nil {
+			data-update-params={ *item.UpdateParams }
+			@dblclick.prevent="$dispatch('event-roles-form-update', { params: $el.dataset.updateParams })"
+		}
+	>
+		<span>{ item.Item.Role.Name } </span>
+		<div class="flex flex justify-center">
+			<span x-text="$t('main-title-perms')"></span>
+			<span>:&nbsp;</span>
+			<span>{ fmt.Sprint(len(item.Item.Permissions)) }</span>
+		</div>
+		<div class="grid grid-cols-3 gap-2 text-start break-words">
+			for _,perm := range item.Item.Permissions {
+				<span>{ perm.Name }</span>
+			}
+		</div>
+		if hasWritePerm {
+			@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{"data-recaptcha-action" : "roles_delete"})
+		}
+	</li>
+}
+
+templ CountersView(counters Counters) {
+	<div
+		id="roles-counters"
+		hidden="hidden"
+		hx-swap-oob="true"
+		data-total-count={ fmt.Sprint(counters.TotalCount) }
+		if counters.QueryCount != nil {
+			data-query-count={ fmt.Sprint(*counters.QueryCount) }
+		}
+		x-init="
+	total = $el.getAttribute('data-total-count');
+	query = $el.getAttribute('data-query-count');
+	"
+	></div>
+}
+
+templ FormResponseView(res FormResponse) {
+	<div
+		data-response-err={ res.errorStr }
+		data-send-event={ fmt.Sprint(res.errorStr == "" && res.item == nil) }
+		x-init="
+ 		errMsg = $el.getAttribute('data-response-err');
+  		counter = parseInt($el.getAttribute('data-counter'));
+
+ 		if (errMsg === '') {
+ 		  $dispatch('event-roles-form-close');
+ 		 }
+
+  		if ($el.getAttribute('data-send-event') === 'true') {
+  		   sendEvent('roles-updater', 'new-role');
+  		}
+ 		"
+	></div>
+	if res.item != nil && res.item.isUpdate {
+		@ItemView(*res.item)
+	}
+}
+
+templ AllData(str string) {
+	<div
+		data-params={ str }
+		x-init="$dispatch('event-set-roles', { params: $el.dataset.params })"
+	></div>
+}
