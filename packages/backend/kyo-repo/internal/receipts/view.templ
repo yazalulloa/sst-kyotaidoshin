@@ -1,0 +1,351 @@
+package receipts
+
+import (
+	"fmt"
+	"github.com/yaz/kyo-repo/internal/api"
+	"github.com/yaz/kyo-repo/internal/debts"
+	"github.com/yaz/kyo-repo/internal/expenses"
+	"github.com/yaz/kyo-repo/internal/extraCharges"
+	"github.com/yaz/kyo-repo/internal/reserveFunds"
+	"github.com/yaz/kyo-repo/internal/util"
+	"time"
+)
+
+templ Search(res *TableResponse) {
+	for _, item := range res.Results {
+		@ItemView(item)
+	}
+	if res.NextPageUrl != "" {
+		@api.NextPageLi(res.NextPageUrl, templ.Attributes{
+			"hx-include": "[name='building_input'],[name='month_input'],[name='year_input']"})
+	}
+	@CountersView(res.Counters)
+}
+
+templ ItemView(item Item) {
+	{{ hasWritePerm := api.HasPerms(ctx, api.RECEIPTS_WRITE) }}
+	<li
+		id={ item.CardId }
+		class="fade-me-in fade-me-out"
+		if item.isUpdate {
+			hx-swap-oob="true"
+		}
+		if hasWritePerm && false {
+			@dblclick={ fmt.Sprintf("window.location.href = '/receipts/edit/%s'", item.Key) }
+		}
+	>
+		<span>{ item.Item.BuildingID }</span>
+		<span x-text={ fmt.Sprintf("$t('main-months-%d')", item.Item.Month) }></span>
+		<span>{ fmt.Sprint(item.Item.Year) }</span>
+		<span>{ item.Item.Date.Format(time.DateOnly) }</span>
+		<div
+			class="flex justify-center"
+			hx-get={ fmt.Sprintf("/api/receipts/sent/%s", item.Key) }
+			hx-trigger={ fmt.Sprintf("sent-%s from:body", item.CardId) }
+			hx-swap="innerHTML"
+		>
+			@SentView(item)
+		</div>
+		@api.SpanFormatDate(fmt.Sprint(item.CreatedAt))
+		<div class="dropdown dropdown-hover dropdown-left w-fit md:m-auto ml-auto">
+			<div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+				<svg x-bind:data-src="menuVerticalIconUrl" class="size-5"></svg>
+			</div>
+			<ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+				if hasWritePerm {
+					<li>
+						<a
+							hx-delete={ fmt.Sprintf(_PATH+"/%s", item.Key) }
+							hx-target={ "#" + item.CardId }
+							if !util.IsDevMode() {
+								hx-headers={ util.CrsfHeaders(ctx) }
+							}
+							hx-indicator=".htmx-indicator"
+							hx-include="[name='building_input'],[name='month_input'],[name='year_input']"
+							hx-disabled-elt="this"
+							hx-trigger="mousedown"
+							hx-swap="delete swap:300ms"
+							data-recaptcha-action="receipts_delete"
+							class="flex items-center gap-2"
+						>
+							<div class="rounded-full border border-error p-1 text-error">
+								<svg x-bind:data-src="deleteIconUrl" data-cache="21600" class="size-3"></svg>
+							</div>
+							<span x-text="$t('main-action-delete')"></span>
+						</a>
+					</li>
+					<li>
+						<a
+							href={ templ.URL(fmt.Sprintf("/receipts/edit/%s", item.Key)) }
+							class="flex items-center gap-2"
+						>
+							<div class="rounded-full border border-success p-1 text-success">
+								<svg x-bind:data-src="editIconUrl" data-cache="21600" class="size-3"></svg>
+							</div>
+							<span x-text="$t('main-action-edit')"></span>
+						</a>
+					</li>
+					<li>
+						<a
+							hx-post={ fmt.Sprintf(_DUPLICATE+"/%s", item.Key) }
+							hx-indicator=".htmx-indicator"
+							hx-disabled-elt="this"
+							hx-trigger="mousedown"
+							hx-target="#default-anchor"
+							hx-swap="innerHTML"
+							class="flex items-center gap-2"
+							data-recaptcha-action="receipts_duplicate"
+						>
+							<svg x-bind:data-src="duplicateIconUrl" data-cache="21600" class="size-5"></svg>
+							<span x-text="$t('main-action-copy')"></span>
+						</a>
+					</li>
+				}
+				<li>
+					<a
+						href={ templ.URL(fmt.Sprintf("/receipts/view/%s", item.Key)) }
+						class="flex items-center gap-2"
+					>
+						<svg x-bind:data-src="receiptIconUrl" data-cache="21600" class="size-5"></svg>
+						<span x-text="$t('main-action-view-receipts')"></span>
+					</a>
+				</li>
+				<li>
+					<a
+						hx-get={ fmt.Sprintf(_DOWNLOAD_ZIP_FILE+"/%s", item.Key) }
+						todo-fix-hx-indicator=".htmx-indicator"
+						todo-fix-hx-disabled-elt="this"
+						hx-trigger="mousedown"
+						hx-target="this"
+						hx-swap="none"
+						class="flex items-center gap-2"
+						hx-on:htmx:before-request="this.dispatchEvent(new CustomEvent('event-is-loading'))"
+						hx-on:htmx:after-request="this.dispatchEvent(new CustomEvent('event-is-not-loading'))"
+						@event-is-loading="isLoading = true"
+						@event-is-not-loading="isLoading = false"
+						x-data="{isLoading: false}"
+						x-bind:disabled="isLoading"
+					>
+						<svg x-bind:data-src="zipFileIconUrl" data-cache="21600" class="size-5"></svg>
+						<span x-text="$t('main-action-download-zip')"></span>
+						<svg
+							x-show="isLoading"
+							x-bind:data-src="loadingIconUrl"
+							class="size-5 animate-spin motion-reduce:animate-none fill-on-primary"
+						></svg>
+					</a>
+				</li>
+				if hasWritePerm {
+					<li>
+						<a
+							hx-post={ fmt.Sprintf(_SEND_PDFS+"/%s", item.Key) }
+							hx-indicator=".htmx-indicator"
+							hx-disabled-elt="this"
+							hx-trigger="mousedown"
+							hx-swap="none"
+							data-recaptcha-action="receipts_send_apts"
+							class="flex items-center gap-2"
+						>
+							<svg x-bind:data-src="sendMailIconUrl" data-cache="21600" class="size-5"></svg>
+							<span x-text="$t('main-action-send-pdfs-now')"></span>
+						</a>
+					</li>
+					<li>
+						<button
+							data-params={ item.UpdateParams }
+							@click="
+                                  						    isOpen = false;
+                                  						    $dispatch('event-open-send-dialog', { params: $el.dataset.params })
+                                  						  "
+							class="flex items-center gap-2"
+						>
+							<svg x-bind:data-src="sendMailIconUrl" data-cache="21600" class="size-5"></svg>
+							<span x-text="$t('main-action-send-pdfs')"></span>
+						</button>
+					</li>
+				}
+				<li>
+					<a
+						hx-get={ fmt.Sprintf(_DOWNLOAD_HTML_FILE+"/%s", item.Key) }
+						hx-indicator=".htmx-indicator"
+						hx-disabled-elt="this"
+						hx-trigger="mousedown"
+						hx-target="#anchor-download-html"
+						hx-swap="innerHTML"
+						class="flex items-center gap-2"
+					>
+						<div hidden="hidden" id="anchor-download-html"></div>
+						<svg x-bind:data-src="sendMailIconUrl" data-cache="21600" class="size-5"></svg>
+						<span x-text="$t('main-action-download-html')"></span>
+					</a>
+				</li>
+			</ul>
+		</div>
+	</li>
+}
+
+templ SentView(item Item) {
+	{{
+			condition := item.LastSent != nil
+	}}
+	<span
+		class={
+			"w-fit inline-flex overflow-hidden rounded-(--radius-selector) border text-xs font-medium tracking-wide fade-me-in fade-me-out",
+			templ.KV("border-success text-success", condition),
+			templ.KV("border-error text-error", !condition),
+		}
+	>
+		<span
+			class={
+				"flex items-center gap-1 px-2 py-1",
+				templ.KV("bg-success/10", condition),
+				templ.KV("bg-error/10", !condition),
+			}
+		>
+			<span
+				class={
+					"size-1.5 rounded-full",
+					templ.KV("bg-success", condition),
+					templ.KV("bg-error", !condition),
+				}
+			></span>
+			@api.SpanWitX_Text("$t('main-title-sent')")
+			if condition {
+				@api.SpanFormatDate(fmt.Sprint(*item.LastSent))
+			}
+		</span>
+	</span>
+}
+
+templ CountersView(counters Counters) {
+	<div
+		id="receipts-counters"
+		hidden="hidden"
+		hx-swap-oob="true"
+		data-total-count={ fmt.Sprint(counters.TotalCount) }
+		if counters.QueryCount != nil {
+			data-query-count={ fmt.Sprint(*counters.QueryCount) }
+		}
+		x-init="
+	total = $el.getAttribute('data-total-count');
+	query = $el.getAttribute('data-query-count');
+	"
+	></div>
+}
+
+templ YearsView(init string) {
+	<div x-init={ init }></div>
+}
+
+templ FormView(dto FormDto) {
+	@api.CSRF()
+	<input type="hidden" name="key" value={ dto.key }/>
+	<div
+		hidden="hidden"
+		data-main-currency={ dto.building.MainCurrency }
+		data-debt-currency={ dto.building.DebtCurrency }
+		data-params={ dto.updateParams }
+		data-apts={ dto.apts }
+		x-init="
+		$dispatch('event-receipt-form-update', $el.dataset);
+    $el.remove();
+		"
+	></div>
+	<div id="receiptRateSelect" hx-swap-oob="innerHTML">
+		for _, rate := range dto.rates {
+			<option
+				value={ rate.Key }
+				if rate.ID == dto.receipt.RateID {
+					selected
+				}
+			>
+				<span>{ rate.DateOfRate }</span>&nbsp;&nbsp;&nbsp;<span>{ util.FormatFloat64(rate.Rate) }</span>
+			</option>
+		}
+	</div>
+	@expenses.FormView(dto.expenseFormDto)
+	@reserveFunds.FormView(dto.reserveFundFormDto)
+	@extraCharges.FormView(dto.extraChargesFormDto)
+	@debts.FormView(dto.debtFormDto)
+	@expenses.ReserveFundExpensesView(dto.reserveFundExpenses)
+	@expenses.ExpenseTotalsView(dto.expenseTotals)
+}
+
+templ FormResponseView(res FormResponse) {
+	<div
+		data-response-err={ res.errorStr }
+		x-init="
+errMsg = $el.getAttribute('data-response-err');
+
+if (errMsg === '') {
+let form = $el.closest('form')
+form.classList.add('border', 'border-success');
+await sleep(3000);
+form.classList.remove('border', 'border-success');
+}
+
+"
+	></div>
+}
+
+templ SendPdfsView(progressId string, closeModal bool) {
+	<div id="receipts-email-progress" hx-swap-oob="beforeend">
+		<div
+			class="pb-2 w-full flex justify-center gap-2"
+			x-data={ fmt.Sprintf("{ url: '%s/%s' }", _SEND_PDFS_PROGRESS, progressId) }
+		>
+			<div
+				x-bind:hx-get="receiptSendProgressPartialUrl"
+				hx-trigger="load"
+				hx-swap="outerHTML"
+			></div>
+			<div class="flex justify-center">
+				<button
+					type="button"
+					class="btn btn-sm btn-outline btn-error btn-circle"
+					if !util.IsDevMode() {
+						hx-headers={ util.CrsfHeaders(ctx) }
+					}
+					hx-put={ fmt.Sprintf(_CANCEL_SEND_PDFS+"/%s", progressId) }
+					hx-indicator=".htmx-indicator"
+					hx-disabled-elt="this"
+					hx-swap="none"
+				>
+					<svg x-bind:data-src="deleteIconUrl" data-cache="21600" class="h-6 w-6"></svg>
+				</button>
+			</div>
+		</div>
+	</div>
+	if closeModal {
+		<div
+			x-init="
+		   $dispatch('event-close-send-dialog')
+		   $el.remove()
+		"
+		></div>
+	}
+}
+
+templ SendPdfsProgressView(progressId, update string, finished bool) {
+	<div
+		hidden="hidden"
+		if !finished {
+			hx-get={ fmt.Sprintf(_SEND_PDFS_PROGRESS+"/%s", progressId) }
+			hx-trigger="load delay:500ms"
+			hx-swap="outerHTML"
+		}
+		data-progress-update={ update }
+		x-init="$dispatch('event-update-params', { params: $el.getAttribute('data-progress-update') });"
+	></div>
+}
+
+templ ShowNewReceiptsDialog(encoded string) {
+	<div id="receipts-dialog-content" hx-swap-oob="innerHTML">
+		<div
+			data-params={ encoded }
+			x-init="$dispatch('event-receipt-form-update', { params: $el.dataset.params })
+		  $el.remove()
+		"
+		></div>
+	</div>
+}

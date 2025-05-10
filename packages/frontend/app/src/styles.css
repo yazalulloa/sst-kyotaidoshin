@@ -4,7 +4,7 @@
 }
 
 @source "../src";
-@source "../../../backend/api";
+@source "../../../backend/kyo-repo";
 
 
 .htmx-indicator {
