@@ -104,7 +104,11 @@
           <span x-text="params.email"></span>
 
           <div class="flex justify-center">
-            <svg x-bind:data-src="PROVIDER_ICONS.get(params.provider.toLowerCase())" class="size-8 rounded-full p-1"></svg>
+
+            <template x-if="params.provider">
+              <svg x-bind:data-src="PROVIDER_ICONS.get(params.provider.toLowerCase())" class="size-8 rounded-full p-1"></svg>
+            </template>
+
           </div>
           <span x-text="params.username"></span>
         </div>
