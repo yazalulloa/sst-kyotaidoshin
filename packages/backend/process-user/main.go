@@ -42,7 +42,8 @@ func handler(ctx context.Context, input Input) (*UserSubject, error) {
 	}
 
 	if userInfo.isNewUser {
-		go func() {
+		defer func() {
+			log.Printf("New user registered: %s, sending notification", userInfo.User.ProviderID)
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 			defer cancel()
 
@@ -63,6 +64,8 @@ func handler(ctx context.Context, input Input) (*UserSubject, error) {
 				log.Printf("Error sending bulk message: %v", err)
 				return
 			}
+
+			log.Printf("Notification sent to %d users", len(ids))
 
 		}()
 	}

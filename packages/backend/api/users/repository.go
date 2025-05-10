@@ -106,15 +106,18 @@ func (repo Repository) deleteById(id string) (int64, error) {
 
 func (repo Repository) getWitRole(id string) (*struct {
 	model.Users
+	Chat *model.TelegramChats
 	Role *model.Roles
 }, error) {
-	stmt := Users.SELECT(Users.AllColumns, Roles.AllColumns).FROM(
+	stmt := Users.SELECT(Users.AllColumns, Roles.AllColumns, TelegramChats.AllColumns).FROM(
 		Users.LEFT_JOIN(UserRoles, Users.ID.EQ(UserRoles.UserID)).
-			LEFT_JOIN(Roles, UserRoles.RoleID.EQ(Roles.ID)),
+			LEFT_JOIN(Roles, UserRoles.RoleID.EQ(Roles.ID)).
+			LEFT_JOIN(TelegramChats, Users.ID.EQ(TelegramChats.UserID)),
 	).WHERE(Users.ID.EQ(sqlite.String(id)))
 
 	var dest struct {
 		model.Users
+		Chat *model.TelegramChats
 		Role *model.Roles
 	}
 	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)

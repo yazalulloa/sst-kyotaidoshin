@@ -377,3 +377,37 @@ func HasPerms(ctx context.Context, perms ...PERM) bool {
 
 	return false
 }
+
+func RedirectToAuthServer(w http.ResponseWriter, r *http.Request) {
+	url := fmt.Sprintf("%s://%s", r.URL.Scheme, r.URL.Host)
+	w.Header().Add("HX-Redirect", url)
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte("Unauthorized"))
+}
+
+func RemoveAuthCookies(w http.ResponseWriter, r *http.Request) {
+	accessTokenCookie, err := r.Cookie("access_token")
+	if err == nil && accessTokenCookie != nil {
+		cookie := CookieToRemove("access_token")
+		http.SetCookie(w, cookie)
+	}
+
+	refreshTokenCookie, err := r.Cookie("refresh_token")
+	if err == nil && refreshTokenCookie != nil {
+		cookie := CookieToRemove("refresh_token")
+		http.SetCookie(w, cookie)
+	}
+
+}
+
+func CookieToRemove(name string) *http.Cookie {
+	return &http.Cookie{
+		Name:     name,
+		Value:    "",
+		MaxAge:   -1,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
+	}
+}

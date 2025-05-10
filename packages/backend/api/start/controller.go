@@ -1,9 +1,12 @@
 package start
 
 import (
+	"database/sql"
 	"db"
 	"db/gen/model"
 	. "db/gen/table"
+	"errors"
+	"github.com/go-jet/jet/v2/qrm"
 	"github.com/go-jet/jet/v2/sqlite"
 	"github.com/gorilla/mux"
 	"kyotaidoshin/api"
@@ -61,6 +64,12 @@ func getInit(w http.ResponseWriter, r *http.Request) {
 		defer wg.Done()
 
 		anUser, err := users.NewRepository(r.Context()).GetByID(userId)
+
+		if errors.Is(err, sql.ErrNoRows) || errors.Is(err, qrm.ErrNoRows) {
+			log.Printf("user %s not found", userId)
+			return
+		}
+
 		if err != nil {
 			log.Printf("Error getting user: %v", err)
 			errorChan <- err
@@ -76,6 +85,12 @@ func getInit(w http.ResponseWriter, r *http.Request) {
 	err := util.HasErrors(errorChan)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if user == nil {
+		api.RemoveAuthCookies(w, r)
+		api.RedirectToAuthServer(w, r)
 		return
 	}
 

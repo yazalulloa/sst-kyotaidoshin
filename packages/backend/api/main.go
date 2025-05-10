@@ -122,30 +122,23 @@ func loggingMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func redirectToAuthServer(w http.ResponseWriter, r *http.Request) {
-	url := fmt.Sprintf("%s://%s", r.URL.Scheme, r.URL.Host)
-	w.Header().Add("HX-Redirect", url)
-	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte("Unauthorized"))
-}
-
 func authenticationMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookieAccessToken, err := r.Cookie("access_token")
 		if err != nil {
-			redirectToAuthServer(w, r)
+			api.RedirectToAuthServer(w, r)
 			return
 		}
 
 		if cookieAccessToken == nil {
-			redirectToAuthServer(w, r)
+			api.RedirectToAuthServer(w, r)
 			return
 		}
 
 		accessToken := cookieAccessToken.Value
 
 		if accessToken == "" {
-			redirectToAuthServer(w, r)
+			api.RedirectToAuthServer(w, r)
 			return
 		}
 
@@ -158,7 +151,7 @@ func authenticationMiddleware(next http.Handler) http.Handler {
 		newCtx, err := util.Verify(r.Context(), accessToken, refreshToken)
 		if err != nil {
 			log.Printf("Failed to verify token: %v", err)
-			redirectToAuthServer(w, r)
+			api.RedirectToAuthServer(w, r)
 			return
 		}
 
@@ -167,7 +160,7 @@ func authenticationMiddleware(next http.Handler) http.Handler {
 		//err = auth_client.Verify(accessToken, refreshToken)
 		//if err != nil {
 		//	log.Printf("Failed to verify token: %v", err)
-		//	redirectToAuthServer(w, r)
+		//	api.RedirectToAuthServer(w, r)
 		//	return
 		//}
 

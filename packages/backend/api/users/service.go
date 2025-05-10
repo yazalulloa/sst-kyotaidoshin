@@ -274,5 +274,5 @@ func (service Service) getItemWitRole(keys Keys) (*Item, error) {
 		return nil, err
 	}
 
-	return toItem(user.Users, user.Role, nil, &keys.CardId)
+	return toItem(user.Users, user.Role, user.Chat, &keys.CardId)
 }

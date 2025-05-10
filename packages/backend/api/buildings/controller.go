@@ -324,16 +324,6 @@ func formData(w http.ResponseWriter, r *http.Request) {
 			updateParams.RoundUpPayments = building.RoundUpPayments
 			updateParams.EmailConfig = building.EmailConfig
 
-			byteArray, err := json.Marshal(updateParams)
-
-			if err != nil {
-				errChan <- err
-				return
-			}
-
-			base64Str := base64.URLEncoding.EncodeToString(byteArray)
-			formDto.UpdateParams = &base64Str
-
 		}()
 
 		go func() {
@@ -378,6 +368,16 @@ func formData(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+		byteArray, err := json.Marshal(updateParams)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		base64Str := base64.URLEncoding.EncodeToString(byteArray)
+		formDto.UpdateParams = &base64Str
 
 	}
 
