@@ -12,7 +12,7 @@
     "@aws-sdk/client-lambda": "^3.806.0",
     "@openauthjs/openauth": "^0.4.3",
     "hono": "^4.7.9",
-    "sst": "^3.14.12",
+    "sst": "^3.14.14",
     "uuid": "^11.1.0",
     "valibot": "^1.1.0"
   }

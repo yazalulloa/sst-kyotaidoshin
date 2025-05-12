@@ -14,6 +14,6 @@ sqlite3 "$db_file" < "$schema_file"
 
 echo "Database created successfully!"
 
-SOURCE_PATH="$DIR"/../packages/backend/db/gen
+SOURCE_PATH="$DIR"/../packages/backend/kyo-repo/internal/db/gen
 jet -source=sqlite -dsn="file:///$db_file" -path="$SOURCE_PATH"
 rm "$db_file"

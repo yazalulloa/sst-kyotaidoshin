@@ -3,7 +3,7 @@ package debts
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-playground/form"
+	"github.com/go-playground/form/v4"
 	"github.com/go-playground/validator/v10"
 	"github.com/yaz/kyo-repo/internal/api"
 	"github.com/yaz/kyo-repo/internal/db/gen/model"
