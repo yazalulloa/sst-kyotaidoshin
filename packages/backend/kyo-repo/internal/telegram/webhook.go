@@ -14,9 +14,9 @@ func (service Service) SetWebhook() error {
 		return err
 	}
 
-	apiKey, err := resource.Get("TelegramBotApiKey", "value")
+	apiKey, err := GetWebhookTelegramBotApiKey()
 	if err != nil {
-		return fmt.Errorf("GetWebhook TelegramBotApiKey error: %w", err)
+		return err
 	}
 
 	functionUrl, err := resource.Get("TelegramWebhookFunction", "url")
@@ -28,7 +28,7 @@ func (service Service) SetWebhook() error {
 	ok, err := telegramBot.SetWebhook(service.ctx, &bot.SetWebhookParams{
 		URL:            functionUrl.(string),
 		MaxConnections: 1,
-		SecretToken:    apiKey.(string),
+		SecretToken:    apiKey,
 	})
 
 	if err != nil {

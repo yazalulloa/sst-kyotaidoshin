@@ -312,9 +312,6 @@ export default $config({
             }
 
           }
-          // Modify CloudFront distribution arguments here
-
-          // Add other CloudFront-specific configurations
         }
       }
     });

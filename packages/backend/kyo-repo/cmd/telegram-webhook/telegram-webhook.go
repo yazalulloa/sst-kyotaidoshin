@@ -13,15 +13,21 @@ import (
 
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (string, error) {
 
-	//if request.HTTPMethod != "POST" {
-	//	log.Printf("Invalid HTTP method [%s]", request.HTTPMethod)
-	//	return "", nil
-	//}
-
 	token := request.Headers["x-telegram-bot-api-secret-token"]
 
 	if token == "" {
 		log.Printf("No token provided")
+		return "", nil
+	}
+
+	apiKey, err := telegram.GetWebhookTelegramBotApiKey()
+	if err != nil {
+		log.Printf("Error getting webhook API key: %s", err)
+		return "", err
+	}
+
+	if token != apiKey {
+		log.Printf("Invalid token provided")
 		return "", nil
 	}
 
@@ -34,7 +40,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (string
 
 	update := models.Update{}
 
-	err := json.NewDecoder(strings.NewReader(body)).Decode(&update)
+	err = json.NewDecoder(strings.NewReader(body)).Decode(&update)
 	if err != nil {
 		log.Printf("Error decoding body: %s", err)
 		return "", err

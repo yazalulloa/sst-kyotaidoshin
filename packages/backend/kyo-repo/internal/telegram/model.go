@@ -45,9 +45,9 @@ func GetTelegramBot() (*bot.Bot, error) {
 			return
 		}
 
-		apiKey, err := resource.Get("TelegramBotApiKey", "value")
+		apiKey, err := GetWebhookTelegramBotApiKey()
 		if err != nil {
-			_err = fmt.Errorf("GetWebhook TelegramBotApiKey error: %w", err)
+			_err = err
 			return
 		}
 
@@ -65,7 +65,7 @@ func GetTelegramBot() (*bot.Bot, error) {
 			bot.WithHTTPClient(time.Second*10, httpClient),
 			bot.WithSkipGetMe(),
 			bot.WithNotAsyncHandlers(),
-			bot.WithWebhookSecretToken(apiKey.(string)),
+			bot.WithWebhookSecretToken(apiKey),
 		}
 
 		_telegramBotInstance, err = bot.New(token.(string), opts...)
