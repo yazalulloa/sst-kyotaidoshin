@@ -162,7 +162,7 @@ func lastRateCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
 		return
 	}
 
-	rate, err := rates.LastRate(util.USD.Name())
+	rate, err := rates.NewRepository(ctx).LastRate(util.USD.Name())
 	if err != nil {
 		log.Printf("Error getting last rate: %v", err)
 		return
@@ -358,7 +358,7 @@ func sendBackup(filepath, filename string, ctx context.Context, b *bot.Bot, upda
 
 func backupApartmentsCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
 
-	filepath, err := apartments.Backup()
+	filepath, err := apartments.NewService(ctx).Backup()
 	if err != nil {
 		log.Printf("Error getting apartments backup: %v", err)
 		return
@@ -376,7 +376,7 @@ func backupApartmentsCallBack(ctx context.Context, b *bot.Bot, update *models.Up
 
 func backupBuildingsCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
 
-	filepath, err := buildings.Backup()
+	filepath, err := buildings.NewService(ctx).Backup()
 	if err != nil {
 		log.Printf("Error getting buildings backup: %v", err)
 		return
@@ -393,7 +393,7 @@ func backupBuildingsCallBack(ctx context.Context, b *bot.Bot, update *models.Upd
 }
 
 func backupReceiptsCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
-	filepath, err := receipts.Backup()
+	filepath, err := receipts.NewService(ctx).Backup()
 	if err != nil {
 		log.Printf("Error getting receipts backup: %v", err)
 		return
@@ -411,7 +411,7 @@ func backupReceiptsCallBack(ctx context.Context, b *bot.Bot, update *models.Upda
 
 func backupAllCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
 
-	filepath, err := backup.AllBackup(api.BACKUP_ALL_FILE)
+	filepath, err := backup.AllBackup(ctx, api.BACKUP_ALL_FILE)
 	if err != nil {
 		log.Printf("Error getting all backup: %v", err)
 		return

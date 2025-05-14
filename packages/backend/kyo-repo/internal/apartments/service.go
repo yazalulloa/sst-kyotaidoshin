@@ -1,16 +1,28 @@
 package apartments
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"github.com/yaz/kyo-repo/internal/api"
 	"github.com/yaz/kyo-repo/internal/db/gen/model"
 	"github.com/yaz/kyo-repo/internal/util"
+	"log"
 	"strings"
 	"sync"
 )
 
-func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
+type Service struct {
+	repo Repository
+}
+
+func NewService(ctx context.Context) Service {
+	return Service{
+		repo: NewRepository(ctx),
+	}
+}
+
+func (service Service) getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 	var tableResponse TableResponse
 
 	var wg sync.WaitGroup
@@ -19,7 +31,7 @@ func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 
 	go func() {
 		defer wg.Done()
-		array, err := selectList(requestQuery)
+		array, err := service.repo.selectList(requestQuery)
 		if err != nil {
 			errorChan <- err
 			return
@@ -42,7 +54,7 @@ func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 
 	go func() {
 		defer wg.Done()
-		totalCount, err := getTotalCount()
+		totalCount, err := service.repo.getTotalCount()
 		if err != nil {
 			errorChan <- err
 			return
@@ -52,7 +64,7 @@ func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 
 	go func() {
 		defer wg.Done()
-		queryCount, err := getQueryCount(requestQuery)
+		queryCount, err := service.repo.getQueryCount(requestQuery)
 		if err != nil {
 			errorChan <- err
 			return
@@ -113,7 +125,7 @@ func toItem(item *model.Apartments, oldCardId *string) (*Item, error) {
 	}, nil
 }
 
-func deleteAndReturnCounters(keys Keys) (*Counters, error) {
+func (service Service) deleteAndReturnCounters(keys Keys) (*Counters, error) {
 	counters := Counters{}
 	var rowsDeleted int64 = 0
 
@@ -123,7 +135,7 @@ func deleteAndReturnCounters(keys Keys) (*Counters, error) {
 
 	go func() {
 		defer wg.Done()
-		rowsAffected, err := deleteByKeys(keys)
+		rowsAffected, err := service.repo.deleteByKeys(keys)
 		if err != nil {
 			errorChan <- err
 			return
@@ -134,7 +146,7 @@ func deleteAndReturnCounters(keys Keys) (*Counters, error) {
 
 	go func() {
 		defer wg.Done()
-		totalCount, err := getTotalCount()
+		totalCount, err := service.repo.getTotalCount()
 
 		if err != nil {
 			errorChan <- err
@@ -156,32 +168,14 @@ func deleteAndReturnCounters(keys Keys) (*Counters, error) {
 	return &counters, nil
 }
 
-func insertDtos(apts []ApartmentDto) (int64, error) {
-
-	array := make([]model.Apartments, len(apts))
-
-	for i, apt := range apts {
-		emails := strings.Join(apt.Emails, ",")
-		array[i] = model.Apartments{
-			BuildingID: apt.BuildingID,
-			Number:     apt.Number,
-			Name:       apt.Name,
-			Aliquot:    apt.Aliquot,
-			Emails:     emails,
-		}
-	}
-
-	return insertBulk(array)
-}
-
-func Backup() (string, error) {
+func (service Service) Backup() (string, error) {
 
 	requestQuery := RequestQuery{
 		Limit: 30,
 	}
 
 	selectListDtos := func() ([]ApartmentDto, error) {
-		list, err := selectList(requestQuery)
+		list, err := service.repo.selectList(requestQuery)
 		if err != nil {
 			return nil, err
 		}
@@ -207,4 +201,28 @@ func Backup() (string, error) {
 	}
 
 	return api.Backup(api.BACKUP_APARTMENTS_FILE, selectListDtos)
+}
+
+func (service Service) ProcessDecoder(decoder *json.Decoder) (int64, error) {
+	var dto []ApartmentDto
+	err := decoder.Decode(&dto)
+	if err != nil {
+		log.Printf("Error decoding json: %s", err)
+		return 0, err
+	}
+
+	array := make([]model.Apartments, len(dto))
+
+	for i, apt := range dto {
+		emails := strings.Join(apt.Emails, ",")
+		array[i] = model.Apartments{
+			BuildingID: apt.BuildingID,
+			Number:     apt.Number,
+			Name:       apt.Name,
+			Aliquot:    apt.Aliquot,
+			Emails:     emails,
+		}
+	}
+
+	return service.repo.insertBulk(array)
 }

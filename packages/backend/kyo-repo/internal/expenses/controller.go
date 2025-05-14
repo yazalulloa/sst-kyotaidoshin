@@ -72,10 +72,12 @@ func Upsert(r *http.Request) FormResponse {
 
 	isUpdate := keys.ID != nil
 
+	repository := NewRepository(r.Context())
+
 	if isUpdate {
-		_, err = update(expense)
+		_, err = repository.update(expense)
 	} else {
-		lastInsertId, err := insert(expense)
+		lastInsertId, err := repository.insert(expense)
 		if err == nil {
 			id := int32(lastInsertId)
 			keys.ID = &id
@@ -100,7 +102,7 @@ func Upsert(r *http.Request) FormResponse {
 	var counter *int64
 
 	if !isUpdate {
-		count, err := countByReceipt(keys.ReceiptID)
+		count, err := repository.countByReceipt(keys.ReceiptID)
 		if err != nil {
 			log.Printf("Error getting count: %v", err)
 			response.ErrorStr = err.Error()
@@ -128,7 +130,7 @@ func DeleteAndReturnKeys(r *http.Request) (string, Keys, error) {
 		return key, keys, fmt.Errorf("keys id is required")
 	}
 
-	_, err = deleteById(*keys.ID)
+	_, err = NewRepository(r.Context()).deleteById(*keys.ID)
 	if err != nil {
 		return key, keys, err
 	}

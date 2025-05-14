@@ -105,7 +105,9 @@ func debtPut(w http.ResponseWriter, r *http.Request) {
 			PreviousPaymentAmountCurrency: request.PreviousPaymentAmountCurrency,
 		}
 
-		_, err = update(debt)
+		repository := NewRepository(r.Context())
+
+		_, err = repository.update(debt)
 
 		if err != nil {
 			log.Printf("Error inserting/updating debt: %v", err)
@@ -124,7 +126,7 @@ func debtPut(w http.ResponseWriter, r *http.Request) {
 			return response
 		}
 
-		formDto, err := GetFormDto(keys.BuildingID, keys.ReceiptID)
+		formDto, err := repository.GetFormDto(keys.BuildingID, keys.ReceiptID)
 		if err != nil {
 			log.Printf("Error getting totals: %v", err)
 			response.errorStr = err.Error()

@@ -50,7 +50,7 @@ func parseNewReceipt(ctx context.Context, key string) (*ReceiptFileFormDto, erro
 
 	go func() {
 		defer wg.Done()
-		ids, err = buildings.SelectIds()
+		ids, err = buildings.NewRepository(ctx).SelectIds()
 		if err != nil {
 			errorChan <- err
 			return
@@ -60,7 +60,7 @@ func parseNewReceipt(ctx context.Context, key string) (*ReceiptFileFormDto, erro
 	go func() {
 		defer wg.Done()
 
-		ratesArray, err := rates.SelectList(rates.RequestQuery{
+		ratesArray, err := rates.NewRepository(ctx).SelectList(rates.RequestQuery{
 			Currencies: []string{util.USD.Name()},
 			SortOrder:  util.SortOrderTypeDESC,
 			Limit:      10,

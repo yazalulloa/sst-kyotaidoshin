@@ -1,6 +1,7 @@
 package extraCharges
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -9,9 +10,19 @@ import (
 	"strings"
 )
 
-func GetBuildingFormDto(buildingId string) (*FormDto, error) {
+type Service struct {
+	repo Repository
+}
 
-	list, err := SelectByBuilding(buildingId)
+func NewService(ctx context.Context) Service {
+	return Service{
+		repo: NewRepository(ctx),
+	}
+}
+
+func (service Service) GetBuildingFormDto(buildingId string) (*FormDto, error) {
+
+	list, err := service.repo.SelectByBuilding(buildingId)
 
 	if err != nil {
 		return nil, err
@@ -40,9 +51,9 @@ func GetBuildingFormDto(buildingId string) (*FormDto, error) {
 	}, nil
 }
 
-func GetReceiptFormDto(buildingId string, receiptId string) (*FormDto, error) {
+func (service Service) GetReceiptFormDto(buildingId string, receiptId string) (*FormDto, error) {
 
-	list, err := SelectByReceipt(receiptId)
+	list, err := service.repo.SelectByReceipt(receiptId)
 
 	if err != nil {
 		return nil, err
@@ -71,8 +82,8 @@ func GetReceiptFormDto(buildingId string, receiptId string) (*FormDto, error) {
 	}, nil
 }
 
-func getItem(id int32, oldCardId *string) (*Item, error) {
-	item, err := selectById(id)
+func (service Service) getItem(id int32, oldCardId *string) (*Item, error) {
+	item, err := service.repo.selectById(id)
 
 	if err != nil {
 		return nil, err

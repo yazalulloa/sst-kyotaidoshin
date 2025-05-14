@@ -48,7 +48,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 		SortOrder:     util.SortOrderTypeDESC,
 	}
 
-	response, err := getTableResponse(requestQuery)
+	response, err := NewService(r.Context()).getTableResponse(requestQuery)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -90,7 +90,7 @@ func buildingDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	counters, err := deleteAndReturnCounters(dest)
+	counters, err := NewService(r.Context()).deleteAndReturnCounters(dest)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -163,8 +163,10 @@ func buildingPut(w http.ResponseWriter, r *http.Request) {
 			return response
 		}
 
+		repository := NewRepository(r.Context())
+
 		if !isUpdate {
-			exists, err := idExists(request.Id)
+			exists, err := repository.idExists(request.Id)
 			if err != nil {
 				response.errorStr = err.Error()
 				return response
@@ -213,13 +215,13 @@ func buildingPut(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if isUpdate {
-			err = update(building)
+			err = repository.update(building)
 			if err == nil {
 				defer receiptPdf.PublishBuilding(r.Context(), building.ID)
 			}
 
 		} else {
-			err = insert(building)
+			err = repository.insert(building)
 			defer isr.Invoke(r.Context())
 		}
 
@@ -301,7 +303,7 @@ func formData(w http.ResponseWriter, r *http.Request) {
 
 		go func() {
 			defer wg.Done()
-			building, err := selectById(id)
+			building, err := NewRepository(r.Context()).selectById(id)
 			if err != nil {
 				errChan <- err
 				return
@@ -328,7 +330,7 @@ func formData(w http.ResponseWriter, r *http.Request) {
 
 		go func() {
 			defer wg.Done()
-			reserveFundFormDto, err := reserveFunds.GetFormDto(id, "")
+			reserveFundFormDto, err := reserveFunds.NewService(r.Context()).GetFormDto(id, "")
 			if err != nil {
 				errChan <- err
 				return
@@ -339,7 +341,7 @@ func formData(w http.ResponseWriter, r *http.Request) {
 
 		go func() {
 			defer wg.Done()
-			extraChargesFormDto, err := extraCharges.GetBuildingFormDto(id)
+			extraChargesFormDto, err := extraCharges.NewService(r.Context()).GetBuildingFormDto(id)
 			if err != nil {
 				errChan <- err
 				return
@@ -350,7 +352,7 @@ func formData(w http.ResponseWriter, r *http.Request) {
 
 		go func() {
 			defer wg.Done()
-			apts, err := apartments.SelectNumberAndNameByBuildingId(id)
+			apts, err := apartments.NewRepository(r.Context()).SelectNumberAndNameByBuildingId(id)
 			if err != nil {
 				errChan <- err
 				return
@@ -439,7 +441,7 @@ type reserveFundDto struct {
 
 func uploadBackup(w http.ResponseWriter, r *http.Request) {
 
-	component, err := api.ProcessUploadBackup(r, "/buildings", ProcessDecoder)
+	component, err := api.ProcessUploadBackup(r, "/buildings", NewService(r.Context()).ProcessDecoder)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -452,96 +454,4 @@ func uploadBackup(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-}
-
-func ProcessDecoder(decoder *json.Decoder) (int64, error) {
-	var dto []BuildingRecord
-	err := decoder.Decode(&dto)
-	if err != nil {
-		log.Printf("Error decoding json: %s", err)
-		return 0, err
-	}
-
-	buildings := make([]model.Buildings, len(dto))
-	var reserveFundArray []model.ReserveFunds
-	var extraChargeArray []model.ExtraCharges
-
-	configs, err := email_h.GetConfigs()
-	if err != nil {
-		return 0, err
-	}
-
-	getFirst := func() string {
-		for key := range configs {
-			return key
-		}
-		return ""
-	}
-
-	for i, record := range dto {
-		buildings[i] = model.Buildings{
-			ID:                          record.Building.Id,
-			Name:                        record.Building.Name,
-			Rif:                         record.Building.Rif,
-			MainCurrency:                record.Building.MainCurrency,
-			DebtCurrency:                record.Building.DebtCurrency,
-			CurrenciesToShowAmountToPay: strings.Join(record.Building.CurrenciesToShowAmountToPay, ","),
-			FixedPay:                    record.Building.FixedPay,
-			FixedPayAmount:              record.Building.FixedPayAmount,
-			RoundUpPayments:             record.Building.RoundUpPayments,
-			EmailConfig:                 getFirst(),
-		}
-
-		for _, reserveFund := range record.ReserveFunds {
-			reserveFundArray = append(reserveFundArray, model.ReserveFunds{
-				BuildingID:    reserveFund.BuildingID,
-				Name:          reserveFund.Name,
-				Fund:          reserveFund.Fund,
-				Expense:       reserveFund.Expense,
-				Pay:           reserveFund.Pay,
-				Active:        reserveFund.Active,
-				Type:          reserveFund.Type,
-				ExpenseType:   reserveFund.ExpenseType,
-				AddToExpenses: reserveFund.AddToExpenses,
-			})
-		}
-
-		for _, extraCharge := range record.ExtraCharges {
-			var builder strings.Builder
-			for idx, apt := range extraCharge.Apartments {
-				builder.WriteString(apt.Number)
-				if idx < len(extraCharge.Apartments)-1 {
-					builder.WriteString(",")
-				}
-			}
-
-			extraChargeArray = append(extraChargeArray, model.ExtraCharges{
-				BuildingID:      extraCharge.BuildingID,
-				ParentReference: extraCharge.ParentReference,
-				Type:            extraCharge.Type,
-				Description:     extraCharge.Description,
-				Amount:          extraCharge.Amount,
-				Currency:        extraCharge.Currency,
-				Active:          extraCharge.Active,
-				Apartments:      builder.String(),
-			})
-		}
-	}
-
-	rowsAffected, err := insertBackup(buildings)
-	if err != nil {
-		return 0, err
-	}
-
-	_, err = reserveFunds.InsertBackup(reserveFundArray)
-	if err != nil {
-		return 0, err
-	}
-
-	_, err = extraCharges.InsertBulk(extraChargeArray)
-	if err != nil {
-		return 0, err
-	}
-
-	return rowsAffected, nil
 }

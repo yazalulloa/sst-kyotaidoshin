@@ -23,7 +23,7 @@ func reserveFundPut(w http.ResponseWriter, r *http.Request) {
 
 	var ctx context.Context
 	if response.Keys.ReceiptId != "" && response.ErrorStr == "" {
-		expensesDto, err := receipts.JoinExpensesAndReserveFunds(response.Item.Item.BuildingID, response.Keys.ReceiptId)
+		expensesDto, err := receipts.NewService(ctx).JoinExpensesAndReserveFunds(response.Item.Item.BuildingID, response.Keys.ReceiptId)
 		if err != nil {
 			log.Printf("Error joining expenses and reserve funds: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -56,7 +56,7 @@ func reserveFundDelete(w http.ResponseWriter, r *http.Request) {
 	var ctx context.Context
 
 	if keys.ReceiptId != "" {
-		expensesDto, err := receipts.JoinExpensesAndReserveFunds(keys.BuildingId, keys.ReceiptId)
+		expensesDto, err := receipts.NewService(ctx).JoinExpensesAndReserveFunds(keys.BuildingId, keys.ReceiptId)
 		if err != nil {
 			log.Printf("Error joining expenses and reserve funds: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -68,7 +68,7 @@ func reserveFundDelete(w http.ResponseWriter, r *http.Request) {
 		ctx = r.Context()
 	}
 
-	counter, err := reserveFunds.CountByBuilding(keys.BuildingId)
+	counter, err := reserveFunds.NewRepository(ctx).CountByBuilding(keys.BuildingId)
 	if err != nil {
 		log.Printf("Error getting count: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

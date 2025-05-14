@@ -85,14 +85,16 @@ func extraChargesPut(w http.ResponseWriter, r *http.Request) {
 
 		isUpdate := keys.Id != nil
 
+		service := NewService(r.Context())
+
 		var idToLookup int32
 		var cardIdStr *string
 		if isUpdate {
-			_, err = update(extraCharge)
+			_, err = service.repo.update(extraCharge)
 			idToLookup = *keys.Id
 			cardIdStr = &keys.CardId
 		} else {
-			lastInsertId, err := insert(extraCharge)
+			lastInsertId, err := service.repo.insert(extraCharge)
 			if err == nil {
 				idToLookup = int32(lastInsertId)
 			}
@@ -110,14 +112,14 @@ func extraChargesPut(w http.ResponseWriter, r *http.Request) {
 			defer receiptPdf.PublishBuilding(r.Context(), keys.BuildingID)
 		}
 
-		item, err := getItem(idToLookup, cardIdStr)
+		item, err := service.getItem(idToLookup, cardIdStr)
 		if err != nil {
 			log.Printf("Error getting item: %v", err)
 			response.errorStr = err.Error()
 			return response
 		}
 
-		count, err := countByBuilding(keys.BuildingID)
+		count, err := service.repo.countByBuilding(keys.BuildingID)
 		if err != nil {
 			log.Printf("Error getting count: %v", err)
 			response.errorStr = err.Error()
@@ -157,15 +159,16 @@ func extraChargesDelete(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "BadRequest", http.StatusBadRequest)
 		return
 	}
+	service := NewService(r.Context())
 
-	_, err = deleteById(*keys.Id)
+	_, err = service.repo.deleteById(*keys.Id)
 	if err != nil {
 		log.Printf("Error deleting extraCharges: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	count, err := countByBuilding(keys.BuildingID)
+	count, err := service.repo.countByBuilding(keys.BuildingID)
 
 	if err != nil {
 		log.Printf("Error getting count: %v", err)

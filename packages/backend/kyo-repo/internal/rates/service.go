@@ -9,6 +9,16 @@ import (
 	"time"
 )
 
+type Service struct {
+	repo Repository
+}
+
+func NewService(ctx context.Context) Service {
+	return Service{
+		repo: NewRepository(ctx),
+	}
+}
+
 func ToItem(rate model.Rates) Item {
 	return Item{
 		Key:        *util.Encode(*rate.ID),
@@ -20,14 +30,14 @@ func ToItem(rate model.Rates) Item {
 	}
 }
 
-func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
+func (service Service) getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 	var tableResponse TableResponse
 	var oErr error
 	var wg sync.WaitGroup
 	wg.Add(3)
 	go func() {
 		defer wg.Done()
-		array, err := SelectList(requestQuery)
+		array, err := service.repo.SelectList(requestQuery)
 		results := make([]Item, len(array))
 		for i, item := range array {
 			results[i] = ToItem(item)
@@ -38,14 +48,14 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 
 	go func() {
 		defer wg.Done()
-		totalCount, err := getTotalCount()
+		totalCount, err := service.repo.getTotalCount()
 		tableResponse.Counters.TotalCount = totalCount
 		oErr = err
 	}()
 
 	go func() {
 		defer wg.Done()
-		queryCount, err := getQueryCount(requestQuery)
+		queryCount, err := service.repo.getQueryCount(requestQuery)
 		if queryCount != nil {
 			tableResponse.Counters.QueryCount = queryCount
 		}
@@ -57,9 +67,9 @@ func getTableResponse(requestQuery RequestQuery) (TableResponse, error) {
 	return tableResponse, oErr
 }
 
-func deleteRateReturnCounters(ctx context.Context, id int64, requestQuery RequestQuery) (*Counters, error) {
+func (service Service) deleteRateReturnCounters(id int64, requestQuery RequestQuery) (*Counters, error) {
 
-	_, err := deleteRateById(id)
+	_, err := service.repo.deleteRateById(id)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +81,7 @@ func deleteRateReturnCounters(ctx context.Context, id int64, requestQuery Reques
 
 	go func() {
 		defer wg.Done()
-		totalCount, err := getTotalCount()
+		totalCount, err := service.repo.getTotalCount()
 		if err != nil {
 			errorChan <- err
 			return
@@ -81,7 +91,7 @@ func deleteRateReturnCounters(ctx context.Context, id int64, requestQuery Reques
 
 	go func() {
 		defer wg.Done()
-		queryCount, err := getQueryCount(requestQuery)
+		queryCount, err := service.repo.getQueryCount(requestQuery)
 		if err != nil {
 			errorChan <- err
 			return

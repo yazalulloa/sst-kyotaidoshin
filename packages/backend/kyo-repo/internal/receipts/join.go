@@ -1,6 +1,7 @@
 package receipts
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -18,7 +19,7 @@ import (
 	"sync"
 )
 
-func JoinExpensesAndReserveFunds(buildingId string, receiptId string) (*expenses.ReceiptExpensesDto, error) {
+func (service Service) JoinExpensesAndReserveFunds(buildingId string, receiptId string) (*expenses.ReceiptExpensesDto, error) {
 
 	var wg sync.WaitGroup
 	wg.Add(2)
@@ -29,7 +30,7 @@ func JoinExpensesAndReserveFunds(buildingId string, receiptId string) (*expenses
 
 	go func() {
 		defer wg.Done()
-		dto, err := reserveFunds.GetFormDto(buildingId, receiptId)
+		dto, err := reserveFunds.NewService(service.repo.ctx).GetFormDto(buildingId, receiptId)
 		if err != nil {
 			errorChan <- err
 			return
@@ -40,7 +41,7 @@ func JoinExpensesAndReserveFunds(buildingId string, receiptId string) (*expenses
 
 	go func() {
 		defer wg.Done()
-		dto, err := expenses.GetFormDto(buildingId, receiptId)
+		dto, err := expenses.NewRepository(service.repo.ctx).GetFormDto(buildingId, receiptId)
 		if err != nil {
 			errorChan <- err
 			return
@@ -124,7 +125,7 @@ func GetReceiptExpensesDto(receiptId string, expenseArray []expenses.Item, reser
 	}
 }
 
-func CalculateReceipt(buildingId, receiptId string) (*CalculatedReceipt, error) {
+func CalculateReceipt(ctx context.Context, buildingId, receiptId string) (*CalculatedReceipt, error) {
 
 	var wg sync.WaitGroup
 	wg.Add(8)
@@ -141,7 +142,7 @@ func CalculateReceipt(buildingId, receiptId string) (*CalculatedReceipt, error) 
 	go func() {
 		defer wg.Done()
 
-		item, err := selectByIdWithRate(receiptId)
+		item, err := NewRepository(ctx).selectByIdWithRate(receiptId)
 		if err != nil {
 			errorChan <- err
 			return
@@ -156,7 +157,7 @@ func CalculateReceipt(buildingId, receiptId string) (*CalculatedReceipt, error) 
 	go func() {
 		defer wg.Done()
 
-		building, err := buildings.SelectById(buildingId)
+		building, err := buildings.NewRepository(ctx).SelectById(buildingId)
 		if err != nil {
 			errorChan <- err
 			return
@@ -190,7 +191,7 @@ func CalculateReceipt(buildingId, receiptId string) (*CalculatedReceipt, error) 
 	go func() {
 		defer wg.Done()
 
-		array, err := reserveFunds.SelectByBuilding(buildingId)
+		array, err := reserveFunds.NewRepository(ctx).SelectByBuilding(buildingId)
 		if err != nil {
 			errorChan <- err
 			return
@@ -202,7 +203,7 @@ func CalculateReceipt(buildingId, receiptId string) (*CalculatedReceipt, error) 
 	go func() {
 		defer wg.Done()
 
-		array, err := apartments.SelectByBuilding(buildingId)
+		array, err := apartments.NewRepository(ctx).SelectByBuilding(buildingId)
 		if err != nil {
 			errorChan <- err
 			return
@@ -213,7 +214,7 @@ func CalculateReceipt(buildingId, receiptId string) (*CalculatedReceipt, error) 
 
 	go func() {
 		defer wg.Done()
-		array, err := expenses.SelectByReceipt(receiptId)
+		array, err := expenses.NewRepository(ctx).SelectByReceipt(receiptId)
 		if err != nil {
 			errorChan <- err
 			return
@@ -236,7 +237,7 @@ func CalculateReceipt(buildingId, receiptId string) (*CalculatedReceipt, error) 
 	go func() {
 		defer wg.Done()
 
-		array, err := debts.SelectByBuildingReceipt(buildingId, receiptId)
+		array, err := debts.NewRepository(ctx).SelectByBuildingReceipt(buildingId, receiptId)
 		if err != nil {
 			errorChan <- err
 			return
@@ -257,7 +258,7 @@ func CalculateReceipt(buildingId, receiptId string) (*CalculatedReceipt, error) 
 	go func() {
 		defer wg.Done()
 
-		array, err := extraCharges.SelectByReceipt(receiptId)
+		array, err := extraCharges.NewRepository(ctx).SelectByReceipt(receiptId)
 		if err != nil {
 			errorChan <- err
 			return
@@ -269,7 +270,7 @@ func CalculateReceipt(buildingId, receiptId string) (*CalculatedReceipt, error) 
 	go func() {
 		defer wg.Done()
 
-		array, err := extraCharges.SelectByBuilding(buildingId)
+		array, err := extraCharges.NewRepository(ctx).SelectByBuilding(buildingId)
 		if err != nil {
 			errorChan <- err
 			return

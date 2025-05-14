@@ -1,6 +1,7 @@
 package roles
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"github.com/yaz/kyo-repo/internal/db/gen/model"
@@ -9,7 +10,7 @@ import (
 	"sync"
 )
 
-func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
+func getTableResponse(ctx context.Context, requestQuery RequestQuery) (*TableResponse, error) {
 	var tableResponse TableResponse
 
 	var wg sync.WaitGroup
@@ -18,7 +19,7 @@ func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 
 	go func() {
 		defer wg.Done()
-		array, err := selectList(requestQuery)
+		array, err := selectList(ctx, requestQuery)
 		if err != nil {
 			errorChan <- err
 			return
@@ -44,7 +45,7 @@ func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 
 	go func() {
 		defer wg.Done()
-		totalCount, err := getTotalCount()
+		totalCount, err := getTotalCount(ctx)
 		if err != nil {
 			errorChan <- err
 			return
@@ -54,7 +55,7 @@ func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 
 	go func() {
 		defer wg.Done()
-		queryCount, err := getQueryCount(requestQuery)
+		queryCount, err := getQueryCount(ctx, requestQuery)
 		if err != nil {
 			errorChan <- err
 			return
@@ -114,21 +115,21 @@ func toItem(item RoleWithPermissions, oldCardId *string) (*Item, error) {
 	}, nil
 }
 
-func insertRole(name string, perms []int32) (int32, error) {
+func insertRole(ctx context.Context, name string, perms []int32) (int32, error) {
 	role := model.Roles{
 		Name: name,
 	}
-	roleId, err := insert(role)
+	roleId, err := insert(ctx, role)
 	if err != nil {
 		return 0, err
 	}
 
-	_, err = insertPerms(int32(roleId), perms)
+	_, err = insertPerms(ctx, int32(roleId), perms)
 
 	return int32(roleId), nil
 }
 
-func updateRole(role model.Roles, perms []int32) (int64, error) {
+func updateRole(ctx context.Context, role model.Roles, perms []int32) (int64, error) {
 
 	var wg sync.WaitGroup
 	wg.Add(3)
@@ -136,7 +137,7 @@ func updateRole(role model.Roles, perms []int32) (int64, error) {
 
 	go func() {
 		defer wg.Done()
-		_, err := update(role)
+		_, err := update(ctx, role)
 		if err != nil {
 			errorChan <- err
 			return
@@ -145,7 +146,7 @@ func updateRole(role model.Roles, perms []int32) (int64, error) {
 
 	go func() {
 		defer wg.Done()
-		_, err := insertPerms(*role.ID, perms)
+		_, err := insertPerms(ctx, *role.ID, perms)
 		if err != nil {
 			errorChan <- err
 			return
@@ -154,7 +155,7 @@ func updateRole(role model.Roles, perms []int32) (int64, error) {
 
 	go func() {
 		defer wg.Done()
-		rows, err := deleteOnUpdate(*role.ID, perms)
+		rows, err := deleteOnUpdate(ctx, *role.ID, perms)
 		if err != nil {
 			errorChan <- err
 			return
@@ -174,8 +175,8 @@ func updateRole(role model.Roles, perms []int32) (int64, error) {
 	return 0, nil
 }
 
-func getItem(id int32, oldCardId *string) (*Item, error) {
-	role, err := selectById(id)
+func getItem(ctx context.Context, id int32, oldCardId *string) (*Item, error) {
+	role, err := selectById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -187,14 +188,14 @@ func getItem(id int32, oldCardId *string) (*Item, error) {
 
 }
 
-func deleteAndReturnCounters(keys Keys) (*Counters, error) {
+func deleteAndReturnCounters(ctx context.Context, keys Keys) (*Counters, error) {
 
-	_, err := deleteById(keys.ID)
+	_, err := deleteById(ctx, keys.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	totalCount, err := getTotalCount()
+	totalCount, err := getTotalCount(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -42,7 +42,7 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 
 			switch backupType {
 			case util.APARTMENTS:
-				processDecoder = apartments.ProcessDecoder
+				processDecoder = apartments.NewService(ctx).ProcessDecoder
 				break
 			case util.BUILDINGS:
 				processDecoder = buildings.ProcessDecoder

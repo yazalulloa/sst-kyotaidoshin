@@ -1,6 +1,7 @@
 package roles
 
 import (
+	"context"
 	"fmt"
 	"github.com/go-jet/jet/v2/sqlite"
 	"github.com/yaz/kyo-repo/internal/db"
@@ -8,12 +9,12 @@ import (
 	. "github.com/yaz/kyo-repo/internal/db/gen/table"
 )
 
-func getTotalCount() (int64, error) {
+func getTotalCount(ctx context.Context) (int64, error) {
 
 	var dest struct {
 		Count int64
 	}
-	err := Roles.SELECT(sqlite.COUNT(sqlite.STAR).AS("Count")).FROM(Roles).Query(db.GetDB().DB, &dest)
+	err := Roles.SELECT(sqlite.COUNT(sqlite.STAR).AS("Count")).FROM(Roles).QueryContext(ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return 0, err
 	}
@@ -37,7 +38,7 @@ func queryCondition(requestQuery RequestQuery) *sqlite.BoolExpression {
 	return &condition
 }
 
-func getQueryCount(requestQuery RequestQuery) (*int64, error) {
+func getQueryCount(ctx context.Context, requestQuery RequestQuery) (*int64, error) {
 
 	condition := queryCondition(requestQuery)
 	if condition == nil {
@@ -51,7 +52,7 @@ func getQueryCount(requestQuery RequestQuery) (*int64, error) {
 		Count int64
 	}
 
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
@@ -59,14 +60,14 @@ func getQueryCount(requestQuery RequestQuery) (*int64, error) {
 	return &dest.Count, nil
 }
 
-func selectAll() ([]struct {
+func selectAll(ctx context.Context) ([]struct {
 	model.Roles
 	Permissions []model.Permissions
 }, error) {
-	return selectList(RequestQuery{})
+	return selectList(ctx, RequestQuery{})
 }
 
-func selectList(requestQuery RequestQuery) ([]struct {
+func selectList(ctx context.Context, requestQuery RequestQuery) ([]struct {
 	model.Roles
 	Permissions []model.Permissions
 }, error) {
@@ -100,7 +101,7 @@ func selectList(requestQuery RequestQuery) ([]struct {
 		Permissions []model.Permissions
 	}
 
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
@@ -108,10 +109,10 @@ func selectList(requestQuery RequestQuery) ([]struct {
 	return dest, nil
 }
 
-func insert(role model.Roles) (int64, error) {
+func insert(ctx context.Context, role model.Roles) (int64, error) {
 	stmt := Roles.INSERT(Roles.Name).VALUES(role.Name)
 
-	res, err := stmt.Exec(db.GetDB().DB)
+	res, err := stmt.ExecContext(ctx, db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}
@@ -124,7 +125,7 @@ func insert(role model.Roles) (int64, error) {
 	return lastId, nil
 }
 
-func insertPerms(roleId int32, perms []int32) (int64, error) {
+func insertPerms(ctx context.Context, roleId int32, perms []int32) (int64, error) {
 	stmt := RolePermissions.INSERT(RolePermissions.RoleID, RolePermissions.PermissionID).
 		ON_CONFLICT().DO_NOTHING()
 
@@ -132,7 +133,7 @@ func insertPerms(roleId int32, perms []int32) (int64, error) {
 		stmt = stmt.VALUES(roleId, perm)
 	}
 
-	res, err := stmt.Exec(db.GetDB().DB)
+	res, err := stmt.ExecContext(ctx, db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}
@@ -147,12 +148,12 @@ func insertPerms(roleId int32, perms []int32) (int64, error) {
 
 }
 
-func update(role model.Roles) (int64, error) {
+func update(ctx context.Context, role model.Roles) (int64, error) {
 	stmt := Roles.UPDATE(Roles.Name).SET(Roles.Name).
 		WHERE(Roles.ID.EQ(sqlite.Int32(*role.ID))).
 		SET(role.Name)
 
-	res, err := stmt.Exec(db.GetDB().DB)
+	res, err := stmt.ExecContext(ctx, db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}
@@ -167,14 +168,14 @@ func update(role model.Roles) (int64, error) {
 
 }
 
-func deleteById(id int32) (int64, error) {
-	res, err := RolePermissions.DELETE().WHERE(RolePermissions.RoleID.EQ(sqlite.Int32(id))).Exec(db.GetDB().DB)
+func deleteById(ctx context.Context, id int32) (int64, error) {
+	res, err := RolePermissions.DELETE().WHERE(RolePermissions.RoleID.EQ(sqlite.Int32(id))).ExecContext(ctx, db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}
 
 	stmt := Roles.DELETE().WHERE(Roles.ID.EQ(sqlite.Int32(id)))
-	res, err = stmt.Exec(db.GetDB().DB)
+	res, err = stmt.ExecContext(ctx, db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}
@@ -188,7 +189,7 @@ func deleteById(id int32) (int64, error) {
 	return rowsAffected, nil
 }
 
-func deleteOnUpdate(roleId int32, perms []int32) (int64, error) {
+func deleteOnUpdate(ctx context.Context, roleId int32, perms []int32) (int64, error) {
 
 	notInArray := make([]sqlite.Expression, len(perms))
 
@@ -198,7 +199,7 @@ func deleteOnUpdate(roleId int32, perms []int32) (int64, error) {
 
 	stmt := RolePermissions.DELETE().WHERE(RolePermissions.RoleID.EQ(sqlite.Int32(roleId)).
 		AND(RolePermissions.PermissionID.NOT_IN(notInArray...)))
-	res, err := stmt.Exec(db.GetDB().DB)
+	res, err := stmt.ExecContext(ctx, db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}
@@ -212,7 +213,7 @@ func deleteOnUpdate(roleId int32, perms []int32) (int64, error) {
 	return rowsAffected, nil
 }
 
-func selectById(id int32) (*struct {
+func selectById(ctx context.Context, id int32) (*struct {
 	model.Roles
 	Permissions []model.Permissions
 }, error) {
@@ -230,7 +231,7 @@ func selectById(id int32) (*struct {
 		Permissions []model.Permissions
 	}
 
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}

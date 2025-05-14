@@ -1,15 +1,26 @@
 package reserveFunds
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"github.com/yaz/kyo-repo/internal/db/gen/model"
 	"github.com/yaz/kyo-repo/internal/util"
 )
 
-func GetFormDto(buildingId string, receiptId string) (*FormDto, error) {
+type Service struct {
+	repo Repository
+}
 
-	reserveFunds, err := SelectByBuilding(buildingId)
+func NewService(ctx context.Context) Service {
+	return Service{
+		repo: NewRepository(ctx),
+	}
+}
+
+func (service Service) GetFormDto(buildingId string, receiptId string) (*FormDto, error) {
+
+	reserveFunds, err := service.repo.SelectByBuilding(buildingId)
 
 	if err != nil {
 		return nil, err
@@ -34,8 +45,8 @@ func GetFormDto(buildingId string, receiptId string) (*FormDto, error) {
 	}, nil
 }
 
-func getItem(id int32, receiptId string, oldCardId *string) (*Item, error) {
-	item, err := selectById(id)
+func (service Service) getItem(id int32, receiptId string, oldCardId *string) (*Item, error) {
+	item, err := service.repo.selectById(id)
 
 	if err != nil {
 		return nil, err

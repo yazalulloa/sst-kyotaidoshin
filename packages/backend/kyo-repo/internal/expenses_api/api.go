@@ -19,7 +19,7 @@ func expensesPut(w http.ResponseWriter, r *http.Request) {
 
 	if response.ErrorStr == "" {
 
-		expensesDto, err := receipts.JoinExpensesAndReserveFunds(response.Item.Item.BuildingID, response.Item.Item.ReceiptID)
+		expensesDto, err := receipts.NewService(r.Context()).JoinExpensesAndReserveFunds(response.Item.Item.BuildingID, response.Item.Item.ReceiptID)
 		if err != nil {
 			log.Printf("Error joining expenses and reserve funds: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -44,7 +44,7 @@ func expensesDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	expensesDto, err := receipts.JoinExpensesAndReserveFunds(keys.BuildingID, keys.ReceiptID)
+	expensesDto, err := receipts.NewService(r.Context()).JoinExpensesAndReserveFunds(keys.BuildingID, keys.ReceiptID)
 
 	if err != nil {
 		log.Printf("Error joining expenses and reserve funds: %v", err)

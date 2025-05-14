@@ -1,6 +1,7 @@
 package isr
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"github.com/yaz/kyo-repo/internal/db"
@@ -10,10 +11,18 @@ import (
 	"slices"
 )
 
-func getDistinctCurrencies() ([]string, error) {
+type Repository struct {
+	ctx context.Context
+}
+
+func NewRepository(ctx context.Context) Repository {
+	return Repository{ctx: ctx}
+}
+
+func (repo Repository) getDistinctCurrencies() ([]string, error) {
 	stmt := Rates.SELECT(Rates.FromCurrency).DISTINCT().FROM(Rates)
 	var dest []string
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
@@ -21,11 +30,11 @@ func getDistinctCurrencies() ([]string, error) {
 	return dest, nil
 }
 
-func buildingIds() ([]string, error) {
+func (repo Repository) buildingIds() ([]string, error) {
 	stmt := Buildings.SELECT(Buildings.ID).FROM(Buildings)
 
 	var buildings []model.Buildings
-	err := stmt.Query(db.GetDB().DB, &buildings)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &buildings)
 	if err != nil {
 		return nil, err
 	}
@@ -38,15 +47,15 @@ func buildingIds() ([]string, error) {
 	return array, nil
 }
 
-func apartmentBuildings() ([]string, error) {
+func (repo Repository) apartmentBuildings() ([]string, error) {
 	stmt := Apartments.SELECT(Apartments.BuildingID).DISTINCT().FROM(Apartments)
 	var dest []string
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
 
-	og, err := buildingIds()
+	og, err := repo.buildingIds()
 	if err != nil {
 		return nil, err
 	}
@@ -63,16 +72,16 @@ func apartmentBuildings() ([]string, error) {
 	return dest, nil
 }
 
-func receiptBuildings() ([]string, error) {
+func (repo Repository) receiptBuildings() ([]string, error) {
 	stmt := Receipts.SELECT(Receipts.BuildingID).DISTINCT().FROM(Receipts)
 
 	var dest []string
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
 
-	og, err := buildingIds()
+	og, err := repo.buildingIds()
 	if err != nil {
 		return nil, err
 	}
@@ -89,11 +98,11 @@ func receiptBuildings() ([]string, error) {
 
 }
 
-func receiptYears() ([]int16, error) {
+func (repo Repository) receiptYears() ([]int16, error) {
 	stmt := Receipts.SELECT(Receipts.Year).DISTINCT().FROM(Receipts)
 
 	var dest []int16
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
@@ -106,12 +115,12 @@ type Apt struct {
 	Name   string `json:"name"`
 }
 
-func receiptApts() (*string, error) {
+func (repo Repository) receiptApts() (*string, error) {
 	stmt := Apartments.SELECT(Apartments.BuildingID, Apartments.Number, Apartments.Name).FROM(Apartments).
 		ORDER_BY(Apartments.BuildingID.ASC(), Apartments.Number.ASC())
 
 	var array []model.Apartments
-	err := stmt.Query(db.GetDB().DB, &array)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &array)
 	if err != nil {
 		return nil, err
 	}

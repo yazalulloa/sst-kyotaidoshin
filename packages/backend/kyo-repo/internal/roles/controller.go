@@ -46,7 +46,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 		Limit:  31,
 	}
 
-	response, err := getTableResponse(requestQuery)
+	response, err := getTableResponse(r.Context(), requestQuery)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -136,12 +136,12 @@ func rolesPut(w http.ResponseWriter, r *http.Request) {
 
 		if isUpdate {
 			role.ID = &keys.ID
-			_, err = updateRole(role, request.Perms)
+			_, err = updateRole(r.Context(), role, request.Perms)
 			if err == nil {
 				defer api.GetPermsMap().Clear()
 			}
 		} else {
-			roleId, err := insertRole(request.Name, request.Perms)
+			roleId, err := insertRole(r.Context(), request.Name, request.Perms)
 
 			log.Printf("roleId: %v", roleId)
 			if err == nil {
@@ -157,7 +157,7 @@ func rolesPut(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if isUpdate {
-			item, err := getItem(*role.ID, &keys.CardId)
+			item, err := getItem(r.Context(), *role.ID, &keys.CardId)
 			if err != nil {
 				log.Printf("Error getting item: %v", err)
 				response.errorStr = err.Error()
@@ -194,7 +194,7 @@ func roleDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	counters, err := deleteAndReturnCounters(keys)
+	counters, err := deleteAndReturnCounters(r.Context(), keys)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -212,7 +212,7 @@ func roleDelete(w http.ResponseWriter, r *http.Request) {
 
 func getAll(w http.ResponseWriter, r *http.Request) {
 
-	data, err := selectAll()
+	data, err := selectAll(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -244,7 +244,7 @@ func getAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func getAllMin(w http.ResponseWriter, r *http.Request) {
-	data, err := selectAll()
+	data, err := selectAll(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

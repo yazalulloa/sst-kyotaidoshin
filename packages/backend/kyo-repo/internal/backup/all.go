@@ -3,6 +3,7 @@ package backup
 import (
 	"archive/tar"
 	"compress/gzip"
+	"context"
 	"fmt"
 	"github.com/yaz/kyo-repo/internal/apartments"
 	"github.com/yaz/kyo-repo/internal/buildings"
@@ -14,7 +15,7 @@ import (
 	"sync"
 )
 
-func AllBackup(filename string) (string, error) {
+func AllBackup(ctx context.Context, filename string) (string, error) {
 
 	var wg sync.WaitGroup
 	wg.Add(3)
@@ -26,7 +27,7 @@ func AllBackup(filename string) (string, error) {
 
 	go func() {
 		defer wg.Done()
-		path, err := apartments.Backup()
+		path, err := apartments.NewService(ctx).Backup()
 
 		if err != nil {
 			errorChan <- err
@@ -37,7 +38,7 @@ func AllBackup(filename string) (string, error) {
 
 	go func() {
 		defer wg.Done()
-		path, err := buildings.Backup()
+		path, err := buildings.NewService(ctx).Backup()
 
 		if err != nil {
 			errorChan <- err
@@ -48,7 +49,7 @@ func AllBackup(filename string) (string, error) {
 
 	go func() {
 		defer wg.Done()
-		path, err := receipts.Backup()
+		path, err := receipts.NewService(ctx).Backup()
 
 		if err != nil {
 			errorChan <- err

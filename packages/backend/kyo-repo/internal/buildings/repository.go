@@ -1,6 +1,7 @@
 package buildings
 
 import (
+	"context"
 	"github.com/go-jet/jet/v2/sqlite"
 	"github.com/yaz/kyo-repo/internal/db"
 	"github.com/yaz/kyo-repo/internal/db/gen/model"
@@ -9,29 +10,37 @@ import (
 	"github.com/yaz/kyo-repo/internal/util"
 )
 
-func getTotalCount() (int64, error) {
+type Repository struct {
+	ctx context.Context
+}
+
+func NewRepository(ctx context.Context) Repository {
+	return Repository{ctx: ctx}
+}
+
+func (repo Repository) getTotalCount() (int64, error) {
 	var dest struct {
 		Count int64
 	}
-	err := Buildings.SELECT(sqlite.COUNT(sqlite.STAR).AS("Count")).FROM(Buildings).Query(db.GetDB().DB, &dest)
+	err := Buildings.SELECT(sqlite.COUNT(sqlite.STAR).AS("Count")).FROM(Buildings).QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return 0, err
 	}
 	return dest.Count, nil
 }
 
-func idExists(id string) (bool, error) {
+func (repo Repository) idExists(id string) (bool, error) {
 
 	stmt := Buildings.SELECT(Buildings.ID).FROM(Buildings).WHERE(Buildings.ID.EQ(sqlite.String(id)))
 	var dest []string
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return false, err
 	}
 	return len(dest) > 0, nil
 }
 
-func selectList(req RequestQuery) ([]struct {
+func (repo Repository) selectList(req RequestQuery) ([]struct {
 	model.Buildings
 	AptCount int64
 }, error) {
@@ -62,7 +71,7 @@ func selectList(req RequestQuery) ([]struct {
 		stmt = stmt.LIMIT(int64(req.Limit))
 	}
 
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
@@ -70,10 +79,7 @@ func selectList(req RequestQuery) ([]struct {
 	return dest, nil
 }
 
-//type ExtraChargesArray []model.ExtraCharges
-//type ReserveFundsArray []model.ReserveFunds
-
-func selectRecords(lastId string, limit int64) ([]struct {
+func (repo Repository) selectRecords(lastId string, limit int64) ([]struct {
 	model.Buildings
 	ExtraCharges []model.ExtraCharges
 	ReserveFunds []model.ReserveFunds
@@ -110,7 +116,7 @@ func selectRecords(lastId string, limit int64) ([]struct {
 			ORDER_BY(Buildings.ID.ASC()),
 	)
 
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
@@ -118,9 +124,9 @@ func selectRecords(lastId string, limit int64) ([]struct {
 	return dest, nil
 }
 
-func deleteById(id string) (int64, error) {
+func (repo Repository) deleteById(id string) (int64, error) {
 	stmt := Buildings.DELETE().WHERE(Buildings.ID.EQ(sqlite.String(id)))
-	result, err := stmt.Exec(db.GetDB().DB)
+	result, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}
@@ -133,15 +139,15 @@ func deleteById(id string) (int64, error) {
 	return rowsAffected, err
 }
 
-func insert(building model.Buildings) error {
+func (repo Repository) insert(building model.Buildings) error {
 	stmt := Buildings.INSERT(Buildings.ID, Buildings.Name, Buildings.Rif, Buildings.MainCurrency, Buildings.DebtCurrency, Buildings.CurrenciesToShowAmountToPay, Buildings.DebtsCurrenciesToShow, Buildings.FixedPay, Buildings.FixedPayAmount, Buildings.RoundUpPayments, Buildings.EmailConfig).
 		VALUES(building.ID, building.Name, building.Rif, building.MainCurrency, building.DebtCurrency, building.CurrenciesToShowAmountToPay, building.DebtsCurrenciesToShow, building.FixedPay, building.FixedPayAmount, building.RoundUpPayments, building.EmailConfig)
 
-	_, err := stmt.Exec(db.GetDB().DB)
+	_, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	return err
 }
 
-func insertBackup(buildings []model.Buildings) (int64, error) {
+func (repo Repository) insertBackup(buildings []model.Buildings) (int64, error) {
 	stmt := Buildings.INSERT(Buildings.ID, Buildings.Name, Buildings.Rif, Buildings.MainCurrency, Buildings.DebtCurrency, Buildings.CurrenciesToShowAmountToPay, Buildings.DebtsCurrenciesToShow, Buildings.FixedPay, Buildings.FixedPayAmount, Buildings.RoundUpPayments, Buildings.EmailConfig).
 		ON_CONFLICT().DO_NOTHING()
 
@@ -149,7 +155,7 @@ func insertBackup(buildings []model.Buildings) (int64, error) {
 		stmt = stmt.VALUES(building.ID, building.Name, building.Rif, building.MainCurrency, building.DebtCurrency, building.CurrenciesToShowAmountToPay, building.DebtsCurrenciesToShow, building.FixedPay, building.FixedPayAmount, building.RoundUpPayments, building.EmailConfig)
 	}
 
-	result, err := stmt.Exec(db.GetDB().DB)
+	result, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}
@@ -162,44 +168,44 @@ func insertBackup(buildings []model.Buildings) (int64, error) {
 	return rowsAffected, nil
 }
 
-func update(building model.Buildings) error {
+func (repo Repository) update(building model.Buildings) error {
 
 	stmt := Buildings.UPDATE(
 		Buildings.Name, Buildings.Rif, Buildings.MainCurrency, Buildings.DebtCurrency, Buildings.CurrenciesToShowAmountToPay, Buildings.DebtsCurrenciesToShow, Buildings.FixedPay, Buildings.FixedPayAmount, Buildings.RoundUpPayments, Buildings.EmailConfig).
 		WHERE(Buildings.ID.EQ(sqlite.String(building.ID))).
 		SET(building.Name, building.Rif, building.MainCurrency, building.DebtCurrency, building.CurrenciesToShowAmountToPay, building.DebtsCurrenciesToShow, building.FixedPay, building.FixedPayAmount, building.RoundUpPayments, building.EmailConfig)
 
-	_, err := stmt.Exec(db.GetDB().DB)
+	_, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	return err
 
 }
 
-func selectById(id string) (*model.Buildings, error) {
+func (repo Repository) selectById(id string) (*model.Buildings, error) {
 	stmt := Buildings.SELECT(Buildings.AllColumns).FROM(Buildings).WHERE(Buildings.ID.EQ(sqlite.String(id)))
 	var dest model.Buildings
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
 	return &dest, nil
 }
 
-func SelectIds() ([]string, error) {
+func (repo Repository) SelectIds() ([]string, error) {
 	stmt := Buildings.SELECT(Buildings.ID).FROM(Buildings).ORDER_BY(Buildings.ID.ASC())
 	var dest []string
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
 	return dest, nil
 }
 
-func SelectById(id string) (*model.Buildings, error) {
+func (repo Repository) SelectById(id string) (*model.Buildings, error) {
 
 	stmt := Buildings.SELECT(Buildings.AllColumns).FROM(Buildings).WHERE(Buildings.ID.EQ(sqlite.String(id)))
 
 	var dest model.Buildings
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}

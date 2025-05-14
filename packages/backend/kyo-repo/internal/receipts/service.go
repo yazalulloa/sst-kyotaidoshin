@@ -2,6 +2,7 @@ package receipts
 
 import (
 	"cmp"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -16,6 +17,7 @@ import (
 	"github.com/yaz/kyo-repo/internal/rates"
 	"github.com/yaz/kyo-repo/internal/reserveFunds"
 	"github.com/yaz/kyo-repo/internal/util"
+	"golang.org/x/sync/syncmap"
 	"log"
 	"slices"
 	"strings"
@@ -23,7 +25,17 @@ import (
 	"time"
 )
 
-func loadRates(records []ReceiptRecord, ratesHolder *RatesHolder) error {
+type Service struct {
+	repo Repository
+}
+
+func NewService(ctx context.Context) Service {
+	return Service{
+		repo: NewRepository(ctx),
+	}
+}
+
+func (service Service) loadRates(records []ReceiptRecord, ratesHolder *RatesHolder) error {
 	for _, record := range records {
 		if record.Receipt.Date == "" {
 			log.Printf("Record has no date: %v", record)
@@ -66,7 +78,7 @@ func loadRates(records []ReceiptRecord, ratesHolder *RatesHolder) error {
 				return
 			}
 
-			rate, err := rates.GetFirstBeforeDate(util.USD.Name(), parsedDate)
+			rate, err := rates.NewRepository(service.repo.ctx).GetFirstBeforeDate(util.USD.Name(), parsedDate)
 			if err != nil {
 				errorChan <- fmt.Errorf("error getting rate for date %s: %w", date, err)
 				return
@@ -87,9 +99,9 @@ func loadRates(records []ReceiptRecord, ratesHolder *RatesHolder) error {
 	return nil
 }
 
-func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, error) {
+func (service Service) insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, error) {
 
-	err := loadRates(records, ratesHolder)
+	err := service.loadRates(records, ratesHolder)
 	if err != nil {
 		return 0, err
 	}
@@ -218,7 +230,7 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 
 	go func() {
 		defer wg.Done()
-		_, err := InsertBulk(receiptsArray)
+		_, err := service.repo.InsertBulk(receiptsArray)
 		if err != nil {
 			errorChan <- err
 			return
@@ -227,7 +239,7 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 
 	go func() {
 		defer wg.Done()
-		rows, err := extraCharges.InsertBulk(extraChargeArray)
+		rows, err := extraCharges.NewRepository(service.repo.ctx).InsertBulk(extraChargeArray)
 		if err != nil {
 			errorChan <- err
 			return
@@ -237,7 +249,7 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 
 	go func() {
 		defer wg.Done()
-		rows, err := expenses.InsertBulk(expensesArray)
+		rows, err := expenses.NewRepository(service.repo.ctx).InsertBulk(expensesArray)
 		if err != nil {
 			errorChan <- err
 			return
@@ -248,7 +260,7 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 	go func() {
 		defer wg.Done()
 
-		rows, err := debts.InsertBulk(debtsArray)
+		rows, err := debts.NewRepository(service.repo.ctx).InsertBulk(debtsArray)
 		if err != nil {
 			errorChan <- err
 			return
@@ -267,7 +279,7 @@ func insertRecord(records []ReceiptRecord, ratesHolder *RatesHolder) (int64, err
 	return counter, nil
 }
 
-func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
+func (service Service) getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 
 	//start := time.Now()
 	//defer func() { log.Printf("Elapsed time getTableResponse receipts: %v\n", time.Since(start)) }()
@@ -283,7 +295,7 @@ func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 		//start := time.Now()
 		//defer func() { log.Printf("Elapsed time selectList: %v\n", time.Since(start)) }()
 
-		array, err := selectList(requestQuery)
+		array, err := service.repo.selectList(requestQuery)
 		if err != nil {
 			errorChan <- err
 			return
@@ -309,7 +321,7 @@ func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 		//start := time.Now()
 		//defer func() { log.Printf("Elapsed time getTotalCount: %v\n", time.Since(start)) }()
 
-		totalCount, err := getTotalCount()
+		totalCount, err := service.repo.getTotalCount()
 		if err != nil {
 			errorChan <- err
 			return
@@ -322,7 +334,7 @@ func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 		//start := time.Now()
 		//defer func() { log.Printf("Elapsed time getQueryCount: %v\n", time.Since(start)) }()
 
-		queryCount, err := getQueryCount(requestQuery)
+		queryCount, err := service.repo.getQueryCount(requestQuery)
 		if err != nil {
 			errorChan <- err
 			return
@@ -386,8 +398,8 @@ func toItem(item *model.Receipts, oldCardId *string) (*Item, error) {
 	}, nil
 }
 
-func getItem(id string, oldCardId *string) (*Item, error) {
-	receipt, err := selectById(id)
+func (service Service) getItem(id string, oldCardId *string) (*Item, error) {
+	receipt, err := service.repo.selectById(id)
 	if err != nil {
 		return nil, err
 	}
@@ -404,7 +416,7 @@ func getItem(id string, oldCardId *string) (*Item, error) {
 	return item, nil
 }
 
-func getFormDto(keys Keys) (*FormDto, error) {
+func (service Service) getFormDto(keys Keys) (*FormDto, error) {
 	formDto := FormDto{}
 
 	var wg sync.WaitGroup
@@ -414,7 +426,7 @@ func getFormDto(keys Keys) (*FormDto, error) {
 	go func() {
 		defer wg.Done()
 
-		building, err := buildings.SelectById(keys.BuildingId)
+		building, err := buildings.NewRepository(service.repo.ctx).SelectById(keys.BuildingId)
 		if err != nil {
 			errorChan <- err
 			return
@@ -426,7 +438,7 @@ func getFormDto(keys Keys) (*FormDto, error) {
 	go func() {
 		defer wg.Done()
 
-		receipt, err := selectById(keys.Id)
+		receipt, err := service.repo.selectById(keys.Id)
 		if err != nil {
 			errorChan <- err
 			return
@@ -437,7 +449,7 @@ func getFormDto(keys Keys) (*FormDto, error) {
 			return
 		}
 
-		ratesDtos, err := getRatesDtos(&receipt.Date)
+		ratesDtos, err := service.getRatesDtos(&receipt.Date)
 		if err != nil {
 			errorChan <- err
 			return
@@ -475,7 +487,7 @@ func getFormDto(keys Keys) (*FormDto, error) {
 	go func() {
 		defer wg.Done()
 
-		dto, err := expenses.GetFormDto(keys.BuildingId, keys.Id)
+		dto, err := expenses.NewRepository(service.repo.ctx).GetFormDto(keys.BuildingId, keys.Id)
 		if err != nil {
 			errorChan <- err
 			return
@@ -487,7 +499,7 @@ func getFormDto(keys Keys) (*FormDto, error) {
 	go func() {
 		defer wg.Done()
 
-		reserveFundFormDto, err := reserveFunds.GetFormDto(keys.BuildingId, keys.Id)
+		reserveFundFormDto, err := reserveFunds.NewService(service.repo.ctx).GetFormDto(keys.BuildingId, keys.Id)
 		if err != nil {
 			errorChan <- err
 			return
@@ -499,7 +511,7 @@ func getFormDto(keys Keys) (*FormDto, error) {
 	go func() {
 		defer wg.Done()
 
-		dto, err := extraCharges.GetReceiptFormDto(keys.BuildingId, keys.Id)
+		dto, err := extraCharges.NewService(service.repo.ctx).GetReceiptFormDto(keys.BuildingId, keys.Id)
 		if err != nil {
 			errorChan <- err
 			return
@@ -511,7 +523,7 @@ func getFormDto(keys Keys) (*FormDto, error) {
 	go func() {
 		defer wg.Done()
 
-		dto, err := debts.GetFormDto(keys.BuildingId, keys.Id)
+		dto, err := debts.NewRepository(service.repo.ctx).GetFormDto(keys.BuildingId, keys.Id)
 		if err != nil {
 			errorChan <- err
 			return
@@ -522,7 +534,7 @@ func getFormDto(keys Keys) (*FormDto, error) {
 
 	go func() {
 		defer wg.Done()
-		apts, err := apartments.SelectNumberAndNameByBuildingId(keys.BuildingId)
+		apts, err := apartments.NewRepository(service.repo.ctx).SelectNumberAndNameByBuildingId(keys.BuildingId)
 		if err != nil {
 			errorChan <- err
 			return
@@ -567,7 +579,7 @@ func getFormDto(keys Keys) (*FormDto, error) {
 	return &formDto, nil
 }
 
-func getRatesDtos(date *time.Time) ([]RateDto, error) {
+func (service Service) getRatesDtos(date *time.Time) ([]RateDto, error) {
 
 	var wg sync.WaitGroup
 	wg.Add(2)
@@ -578,7 +590,7 @@ func getRatesDtos(date *time.Time) ([]RateDto, error) {
 
 	go func() {
 		defer wg.Done()
-		arr, err := rates.GetFromDate(util.USD.Name(), *date, 5, true)
+		arr, err := rates.NewRepository(service.repo.ctx).GetFromDate(util.USD.Name(), *date, 5, true)
 
 		if err != nil {
 			errorChan <- err
@@ -591,7 +603,7 @@ func getRatesDtos(date *time.Time) ([]RateDto, error) {
 
 	go func() {
 		defer wg.Done()
-		arr, err := rates.GetFromDate(util.USD.Name(), *date, 5, false)
+		arr, err := rates.NewRepository(service.repo.ctx).GetFromDate(util.USD.Name(), *date, 5, false)
 
 		if err != nil {
 			errorChan <- err
@@ -636,7 +648,7 @@ func getRatesDtos(date *time.Time) ([]RateDto, error) {
 
 }
 
-func deleteReceipt(keys Keys) (int64, error) {
+func (service Service) deleteReceipt(keys Keys) (int64, error) {
 	numWorkers := 4
 	var wg sync.WaitGroup
 	resultChan := make(chan int64, numWorkers)
@@ -646,7 +658,7 @@ func deleteReceipt(keys Keys) (int64, error) {
 
 	go func() {
 		defer wg.Done()
-		rowsAffected, err := deleteById(keys.Id)
+		rowsAffected, err := service.repo.deleteById(keys.Id)
 		if err != nil {
 			errorChan <- fmt.Errorf("error deleting receipt: %s %s -> %w", keys.BuildingId, keys.Id, err)
 			return
@@ -657,7 +669,7 @@ func deleteReceipt(keys Keys) (int64, error) {
 
 	go func() {
 		defer wg.Done()
-		rowsAffected, err := extraCharges.DeleteByReceipt(keys.Id)
+		rowsAffected, err := extraCharges.NewRepository(service.repo.ctx).DeleteByReceipt(keys.Id)
 		if err != nil {
 			errorChan <- fmt.Errorf("error deleting extra charges: %s %s -> %w", keys.BuildingId, keys.Id, err)
 			return
@@ -668,7 +680,7 @@ func deleteReceipt(keys Keys) (int64, error) {
 
 	go func() {
 		defer wg.Done()
-		rowsAffected, err := expenses.DeleteByReceipt(keys.Id)
+		rowsAffected, err := expenses.NewRepository(service.repo.ctx).DeleteByReceipt(keys.Id)
 		if err != nil {
 			errorChan <- fmt.Errorf("error deleting expenses: %s %s -> %w", keys.BuildingId, keys.Id, err)
 			return
@@ -679,7 +691,7 @@ func deleteReceipt(keys Keys) (int64, error) {
 
 	go func() {
 		defer wg.Done()
-		rowsAffected, err := debts.DeleteByReceipt(keys.BuildingId, keys.Id)
+		rowsAffected, err := debts.NewRepository(service.repo.ctx).DeleteByReceipt(keys.BuildingId, keys.Id)
 		if err != nil {
 			errorChan <- fmt.Errorf("error deleting debts: %s %s -> %w", keys.BuildingId, keys.Id, err)
 			return
@@ -711,7 +723,7 @@ func deleteReceipt(keys Keys) (int64, error) {
 	return sum, nil
 }
 
-func duplicate(key Keys) (*string, error) {
+func (service Service) duplicate(key Keys) (*string, error) {
 	var wg sync.WaitGroup
 	wg.Add(4)
 	errorChan := make(chan error, 4)
@@ -723,7 +735,7 @@ func duplicate(key Keys) (*string, error) {
 
 	go func() {
 		defer wg.Done()
-		rec, err := selectById(key.Id)
+		rec, err := service.repo.selectById(key.Id)
 		if err != nil {
 			errorChan <- err
 			return
@@ -733,7 +745,7 @@ func duplicate(key Keys) (*string, error) {
 
 	go func() {
 		defer wg.Done()
-		array, err := debts.SelectByBuildingReceipt(key.BuildingId, key.Id)
+		array, err := debts.NewRepository(service.repo.ctx).SelectByBuildingReceipt(key.BuildingId, key.Id)
 		if err != nil {
 			errorChan <- err
 			return
@@ -743,7 +755,7 @@ func duplicate(key Keys) (*string, error) {
 
 	go func() {
 		defer wg.Done()
-		array, err := expenses.SelectByReceipt(key.Id)
+		array, err := expenses.NewRepository(service.repo.ctx).SelectByReceipt(key.Id)
 		if err != nil {
 			errorChan <- err
 			return
@@ -753,7 +765,7 @@ func duplicate(key Keys) (*string, error) {
 
 	go func() {
 		defer wg.Done()
-		array, err := extraCharges.SelectByReceipt(key.Id)
+		array, err := extraCharges.NewRepository(service.repo.ctx).SelectByReceipt(key.Id)
 		if err != nil {
 			errorChan <- err
 			return
@@ -791,7 +803,7 @@ func duplicate(key Keys) (*string, error) {
 	go func() {
 		defer wg.Done()
 
-		rowsAffected, err := insert(*receipt)
+		rowsAffected, err := service.repo.insert(*receipt)
 		if err != nil {
 			errorChan <- err
 			return
@@ -802,7 +814,7 @@ func duplicate(key Keys) (*string, error) {
 
 	go func() {
 		defer wg.Done()
-		rowsAffected, err := debts.InsertBulk(debtArray)
+		rowsAffected, err := debts.NewRepository(service.repo.ctx).InsertBulk(debtArray)
 		if err != nil {
 			errorChan <- err
 			return
@@ -813,7 +825,7 @@ func duplicate(key Keys) (*string, error) {
 
 	go func() {
 		defer wg.Done()
-		rowsAffected, err := expenses.InsertBulk(expenseArray)
+		rowsAffected, err := expenses.NewRepository(service.repo.ctx).InsertBulk(expenseArray)
 		if err != nil {
 			errorChan <- err
 			return
@@ -824,7 +836,7 @@ func duplicate(key Keys) (*string, error) {
 
 	go func() {
 		defer wg.Done()
-		rowsAffected, err := extraCharges.InsertBulk(extraChargeArray)
+		rowsAffected, err := extraCharges.NewRepository(service.repo.ctx).InsertBulk(extraChargeArray)
 		if err != nil {
 			errorChan <- err
 			return
@@ -852,14 +864,14 @@ func duplicate(key Keys) (*string, error) {
 	return util.Encode(keys(*receipt, "")), nil
 }
 
-func Backup() (string, error) {
+func (service Service) Backup() (string, error) {
 
 	requestQuery := RequestQuery{
 		Limit:     30,
 		SortOrder: util.SortOrderTypeASC,
 	}
 	selectListDtos := func() ([]ReceiptBackup, error) {
-		list, err := selectList(requestQuery)
+		list, err := service.repo.selectList(requestQuery)
 		if err != nil {
 			return nil, err
 		}
@@ -886,7 +898,7 @@ func Backup() (string, error) {
 		go func() {
 			defer wg.Done()
 
-			extraChargesArray, err = extraCharges.SelectByReceipts(ids)
+			extraChargesArray, err = extraCharges.NewRepository(service.repo.ctx).SelectByReceipts(ids)
 
 			if err != nil {
 				errorChan <- err
@@ -897,7 +909,7 @@ func Backup() (string, error) {
 		go func() {
 			defer wg.Done()
 
-			expensesArray, err = expenses.SelectByReceipts(ids)
+			expensesArray, err = expenses.NewRepository(service.repo.ctx).SelectByReceipts(ids)
 			if err != nil {
 				errorChan <- err
 				return
@@ -908,7 +920,7 @@ func Backup() (string, error) {
 		go func() {
 			defer wg.Done()
 
-			debtsArray, err = debts.SelectByReceipts(ids)
+			debtsArray, err = debts.NewRepository(service.repo.ctx).SelectByReceipts(ids)
 			if err != nil {
 				errorChan <- err
 				return
@@ -1014,4 +1026,46 @@ func Backup() (string, error) {
 	}
 
 	return api.Backup(api.BACKUP_RECEIPTS_FILE, selectListDtos)
+}
+
+func (service Service) ProcessDecoder(decoder *json.Decoder) (int64, error) {
+	var records []ReceiptRecord
+	err := decoder.Decode(&records)
+	if err != nil {
+		log.Printf("Error decoding json: %s", err)
+		return 0, err
+	}
+
+	slices.SortFunc(records, func(a, b ReceiptRecord) int {
+
+		lhs, err := time.Parse(time.DateOnly, a.Receipt.Date)
+		if err != nil {
+			//panic(err)
+			log.Printf("Error parsing date: %s %v", a.Receipt.Date, err)
+			return 0
+		}
+
+		rhs, err := time.Parse(time.DateOnly, b.Receipt.Date)
+		if err != nil {
+			//panic(err)
+			log.Printf("Error parsing date: %s %v", b.Receipt.Date, err)
+			return 0
+		}
+
+		return lhs.Compare(rhs)
+	})
+
+	array := util.SplitArray(records, 15)
+
+	var total int64
+	ratesHolder := RatesHolder{Rates: syncmap.Map{}}
+	for _, chunk := range array {
+		rowsAffected, err := service.insertRecord(chunk, &ratesHolder)
+		if err != nil {
+			return 0, err
+		}
+		total += rowsAffected
+	}
+
+	return total, nil
 }

@@ -1,6 +1,7 @@
 package expenses
 
 import (
+	"context"
 	"github.com/go-jet/jet/v2/sqlite"
 	"github.com/yaz/kyo-repo/internal/db"
 	"github.com/yaz/kyo-repo/internal/db/gen/model"
@@ -8,18 +9,15 @@ import (
 	"log"
 )
 
-func count() (int64, error) {
-	var dest struct {
-		Count int64
-	}
-	err := Expenses.SELECT(sqlite.COUNT(sqlite.STAR).AS("Count")).FROM(Expenses).Query(db.GetDB().DB, &dest)
-	if err != nil {
-		return 0, err
-	}
-	return dest.Count, nil
+type Repository struct {
+	ctx context.Context
 }
 
-func InsertBulk(array []model.Expenses) (int64, error) {
+func NewRepository(ctx context.Context) Repository {
+	return Repository{ctx: ctx}
+}
+
+func (repo Repository) InsertBulk(array []model.Expenses) (int64, error) {
 
 	if len(array) == 0 {
 		return 0, nil
@@ -31,7 +29,7 @@ func InsertBulk(array []model.Expenses) (int64, error) {
 		stmt = stmt.VALUES(expense.BuildingID, expense.ReceiptID, expense.Description, expense.Amount, expense.Currency, expense.Type)
 	}
 
-	res, err := stmt.Exec(db.GetDB().DB)
+	res, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	if err != nil {
 		log.Printf("Error inserting array: %v\n", err)
 		return 0, err
@@ -45,31 +43,31 @@ func InsertBulk(array []model.Expenses) (int64, error) {
 	return rowsAffected, nil
 }
 
-func SelectByReceipt(receiptID string) ([]model.Expenses, error) {
+func (repo Repository) SelectByReceipt(receiptID string) ([]model.Expenses, error) {
 	var dest []model.Expenses
-	err := Expenses.SELECT(Expenses.AllColumns).WHERE(Expenses.ReceiptID.EQ(sqlite.String(receiptID))).Query(db.GetDB().DB, &dest)
+	err := Expenses.SELECT(Expenses.AllColumns).WHERE(Expenses.ReceiptID.EQ(sqlite.String(receiptID))).QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
 	return dest, nil
 }
 
-func SelectByReceipts(ids []string) ([]model.Expenses, error) {
+func (repo Repository) SelectByReceipts(ids []string) ([]model.Expenses, error) {
 	receipts := make([]sqlite.Expression, len(ids))
 	for i, p := range ids {
 		receipts[i] = sqlite.String(p)
 	}
 	var dest []model.Expenses
-	err := Expenses.SELECT(Expenses.AllColumns).WHERE(Expenses.ReceiptID.IN(receipts...)).Query(db.GetDB().DB, &dest)
+	err := Expenses.SELECT(Expenses.AllColumns).WHERE(Expenses.ReceiptID.IN(receipts...)).QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
 	return dest, nil
 }
 
-func DeleteByReceipt(receiptID string) (int64, error) {
+func (repo Repository) DeleteByReceipt(receiptID string) (int64, error) {
 	stmt := Expenses.DELETE().WHERE(Expenses.ReceiptID.EQ(sqlite.String(receiptID)))
-	res, err := stmt.Exec(db.GetDB().DB)
+	res, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}
@@ -81,9 +79,9 @@ func DeleteByReceipt(receiptID string) (int64, error) {
 	return rowsAffected, nil
 }
 
-func deleteById(id int32) (int64, error) {
+func (repo Repository) deleteById(id int32) (int64, error) {
 	stmt := Expenses.DELETE().WHERE(Expenses.ID.EQ(sqlite.Int32(id)))
-	res, err := stmt.Exec(db.GetDB().DB)
+	res, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}
@@ -96,7 +94,7 @@ func deleteById(id int32) (int64, error) {
 	return rowsAffected, nil
 }
 
-func countByReceipt(receiptID string) (int64, error) {
+func (repo Repository) countByReceipt(receiptID string) (int64, error) {
 	stmt := Expenses.SELECT(
 		sqlite.COUNT(sqlite.STAR).
 			//Expenses.ID).
@@ -106,7 +104,7 @@ func countByReceipt(receiptID string) (int64, error) {
 	var dest struct {
 		Count int64
 	}
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return 0, err
 	}
@@ -114,12 +112,12 @@ func countByReceipt(receiptID string) (int64, error) {
 	return dest.Count, nil
 }
 
-func update(expense model.Expenses) (int64, error) {
+func (repo Repository) update(expense model.Expenses) (int64, error) {
 	stmt := Expenses.UPDATE(Expenses.Description, Expenses.Amount, Expenses.Currency, Expenses.Type).
 		WHERE(Expenses.ID.EQ(sqlite.Int32(*expense.ID))).
 		SET(expense.Description, expense.Amount, expense.Currency, expense.Type)
 
-	res, err := stmt.Exec(db.GetDB().DB)
+	res, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}
@@ -132,11 +130,11 @@ func update(expense model.Expenses) (int64, error) {
 	return rowsAffected, nil
 }
 
-func insert(expense model.Expenses) (int64, error) {
+func (repo Repository) insert(expense model.Expenses) (int64, error) {
 	stmt := Expenses.INSERT(Expenses.BuildingID, Expenses.ReceiptID, Expenses.Description, Expenses.Amount, Expenses.Currency, Expenses.Type).
 		VALUES(expense.BuildingID, expense.ReceiptID, expense.Description, expense.Amount, expense.Currency, expense.Type)
 
-	result, err := stmt.Exec(db.GetDB().DB)
+	result, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}

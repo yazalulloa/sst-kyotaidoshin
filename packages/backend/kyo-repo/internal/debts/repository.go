@@ -1,6 +1,7 @@
 package debts
 
 import (
+	"context"
 	"github.com/go-jet/jet/v2/sqlite"
 	"github.com/yaz/kyo-repo/internal/db"
 	"github.com/yaz/kyo-repo/internal/db/gen/model"
@@ -9,18 +10,15 @@ import (
 	"log"
 )
 
-func count() (int64, error) {
-	var dest struct {
-		Count int64
-	}
-	err := Debts.SELECT(sqlite.COUNT(sqlite.STAR).AS("Count")).FROM(Debts).Query(db.GetDB().DB, &dest)
-	if err != nil {
-		return 0, err
-	}
-	return dest.Count, nil
+type Repository struct {
+	ctx context.Context
 }
 
-func InsertBulk(array []model.Debts) (int64, error) {
+func NewRepository(ctx context.Context) Repository {
+	return Repository{ctx: ctx}
+}
+
+func (repo Repository) InsertBulk(array []model.Debts) (int64, error) {
 	if len(array) == 0 {
 		return 0, nil
 	}
@@ -35,7 +33,7 @@ func InsertBulk(array []model.Debts) (int64, error) {
 		stmt = stmt.VALUES(debt.BuildingID, debt.ReceiptID, debt.AptNumber, debt.Receipts, debt.Amount, debt.Months, debt.PreviousPaymentAmount, debt.PreviousPaymentAmountCurrency)
 	}
 
-	res, err := stmt.Exec(db.GetDB().DB)
+	res, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	if err != nil {
 		log.Printf("Error inserting array: %v\n%s", err, stmt.DebugSql())
 		return 0, err
@@ -49,14 +47,14 @@ func InsertBulk(array []model.Debts) (int64, error) {
 	return rowsAffected, nil
 }
 
-func SelectByBuildingReceipt(buildingId string, receiptId string) ([]model.Debts, error) {
+func (repo Repository) SelectByBuildingReceipt(buildingId string, receiptId string) ([]model.Debts, error) {
 
 	stmt := Debts.SELECT(Debts.AllColumns).
 		WHERE(Debts.BuildingID.EQ(sqlite.String(buildingId)).
 			AND(Debts.ReceiptID.EQ(sqlite.String(receiptId))))
 
 	var dest []model.Debts
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
@@ -64,13 +62,13 @@ func SelectByBuildingReceipt(buildingId string, receiptId string) ([]model.Debts
 	return dest, nil
 }
 
-func SelectByReceipts(ids []string) ([]model.Debts, error) {
+func (repo Repository) SelectByReceipts(ids []string) ([]model.Debts, error) {
 	receipts := make([]sqlite.Expression, len(ids))
 	for i, p := range ids {
 		receipts[i] = sqlite.String(p)
 	}
 	var dest []model.Debts
-	err := Debts.SELECT(Debts.AllColumns).WHERE(Debts.ReceiptID.IN(receipts...)).Query(db.GetDB().DB, &dest)
+	err := Debts.SELECT(Debts.AllColumns).WHERE(Debts.ReceiptID.IN(receipts...)).QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
@@ -78,9 +76,9 @@ func SelectByReceipts(ids []string) ([]model.Debts, error) {
 
 }
 
-func DeleteByReceipt(buildingId string, receiptId string) (int64, error) {
+func (repo Repository) DeleteByReceipt(buildingId string, receiptId string) (int64, error) {
 	stmt := Debts.DELETE().WHERE(Debts.BuildingID.EQ(sqlite.String(buildingId)).AND(Debts.ReceiptID.EQ(sqlite.String(receiptId))))
-	res, err := stmt.Exec(db.GetDB().DB)
+	res, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}
@@ -92,12 +90,12 @@ func DeleteByReceipt(buildingId string, receiptId string) (int64, error) {
 	return rowsAffected, nil
 }
 
-func update(debt model.Debts) (int64, error) {
+func (repo Repository) update(debt model.Debts) (int64, error) {
 	stmt := Debts.UPDATE(Debts.Receipts, Debts.Amount, Debts.Months, Debts.PreviousPaymentAmount, Debts.PreviousPaymentAmountCurrency).
 		WHERE(Debts.BuildingID.EQ(sqlite.String(debt.BuildingID)).AND(Debts.ReceiptID.EQ(sqlite.String(debt.ReceiptID))).AND(Debts.AptNumber.EQ(sqlite.String(debt.AptNumber)))).
 		SET(debt.Receipts, debt.Amount, debt.Months, debt.PreviousPaymentAmount, debt.PreviousPaymentAmountCurrency)
 
-	res, err := stmt.Exec(db.GetDB().DB)
+	res, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	if err != nil {
 		log.Printf("Error updating debt: %v\n", err)
 		return 0, err

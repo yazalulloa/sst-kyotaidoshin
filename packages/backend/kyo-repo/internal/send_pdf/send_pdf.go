@@ -54,7 +54,7 @@ func (holder *Holder) _sendPdfs() error {
 
 	altRecipient := altEmailsRecipient.(string)
 
-	receipt, err := receipts.CalculateReceipt(holder.Event.BuildingId, holder.Event.ReceiptId)
+	receipt, err := receipts.CalculateReceipt(holder.Ctx, holder.Event.BuildingId, holder.Event.ReceiptId)
 	if err != nil {
 		return err
 	}
@@ -202,7 +202,7 @@ func (holder *Holder) _sendPdfs() error {
 	}
 
 	log.Printf("Sent %d", sentMsgs)
-	_, err = receipts.UpdateLastSent(holder.Event.ReceiptId)
+	_, err = receipts.NewRepository(holder.Ctx).UpdateLastSent(holder.Event.ReceiptId)
 	if err != nil {
 		return err
 	}

@@ -23,11 +23,9 @@ import (
 	"github.com/yaz/kyo-repo/internal/rates"
 	"github.com/yaz/kyo-repo/internal/receiptPdf"
 	"github.com/yaz/kyo-repo/internal/util"
-	"golang.org/x/sync/syncmap"
 	"io"
 	"log"
 	"net/http"
-	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -89,7 +87,7 @@ func getUploadBackupForm(w http.ResponseWriter, r *http.Request) {
 
 func uploadBackup(w http.ResponseWriter, r *http.Request) {
 
-	component, err := api.ProcessUploadBackup(r, "/receipts", ProcessDecoder)
+	component, err := api.ProcessUploadBackup(r, "/receipts", NewService(r.Context()).ProcessDecoder)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -102,48 +100,6 @@ func uploadBackup(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-}
-
-func ProcessDecoder(decoder *json.Decoder) (int64, error) {
-	var records []ReceiptRecord
-	err := decoder.Decode(&records)
-	if err != nil {
-		log.Printf("Error decoding json: %s", err)
-		return 0, err
-	}
-
-	slices.SortFunc(records, func(a, b ReceiptRecord) int {
-
-		lhs, err := time.Parse(time.DateOnly, a.Receipt.Date)
-		if err != nil {
-			//panic(err)
-			log.Printf("Error parsing date: %s %v", a.Receipt.Date, err)
-			return 0
-		}
-
-		rhs, err := time.Parse(time.DateOnly, b.Receipt.Date)
-		if err != nil {
-			//panic(err)
-			log.Printf("Error parsing date: %s %v", b.Receipt.Date, err)
-			return 0
-		}
-
-		return lhs.Compare(rhs)
-	})
-
-	array := util.SplitArray(records, 15)
-
-	var total int64
-	ratesHolder := RatesHolder{Rates: syncmap.Map{}}
-	for _, chunk := range array {
-		rowsAffected, err := insertRecord(chunk, &ratesHolder)
-		if err != nil {
-			return 0, err
-		}
-		total += rowsAffected
-	}
-
-	return total, nil
 }
 
 func search(w http.ResponseWriter, r *http.Request) {
@@ -194,7 +150,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 		SortOrder: util.SortOrderTypeDESC,
 	}
 
-	response, err := getTableResponse(requestQuery)
+	response, err := NewService(r.Context()).getTableResponse(requestQuery)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -242,7 +198,7 @@ func formData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	formDto, oErr := getFormDto(keys)
+	formDto, oErr := NewService(r.Context()).getFormDto(keys)
 
 	if oErr != nil {
 		http.Error(w, oErr.Error(), http.StatusInternalServerError)
@@ -347,7 +303,7 @@ func receiptPost(w http.ResponseWriter, r *http.Request) {
 			return response
 		}
 
-		exist, err := rates.CheckRateExist(*rateId)
+		exist, err := rates.NewRepository(r.Context()).CheckRateExist(*rateId)
 		if err != nil {
 			log.Printf("Error checking rate: %v", err)
 			response.errorStr = err.Error()
@@ -385,7 +341,7 @@ func receiptPost(w http.ResponseWriter, r *http.Request) {
 			parsedReceipt.ExtraCharges[i].ParentReference = receipt.ID
 		}
 
-		apts, err := apartments.SelectByBuilding(receipt.BuildingID)
+		apts, err := apartments.NewRepository(r.Context()).SelectByBuilding(receipt.BuildingID)
 		if err != nil {
 			log.Printf("Error getting apartments: %v", err)
 			response.errorStr = err.Error()
@@ -398,7 +354,7 @@ func receiptPost(w http.ResponseWriter, r *http.Request) {
 
 		go func() {
 			defer wg.Done()
-			_, err = insert(receipt)
+			_, err = NewRepository(r.Context()).insert(receipt)
 			if err != nil {
 				errorChan <- err
 				return
@@ -432,7 +388,7 @@ func receiptPost(w http.ResponseWriter, r *http.Request) {
 				debtArray[i] = debt
 			}
 
-			_, err = debts.InsertBulk(debtArray)
+			_, err = debts.NewRepository(r.Context()).InsertBulk(debtArray)
 			if err != nil {
 				errorChan <- err
 				return
@@ -441,7 +397,7 @@ func receiptPost(w http.ResponseWriter, r *http.Request) {
 
 		go func() {
 			defer wg.Done()
-			_, err = expenses.InsertBulk(parsedReceipt.Expenses)
+			_, err = expenses.NewRepository(r.Context()).InsertBulk(parsedReceipt.Expenses)
 			if err != nil {
 				errorChan <- err
 				return
@@ -462,7 +418,7 @@ func receiptPost(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
-			_, err = extraCharges.InsertBulk(extraChargesArray)
+			_, err = extraCharges.NewRepository(r.Context()).InsertBulk(extraChargesArray)
 			if err != nil {
 				errorChan <- err
 				return
@@ -574,7 +530,7 @@ func receiptPut(w http.ResponseWriter, r *http.Request) {
 			return response
 		}
 
-		exist, err := rates.CheckRateExist(*rateId)
+		exist, err := rates.NewRepository(r.Context()).CheckRateExist(*rateId)
 		if err != nil {
 			log.Printf("Error checking rate: %v", err)
 			response.errorStr = err.Error()
@@ -595,7 +551,7 @@ func receiptPut(w http.ResponseWriter, r *http.Request) {
 			RateID:     *rateId,
 		}
 
-		_, err = update(receipt)
+		_, err = NewRepository(r.Context()).update(receipt)
 		if err != nil {
 			log.Printf("Error updating receipt: %v", err)
 			response.errorStr = err.Error()
@@ -636,7 +592,7 @@ func receiptDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = deleteReceipt(keys)
+	_, err = NewService(r.Context()).deleteReceipt(keys)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -664,7 +620,7 @@ func getReceiptView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id)
+	receipt, err := CalculateReceipt(r.Context(), keys.BuildingId, keys.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -734,7 +690,7 @@ func getZip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id)
+	receipt, err := CalculateReceipt(r.Context(), keys.BuildingId, keys.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -808,7 +764,7 @@ func getPdf(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id)
+	receipt, err := CalculateReceipt(r.Context(), keys.BuildingId, keys.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -861,7 +817,7 @@ func getHtml(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	receipt, err := CalculateReceipt(keys.BuildingId, keys.Id)
+	receipt, err := CalculateReceipt(r.Context(), keys.BuildingId, keys.Id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -1099,7 +1055,7 @@ func duplicateReceipt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	str, err := duplicate(keys)
+	str, err := NewService(r.Context()).duplicate(keys)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -1178,7 +1134,7 @@ func getReceiptSent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	item, err := getItem(keys.Id, &keys.CardId)
+	item, err := NewService(r.Context()).getItem(keys.Id, &keys.CardId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

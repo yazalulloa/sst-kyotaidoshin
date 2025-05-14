@@ -1,6 +1,7 @@
 package apartments
 
 import (
+	"context"
 	"fmt"
 	"github.com/go-jet/jet/v2/sqlite"
 	"github.com/yaz/kyo-repo/internal/db"
@@ -9,6 +10,14 @@ import (
 	"strings"
 )
 
+type Repository struct {
+	ctx context.Context
+}
+
+func NewRepository(ctx context.Context) Repository {
+	return Repository{ctx: ctx}
+}
+
 func searchExpression(search string) sqlite.BoolExpression {
 	q := fmt.Sprintf("%%%s%%", search)
 	return sqlite.RawBool(
@@ -16,12 +25,12 @@ func searchExpression(search string) sqlite.BoolExpression {
 		sqlite.RawArgs{":search": q}).IS_TRUE()
 }
 
-func getTotalCount() (int64, error) {
+func (repo Repository) getTotalCount() (int64, error) {
 
 	var dest struct {
 		Count int64
 	}
-	err := Apartments.SELECT(sqlite.COUNT(sqlite.STAR).AS("Count")).FROM(Apartments).Query(db.GetDB().DB, &dest)
+	err := Apartments.SELECT(sqlite.COUNT(sqlite.STAR).AS("Count")).FROM(Apartments).QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return 0, err
 	}
@@ -62,7 +71,7 @@ func queryCondition(requestQuery RequestQuery) *sqlite.BoolExpression {
 	return &condition
 }
 
-func getQueryCount(requestQuery RequestQuery) (*int64, error) {
+func (repo Repository) getQueryCount(requestQuery RequestQuery) (*int64, error) {
 
 	condition := queryCondition(requestQuery)
 	if condition == nil {
@@ -76,7 +85,7 @@ func getQueryCount(requestQuery RequestQuery) (*int64, error) {
 		Count int64
 	}
 
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +93,7 @@ func getQueryCount(requestQuery RequestQuery) (*int64, error) {
 	return &dest.Count, nil
 }
 
-func selectList(requestQuery RequestQuery) ([]model.Apartments, error) {
+func (repo Repository) selectList(requestQuery RequestQuery) ([]model.Apartments, error) {
 	condition := sqlite.Bool(true)
 
 	if requestQuery.lastBuildingId != "" && requestQuery.lastNumber != "" {
@@ -109,7 +118,7 @@ func selectList(requestQuery RequestQuery) ([]model.Apartments, error) {
 
 	var list []model.Apartments
 
-	err := stmt.Query(db.GetDB().DB, &list)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &list)
 	if err != nil {
 		return nil, err
 	}
@@ -117,11 +126,11 @@ func selectList(requestQuery RequestQuery) ([]model.Apartments, error) {
 	return list, nil
 }
 
-func deleteByKeys(keys Keys) (int64, error) {
+func (repo Repository) deleteByKeys(keys Keys) (int64, error) {
 
 	stmt := Apartments.DELETE().WHERE(Apartments.BuildingID.EQ(sqlite.String(keys.BuildingId)).
 		AND(Apartments.Number.EQ(sqlite.String(keys.Number))))
-	result, err := stmt.Exec(db.GetDB().DB)
+	result, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}
@@ -129,7 +138,7 @@ func deleteByKeys(keys Keys) (int64, error) {
 	return result.RowsAffected()
 }
 
-func insertBulk(apartments []model.Apartments) (int64, error) {
+func (repo Repository) insertBulk(apartments []model.Apartments) (int64, error) {
 	stmt := Apartments.INSERT(Apartments.BuildingID, Apartments.Number, Apartments.Name, Apartments.IDDoc, Apartments.Aliquot, Apartments.Emails).
 		ON_CONFLICT().DO_NOTHING()
 
@@ -137,7 +146,7 @@ func insertBulk(apartments []model.Apartments) (int64, error) {
 		stmt = stmt.VALUES(apartment.BuildingID, apartment.Number, apartment.Name, apartment.IDDoc, apartment.Aliquot, apartment.Emails)
 	}
 
-	res, err := stmt.Exec(db.GetDB().DB)
+	res, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	if err != nil {
 		return 0, err
 	}
@@ -150,13 +159,13 @@ func insertBulk(apartments []model.Apartments) (int64, error) {
 	return rowsAffected, nil
 }
 
-func SelectNumberAndNameByBuildingId(buildingId string) ([]Apt, error) {
+func (repo Repository) SelectNumberAndNameByBuildingId(buildingId string) ([]Apt, error) {
 	stmt := Apartments.SELECT(Apartments.Number, Apartments.Name).FROM(Apartments).
 		WHERE(Apartments.BuildingID.EQ(sqlite.String(buildingId))).
 		ORDER_BY(Apartments.Number.ASC())
 
 	var dest []model.Apartments
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
@@ -169,13 +178,13 @@ func SelectNumberAndNameByBuildingId(buildingId string) ([]Apt, error) {
 	return apts, nil
 }
 
-func SelectByBuilding(buildingId string) ([]model.Apartments, error) {
+func (repo Repository) SelectByBuilding(buildingId string) ([]model.Apartments, error) {
 	stmt := Apartments.SELECT(Apartments.AllColumns).FROM(Apartments).
 		WHERE(Apartments.BuildingID.EQ(sqlite.String(buildingId))).
 		ORDER_BY(Apartments.Number.ASC())
 
 	var dest []model.Apartments
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return nil, err
 	}
@@ -183,14 +192,14 @@ func SelectByBuilding(buildingId string) ([]model.Apartments, error) {
 	return dest, nil
 }
 
-func aptExists(buildingId, number string) (bool, error) {
+func (repo Repository) aptExists(buildingId, number string) (bool, error) {
 	stmt := Apartments.SELECT(sqlite.COUNT(sqlite.STAR).AS("Count")).FROM(Apartments).
 		WHERE(Apartments.BuildingID.EQ(sqlite.String(buildingId)).AND(Apartments.Number.EQ(sqlite.String(number))))
 
 	var dest struct {
 		Count int64
 	}
-	err := stmt.Query(db.GetDB().DB, &dest)
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
 		return false, err
 	}
@@ -198,20 +207,20 @@ func aptExists(buildingId, number string) (bool, error) {
 	return dest.Count > 0, nil
 }
 
-func update(apartment model.Apartments) error {
+func (repo Repository) update(apartment model.Apartments) error {
 	stmt := Apartments.UPDATE(Apartments.Name, Apartments.IDDoc, Apartments.Aliquot, Apartments.Emails).
 		WHERE(Apartments.BuildingID.EQ(sqlite.String(apartment.BuildingID)).AND(Apartments.Number.EQ(sqlite.String(apartment.Number)))).
 		SET(apartment.Name, apartment.IDDoc, apartment.Aliquot, apartment.Emails)
 
-	_, err := stmt.Exec(db.GetDB().DB)
+	_, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	return err
 }
 
-func insert(apartment model.Apartments) error {
+func (repo Repository) insert(apartment model.Apartments) error {
 	stmt := Apartments.INSERT(Apartments.BuildingID, Apartments.Number, Apartments.Name, Apartments.IDDoc, Apartments.Aliquot, Apartments.Emails).
 		VALUES(apartment.BuildingID, apartment.Number, apartment.Name, apartment.IDDoc, apartment.Aliquot, apartment.Emails)
 
-	_, err := stmt.Exec(db.GetDB().DB)
+	_, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	return err
 
 }

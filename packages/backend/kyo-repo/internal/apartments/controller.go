@@ -1,7 +1,6 @@
 package apartments
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/go-playground/form/v4"
 	"github.com/go-playground/validator/v10"
@@ -52,7 +51,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 		Limit:          31,
 	}
 
-	response, err := getTableResponse(requestQuery)
+	response, err := NewService(r.Context()).getTableResponse(requestQuery)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -104,7 +103,7 @@ func aptDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	counters, err := deleteAndReturnCounters(keys)
+	counters, err := NewService(r.Context()).deleteAndReturnCounters(keys)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -176,8 +175,10 @@ func aptPut(w http.ResponseWriter, r *http.Request) {
 			return response
 		}
 
+		service := NewService(r.Context())
+
 		if !isUpdate {
-			exists, err := aptExists(request.Building, request.Number)
+			exists, err := service.repo.aptExists(request.Building, request.Number)
 			if err != nil {
 				response.errorStr = err.Error()
 				return response
@@ -214,9 +215,9 @@ func aptPut(w http.ResponseWriter, r *http.Request) {
 			apartment.BuildingID = keys.BuildingId
 			apartment.Number = keys.Number
 
-			err = update(apartment)
+			err = service.repo.update(apartment)
 		} else {
-			err = insert(apartment)
+			err = service.repo.insert(apartment)
 		}
 
 		if err != nil {
@@ -269,20 +270,9 @@ func getUploadBackupForm(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func ProcessDecoder(decoder *json.Decoder) (int64, error) {
-	var dto []ApartmentDto
-	err := decoder.Decode(&dto)
-	if err != nil {
-		log.Printf("Error decoding json: %s", err)
-		return 0, err
-	}
-
-	return insertDtos(dto)
-}
-
 func uploadBackup(w http.ResponseWriter, r *http.Request) {
 
-	component, err := api.ProcessUploadBackup(r, "/apartments", ProcessDecoder)
+	component, err := api.ProcessUploadBackup(r, "/apartments", NewService(r.Context()).ProcessDecoder)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

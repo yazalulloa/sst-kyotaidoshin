@@ -1,8 +1,12 @@
 package buildings
 
 import (
+	"context"
+	"encoding/json"
 	"github.com/google/uuid"
 	"github.com/yaz/kyo-repo/internal/api"
+	"github.com/yaz/kyo-repo/internal/db/gen/model"
+	"github.com/yaz/kyo-repo/internal/email_h"
 	"github.com/yaz/kyo-repo/internal/extraCharges"
 	"github.com/yaz/kyo-repo/internal/reserveFunds"
 	"github.com/yaz/kyo-repo/internal/util"
@@ -11,7 +15,17 @@ import (
 	"sync"
 )
 
-func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
+type Service struct {
+	repo Repository
+}
+
+func NewService(ctx context.Context) Service {
+	return Service{
+		repo: NewRepository(ctx),
+	}
+}
+
+func (service Service) getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 	var rateTableResponse TableResponse
 
 	var wg sync.WaitGroup
@@ -20,7 +34,7 @@ func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 
 	go func() {
 		defer wg.Done()
-		array, err := selectList(requestQuery)
+		array, err := service.repo.selectList(requestQuery)
 		if err != nil {
 			errorChan <- err
 			return
@@ -44,7 +58,7 @@ func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 
 	go func() {
 		defer wg.Done()
-		totalCount, err := getTotalCount()
+		totalCount, err := service.repo.getTotalCount()
 		if err != nil {
 			errorChan <- err
 			return
@@ -63,7 +77,7 @@ func getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 	return &rateTableResponse, nil
 }
 
-func deleteAndReturnCounters(id string) (*Counters, error) {
+func (service Service) deleteAndReturnCounters(id string) (*Counters, error) {
 
 	var wg sync.WaitGroup
 	workers := 3
@@ -72,7 +86,7 @@ func deleteAndReturnCounters(id string) (*Counters, error) {
 
 	go func() {
 		defer wg.Done()
-		_, err := deleteById(id)
+		_, err := service.repo.deleteById(id)
 		if err != nil {
 			errorChan <- err
 			return
@@ -81,7 +95,7 @@ func deleteAndReturnCounters(id string) (*Counters, error) {
 
 	go func() {
 		defer wg.Done()
-		_, err := reserveFunds.DeleteByBuilding(id)
+		_, err := reserveFunds.NewRepository(service.repo.ctx).DeleteByBuilding(id)
 		if err != nil {
 			errorChan <- err
 			return
@@ -90,7 +104,7 @@ func deleteAndReturnCounters(id string) (*Counters, error) {
 
 	go func() {
 		defer wg.Done()
-		_, err := extraCharges.DeleteByBuilding(id)
+		_, err := extraCharges.NewRepository(service.repo.ctx).DeleteByBuilding(id)
 		if err != nil {
 			errorChan <- err
 			return
@@ -105,7 +119,7 @@ func deleteAndReturnCounters(id string) (*Counters, error) {
 		return nil, err
 	}
 
-	totalCount, err := getTotalCount()
+	totalCount, err := service.repo.getTotalCount()
 	if err != nil {
 		return nil, err
 	}
@@ -115,12 +129,12 @@ func deleteAndReturnCounters(id string) (*Counters, error) {
 	return &counters, nil
 }
 
-func Backup() (string, error) {
+func (service Service) Backup() (string, error) {
 
 	lastId := ""
 
 	selectListDtos := func() ([]BuildingRecord, error) {
-		list, err := selectRecords(lastId, 2)
+		list, err := service.repo.selectRecords(lastId, 2)
 		if err != nil {
 			return nil, err
 		}
@@ -195,4 +209,96 @@ func Backup() (string, error) {
 	}
 
 	return api.Backup(api.BACKUP_BUILDINGS_FILE, selectListDtos)
+}
+
+func (service Service) ProcessDecoder(decoder *json.Decoder) (int64, error) {
+	var dto []BuildingRecord
+	err := decoder.Decode(&dto)
+	if err != nil {
+		log.Printf("Error decoding json: %s", err)
+		return 0, err
+	}
+
+	buildings := make([]model.Buildings, len(dto))
+	var reserveFundArray []model.ReserveFunds
+	var extraChargeArray []model.ExtraCharges
+
+	configs, err := email_h.GetConfigs()
+	if err != nil {
+		return 0, err
+	}
+
+	getFirst := func() string {
+		for key := range configs {
+			return key
+		}
+		return ""
+	}
+
+	for i, record := range dto {
+		buildings[i] = model.Buildings{
+			ID:                          record.Building.Id,
+			Name:                        record.Building.Name,
+			Rif:                         record.Building.Rif,
+			MainCurrency:                record.Building.MainCurrency,
+			DebtCurrency:                record.Building.DebtCurrency,
+			CurrenciesToShowAmountToPay: strings.Join(record.Building.CurrenciesToShowAmountToPay, ","),
+			FixedPay:                    record.Building.FixedPay,
+			FixedPayAmount:              record.Building.FixedPayAmount,
+			RoundUpPayments:             record.Building.RoundUpPayments,
+			EmailConfig:                 getFirst(),
+		}
+
+		for _, reserveFund := range record.ReserveFunds {
+			reserveFundArray = append(reserveFundArray, model.ReserveFunds{
+				BuildingID:    reserveFund.BuildingID,
+				Name:          reserveFund.Name,
+				Fund:          reserveFund.Fund,
+				Expense:       reserveFund.Expense,
+				Pay:           reserveFund.Pay,
+				Active:        reserveFund.Active,
+				Type:          reserveFund.Type,
+				ExpenseType:   reserveFund.ExpenseType,
+				AddToExpenses: reserveFund.AddToExpenses,
+			})
+		}
+
+		for _, extraCharge := range record.ExtraCharges {
+			var builder strings.Builder
+			for idx, apt := range extraCharge.Apartments {
+				builder.WriteString(apt.Number)
+				if idx < len(extraCharge.Apartments)-1 {
+					builder.WriteString(",")
+				}
+			}
+
+			extraChargeArray = append(extraChargeArray, model.ExtraCharges{
+				BuildingID:      extraCharge.BuildingID,
+				ParentReference: extraCharge.ParentReference,
+				Type:            extraCharge.Type,
+				Description:     extraCharge.Description,
+				Amount:          extraCharge.Amount,
+				Currency:        extraCharge.Currency,
+				Active:          extraCharge.Active,
+				Apartments:      builder.String(),
+			})
+		}
+	}
+
+	rowsAffected, err := service.repo.insertBackup(buildings)
+	if err != nil {
+		return 0, err
+	}
+
+	_, err = reserveFunds.NewRepository(service.repo.ctx).InsertBackup(reserveFundArray)
+	if err != nil {
+		return 0, err
+	}
+
+	_, err = extraCharges.NewRepository(service.repo.ctx).InsertBulk(extraChargeArray)
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
 }

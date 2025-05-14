@@ -16,6 +16,72 @@ import (
 	"strings"
 )
 
+const ratesCurrenciesObjectKey = "/rates/currencies.html"
+const receiptsBuildingsObjectKey = "/receipts/buildings.html"
+const receiptsYearsObjectKey = "/receipts/years.html"
+const receiptApartmentsObjectKey = "/receipts/apartments.html"
+const apartmentsBuildingsObjectKey = "/apartments/buildings.html"
+
+type IsrObj struct {
+	objectKey      string
+	buildComponent func(context.Context) (templ.Component, error)
+}
+
+var isrObjects = []IsrObj{
+	{
+		objectKey: ratesCurrenciesObjectKey,
+		buildComponent: func(ctx context.Context) (templ.Component, error) {
+			return toStringArray("currencies", NewRepository(ctx).getDistinctCurrencies)
+		},
+	},
+	{
+		objectKey: receiptsBuildingsObjectKey,
+		buildComponent: func(ctx context.Context) (templ.Component, error) {
+			return toStringArray("buildings", NewRepository(ctx).receiptBuildings)
+		},
+	},
+	{
+		objectKey: receiptsYearsObjectKey,
+		buildComponent: func(ctx context.Context) (templ.Component, error) {
+			array, err := NewRepository(ctx).receiptYears()
+			if err != nil {
+				return nil, err
+			}
+
+			var builder strings.Builder
+			builder.WriteString("years = [")
+			for i, year := range array {
+				builder.WriteString(fmt.Sprint(year))
+				if i < len(array)-1 {
+					builder.WriteString(",")
+				}
+			}
+
+			builder.WriteString("]")
+
+			return XInitView(builder.String()), nil
+		},
+	},
+	{
+		objectKey: receiptApartmentsObjectKey,
+		buildComponent: func(ctx context.Context) (templ.Component, error) {
+			apts, err := NewRepository(ctx).receiptApts()
+			if err != nil {
+				return nil, err
+			}
+
+			return SendAptsView(*apts), nil
+
+		},
+	},
+	{
+		objectKey: apartmentsBuildingsObjectKey,
+		buildComponent: func(ctx context.Context) (templ.Component, error) {
+			return toStringArray("buildings", NewRepository(ctx).apartmentBuildings)
+		},
+	},
+}
+
 func Invoke(ctx context.Context) {
 
 	function, err := resource.Get("IsrGenFunction", "name")
@@ -41,8 +107,13 @@ func Invoke(ctx context.Context) {
 	}
 }
 
-func putInBucket(ctx context.Context, objectKey string, component templ.Component) error {
+func (isr IsrObj) putInBucket(ctx context.Context) error {
 	bucket, err := resource.Get("WebAssetsBucket", "name")
+	if err != nil {
+		return err
+	}
+
+	component, err := isr.buildComponent(ctx)
 	if err != nil {
 		return err
 	}
@@ -61,7 +132,7 @@ func putInBucket(ctx context.Context, objectKey string, component templ.Componen
 	contentLength := int64(buf.Len())
 	_, err = s3Client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:            aws.String(bucket.(string)),
-		Key:               aws.String(os.Getenv("ISR_PREFIX") + objectKey),
+		Key:               aws.String(os.Getenv("ISR_PREFIX") + isr.objectKey),
 		Body:              &buf,
 		ChecksumAlgorithm: types.ChecksumAlgorithmCrc64nvme,
 		//ChecksumCRC32:             nil,
@@ -75,7 +146,7 @@ func putInBucket(ctx context.Context, objectKey string, component templ.Componen
 		//CacheControl: aws.String("max-age=0,no-cache,no-store,must-revalidate"), //Works but no 304
 	})
 
-	log.Printf("Updated %s %d", objectKey, contentLength)
+	log.Printf("Updated %s %d", isr.objectKey, contentLength)
 
 	if err != nil {
 		return err
@@ -84,13 +155,13 @@ func putInBucket(ctx context.Context, objectKey string, component templ.Componen
 	return nil
 }
 
-func getObject(ctx context.Context, objectKey string, putIfNotExists func(ctx context.Context) error) ([]byte, error) {
+func (isr IsrObj) getObject(ctx context.Context) ([]byte, error) {
 	bucket, err := resource.Get("WebAssetsBucket", "name")
 	if err != nil {
 		return nil, err
 	}
 
-	objectKey = os.Getenv("ISR_PREFIX") + objectKey
+	objectKey := os.Getenv("ISR_PREFIX") + isr.objectKey
 
 	exists, err := aws_h.FileExistsS3(ctx, bucket.(string), objectKey)
 	if err != nil {
@@ -106,7 +177,7 @@ func getObject(ctx context.Context, objectKey string, putIfNotExists func(ctx co
 		return data, nil
 	}
 
-	err = putIfNotExists(ctx)
+	err = isr.putInBucket(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -119,109 +190,10 @@ func getObject(ctx context.Context, objectKey string, putIfNotExists func(ctx co
 	return data, nil
 }
 
-const ratesCurrenciesObjectKey = "/rates/currencies.html"
-
-func GetRatesCurrencies(ctx context.Context) ([]byte, error) {
-
-	return getObject(ctx, ratesCurrenciesObjectKey, UpdateRatesCurrencies)
-}
-
-func UpdateRatesCurrencies(ctx context.Context) error {
-	component, err := toStringArray("currencies", getDistinctCurrencies)
-	if err != nil {
-		return err
-	}
-
-	return putInBucket(ctx, ratesCurrenciesObjectKey, component)
-}
-
-const receiptsBuildingsObjectKey = "/receipts/buildings.html"
-
-func GetReceiptsBuildings(ctx context.Context) ([]byte, error) {
-
-	return getObject(ctx, receiptsBuildingsObjectKey, updateReceiptsBuildings)
-}
-
-func updateReceiptsBuildings(ctx context.Context) error {
-
-	component, err := toStringArray("buildings", receiptBuildings)
-	if err != nil {
-		return err
-	}
-
-	return putInBucket(ctx, receiptsBuildingsObjectKey, component)
-}
-
-const receiptsYearsObjectKey = "/receipts/years.html"
-
-func GetReceiptsYears(ctx context.Context) ([]byte, error) {
-	return getObject(ctx, receiptsYearsObjectKey, updateReceiptsYears)
-}
-
-func updateReceiptsYears(ctx context.Context) error {
-
-	array, err := receiptYears()
-	if err != nil {
-		return err
-	}
-
-	var builder strings.Builder
-	builder.WriteString("years = [")
-	for i, year := range array {
-		builder.WriteString(fmt.Sprint(year))
-		if i < len(array)-1 {
-			builder.WriteString(",")
-		}
-	}
-
-	builder.WriteString("]")
-
-	return putInBucket(ctx, receiptsYearsObjectKey, XInitView(builder.String()))
-}
-
-const receiptApartmentsObjectKey = "/receipts/apartments.html"
-
-func GetReceiptsApartments(ctx context.Context) ([]byte, error) {
-	return getObject(ctx, receiptApartmentsObjectKey, updateReceiptsApartments)
-}
-
-func updateReceiptsApartments(ctx context.Context) error {
-	apts, err := receiptApts()
-	if err != nil {
-		return err
-	}
-
-	return putInBucket(ctx, receiptApartmentsObjectKey, SendAptsView(*apts))
-}
-
-const apartmentsBuildingsObjectKey = "/apartments/buildings.html"
-
-func GetApartmentsBuildings(ctx context.Context) ([]byte, error) {
-	return getObject(ctx, apartmentsBuildingsObjectKey, updateApartmentsBuildings)
-}
-
-func updateApartmentsBuildings(ctx context.Context) error {
-
-	component, err := toStringArray("buildings", apartmentBuildings)
-	if err != nil {
-		return err
-	}
-
-	return putInBucket(ctx, apartmentsBuildingsObjectKey, component)
-}
-
 func UpdateAll(ctx context.Context) error {
 
-	functions := []func(ctx context.Context) error{
-		UpdateRatesCurrencies,
-		updateReceiptsBuildings,
-		updateReceiptsYears,
-		updateApartmentsBuildings,
-		updateReceiptsApartments,
-	}
-
-	for _, f := range functions {
-		err := f(ctx)
+	for _, obj := range isrObjects {
+		err := obj.putInBucket(ctx)
 		if err != nil {
 			return err
 		}

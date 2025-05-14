@@ -71,14 +71,16 @@ func Upsert(r *http.Request) FormResponse {
 
 	isUpdate := keys.Id != nil
 
+	service := NewService(r.Context())
+
 	var idToLookup int32
 	var cardIdStr *string
 	if isUpdate {
-		_, err = update(reserveFund)
+		_, err = service.repo.update(reserveFund)
 		idToLookup = *keys.Id
 		cardIdStr = &keys.CardId
 	} else {
-		lastInsertId, err := insert(reserveFund)
+		lastInsertId, err := service.repo.insert(reserveFund)
 		if err == nil {
 			idToLookup = int32(lastInsertId)
 		}
@@ -92,14 +94,14 @@ func Upsert(r *http.Request) FormResponse {
 
 	defer receiptPdf.PublishBuilding(r.Context(), keys.BuildingId)
 
-	item, err := getItem(idToLookup, keys.ReceiptId, cardIdStr)
+	item, err := service.getItem(idToLookup, keys.ReceiptId, cardIdStr)
 	if err != nil {
 		log.Printf("Error getting Item: %v", err)
 		response.ErrorStr = err.Error()
 		return response
 	}
 
-	count, err := CountByBuilding(keys.BuildingId)
+	count, err := service.repo.CountByBuilding(keys.BuildingId)
 	if err != nil {
 		log.Printf("Error getting count: %v", err)
 		response.ErrorStr = err.Error()
@@ -126,7 +128,7 @@ func DeleteAndReturnKeys(r *http.Request) (string, Keys, error) {
 		return "", keys, fmt.Errorf("id is required")
 	}
 
-	_, err = deleteById(*keys.Id)
+	_, err = NewRepository(r.Context()).deleteById(*keys.Id)
 	if err != nil {
 		return "", keys, err
 	}

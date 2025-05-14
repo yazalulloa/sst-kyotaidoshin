@@ -31,7 +31,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 		SortOrder:  util.GetQueryParamAsSortOrderType(r, "sort_order"),
 	}
 
-	response, err := getTableResponse(requestQuery)
+	response, err := NewService(r.Context()).getTableResponse(requestQuery)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -93,7 +93,7 @@ func deleteRate(w http.ResponseWriter, r *http.Request) {
 		SortOrder:  util.GetQueryParamAsSortOrderType(r, "sort_order"),
 	}
 
-	counters, err := deleteRateReturnCounters(r.Context(), str, rateQuery)
+	counters, err := NewService(r.Context()).deleteRateReturnCounters(str, rateQuery)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

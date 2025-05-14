@@ -344,7 +344,7 @@ func (info ParsingInfo) parse() (*Result, error) {
 
 		if info.ProcessAll || sheetIndex == 0 {
 
-			ratesInserted, err := processRates(&rateArray)
+			ratesInserted, err := processRates(info.Ctx, &rateArray)
 			parsingError.Value = ""
 			if err != nil {
 				return nil, parsingError.err(err)
@@ -356,9 +356,9 @@ func (info ParsingInfo) parse() (*Result, error) {
 	return &result, nil
 }
 
-func processRates(rateArray *[]model.Rates) (int64, error) {
+func processRates(ctx context.Context, rateArray *[]model.Rates) (int64, error) {
 
-	rowsAffected, err := rates.Insert(*rateArray)
+	rowsAffected, err := rates.NewRepository(ctx).Insert(*rateArray)
 	if err != nil {
 		return 0, err
 	}

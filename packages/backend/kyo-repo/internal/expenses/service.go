@@ -7,9 +7,9 @@ import (
 	"github.com/yaz/kyo-repo/internal/util"
 )
 
-func GetFormDto(buildingId string, receiptId string) (*FormDto, error) {
+func (repo Repository) GetFormDto(buildingId string, receiptId string) (*FormDto, error) {
 
-	list, err := SelectByReceipt(receiptId)
+	list, err := repo.SelectByReceipt(receiptId)
 
 	if err != nil {
 		return nil, err

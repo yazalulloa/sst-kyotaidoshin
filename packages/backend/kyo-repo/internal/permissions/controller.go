@@ -23,7 +23,7 @@ func Routes(holder *api.RouterHolder) {
 
 func permissionsAll(w http.ResponseWriter, r *http.Request) {
 
-	all, err := insertAll()
+	all, err := NewService(r.Context()).insertAll()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -38,7 +38,7 @@ func permissionsAll(w http.ResponseWriter, r *http.Request) {
 
 func search(w http.ResponseWriter, r *http.Request) {
 
-	all, err := tableResponse()
+	all, err := NewService(r.Context()).tableResponse()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -62,7 +62,7 @@ func permissionsDelete(w http.ResponseWriter, r *http.Request) {
 
 	id := util.StringToInt32(key)
 
-	_, err := deleteById(id)
+	_, err := NewRepository(r.Context()).deleteById(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -74,7 +74,7 @@ func permissionsDelete(w http.ResponseWriter, r *http.Request) {
 
 func getAllWithLabels(w http.ResponseWriter, r *http.Request) {
 
-	dbPerms, err := selectAll()
+	dbPerms, err := NewRepository(r.Context()).selectAll()
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

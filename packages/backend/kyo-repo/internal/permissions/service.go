@@ -1,12 +1,23 @@
 package permissions
 
 import (
+	"context"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/yaz/kyo-repo/internal/api"
 )
 
-func insertAll() (int64, error) {
+type Service struct {
+	repo Repository
+}
+
+func NewService(ctx context.Context) Service {
+	return Service{
+		repo: NewRepository(ctx),
+	}
+}
+
+func (service Service) insertAll() (int64, error) {
 
 	perms := api.All()
 	array := make([]string, len(perms))
@@ -14,12 +25,12 @@ func insertAll() (int64, error) {
 		array[i] = perms[i].Name()
 	}
 
-	return insertBulk(array)
+	return service.repo.insertBulk(array)
 }
 
-func tableResponse() (*TableResponse, error) {
+func (service Service) tableResponse() (*TableResponse, error) {
 
-	perms, err := selectAll()
+	perms, err := service.repo.selectAll()
 	if err != nil {
 		return nil, err
 	}
