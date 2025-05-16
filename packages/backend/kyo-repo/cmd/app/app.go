@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/awslabs/aws-lambda-go-api-proxy/httpadapter"
-	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/yaz/kyo-repo/internal/apartments"
 	"github.com/yaz/kyo-repo/internal/api"
+	"github.com/yaz/kyo-repo/internal/api/compress"
 	bcv_bucket "github.com/yaz/kyo-repo/internal/bcv-bucket"
 	"github.com/yaz/kyo-repo/internal/buildings"
 	"github.com/yaz/kyo-repo/internal/debts"
@@ -33,6 +33,7 @@ func router() http.Handler {
 
 	newRouter.Use(loggingMiddleware)
 	newRouter.Use(authenticationMiddleware)
+	newRouter.Use(compress.Middleware)
 
 	newRouter.HandleFunc("/api/logged_in", func(w http.ResponseWriter, r *http.Request) {
 
@@ -84,6 +85,9 @@ func router() http.Handler {
 	isr.Routes(holder)
 	telegram_api.Routes(holder)
 
+	return newRouter
+	//return handlers.CompressHandler(newRouter)
+
 	//newRouter.PathPrefix("/").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	//
 	//	_, err := w.Write([]byte("Req: " + " -> " + r.URL.Path + " " + time.Now().String()))
@@ -92,25 +96,25 @@ func router() http.Handler {
 	//	}
 	//})
 
-	if util.IsDevMode() {
-		return newRouter
-	}
-
-	CSRF := csrf.Protect([]byte("32-byte-long-auth-key"),
-		csrf.TrustedOrigins([]string{
-			"localhost:5173",
-		}),
-		csrf.ErrorHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			err := csrf.FailureReason(r)
-
-			log.Printf("CSRF failure: %v", err)
-			http.Error(w, fmt.Sprintf("%s - %s",
-				http.StatusText(http.StatusForbidden), err),
-				http.StatusForbidden)
-		})),
-	)
-
-	return CSRF(newRouter)
+	//if util.IsDevMode() {
+	//	return handlers.CompressHandler(newRouter)
+	//}
+	//
+	//CSRF := csrf.Protect([]byte("32-byte-long-auth-key"),
+	//	csrf.TrustedOrigins([]string{
+	//		"localhost:5173",
+	//	}),
+	//	csrf.ErrorHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	//		err := csrf.FailureReason(r)
+	//
+	//		log.Printf("CSRF failure: %v", err)
+	//		http.Error(w, fmt.Sprintf("%s - %s",
+	//			http.StatusText(http.StatusForbidden), err),
+	//			http.StatusForbidden)
+	//	})),
+	//)
+	//
+	//return CSRF(newRouter)
 }
 
 func loggingMiddleware(next http.Handler) http.Handler {
