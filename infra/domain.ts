@@ -8,3 +8,6 @@ console.log("currentWebUrl", currentWebUrl);
 export const apiDomain = `api.${currentWebUrl}`
 
 export const allowedOrigins = isLocal ? ["http://localhost:5173"] : [`https://${currentWebUrl}`];
+
+export const authDomain = `auth.${currentWebUrl}`
+console.log('AuthDomain', authDomain)
