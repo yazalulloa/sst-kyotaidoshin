@@ -26,7 +26,9 @@
 </div>
 
 <div id="container" hx-swap-oob="true" class="fade-me-out fade-me-in">
-  <ul class="flex flex-col gap-2 *:md:grid *:md:gap-2 *:flex *:flex-row *:flex-wrap *:justify-between *:gap-4 *:items-center *:text-center">
+  <ul class="flex flex-col gap-2 *:md:grid *:md:gap-2 *:flex *:flex-row *:flex-wrap *:justify-between *:gap-4 *:items-center *:text-center"
+      x-bind:class="hasPerm('permissions:write') ? '*:md:grid-cols-3' : '*:md:grid-cols-2'"
+  >
     <li hidden="hidden"
         hx-get="/api/permissions/search"
         hx-trigger="load"

@@ -95,6 +95,17 @@ func search(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
+			numOfSheetsStr := obj.Metadata[bcv.MetadataNumOfSheetsKey]
+			numOfSheets := 0
+
+			if numOfSheetsStr != "" {
+				numOfSheets, err = strconv.Atoi(numOfSheetsStr)
+				if err != nil {
+					log.Printf("Error parsing number of sheets: %v", err)
+					numOfSheets = 0
+				}
+			}
+
 			results[i] = Item{
 				Item: S3File{
 					Name:          *item.Key,
@@ -106,6 +117,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 					Processed:     processedBool,
 					Rates:         ratesParsed,
 					ProcessedDate: processedDate,
+					NumOfSheets:   numOfSheets,
 				},
 				Key:    *util.Encode(*item.Key),
 				CardId: "bcv-buckets-" + uuid.NewString(),
@@ -325,6 +337,7 @@ type S3File struct {
 	Processed     bool
 	Rates         int
 	ProcessedDate *int64
+	NumOfSheets   int
 }
 
 type Item struct {

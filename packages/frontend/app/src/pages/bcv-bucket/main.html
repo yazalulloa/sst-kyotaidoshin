@@ -35,8 +35,9 @@
 
 </div>
 
-<div id="container" hx-swap-oob="true" class="fade-me-out fade-me-in">
-  <ul class="flex flex-col gap-2 *:md:grid *:md:gap-2 *:flex *:flex-row *:flex-wrap *:justify-between *:gap-4 *:items-center *:text-center">
+<div id="container" hx-swap-oob="true" class="fade-me-out fade-me-in pt-2">
+  <ul class="flex flex-col gap-2 *:md:grid *:md:gap-2 *:flex *:flex-row *:flex-wrap *:justify-between *:gap-4 *:items-center *:text-center"
+  x-bind:class="hasPerm('bcv_files:write') ? '*:md:grid-cols-[3fr_1fr_3fr_3fr_2fr_1fr_1fr]' : '*:md:grid-cols-[3fr_1fr_3fr_3fr_2fr_1fr]'">
     <li hidden="hidden"
         hx-get="/api/bcv-bucket/search"
         hx-trigger="load"

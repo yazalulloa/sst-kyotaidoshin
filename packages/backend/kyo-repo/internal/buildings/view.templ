@@ -13,9 +13,7 @@ templ Search(res *TableResponse) {
 	for _, item := range res.Results {
 		<li
 			id={ item.CardId }
-			class={ "fade-me-in fade-me-out ",
-        templ.KV("md:grid-cols-6", hasWritePerm),
-        templ.KV("md:grid-cols-5", !hasWritePerm) }
+			class="fade-me-in fade-me-out"
 		>
 			<div class="flex flex-col gap-2">
 				<span>{ fmt.Sprint(item.Item.ID) }</span>

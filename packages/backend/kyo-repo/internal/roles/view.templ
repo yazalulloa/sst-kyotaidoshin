@@ -17,9 +17,7 @@ templ ItemView(item Item) {
 	{{ hasWritePerm := api.HasPerms(ctx, api.ROLES_WRITE) }}
 	<li
 		id={ item.CardId }
-		class={ "fade-me-in fade-me-out ",
-            templ.KV("md:grid-cols-[1fr_1fr_8fr_1fr]", hasWritePerm),
-            templ.KV("md:grid-cols-[1fr_1fr_8fr]", !hasWritePerm) }
+		class="fade-me-in fade-me-out"
 		if item.isUpdate {
 			hx-swap-oob="true"
 		}

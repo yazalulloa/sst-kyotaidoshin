@@ -86,7 +86,9 @@
 
 <div id="container" hx-swap-oob="true" class="fade-me-out fade-me-in">
   <ul id="rates-table"
-      class="flex flex-col gap-1 p-1 *:md:grid *:flex *:flex-row *:flex-wrap *:gap-4 *:justify-between *:items-center">
+      class="flex flex-col gap-1 p-1 *:md:grid *:flex *:flex-row *:flex-wrap *:gap-4 *:justify-between *:items-center"
+      x-bind:class="hasPerm('rates:write') ? '*:md:grid-cols-[3fr_1fr_1fr_1fr_3fr_1fr]' : '*:md:grid-cols-[3fr_1fr_1fr_1fr_3fr]'"
+  >
 
   </ul>
 

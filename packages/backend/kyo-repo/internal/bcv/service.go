@@ -23,6 +23,7 @@ import (
 const MetadataProcessedKey = "processed"
 const MetadataLastProcessedKey = "lastprocessed"
 const MetadataRatesParsedKey = "ratesparsed"
+const MetadataNumOfSheetsKey = "numofsheets"
 
 var (
 	netTransport = &http.Transport{

@@ -20,9 +20,7 @@ templ Search(res TableResponse) {
 	for _, item := range res.Results {
 		<li
 			id={ item.CardId }
-			class={ "fade-me-in fade-me-out ",
-        templ.KV("md:grid-cols-[5fr_1fr_4fr_4fr_3fr_1fr]", hasWritePerm),
-        templ.KV("md:grid-cols-[5fr_1fr_4fr_4fr_3fr]", !hasWritePerm) }
+			class="fade-me-in fade-me-out"
 		>
 			<a
 				href={ templ.URL(item.Item.Url) }
@@ -46,6 +44,11 @@ templ Search(res TableResponse) {
 				}}
 				@api.BadgeIndicatorWithTooltipV2(item.Item.Processed, spanProcess(item), attrs)
 			</div>
+				<span class="flex">
+      		<span x-text="$t('main-title-sheets')"></span>
+      			<span>:&nbsp;</span>
+      			<span class="w-[2.5em] inline-block text-start">{ fmt.Sprint(item.Item.NumOfSheets) }</span>
+      	</span>
 			if hasWritePerm {
 				<div class="flex flex-row gap-4 justify-center">
 					<button

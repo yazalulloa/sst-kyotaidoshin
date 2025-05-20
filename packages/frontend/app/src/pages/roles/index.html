@@ -37,7 +37,9 @@
 
 <div id="container" hx-swap-oob="true" class="fade-me-out fade-me-in">
   <ul id="roles-table"
-      class="flex flex-col gap-2 *:md:grid *:md:gap-2 *:flex *:flex-col *:flex-wrap *:px-4 *:justify-center *:gap-4 *:p-1 *:items-center *:text-center *:hover:bg-primary/5 *:hover:text-on-surface-strong *:dark:hover:bg-primary-dark/5 *:dark:hover:text-on-surface-dark-strong *:border-b *:border-surface-dark *:dark:border-surface">
+      class="flex flex-col gap-2 *:md:grid *:md:gap-2 *:flex *:flex-col *:flex-wrap *:px-4 *:justify-center *:gap-4 *:p-1 *:items-center *:text-center *:hover:bg-primary/5 *:hover:text-on-surface-strong *:dark:hover:bg-primary-dark/5 *:dark:hover:text-on-surface-dark-strong *:border-b *:border-surface-dark *:dark:border-surface"
+      x-bind:class="hasPerm('roles:write') ? '*:md:grid-cols-[1fr_1fr_8fr_1fr]' : '*:md:grid-cols-[1fr_1fr_8fr]'"
+  >
 
   </ul>
 

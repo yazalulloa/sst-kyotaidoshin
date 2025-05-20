@@ -81,6 +81,7 @@ func fileParse(params ParsingParams) error {
 	output.Metadata[bcv.MetadataProcessedKey] = "true"
 	output.Metadata[bcv.MetadataLastProcessedKey] = time.Now().Format(time.RFC3339)
 	output.Metadata[bcv.MetadataRatesParsedKey] = strconv.FormatInt(result.Parsed, 10)
+	output.Metadata[bcv.MetadataNumOfSheetsKey] = fmt.Sprint(result.NumOfSheets)
 
 	_, err = client.CopyObject(params.Ctx, &s3.CopyObjectInput{
 		Bucket:            &params.Bucket,
@@ -129,8 +130,9 @@ func (e ParsingError) Error() string {
 }
 
 type Result struct {
-	Inserted int64
-	Parsed   int64
+	Inserted    int64
+	Parsed      int64
+	NumOfSheets int
 }
 
 type ParsingInfo struct {
@@ -159,6 +161,8 @@ func (info ParsingInfo) parse() (*Result, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error opening workbook: %w", err)
 	}
+
+	result.NumOfSheets = workbook.GetNumberSheets()
 
 	for sheetIndex, sheet := range workbook.GetSheets() {
 		parsingError.SheetName = sheet.GetName()
