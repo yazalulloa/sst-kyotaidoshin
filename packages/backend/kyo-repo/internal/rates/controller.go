@@ -57,6 +57,8 @@ func search(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		sb.WriteString(fmt.Sprintf("&sort_order=%s", requestQuery.SortOrder))
+
 		nextPageUrl = sb.String()
 	}
 
