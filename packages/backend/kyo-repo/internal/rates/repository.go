@@ -23,7 +23,13 @@ func queryCondition(rateQuery *RequestQuery) (sqlite.BoolExpression, bool) {
 	justTrue := true
 
 	if rateQuery.DateOfRate != nil {
-		condition = condition.AND(Rates.DateOfRate.LT_EQ(sqlite.Date(rateQuery.DateOfRate.Date())))
+
+		if rateQuery.SortOrder == util.SortOrderTypeASC {
+			condition = condition.AND(Rates.DateOfRate.GT_EQ(sqlite.Date(rateQuery.DateOfRate.Date())))
+		} else {
+			condition = condition.AND(Rates.DateOfRate.LT_EQ(sqlite.Date(rateQuery.DateOfRate.Date())))
+		}
+
 		justTrue = false
 	}
 
@@ -44,7 +50,12 @@ func (repo Repository) SelectList(requestQuery RequestQuery) ([]model.Rates, err
 	condition, _ := queryCondition(&requestQuery)
 
 	if requestQuery.LastId > 0 {
-		condition = condition.AND(Rates.ID.LT(sqlite.Int64(requestQuery.LastId)))
+		if requestQuery.SortOrder == util.SortOrderTypeASC {
+			condition = condition.AND(Rates.ID.GT(sqlite.Int64(requestQuery.LastId)))
+		} else {
+			condition = condition.AND(Rates.ID.LT(sqlite.Int64(requestQuery.LastId)))
+		}
+
 	}
 
 	stmt := Rates.SELECT(Rates.AllColumns).FROM(Rates).WHERE(condition).LIMIT(int64(requestQuery.Limit))

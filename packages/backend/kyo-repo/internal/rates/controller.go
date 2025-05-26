@@ -42,6 +42,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 
 	var nextPageUrl string
 	if len(results) == requestQuery.Limit {
+
 		results = results[:len(results)-1]
 		last := results[len(results)-1]
 		var sb strings.Builder

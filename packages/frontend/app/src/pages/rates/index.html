@@ -37,13 +37,30 @@
       </div>
     </div>
 
-    <label class="w-34">
+    <label class="w-34 md:hidden">
       <input type="date"
              class="input"
              name="date_input"
              x-on:change="sendEvent('rates-updater', 'update-rates')"
       />
     </label>
+
+   <div class="hidden md:inline-block" x-data="{
+      changeInput(date) {
+        const dateInput =  $el.previousElementSibling.firstElementChild
+
+        if (dateInput) {
+         dateInput.value = FormatDateAlt(date)
+         sendEvent('rates-updater', 'update-rates');
+        }
+      }
+     }">
+     <div x-bind:hx-get="datePickerPartialUrl"
+          hx-trigger="load"
+          hx-swap="outerHTML"
+          hidden="hidden">
+     </div>
+   </div>
 
     <label class="w-22">
       <select class="select"

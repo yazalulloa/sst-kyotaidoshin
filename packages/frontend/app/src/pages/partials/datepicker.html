@@ -1,0 +1,182 @@
+<div class="dropdown"
+     x-data="{
+     years: [2020, 2021, 2022, 2023, 2024, 2025],
+     year: null,
+      month: null,
+      day: null,
+     value: null,
+     setValue() {
+      if (this.year === null || this.month === null || this.day === null) {
+         console.log('Year, month or day is null');
+         return
+         }
+
+      this.value = new Date(this.year, this.month, this.day);
+     }
+}"
+     x-init="
+     const date = new Date();
+      year = date.getFullYear();
+      month = date.getMonth();
+      day = date.getDate();
+
+       $watch('value', (v) => {
+         changeInput(v)
+       });
+     "
+>
+  <div tabindex="0" role="button" class="btn m-1 btn-neutral gap-4">
+    <span x-text="value ? FormatDateAlt(value) : 'yyyy/mm/dd'"></span>
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="" data-lucide="icon">
+      <path d="M8 2v4"></path>
+      <path d="M16 2v4"></path>
+      <rect width="18" height="18" x="3" y="4" rx="2"></rect>
+      <path d="M3 10h18"></path>
+    </svg>
+  </div>
+  <div
+      tabindex="0"
+      class="dropdown-content card card-sm bg-base-100 z-1 w-80 shadow-md border border-b-gray-200">
+    <div class="card-body p-2 text-center">
+      <div class="flex gap-4">
+        <div class="join">
+          <button class="btn btn-ghost join-item px-2"
+                  @click="
+                if (month > 0) {
+                month = month - 1;
+                } else {
+                month = 11;
+                }
+                "
+          >
+            <svg x-bind:data-src="previousArrowIconUrl" data-cache="21600" class="h-4 w-4"></svg>
+          </button>
+          <label>
+            <select class="select border-0 join-item"
+                    @input="month = parseInt($event.target.value)">
+              <template x-for="v in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]">
+                <option x-bind:selected="v === month" x-bind:value="v"
+                        x-text="$t('main-months-short-' + (v + 1))"></option>
+              </template>
+            </select>
+          </label>
+          <button class="btn btn-ghost join-item px-2"
+                  @click="
+                if (month < 11) {
+                month = month + 1;
+                } else {
+                month = 0;
+                }
+                "
+          >
+            <svg x-bind:data-src="nextArrowIconUrl" data-cache="21600" class="h-4 w-4"></svg>
+          </button>
+
+        </div>
+        <div class="join">
+          <button class="btn btn-ghost join-item px-2"
+                  @click="
+                  if (year > years[0]) {
+                  year = year - 1;
+                  } else {
+                  year = years[years.length - 1];
+                  }
+                  "
+          >
+            <svg x-bind:data-src="previousArrowIconUrl" data-cache="21600" class="h-4 w-4"></svg>
+          </button>
+          <label>
+            <select class="select border-0 join-item"
+                    @input="year = parseInt($event.target.value)">
+              <template x-for="v in years">
+                <option x-bind:selected="v === year" x-bind:value="v" x-text="v"></option>
+              </template>
+            </select>
+          </label>
+          <button class="btn btn-ghost join-item px-2"
+                  @click="
+                  if (year < years[years.length - 1]) {
+                  year = year + 1;
+                  } else {
+                  year = years[0];
+                  }
+                  "
+          >
+            <svg x-bind:data-src="nextArrowIconUrl" data-cache="21600" class="h-4 w-4"></svg>
+          </button>
+
+        </div>
+
+      </div>
+
+      <div class="grid grid-cols-7 gap-2"
+           x-data="{
+       date: null,
+       firstWeekday: null,
+       lastWeekday: null,
+       previousMonthDays: null,
+       nextMonthDays: null,
+       }"
+           x-effect="
+
+       date = new Date(parseInt(year), parseInt(month) + 1, 0),
+       firstWeekday = new Date(date.getFullYear(), date.getMonth(), 1).getDay(),
+       lastWeekday = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDay(),
+       previousMonthDays = new Date(date.getFullYear(), date.getMonth(), 0).getDate(),
+       nextMonthDays = new Date(date.getFullYear(), date.getMonth() + 2, 0).getDate()
+           "
+      >
+        <template x-for="v in [0, 1, 2, 3, 4, 5, 6]">
+          <div class="text-center font-bold">
+            <span x-text="$t('main-weekdays-short-' + v)"></span>
+          </div>
+        </template>
+
+        <template x-for="v in firstWeekday">
+          <button type="button" class="btn btn-sm btn-ghost btn-disabled" disabled>
+            <span x-text="previousMonthDays - (firstWeekday - v)"></span>
+          </button>
+        </template>
+
+        <template
+            x-for="v in date.getDate()">
+          <button type="button" class="btn btn-sm btn-ghost"
+                  x-bind:class="value && year === value.getFullYear() && month === value.getMonth() && v === value.getDate() ? 'btn-active' : ''"
+                  @click="
+          day = v
+          setValue();
+            ">
+            <span x-text="v"></span>
+          </button>
+        </template>
+
+        <template x-for="v in (6 - lastWeekday)">
+          <button type="button" class="btn btn-sm btn-ghost btn-disabled" disabled>
+            <span x-text="v"></span>
+          </button>
+        </template>
+      </div>
+
+      <div class="flex justify-between">
+        <button class="btn btn-ghost"
+                x-text="$t('main-action-clear')"
+                @click="value = null;">
+        </button>
+
+        <button class="btn btn-ghost" type="button"
+                x-text="$t('main-title-today')"
+                @click="
+                const date = new Date();
+                year = date.getFullYear();
+                month = date.getMonth();
+                day = date.getDate();
+                setValue();
+                "
+        >
+        </button>
+
+      </div>
+    </div>
+  </div>
+</div>

@@ -24,6 +24,8 @@ import telegramIconUrl from './assets/images/telegram_logo.svg?no-inline'
 import menuVerticalIconUrl from './assets/images/menu-vertical.svg?no-inline'
 import googleIconUrl from './assets/images/google.svg?no-inline'
 import githubIconUrl from './assets/images/github.svg?no-inline'
+import previousArrowIconUrl from './assets/images/previous-arrow.svg?no-inline'
+import nextArrowIconUrl from './assets/images/next-arrow.svg?no-inline'
 
 window.deleteIconUrl = deleteIconUrl;
 window.processIconUrl = processIconUrl;
@@ -54,6 +56,8 @@ window.googleIconUrl = googleIconUrl;
 window.githubIconUrl = githubIconUrl;
 
 window.menuVerticalIconUrl = menuVerticalIconUrl;
+window.previousArrowIconUrl = previousArrowIconUrl;
+window.nextArrowIconUrl = nextArrowIconUrl;
 
 window.NAV_ICONS = new Map([
   ['nav-apartments', apartmentsIconUrl],

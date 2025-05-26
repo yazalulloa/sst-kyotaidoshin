@@ -88,6 +88,7 @@
     "main-title-subject": "Subject",
     "main-title-notifications": "Notifications",
     "main-title-sheets": "Sheets",
+    "main-title-today": "Today",
     "main-apartments-new": "New Apartment",
     "main-apartments-edit": "Edit Apartment",
     "main-title-id": "ID",
@@ -134,7 +135,14 @@
     "main-months-short-9": "Sep",
     "main-months-short-10": "Oct",
     "main-months-short-11": "Nov",
-    "main-months-short-12": "Dec"
+    "main-months-short-12": "Dec",
+    "main-weekdays-short-0": "Sun",
+    "main-weekdays-short-1": "Mon",
+    "main-weekdays-short-2": "Tue",
+    "main-weekdays-short-3": "Wed",
+    "main-weekdays-short-4": "Thu",
+    "main-weekdays-short-5": "Fri",
+    "main-weekdays-short-6": "Sat"
   },
   "es": {
     "main-action-create": "Crear",
@@ -225,6 +233,7 @@
     "main-title-subject": "Asunto",
     "main-title-notifications": "Notificaciones",
     "main-title-sheets": "Hojas",
+    "main-title-today": "Hoy",
     "main-apartments-new": "Nuevo Apartamento",
     "main-apartments-edit": "Editar Apartamento",
     "main-title-id": "ID",
@@ -272,6 +281,13 @@
     "main-months-short-9": "Sep",
     "main-months-short-10": "Oct",
     "main-months-short-11": "Nov",
-    "main-months-short-12": "Dic"
+    "main-months-short-12": "Dic",
+    "main-weekdays-short-0": "Dom",
+    "main-weekdays-short-1": "Lun",
+    "main-weekdays-short-2": "Mar",
+    "main-weekdays-short-3": "Mié",
+    "main-weekdays-short-4": "Jue",
+    "main-weekdays-short-5": "Vie",
+    "main-weekdays-short-6": "Sáb"
   }
 }
