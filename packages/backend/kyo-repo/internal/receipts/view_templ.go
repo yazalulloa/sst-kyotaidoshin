@@ -48,7 +48,7 @@ func Search(res *TableResponse) templ.Component {
 		}
 		if res.NextPageUrl != "" {
 			templ_7745c5c3_Err = api.NextPageLi(res.NextPageUrl, templ.Attributes{
-				"hx-include": "[name='building_input'],[name='month_input'],[name='year_input']"}).Render(ctx, templ_7745c5c3_Buffer)
+				"hx-include": "[name='building_input'],[name='month_input'],[name='year_input'],[name='date_input']"}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

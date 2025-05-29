@@ -10,6 +10,7 @@ import (
 	"github.com/yaz/kyo-repo/internal/reserveFunds"
 	"github.com/yaz/kyo-repo/internal/util"
 	"golang.org/x/sync/syncmap"
+	"time"
 )
 
 type RequestQuery struct {
@@ -18,6 +19,7 @@ type RequestQuery struct {
 	Buildings []string
 	Months    []int16
 	Years     []int16
+	Date      *time.Time
 	SortOrder util.SortOrderType
 }
 

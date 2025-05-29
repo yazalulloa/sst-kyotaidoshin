@@ -17,7 +17,7 @@ templ Search(res *TableResponse) {
 	}
 	if res.NextPageUrl != "" {
 		@api.NextPageLi(res.NextPageUrl, templ.Attributes{
-			"hx-include": "[name='building_input'],[name='month_input'],[name='year_input']"})
+			"hx-include": "[name='building_input'],[name='month_input'],[name='year_input'],[name='date_input']"})
 	}
 	@CountersView(res.Counters)
 }

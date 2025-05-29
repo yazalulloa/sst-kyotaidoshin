@@ -79,11 +79,36 @@
       </div>
     </div>
 
+    <label class="w-34 md:hidden">
+      <input type="date"
+             class="input"
+             name="date_input"
+             x-on:change="sendEvent('receipts-updater', 'update-receipts')"
+      />
+    </label>
+
+    <div class="hidden md:inline-block" x-data="{
+      changeInput(date) {
+        const dateInput =  $el.previousElementSibling.firstElementChild
+
+        if (dateInput) {
+         dateInput.value = FormatDateAlt(date)
+         sendEvent('receipts-updater', 'update-receipts');
+        }
+      }
+     }">
+      <div x-bind:hx-get="datePickerPartialUrl"
+           hx-trigger="load"
+           hx-swap="outerHTML"
+           hidden="hidden">
+      </div>
+    </div>
+
     <div id="receipts-updater"
          hidden="hidden"
          hx-get="/api/receipts/search"
          hx-trigger="load, update-receipts delay:300ms, new-apt,refresh"
-         hx-include="[name='building_input'],[name='month_input'],[name='year_input']"
+         hx-include="[name='building_input'],[name='month_input'],[name='year_input'],[name='date_input']"
          hx-target="#receipts-table"
          hx-swap="innerHTML"
          hx-sync="this:replace"

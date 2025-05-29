@@ -9,10 +9,10 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@aws-sdk/client-lambda": "^3.816.0",
+    "@aws-sdk/client-lambda": "^3.817.0",
     "@openauthjs/openauth": "^0.4.3",
     "hono": "^4.7.10",
-    "sst": "^3.16.0",
+    "sst": "^3.17.0",
     "uuid": "^11.1.0",
     "valibot": "^1.1.0"
   }

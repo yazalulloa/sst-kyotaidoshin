@@ -146,6 +146,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 		Buildings: buildingIds,
 		Months:    months,
 		Years:     years,
+		Date:      util.GetQueryParamAsDate(r, "date_input"),
 		Limit:     31,
 		SortOrder: util.SortOrderTypeDESC,
 	}
@@ -163,13 +164,6 @@ func search(w http.ResponseWriter, r *http.Request) {
 		last := results[len(results)-1]
 		var sb strings.Builder
 		sb.WriteString(fmt.Sprintf(_SEARCH+"?next_page=%s", last.Key))
-
-		if len(requestQuery.Buildings) > 0 {
-			for _, building := range requestQuery.Buildings {
-				sb.WriteString(fmt.Sprintf("&building_input=%s", building))
-			}
-		}
-
 		nextPageUrl = sb.String()
 	}
 

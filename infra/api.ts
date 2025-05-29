@@ -134,6 +134,7 @@ const mainApiFunction = new sst.aws.Function("MainApiFunction", {
     secret.telegramBotApiKey,
     telegramWebhookFunction,
     secret.captchaSecretKey,
+    secret.posthogApiKey,
   ],
   environment: {
     ISR_PREFIX: isrPrefix

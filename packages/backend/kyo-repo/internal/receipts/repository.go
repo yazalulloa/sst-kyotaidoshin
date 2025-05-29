@@ -110,6 +110,11 @@ func queryCondition(requestQuery RequestQuery) *sqlite.BoolExpression {
 		isThereAnyCondition = true
 	}
 
+	if requestQuery.Date != nil {
+		condition = condition.AND(Receipts.Date.LT_EQ(sqlite.Date(requestQuery.Date.Date())))
+		isThereAnyCondition = true
+	}
+
 	if !isThereAnyCondition {
 		return nil
 	}

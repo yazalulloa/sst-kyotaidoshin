@@ -75,6 +75,10 @@ declare module "sst" {
       "name": string
       "type": "sst.aws.Function"
     }
+    "PosthogApiKey": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "ProcessBcvFile": {
       "name": string
       "type": "sst.aws.Function"
