@@ -210,8 +210,8 @@ func (rec RouteParams) routeHandler() func(http.ResponseWriter,
 
 		go func() {
 			defer wg.Done()
-			timestamp := time.Now().UnixMilli()
-			defer func() { log.Printf("CheckPerms took %d ms", time.Now().UnixMilli()-timestamp) }()
+			//timestamp := time.Now().UnixMilli()
+			//defer func() { log.Printf("CheckPerms took %d ms", time.Now().UnixMilli()-timestamp) }()
 
 			userPerms, err := checkPerms(r, rec.Perms)
 			if err != nil {
@@ -244,7 +244,7 @@ func (rec RouteParams) routeHandler() func(http.ResponseWriter,
 			}
 		}()
 
-		timestamp := time.Now().UnixMilli()
+		//timestamp := time.Now().UnixMilli()
 		wg.Wait()
 		close(errorChan)
 
@@ -256,7 +256,7 @@ func (rec RouteParams) routeHandler() func(http.ResponseWriter,
 			return
 		}
 
-		log.Printf("Middleware took %d ms", time.Now().UnixMilli()-timestamp)
+		//log.Printf("Middleware took %d ms", time.Now().UnixMilli()-timestamp)
 		rec.Handler(w, r)
 	}
 }

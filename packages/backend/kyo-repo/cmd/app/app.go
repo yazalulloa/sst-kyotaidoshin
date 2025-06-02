@@ -31,7 +31,9 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 	"time"
 	"unicode/utf8"
 )
@@ -331,7 +333,7 @@ func mainApiMetricMiddleware(next http.Handler) http.Handler {
 				})
 
 				if err != nil {
-					log.Printf("Failed to enqueue Posthog event: %v path %s", err, r.URL.Path)
+					log.Printf("Failed asd to enqueue Posthog event: %v path %s", err, r.URL.Path)
 				}
 			}
 		}()
@@ -340,8 +342,37 @@ func mainApiMetricMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+// Static initialization
+// SIGTERM Handler: https://docs.aws.amazon.com/lambda/latest/operatorguide/static-initialization.html
+func init() {
+	// Create a chan to receive os signal
+	var c = make(chan os.Signal)
+	// Listening for os signals that can be handled,reference: https://docs.aws.amazon.com/lambda/latest/dg/runtimes-extensions-api.html
+	// Termination Signals: https://www.gnu.org/software/libc/manual/html_node/Termination-Signals.html
+	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGHUP)
+	// do something when os signal received
+	go func() {
+		for s := range c {
+			switch s {
+			// if lambda runtime received SIGTERM signal,perform actual clean up work here.
+			case syscall.SIGTERM:
+				fmt.Println("[runtime] SIGTERM received")
+				fmt.Println("[runtime] Graceful shutdown in progress ...")
+				fmt.Println("[runtime] Graceful shutdown completed")
+				os.Exit(0)
+				// else if lambda runtime received other signal
+			default:
+				fmt.Println("[runtime] Other signal received")
+				fmt.Println("[runtime] Graceful shutdown in progress ...")
+				fmt.Println("[runtime] Graceful shutdown completed")
+				os.Exit(0)
+			}
+		}
+	}()
+}
+
 func main() {
 	//log.SetFlags(log.LstdFlags | log.Lshortfile)
 	log.SetFlags(log.LstdFlags | log.Llongfile)
-	lambda.Start(httpadapter.NewV2(router()).ProxyWithContext)
+	lambda.StartWithOptions(httpadapter.NewV2(router()).ProxyWithContext)
 }

@@ -51,7 +51,7 @@ func checkOrBuild(ctx context.Context, parts []PartInfoUpload, isPdf bool) ([]Pd
 		}
 
 		if exists {
-			log.Printf("Skipping %s", part.ObjectKey)
+			//log.Printf("Skipping %s", part.ObjectKey)
 			return pdfItems, err
 		}
 

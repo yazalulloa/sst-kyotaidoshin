@@ -642,7 +642,7 @@ func getReceiptView(w http.ResponseWriter, r *http.Request) {
 			BuildingId: receipt.Building.ID,
 			Id:         receipt.Receipt.ID,
 			Parts:      []string{apt.Apartment.Number},
-			AllApt:     true,
+			AllApt:     false,
 		})
 
 		apt.DownloadKeys = *downloadKeys
@@ -763,6 +763,8 @@ func getPdf(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	//log.Printf("Keys: %+v", keys)
 
 	parts, err := GetParts(receipt, r.Context(), true, &keys)
 	if err != nil {

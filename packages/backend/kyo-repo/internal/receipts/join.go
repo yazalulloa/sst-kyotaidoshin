@@ -127,10 +127,6 @@ func GetReceiptExpensesDto(receiptId string, expenseArray []expenses.Item, reser
 
 func CalculateReceipt(ctx context.Context, buildingId, receiptId string) (*CalculatedReceipt, error) {
 
-	var wg sync.WaitGroup
-	wg.Add(8)
-	errorChan := make(chan error, 8)
-
 	calculatedReceipt := CalculatedReceipt{}
 
 	var reserveFundArray []model.ReserveFunds
@@ -138,6 +134,10 @@ func CalculateReceipt(ctx context.Context, buildingId, receiptId string) (*Calcu
 	var debtArray []model.Debts
 	var buildingExtraCharges []model.ExtraCharges
 	var receiptExtraCharges []model.ExtraCharges
+
+	var wg sync.WaitGroup
+	wg.Add(8)
+	errorChan := make(chan error, 8)
 
 	go func() {
 		defer wg.Done()
