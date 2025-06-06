@@ -529,7 +529,7 @@ func CalculateReceipt(ctx context.Context, buildingId, receiptId string) (*Calcu
 
 					if len(year.Months) > 0 {
 						if year.Year > 0 {
-							builder.WriteString(fmt.Sprintf("%d: ", year.Year))
+							builder.WriteString(fmt.Sprintf("%d-", year.Year))
 						}
 						for j, month := range year.Months {
 
@@ -539,7 +539,7 @@ func CalculateReceipt(ctx context.Context, buildingId, receiptId string) (*Calcu
 							}
 						}
 						if i != len(monthlyDebt.Years)-1 {
-							builder.WriteString(" - ")
+							builder.WriteString("/")
 						}
 					}
 				}

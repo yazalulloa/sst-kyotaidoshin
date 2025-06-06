@@ -15,7 +15,7 @@ export default defineConfig(({mode}) => {
     plugins: [
       tailwindcss(),
       createHtmlPlugin({
-        minify: false, // Disable minification during development for readability
+        minify: true, // Disable minification during development for readability
         inject: {
           data: {
             recaptchaSiteKey: env.VITE_RECAPTCHA_SITE_KEY,
