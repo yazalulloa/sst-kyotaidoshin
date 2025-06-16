@@ -26,13 +26,17 @@ templ Search(res TableResponse) {
 				href={ templ.URL(item.Item.Url) }
 				target="_blank"
 				rel="noopener noreferrer"
-				class="text-start"
+				class="text-start link link-hover"
 			>
 				{ item.Item.Name }
 			</a>
 			<span class="text-end">{ item.Item.SizeFormatted }</span>
 			<span>{ item.Item.Etag }</span>
+
+			if false {
 			@api.SpanFormatDate(fmt.Sprint(item.Item.LastModified))
+			}
+
 			<div class="flex flex justify-center">
 				{{
 			attrs := templ.Attributes{}

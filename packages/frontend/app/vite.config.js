@@ -6,6 +6,7 @@ export default defineConfig(({mode}) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   console.log(`Environment: ${env.VITE_RECAPTCHA_SITE_KEY}`);
+  console.log(`Captcha Enabled: ${env.VITE_CAPTCHA_ENABLED}`);
 
   return {
     root: 'src', // Assuming your source files are in the 'src' directory
@@ -19,6 +20,7 @@ export default defineConfig(({mode}) => {
         inject: {
           data: {
             recaptchaSiteKey: env.VITE_RECAPTCHA_SITE_KEY,
+            enableCaptcha: env.VITE_CAPTCHA_ENABLED === 'true',
           },
         },
       }),

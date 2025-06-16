@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/yaz/kyo-repo/internal/util"
 	"io"
 	"log"
@@ -53,12 +54,13 @@ func CheckRecaptcha(action RecaptchaAction, secret, response string) error {
 
 	// Check recaptcha verification success.
 	if !body.Success {
-		return errors.New("unsuccessful recaptcha verify request")
+		return errors.New(fmt.Sprintf("unsuccessful recaptcha verify request %s", body.ErrorCodes))
 	}
 
 	// Check response score.
 	if body.Score < 0.5 {
-		return errors.New("lower received score than expected")
+		return errors.New(fmt.Sprintf("recaptcha score is too low: %s", util.FormatFloat64(body.Score)))
+		//return errors.New("lower received score than expected")
 	}
 
 	// Check response action.

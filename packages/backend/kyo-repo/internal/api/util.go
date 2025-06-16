@@ -234,6 +234,12 @@ func (rec RouteParams) routeHandler() func(http.ResponseWriter,
 				return
 			}
 
+			enableCaptcha, _ := resource.Get("EnableCaptcha", "value")
+			if enableCaptcha != nil && enableCaptcha.(string) == "false" {
+				log.Println("Captcha is disabled, skipping recaptcha check")
+				return
+			}
+
 			timestamp := time.Now().UnixMilli()
 			defer func() { log.Printf("CheckRecaptcha took %d ms", time.Now().UnixMilli()-timestamp) }()
 
@@ -341,12 +347,6 @@ func (rec RouteParams) checkCaptcha(r *http.Request) error {
 	token := r.Header.Get("X-Recaptcha-Token")
 
 	if token == "" {
-
-		if false { // TODO delete this
-			log.Printf("Recaptcha token is empty")
-			return nil
-		}
-
 		return errors.New("recaptcha token is empty")
 	}
 

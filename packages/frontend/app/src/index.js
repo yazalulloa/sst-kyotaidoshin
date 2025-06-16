@@ -83,6 +83,11 @@ document.body.addEventListener('htmx:confirm', (evt) => {
     return
   }
 
+  if (import.meta.env.VITE_CAPTCHA_ENABLED && import.meta.env.VITE_CAPTCHA_ENABLED === 'false') {
+    // console.warn("CAPTCHA is disabled in this environment.");
+    return;
+  }
+
   evt.preventDefault()
 
   const toDisable = evt.detail.elt.querySelectorAll(

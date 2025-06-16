@@ -64,9 +64,17 @@ templ ItemView(item Item) {
 			}
 		</div>
 		<div class="flex flex-col gap-2 justify-center">
-			@api.SpanFormatDate(fmt.Sprint(item.CreatedAt))
+				<div class="flex">
+				<span x-text="$t('main-title-created-at')"></span>
+        				<span>:&nbsp;</span>
+        			@api.SpanFormatDate(fmt.Sprint(item.CreatedAt))
+				</div>
 			if item.LastLoginAt > 0 {
+			 <div class="flex">
+				<span x-text="$t('main-title-last-login-at')"></span>
+        				<span>:&nbsp;</span>
 				@api.SpanFormatDate(fmt.Sprint(item.LastLoginAt))
+			 </div>
 			}
 		</div>
 		if hasWritePerm {

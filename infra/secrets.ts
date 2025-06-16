@@ -15,6 +15,7 @@ export const secret = {
   telegramBotApiKey: new sst.Secret("TelegramBotApiKey"),
   captchaSiteKey: new sst.Secret("CaptchaSiteKey"),
   captchaSecretKey: new sst.Secret("CaptchaSecretKey"),
+  enableCaptcha: new sst.Secret("EnableCaptcha", "false"),
   posthogApiKey: new sst.Secret("PosthogApiKey"),
 }
 

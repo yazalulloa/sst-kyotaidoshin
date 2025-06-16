@@ -42,6 +42,10 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
+    "EnableCaptcha": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "GithubClientId": {
       "type": "sst.sst.Secret"
       "value": string

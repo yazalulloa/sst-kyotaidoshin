@@ -134,6 +134,7 @@ const mainApiFunction = new sst.aws.Function("MainApiFunction", {
     secret.telegramBotApiKey,
     telegramWebhookFunction,
     secret.captchaSecretKey,
+    secret.enableCaptcha,
     secret.posthogApiKey,
   ],
   environment: {
@@ -165,6 +166,7 @@ export const site = new sst.aws.StaticSite("WebApp", {
     VITE_IS_DEV: isLocal.toString(),
     VITE_ISR_PREFIX: isrPrefix,
     VITE_RECAPTCHA_SITE_KEY: secret.captchaSiteKey.value,
+    VITE_CAPTCHA_ENABLED: secret.enableCaptcha.value,
   },
   build: {
     command: "bun run build",
