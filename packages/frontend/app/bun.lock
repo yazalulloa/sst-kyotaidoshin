@@ -11,7 +11,7 @@
         "alpinejs-i18n": "^2.5.3",
         "external-svg-loader": "^1.7.1",
         "htmx.org": "2.0.4",
-        "pinecone-router": "^5.5.0",
+        "pinecone-router": "^7.2.0",
         "posthog-js": "^1.253.4",
         "tailwindcss": "^4.1.10",
         "vite": "^6.3.5",
@@ -538,7 +538,7 @@
 
     "picomatch": ["picomatch@4.0.2", "", {}, "sha512-M7BAV6Rlcy5u+m6oPhAPFgJTzAioX/6B0DxyvDlo9l8+T3nLKbrczg2WLUyzd45L8RqfUMyGPzekbMvX2Ldkwg=="],
 
-    "pinecone-router": ["pinecone-router@5.5.0", "", {}, "sha512-phfHw+0CHObGZjBfksDhz+mrkN7eqyJQJDUz8GcCSAzCfHk0a7Q0bJ+GfktNvMYK6+5xQmtpU/htHDWyHwCrQA=="],
+    "pinecone-router": ["pinecone-router@7.2.0", "", {}, "sha512-pEm1YVDNuvkXlL9EErDnmrNO4XwGWHO8OpldbQuQhBbL/NzDPLZwgysuMjOGPRW+sCw5byjbqGrFjuihIt9Wjw=="],
 
     "pkce-challenge": ["pkce-challenge@4.1.0", "", {}, "sha512-ZBmhE1C9LcPoH9XZSdwiPtbPHZROwAnMy+kIFQVrnMCxY4Cudlz3gBOpzilgc0jOgRaiT3sIWfpMomW2ar2orQ=="],
 
