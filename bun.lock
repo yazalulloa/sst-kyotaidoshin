@@ -14,10 +14,11 @@
     "packages/auth": {
       "name": "@kyotaidoshin/auth",
       "dependencies": {
-        "@aws-sdk/client-lambda": "^3.826.0",
+        "@aws-sdk/client-lambda": "^3.828.0",
         "@openauthjs/openauth": "^0.4.3",
         "hono": "^4.7.11",
-        "sst": "^3.17.4",
+        "posthog-node": "^5.1.1",
+        "sst": "^3.17.5",
         "uuid": "^11.1.0",
         "valibot": "^1.1.0",
       },
@@ -371,6 +372,8 @@
     "pkce-challenge": ["pkce-challenge@4.1.0", "", {}, "sha512-ZBmhE1C9LcPoH9XZSdwiPtbPHZROwAnMy+kIFQVrnMCxY4Cudlz3gBOpzilgc0jOgRaiT3sIWfpMomW2ar2orQ=="],
 
     "possible-typed-array-names": ["possible-typed-array-names@1.1.0", "", {}, "sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg=="],
+
+    "posthog-node": ["posthog-node@5.1.1", "", {}, "sha512-6VISkNdxO24ehXiDA4dugyCSIV7lpGVaEu5kn/dlAj+SJ1lgcDru9PQ8p/+GSXsXVxohd1t7kHL2JKc9NoGb0w=="],
 
     "proxy-addr": ["proxy-addr@2.0.7", "", { "dependencies": { "forwarded": "0.2.0", "ipaddr.js": "1.9.1" } }, "sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg=="],
 

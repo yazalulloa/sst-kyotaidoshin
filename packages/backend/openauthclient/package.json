@@ -8,5 +8,7 @@
   "peerDependencies": {
     "typescript": "^5.7.3"
   },
-  "dependencies": {}
+  "dependencies": {
+    "posthog-node": "^5.1.1"
+  }
 }

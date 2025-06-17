@@ -23,6 +23,7 @@ const auth = new sst.aws.Auth("AuthServer", {
       secret.githubClientSecret,
       secret.googleClientId,
       secret.googleClientSecret,
+      secret.posthogApiKey,
       processUserFunction,
     ],
   },
@@ -167,6 +168,7 @@ export const site = new sst.aws.StaticSite("WebApp", {
     VITE_ISR_PREFIX: isrPrefix,
     VITE_RECAPTCHA_SITE_KEY: secret.captchaSiteKey.value,
     VITE_CAPTCHA_ENABLED: secret.enableCaptcha.value,
+    VITE_POSTHOG_API_KEY: secret.posthogApiKey.value,
   },
   build: {
     command: "bun run build",
@@ -217,7 +219,7 @@ export const site = new sst.aws.StaticSite("WebApp", {
 //   },
 // });
 const authClientFunction = new sst.aws.Function("AuthClient", {
-  link: [secret.appClientId, auth, site],
+  link: [secret.appClientId, auth, site, secret.posthogApiKey],
   handler: "packages/backend/openauthclient/index.handler",
   environment: {
     IS_LOCAL: isLocal.toString(),

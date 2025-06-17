@@ -8,8 +8,11 @@ import {Select} from "@openauthjs/openauth/ui/select"
 import type {Theme} from "@openauthjs/openauth/ui/theme"
 import {InvokeCommand, LambdaClient} from "@aws-sdk/client-lambda";
 import {DynamoStorage} from "@openauthjs/openauth/storage/dynamo"
+import { PostHog } from 'posthog-node'
 
 const lambda = new LambdaClient({});
+
+const posthog = new PostHog(Resource.PosthogApiKey.value, { host: 'https://us.i.posthog.com' })
 
 const storage = DynamoStorage({
   table: "kyotaidoshin-tokens",
@@ -90,5 +93,22 @@ const app = issuer({
 
 })
 
+
+app.onError((err, c) => {
+
+
+  console.error("Error in AuthServer:", err, c)
+
+  posthog.captureException(new Error(err.message, { cause: err }), undefined, {
+    path: c.req.path,
+    method: c.req.method,
+    url: c.req.url,
+    headers: c.req.header(),
+    // ... other properties
+  })
+  // posthog.shutdown()
+  // other error handling logic
+  return c.text('Internal Server Error', 500)
+})
 
 export const handler = handle(app)

@@ -3,6 +3,9 @@
   "workspaces": {
     "": {
       "name": "@kyotaidoshin/openauthclient",
+      "dependencies": {
+        "posthog-node": "^5.1.1",
+      },
       "devDependencies": {
         "@types/aws-lambda": "8.10.142",
       },
@@ -13,6 +16,8 @@
   },
   "packages": {
     "@types/aws-lambda": ["@types/aws-lambda@8.10.142", "", {}, "sha512-wy2y/2hQKrS6myOS++koXg3N1Hg+LLyPjaggCFajczSHZPqBnOMuT2sdH3kiASrmdBYyM3pmjyz5SoWraRllCQ=="],
+
+    "posthog-node": ["posthog-node@5.1.1", "", {}, "sha512-6VISkNdxO24ehXiDA4dugyCSIV7lpGVaEu5kn/dlAj+SJ1lgcDru9PQ8p/+GSXsXVxohd1t7kHL2JKc9NoGb0w=="],
 
     "typescript": ["typescript@5.7.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw=="],
   }

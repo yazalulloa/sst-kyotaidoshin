@@ -14,6 +14,9 @@ import './images.js';
 import './config.js';
 import {match} from './utils.js';
 
+import posthog from 'posthog-js'
+posthog.init(import.meta.env.VITE_POSTHOG_API_KEY, { api_host: 'https://us.i.posthog.com', defaults: '2025-05-24' })
+
 window.htmx = htmx;
 
 // htmx.logAll();

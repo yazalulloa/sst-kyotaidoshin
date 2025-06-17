@@ -4,11 +4,15 @@ import {createClient} from "@openauthjs/openauth/client"
 import {handle} from "hono/aws-lambda"
 import {subjects} from "../../auth/subjects"
 import {Resource} from "sst";
+import { PostHog } from 'posthog-node'
 
 const client = createClient({
   clientID: Resource.AppClientId.value,
   issuer: Resource.AuthServer.url
 })
+
+
+const posthog = new PostHog(Resource.PosthogApiKey.value, { host: 'https://us.i.posthog.com' })
 
 const isLocal = getIsLocal();
 
@@ -71,6 +75,23 @@ const app = new Hono()
     console.error(e)
     return c.redirect("/authorize", 302)
   }
+})
+
+app.onError((err, c) => {
+
+  console.error("Error in OpenAuthClient:", err, c)
+
+
+  posthog.captureException(new Error(err.message, { cause: err }), undefined, {
+    path: c.req.path,
+    method: c.req.method,
+    url: c.req.url,
+    headers: c.req.header(),
+    // ... other properties
+  })
+  // posthog.shutdown()
+  // other error handling logic
+  return c.text('Internal Server Error', 500)
 })
 
 export const handler = handle(app)

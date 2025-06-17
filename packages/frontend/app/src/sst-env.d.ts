@@ -8,6 +8,7 @@ interface ImportMetaEnv {
   readonly VITE_ISR_PREFIX: string
   readonly VITE_RECAPTCHA_SITE_KEY: string
   readonly VITE_CAPTCHA_ENABLED: string
+  readonly VITE_POSTHOG_API_KEY: string
 }
 interface ImportMeta {
   readonly env: ImportMetaEnv
