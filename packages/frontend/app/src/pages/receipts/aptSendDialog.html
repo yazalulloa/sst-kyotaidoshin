@@ -76,32 +76,6 @@
           <span x-text="$t('main-months-' + month)"></span>
           <span x-text="date"></span>
         </div>
-
-        <div class="flex w-full justify-center items-center">
-          <label class="fieldset-label">
-           <span
-               class="font-medium tracking-wide"
-               x-bind:class="selectAll ? 'text-(--color-base-content)' : ''"
-               x-text="$t('main-action-select-all')">
-          </span>
-            <input type="checkbox"
-                   class="toggle"
-                   aria-checked="false"
-                   @click="selectAll=!selectAll"
-                   x-bind:checked="selectAll"
-                   x-effect="
-
-                 if (selectAll) {
-                   selected = apts.map(apt => apt.number);
-                 } else {
-                   selected = [];
-                 }
-
-                 $el.setAttribute('aria-checked', selectAll)
-                 "
-            />
-          </label>
-        </div>
       </div>
 
       <!-- Dialog Body -->
@@ -124,14 +98,40 @@
             <div class="fieldset-label" hidden="hidden">Optional</div>
           </fieldset>
 
-          <fieldset class="fieldset">
+          <fieldset class="fieldset *:w-full">
             <legend class="fieldset-legend" x-text="$t('main-title-msg')"></legend>
-            <textarea class="textarea h-24 w-full"
+            <textarea class="textarea h-24"
                       name="message"
                       placeholder="AVISO DE COBRO">
             </textarea>
             <div class="fieldset-label" hidden="hidden">Optional</div>
           </fieldset>
+
+          <div class="flex w-full justify-center items-center">
+            <label class="fieldset-label">
+           <span
+               class="font-medium tracking-wide"
+               x-bind:class="selectAll ? 'text-(--color-base-content)' : ''"
+               x-text="$t('main-action-select-all')">
+          </span>
+              <input type="checkbox"
+                     class="toggle"
+                     aria-checked="false"
+                     @click="selectAll=!selectAll"
+                     x-bind:checked="selectAll"
+                     x-effect="
+
+                 if (selectAll) {
+                   selected = apts.map(apt => apt.number);
+                 } else {
+                   selected = [];
+                 }
+
+                 $el.setAttribute('aria-checked', selectAll)
+                 "
+              />
+            </label>
+          </div>
 
           <div class="flex flex-col w-full">
             <template x-for="apt in apts">

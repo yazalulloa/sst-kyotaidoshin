@@ -12,7 +12,6 @@
     document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'kyo')
 
     if (window.location.pathname === "/logged_in") {
-      console.log("Logged in")
       let redirectTo = localStorage.getItem('redirect_to')
       if (redirectTo !== null) {
         window.location.pathname = redirectTo
