@@ -32,6 +32,12 @@ func getInit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if userId == "" {
+		log.Println("getInit: user id is empty")
+		http.Error(w, "Unauthorized", http.StatusNotFound)
+		return
+	}
+
 	var wg sync.WaitGroup
 	wg.Add(2)
 	errorChan := make(chan error, 2)

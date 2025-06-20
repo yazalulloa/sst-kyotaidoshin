@@ -148,7 +148,7 @@ document.body.addEventListener('htmx:configRequest', async (evt) => {
 
   if (evt.detail.path.includes("/api/")) {
     evt.detail.withCredentials = true;
-    evt.detail.path = import.meta.env.VITE_VAR_ENV + evt.detail.path;
+    // evt.detail.path = import.meta.env.VITE_VAR_ENV + evt.detail.path;
   }
 
 });

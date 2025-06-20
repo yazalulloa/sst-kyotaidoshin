@@ -379,7 +379,9 @@ func HasPerms(ctx context.Context, perms ...PERM) bool {
 }
 
 func RedirectToAuthServer(w http.ResponseWriter, r *http.Request) {
-	url := fmt.Sprintf("%s://%s", r.URL.Scheme, r.URL.Host)
+	//url := os.Getenv("AUTH_SERVER_URL")
+	//url := fmt.Sprintf("%s://%s", r.URL.Scheme, r.URL.Host)
+	url := "/api/authorize"
 	w.Header().Add("HX-Redirect", url)
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte("Unauthorized"))

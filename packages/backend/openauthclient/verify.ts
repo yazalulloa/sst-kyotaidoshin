@@ -6,7 +6,8 @@ import {subjects} from "@kyotaidoshin/auth/subjects";
 
 const client = createClient({
   clientID: Resource.AppClientId.value,
-  issuer: Resource.AuthServer.url
+  issuer: Resource.AuthServer.url,
+  // issuer: process.env.AUTH_SERVER_URL,
 })
 
 
@@ -28,7 +29,9 @@ export const handler: Handler = async (event, context) => {
       refresh: refreshToken,
     })
   } catch (e) {
-    console.log("Error client.verify", e)
+    console.error(`Access token  ${accessToken}`)
+    console.error(`Refresh token ${refreshToken}`)
+    console.error("Error client.verify", e)
     return {
       statusCode: 401,
       body: "Invalid access token",
@@ -36,8 +39,9 @@ export const handler: Handler = async (event, context) => {
   }
 
   if (verified.err) {
-
-    console.log("Error verifying token", verified.err)
+    console.error(`Access token  ${accessToken}`)
+    console.error(`Refresh token ${refreshToken}`)
+    console.error("Error verifying token", verified.err)
     throw new Error("Invalid access token")
   }
 

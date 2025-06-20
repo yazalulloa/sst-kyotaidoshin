@@ -20,6 +20,7 @@ declare module "sst" {
     "AuthClient": {
       "name": string
       "type": "sst.aws.Function"
+      "url": string
     }
     "AuthServer": {
       "type": "sst.aws.Auth"
@@ -78,6 +79,10 @@ declare module "sst" {
     "MainApiFunction": {
       "name": string
       "type": "sst.aws.Function"
+    }
+    "MyRouter": {
+      "type": "sst.aws.Router"
+      "url": string
     }
     "PosthogApiKey": {
       "type": "sst.sst.Secret"

@@ -285,6 +285,9 @@ func authenticationMiddleware(next http.Handler) http.Handler {
 			refreshToken = cookieRefreshToken.Value
 		}
 
+		log.Printf("Access token: %s", accessToken)
+		log.Printf("Refresh token: %s", refreshToken)
+
 		newCtx, err := util.Verify(r.Context(), accessToken, refreshToken)
 		if err != nil {
 			log.Printf("Failed to verify token: %v", err)

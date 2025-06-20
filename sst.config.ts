@@ -13,11 +13,16 @@ export default $config({
   },
   async run() {
 
+
+    console.log("DISTRIBUTION_ID", process.env.DISTRIBUTION_ID);
+
     const infra = await import("./infra");
 
 
     return {
       SiteUrl: infra.site.url,
+      router: infra.myRouter.distributionID,
+      AuthUrl: infra.auth.url,
     };
   },
 });
