@@ -25,9 +25,17 @@ export const apiDomain = `${domain}/api`;
 
 export const allowedOrigins = isLocal ? ["http://localhost:5173"] : [`https://${domain}`];
 
-export const authDomain = `${domain}/auth`;
-// export const authDomain = subdomain("auth")
+// export const authDomain = `${domain}/auth`;
+export const authDomain = subdomain("auth")
 // console.log('AuthDomain', authDomain)
+
+// export const myRouter = new sst.aws.Router("MyRouter", {
+//   domain: {
+//     name: domain,
+//     aliases: [`*.${domain}`],
+//     dns: sst.aws.dns({override: true}),
+//   }
+// })
 
 export const myRouter = isPermanentStage
     ? new sst.aws.Router("MyRouter", {

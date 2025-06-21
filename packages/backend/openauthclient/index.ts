@@ -9,15 +9,15 @@ import * as process from "node:process";
 
 const client = createClient({
   clientID: Resource.AppClientId.value,
-  // issuer: Resource.AuthServer.url,
-  issuer: process.env.AUTH_SERVER_URL,
+  issuer: Resource.AuthServer.url,
+  // issuer: process.env.AUTH_SERVER_URL,
 })
 
 
 const posthog = new PostHog(Resource.PosthogApiKey.value, { host: 'https://us.i.posthog.com' })
 
 const isLocal = getIsLocal();
-const apiUrl = process.env.API_URL
+// const apiUrl = process.env.API_URL
 
 function getIsLocal(): boolean {
 
@@ -32,16 +32,16 @@ const redirectUrl = (isLocal ? "http://localhost:5173" : Resource.WebApp.url) + 
 
 const app = new Hono()
 .get("/authorize", async (c) => {
-  // const origin = new URL(c.req.url).origin
-  const {url} = await client.authorize(apiUrl + "/callback", "code")
+  const origin = new URL(c.req.url).origin
+  const {url} = await client.authorize(origin + "/callback", "code")
   return c.redirect(url, 302)
 })
 .get("/callback", async (c) => {
-  // const origin = new URL(c.req.url).origin
+  const origin = new URL(c.req.url).origin
   try {
     const code = c.req.query("code")
     if (!code) throw new Error("Missing code")
-    const exchanged = await client.exchange(code, apiUrl + "/callback")
+    const exchanged = await client.exchange(code, origin + "/callback")
     if (exchanged.err)
       return new Response(exchanged.err.toString(), {
         status: 400,

@@ -12,10 +12,10 @@ const processUserFunction = new sst.aws.Function("ProcessUser", {
 
 
 export const auth = new sst.aws.Auth("AuthServer", {
-  // domain: {
-  //   name: authDomain,
-  //   dns: sst.aws.dns({override: true}),
-  // },
+  domain: {
+    name: authDomain,
+    dns: sst.aws.dns({override: true}),
+  },
   forceUpgrade: "v2",
   issuer: {
     handler: "packages/auth/index.handler",
@@ -94,9 +94,9 @@ const telegramWebhookFunction = new sst.aws.Function("TelegramWebhookFunction", 
 const verifyAccessFunction = new sst.aws.Function("VerifyAccess", {
   link: [secret.appClientId, auth],
   handler: "packages/backend/openauthclient/verify.handler",
-  environment: {
-    AUTH_SERVER_URL: `https://${authDomain}`,
-  },
+  // environment: {
+  //   AUTH_SERVER_URL: `https://${authDomain}`,
+  // },
 });
 
 // const htmlToPdf = new sst.aws.Function("HtmlToPdf", {
@@ -243,8 +243,8 @@ const authClientFunction = new sst.aws.Function("AuthClient", {
   handler: "packages/backend/openauthclient/index.handler",
   environment: {
     IS_LOCAL: isLocal.toString(),
-    AUTH_SERVER_URL: `https://${authDomain}`,
-    API_URL: `https://${apiDomain}`,
+    // AUTH_SERVER_URL: `https://${authDomain}`,
+    // API_URL: `https://${apiDomain}`,
   },
 });
 

@@ -20,7 +20,6 @@ declare module "sst" {
     "AuthClient": {
       "name": string
       "type": "sst.aws.Function"
-      "url": string
     }
     "AuthServer": {
       "type": "sst.aws.Auth"
