@@ -5,16 +5,15 @@ export default $config({
   app(input) {
     return {
       name: "kyotaidoshin",
-      removal: input?.stage === "production" ? "retain" : "remove",
-      protect: ["production"].includes(input?.stage),
+      // removal: input?.stage === "production" ? "retain" : "remove",
+      // protect: ["production"].includes(input?.stage),
       home: "aws",
       providers: {aws: "6.71.0"},
     };
   },
   async run() {
 
-
-    console.log("DISTRIBUTION_ID", process.env.DISTRIBUTION_ID);
+    console.log("App ", $app)
 
     const infra = await import("./infra");
 
