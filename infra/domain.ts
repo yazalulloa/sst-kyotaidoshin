@@ -1,4 +1,4 @@
-import {isLocal, PROD_STAGE, DEV_STAGE} from "./util";
+import {DEV_STAGE, isLocal, PROD_STAGE} from "./util";
 
 
 // export const stageDomain = $app.stage === PROD_STAGE ? "" : `${$app.stage}.`;
@@ -42,7 +42,7 @@ export const myRouter = isPermanentStage
       domain: {
         name: domain,
         aliases: [`*.${domain}`],
-        dns: sst.aws.dns({override: true}),
+        // dns: sst.aws.dns({override: true}),
       }
     })
     : sst.aws.Router.get("MyRouter", process.env.DISTRIBUTION_ID);

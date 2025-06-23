@@ -2,6 +2,7 @@ import {secret} from "./secrets";
 import {allowedOrigins, apiDomain, authDomain, myRouter} from "./domain";
 import {bcvBucket, receiptsBucket, webAssetsBucket} from "./storage";
 import {isLocal, isrPrefix} from "./util";
+import {Output} from "@pulumi/pulumi";
 
 
 const processUserFunction = new sst.aws.Function("ProcessUser", {
@@ -14,7 +15,7 @@ const processUserFunction = new sst.aws.Function("ProcessUser", {
 export const auth = new sst.aws.Auth("AuthServer", {
   domain: {
     name: authDomain,
-    dns: sst.aws.dns({override: true}),
+    // dns: sst.aws.dns({override: true}),
   },
   forceUpgrade: "v2",
   issuer: {
@@ -126,6 +127,13 @@ receiptPdfQueue.subscribe({
   ]
 });
 
+
+let authRedirectUrl: Output<string> = "";
+if (isLocal && false) {
+  authRedirectUrl = api.url.apply(v => `${v}`);
+  console.log(`AuthRedirectUrl ${authRedirectUrl}`)
+}
+
 const mainApiFunction = new sst.aws.Function("MainApiFunction", {
   handler: "packages/backend/kyo-repo/cmd/app/app.go",
   runtime: "go",
@@ -152,6 +160,7 @@ const mainApiFunction = new sst.aws.Function("MainApiFunction", {
   ],
   environment: {
     ISR_PREFIX: isrPrefix,
+    AUTH_SERVER_URL: authRedirectUrl,
   },
   timeout: "60 seconds",
   permissions: [
@@ -225,14 +234,15 @@ export const site = new sst.aws.StaticSite("WebApp", {
 
 console.log(`AuthServer URL: ${auth.url}`);
 
+
 const authClientFunction = new sst.aws.Function("AuthClient", {
   url: true,
   link: [secret.appClientId, auth, site, secret.posthogApiKey],
   handler: "packages/backend/openauthclient/index.handler",
   environment: {
     IS_LOCAL: isLocal.toString(),
-    // AUTH_SERVER_URL: `https://${authDomain}`,
-     API_URL: `https://${apiDomain}`,
+    // AUTH_SERVER_URL: authRedirectUrl,
+    API_URL: `https://${apiDomain}`,
   },
 });
 
@@ -240,7 +250,6 @@ const authClientFunction = new sst.aws.Function("AuthClient", {
 api.route("GET /authorize", authClientFunction.arn);
 api.route("GET /callback", authClientFunction.arn);
 api.route("GET /", authClientFunction.arn);
-
 
 
 myRouter.route("/api/authorize", authClientFunction.url, {
@@ -256,8 +265,6 @@ myRouter.route("/api/callback", authClientFunction.url, {
     to: "/$1"
   }
 });
-
-
 
 
 myRouter.route("/api", api.url);

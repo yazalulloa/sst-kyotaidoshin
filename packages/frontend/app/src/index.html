@@ -9,7 +9,7 @@
   <title>Kyotaidoshin</title>
   <link href="styles.css" rel="stylesheet">
   <script>
-    document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'kyo')
+    document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || '')
 
     if (window.location.pathname === "/logged_in") {
       let redirectTo = localStorage.getItem('redirect_to')

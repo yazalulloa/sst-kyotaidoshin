@@ -5,6 +5,146 @@
 
 declare module "sst" {
   export interface Resource {
+    "API": {
+      "type": "sst.aws.ApiGatewayV2"
+      "url": string
+    }
+    "AltEmailsRecipient": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "AppClientId": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "AuthClient": {
+      "name": string
+      "type": "sst.aws.Function"
+      "url": string
+    }
+    "AuthServer": {
+      "type": "sst.aws.Auth"
+      "url": string
+    }
+    "BcvFunction": {
+      "name": string
+      "type": "sst.aws.Function"
+      "url": string
+    }
+    "BcvQueue": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "CaptchaSecretKey": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "CaptchaSiteKey": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "EnableCaptcha": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "GithubClientId": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "GithubClientSecret": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "GoogleClientId": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "GoogleClientSecret": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "HtmlToPdfFunction": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "IsrGenFunction": {
+      "name": string
+      "type": "sst.aws.Function"
+      "url": string
+    }
+    "MailerConfigs": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "MainApiFunction": {
+      "name": string
+      "type": "sst.aws.Function"
+    }
+    "MyRouter": {
+      "type": "sst.aws.Router"
+      "url": string
+    }
+    "PosthogApiKey": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "ProcessBcvFile": {
+      "name": string
+      "type": "sst.aws.Function"
+    }
+    "ProcessUser": {
+      "name": string
+      "type": "sst.aws.Function"
+    }
+    "ReceiptPdfQueue": {
+      "type": "sst.aws.Queue"
+      "url": string
+    }
+    "ReceiptsBucket": {
+      "name": string
+      "type": "sst.aws.Bucket"
+    }
+    "SecretBcvFileStartPath": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "SecretBcvUrl": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "SecretTursoUrl": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "TelegramBotApiKey": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "TelegramBotToken": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "TelegramWebhookFunction": {
+      "name": string
+      "type": "sst.aws.Function"
+      "url": string
+    }
+    "VerifyAccess": {
+      "name": string
+      "type": "sst.aws.Function"
+    }
+    "WebApp": {
+      "type": "sst.aws.StaticSite"
+      "url": string
+    }
+    "WebAssetsBucket": {
+      "name": string
+      "type": "sst.aws.Bucket"
+    }
+    "bcv-bucket": {
+      "name": string
+      "type": "sst.aws.Bucket"
+    }
   }
 }
 /// <reference path="sst-env.d.ts" />
