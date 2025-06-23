@@ -15,9 +15,9 @@
     "alpinejs": "^3.14.9",
     "alpinejs-i18n": "^2.5.3",
     "external-svg-loader": "^1.7.1",
-    "htmx.org": "2.0.4",
+    "htmx.org": "^2.0.5",
     "pinecone-router": "^7.2.0",
-    "posthog-js": "^1.255.0",
+    "posthog-js": "^1.255.1",
     "tailwindcss": "^4.1.10",
     "vite": "^6.3.5"
   },

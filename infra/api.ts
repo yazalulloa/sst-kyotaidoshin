@@ -33,16 +33,6 @@ export const auth = new sst.aws.Auth("AuthServer", {
   },
 });
 
-myRouter.route("/auth", auth.url, {
-  rewrite: {
-    regex: "^/auth/(.*)$",
-    to: "/$1"
-  }
-});
-
-myRouter.route("/google", auth.url)
-myRouter.route("/github", auth.url)
-
 
 const isrGenFunction = new sst.aws.Function("IsrGenFunction", {
   url: true,
@@ -81,8 +71,6 @@ const api = new sst.aws.ApiGatewayV2("API", {
     exposeHeaders: ["HX-Redirect", "hx-location", "hx-trigger"],
   },
 });
-
-myRouter.route("/api", api.url)
 
 const telegramWebhookFunction = new sst.aws.Function("TelegramWebhookFunction", {
   url: true,
@@ -187,7 +175,7 @@ export const site = new sst.aws.StaticSite("WebApp", {
   },
   environment: {
     // Accessible in the browser
-    // VITE_VAR_ENV: `https://${apiDomain}`,
+    VITE_VAR_ENV: `https://${apiDomain}`,
     VITE_IS_DEV: isLocal.toString(),
     VITE_ISR_PREFIX: isrPrefix,
     VITE_RECAPTCHA_SITE_KEY: secret.captchaSiteKey.value,
@@ -244,7 +232,7 @@ const authClientFunction = new sst.aws.Function("AuthClient", {
   environment: {
     IS_LOCAL: isLocal.toString(),
     // AUTH_SERVER_URL: `https://${authDomain}`,
-    // API_URL: `https://${apiDomain}`,
+     API_URL: `https://${apiDomain}`,
   },
 });
 
@@ -252,6 +240,7 @@ const authClientFunction = new sst.aws.Function("AuthClient", {
 api.route("GET /authorize", authClientFunction.arn);
 api.route("GET /callback", authClientFunction.arn);
 api.route("GET /", authClientFunction.arn);
+
 
 
 myRouter.route("/api/authorize", authClientFunction.url, {
@@ -267,3 +256,8 @@ myRouter.route("/api/callback", authClientFunction.url, {
     to: "/$1"
   }
 });
+
+
+
+
+myRouter.route("/api", api.url);

@@ -9,7 +9,7 @@ export const bcvFunction = new sst.aws.Function("BcvFunction", {
   timeout: "90 seconds",
 });
 // https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-scheduled-rule-pattern.html
-export const bcvCon = new sst.aws.Cron("bcv-cron", {
+export const bcvCron = new sst.aws.Cron("bcv-cron", {
   schedule: "cron(0/15 18-23 ? * MON-FRI *)",
   // schedule: "cron(0/15 * * * ? *)",
   function: bcvFunction.arn,
@@ -17,7 +17,7 @@ export const bcvCon = new sst.aws.Cron("bcv-cron", {
 
 
 export const bcvQueue = new sst.aws.Queue("BcvQueue", {
-  //not supported for S3 notificationsm
+  //not supported for S3 notifications
   fifo: false,
   visibilityTimeout: "300 seconds",
 });
