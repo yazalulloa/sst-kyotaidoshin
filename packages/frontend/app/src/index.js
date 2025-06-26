@@ -15,7 +15,9 @@ import './config.js';
 import {match} from './utils.js';
 
 import posthog from 'posthog-js'
-posthog.init(import.meta.env.VITE_POSTHOG_API_KEY, { api_host: 'https://us.i.posthog.com', defaults: '2025-05-24' })
+
+posthog.init(import.meta.env.VITE_POSTHOG_API_KEY,
+    {api_host: 'https://us.i.posthog.com', defaults: '2025-05-24'})
 
 window.htmx = htmx;
 
@@ -86,7 +88,8 @@ document.body.addEventListener('htmx:confirm', (evt) => {
     return
   }
 
-  if (import.meta.env.VITE_CAPTCHA_ENABLED && import.meta.env.VITE_CAPTCHA_ENABLED === 'false') {
+  if (import.meta.env.VITE_CAPTCHA_ENABLED
+      && import.meta.env.VITE_CAPTCHA_ENABLED === 'false') {
     // console.warn("CAPTCHA is disabled in this environment.");
     return;
   }
@@ -148,7 +151,10 @@ document.body.addEventListener('htmx:configRequest', async (evt) => {
 
   if (evt.detail.path.includes("/api/")) {
     evt.detail.withCredentials = true;
-    evt.detail.path = import.meta.env.VITE_VAR_ENV + evt.detail.path;
+
+    if (isDev) {
+      evt.detail.path = import.meta.env.VITE_VAR_ENV.replaceAll("/api", "") + evt.detail.path;
+    }
   }
 
 });

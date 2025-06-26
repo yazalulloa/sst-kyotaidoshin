@@ -1,7 +1,8 @@
 import {secret} from "./secrets";
-import {allowedOrigins, apiDomain, authDomain, currentWebUrl} from "./domain";
+import {allowedOrigins, apiDomain, authDomain, myRouter} from "./domain";
 import {bcvBucket, receiptsBucket, webAssetsBucket} from "./storage";
 import {isLocal, isrPrefix} from "./util";
+import {Output} from "@pulumi/pulumi";
 
 
 const processUserFunction = new sst.aws.Function("ProcessUser", {
@@ -11,9 +12,10 @@ const processUserFunction = new sst.aws.Function("ProcessUser", {
 });
 
 
-const auth = new sst.aws.Auth("AuthServer", {
+export const auth = new sst.aws.Auth("AuthServer", {
   domain: {
-    name: authDomain
+    name: authDomain,
+    // dns: sst.aws.dns({override: true}),
   },
   forceUpgrade: "v2",
   issuer: {
@@ -26,8 +28,12 @@ const auth = new sst.aws.Auth("AuthServer", {
       secret.posthogApiKey,
       processUserFunction,
     ],
+    environment: {
+      API_URL: `https://${apiDomain}`,
+    },
   },
 });
+
 
 const isrGenFunction = new sst.aws.Function("IsrGenFunction", {
   url: true,
@@ -41,8 +47,12 @@ const isrGenFunction = new sst.aws.Function("IsrGenFunction", {
 
 
 const api = new sst.aws.ApiGatewayV2("API", {
-  domain: {
-    name: apiDomain
+  // domain: {
+  //   name: apiDomain,
+  //   dns: sst.aws.dns({override: true}),
+  // },
+  accessLog: {
+    retention: "1 month",
   },
   cors: {
     allowOrigins: allowedOrigins,
@@ -73,6 +83,9 @@ const telegramWebhookFunction = new sst.aws.Function("TelegramWebhookFunction", 
 const verifyAccessFunction = new sst.aws.Function("VerifyAccess", {
   link: [secret.appClientId, auth],
   handler: "packages/backend/openauthclient/verify.handler",
+  // environment: {
+  //   AUTH_SERVER_URL: `https://${authDomain}`,
+  // },
 });
 
 // const htmlToPdf = new sst.aws.Function("HtmlToPdf", {
@@ -114,6 +127,13 @@ receiptPdfQueue.subscribe({
   ]
 });
 
+
+let authRedirectUrl: Output<string> = "";
+if (isLocal && false) {
+  authRedirectUrl = api.url.apply(v => `${v}`);
+  console.log(`AuthRedirectUrl ${authRedirectUrl}`)
+}
+
 const mainApiFunction = new sst.aws.Function("MainApiFunction", {
   handler: "packages/backend/kyo-repo/cmd/app/app.go",
   runtime: "go",
@@ -139,7 +159,8 @@ const mainApiFunction = new sst.aws.Function("MainApiFunction", {
     secret.posthogApiKey,
   ],
   environment: {
-    ISR_PREFIX: isrPrefix
+    ISR_PREFIX: isrPrefix,
+    AUTH_SERVER_URL: authRedirectUrl,
   },
   timeout: "60 seconds",
   permissions: [
@@ -158,8 +179,8 @@ api.route("DELETE /api/{proxy+}", mainApiFunction.arn);
 
 export const site = new sst.aws.StaticSite("WebApp", {
   path: "packages/frontend/app",
-  domain: {
-    name: currentWebUrl
+  router: {
+    instance: myRouter
   },
   environment: {
     // Accessible in the browser
@@ -180,7 +201,8 @@ export const site = new sst.aws.StaticSite("WebApp", {
     fileOptions: [
       {
         files: "index.html",
-        cacheControl: "public,max-age=0,s-maxage=0,must-revalidate"
+        cacheControl: "max-age=0,no-cache,must-revalidate,public"
+        // cacheControl: "public,max-age=0,s-maxage=0,must-revalidate"
         // cacheControl: "max-age=0,no-cache,no-store,must-revalidate",
       },
       {
@@ -190,7 +212,7 @@ export const site = new sst.aws.StaticSite("WebApp", {
       {
         files: ["**/*"],
         ignore: ["index.html", "isr/**/*"],
-        cacheControl: "public,max-age=21600,immutable",
+        cacheControl: "public,max-age=31536000,immutable",
       },
       // {
       //   files: "**/*.html",
@@ -211,20 +233,39 @@ export const site = new sst.aws.StaticSite("WebApp", {
   }
 });
 
+console.log(`AuthServer URL: ${auth.url}`);
 
-// const router = new sst.aws.Router("MyRouter", {
-//   routes: {
-//     "/api/*": api.url,
-//     "/*": site.url,
-//   },
-// });
+
 const authClientFunction = new sst.aws.Function("AuthClient", {
+  url: true,
   link: [secret.appClientId, auth, site, secret.posthogApiKey],
   handler: "packages/backend/openauthclient/index.handler",
   environment: {
     IS_LOCAL: isLocal.toString(),
+    // AUTH_SERVER_URL: authRedirectUrl,
+    API_URL: `https://${apiDomain}`,
   },
 });
+
+
 api.route("GET /authorize", authClientFunction.arn);
 api.route("GET /callback", authClientFunction.arn);
 api.route("GET /", authClientFunction.arn);
+
+
+myRouter.route("/api/authorize", authClientFunction.url, {
+  rewrite: {
+    regex: "^/api/(.*)$",
+    to: "/$1"
+  }
+});
+
+myRouter.route("/api/callback", authClientFunction.url, {
+  rewrite: {
+    regex: "^/api/(.*)$",
+    to: "/$1"
+  }
+});
+
+
+myRouter.route("/api", api.url);
