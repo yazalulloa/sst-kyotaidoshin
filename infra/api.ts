@@ -201,7 +201,8 @@ export const site = new sst.aws.StaticSite("WebApp", {
     fileOptions: [
       {
         files: "index.html",
-        cacheControl: "public,max-age=0,s-maxage=0,must-revalidate"
+        cacheControl: "max-age=0,no-cache,must-revalidate,public"
+        // cacheControl: "public,max-age=0,s-maxage=0,must-revalidate"
         // cacheControl: "max-age=0,no-cache,no-store,must-revalidate",
       },
       {
@@ -211,7 +212,7 @@ export const site = new sst.aws.StaticSite("WebApp", {
       {
         files: ["**/*"],
         ignore: ["index.html", "isr/**/*"],
-        cacheControl: "public,max-age=21600,immutable",
+        cacheControl: "public,max-age=31536000,immutable",
       },
       // {
       //   files: "**/*.html",

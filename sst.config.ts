@@ -14,6 +14,7 @@ export default $config({
   async run() {
 
     console.log("App ", $app)
+    console.log("Dev ", $dev)
 
     const infra = await import("./infra");
 

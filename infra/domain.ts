@@ -29,20 +29,39 @@ export const allowedOrigins = isLocal ? ["http://localhost:5173"] : [`https://${
 export const authDomain = subdomain("auth")
 // console.log('AuthDomain', authDomain)
 
-// export const myRouter = new sst.aws.Router("MyRouter", {
-//   domain: {
-//     name: domain,
-//     aliases: [`*.${domain}`],
-//     dns: sst.aws.dns({override: true}),
-//   }
-// })
 
-export const myRouter = isPermanentStage
-    ? new sst.aws.Router("MyRouter", {
+export const myRouter = new sst.aws.Router("MyRouter", {
       domain: {
         name: domain,
         aliases: [`*.${domain}`],
         // dns: sst.aws.dns({override: true}),
+      },
+      transform: {
+        cdn: (args) => {
+          args.transform = {
+            distribution: (disArgs) => {
+              disArgs.httpVersion = "http2and3";
+            }
+          }
+        }
       }
-    })
-    : sst.aws.Router.get("MyRouter", process.env.DISTRIBUTION_ID);
+    });
+
+// export const myRouter = isPermanentStage
+//     ? new sst.aws.Router("MyRouter", {
+//       domain: {
+//         name: domain,
+//         aliases: [`*.${domain}`],
+//         // dns: sst.aws.dns({override: true}),
+//       },
+//       transform: {
+//         cdn: (args) => {
+//           args.transform = {
+//             distribution: (disArgs) => {
+//               disArgs.httpVersion = "http2and3";
+//             }
+//           }
+//         }
+//       }
+//     })
+//     : sst.aws.Router.get("MyRouter", process.env.DISTRIBUTION_ID);
