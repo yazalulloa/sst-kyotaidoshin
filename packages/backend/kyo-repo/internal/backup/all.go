@@ -11,7 +11,6 @@ import (
 	"github.com/yaz/kyo-repo/internal/util"
 	"io"
 	"os"
-	"path/filepath"
 	"sync"
 )
 
@@ -77,7 +76,7 @@ func AllBackup(ctx context.Context, filename string) (string, error) {
 		return "", err
 	}
 
-	path := filepath.Join("/tmp/", filename)
+	path := util.TmpFileName(filename)
 	out, err := os.Create(path)
 	if err != nil {
 		return "", fmt.Errorf("error creating file %s", err)

@@ -122,7 +122,7 @@ func queryCondition(requestQuery RequestQuery) *sqlite.BoolExpression {
 	return &condition
 }
 
-func (repo Repository) selectList(requestQuery RequestQuery) ([]model.Receipts, error) {
+func (repo Repository) SelectList(requestQuery RequestQuery) ([]model.Receipts, error) {
 	condition := sqlite.Bool(true)
 
 	sortOrder := util.SortOrderTypeDESC
@@ -164,7 +164,7 @@ func (repo Repository) selectList(requestQuery RequestQuery) ([]model.Receipts, 
 	return list, nil
 }
 
-func (repo Repository) selectById(id string) (*model.Receipts, error) {
+func (repo Repository) SelectById(id string) (*model.Receipts, error) {
 	stmt := Receipts.SELECT(Receipts.AllColumns).FROM(Receipts).WHERE(Receipts.ID.EQ(sqlite.String(id)))
 
 	var dest model.Receipts

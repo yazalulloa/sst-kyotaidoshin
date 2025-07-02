@@ -5,9 +5,9 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
+	"github.com/yaz/kyo-repo/internal/util"
 	"log"
 	"os"
-	"path/filepath"
 )
 
 const (
@@ -18,7 +18,7 @@ const (
 )
 
 func Backup[T any](filename string, selectList func() ([]T, error)) (string, error) {
-	filePath := filepath.Join("/tmp/", filename)
+	filePath := util.TmpFileName(filename)
 	file, err := os.Create(filePath)
 	if err != nil {
 		return "", fmt.Errorf("error creating file %s", err)

@@ -141,7 +141,9 @@ func (isr IsrObj) putInBucket(ctx context.Context) error {
 		//ChecksumSHA256:            nil,
 		ContentLength: &contentLength,
 		ContentType:   aws.String("text/html;charset=UTF-8"),
-		CacheControl:  aws.String("public,max-age=0,s-maxage=0,must-revalidate"),
+		CacheControl:  aws.String("public,max-age=2,s-maxage=2,must-revalidate"),
+		//CacheControl:  aws.String("s-maxage=2,stale-while-revalidate=2592000"), // works but it takes at least one request to update, maybe 2 or 3
+		//CacheControl:  aws.String("public,max-age=0,s-maxage=0,must-revalidate"),
 		//CacheControl: aws.String("public,max-age=0,must-revalidate"),
 		//CacheControl: aws.String("max-age=0,no-cache,no-store,must-revalidate"), //Works but no 304
 	})
@@ -169,7 +171,7 @@ func (isr IsrObj) getObject(ctx context.Context) ([]byte, error) {
 	}
 
 	if exists {
-		data, err := aws_h.GetObject(ctx, bucket.(string), objectKey)
+		data, err := aws_h.GetObjectBuffer(ctx, bucket.(string), objectKey)
 		if err != nil {
 			return nil, err
 		}
@@ -182,7 +184,7 @@ func (isr IsrObj) getObject(ctx context.Context) ([]byte, error) {
 		return nil, err
 	}
 
-	data, err := aws_h.GetObject(ctx, bucket.(string), objectKey)
+	data, err := aws_h.GetObjectBuffer(ctx, bucket.(string), objectKey)
 	if err != nil {
 		return nil, err
 	}

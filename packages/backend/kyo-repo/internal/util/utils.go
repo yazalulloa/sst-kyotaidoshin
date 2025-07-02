@@ -11,6 +11,8 @@ import (
 	"github.com/yaz/kyo-repo/internal/aws_h"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -236,4 +238,18 @@ func RemoveDuplicates(xs *[]int64) {
 		}
 	}
 	*xs = (*xs)[:j]
+}
+
+func TmpFileName(filename string) string {
+	return filepath.Join("/tmp/", filename)
+}
+
+func DeleteFile(filename string) {
+	if filename == "" {
+		return
+	}
+	err := os.Remove(filename)
+	if err != nil {
+		log.Printf("Error deleting file %s: %s", filename, err)
+	}
 }

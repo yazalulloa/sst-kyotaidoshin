@@ -1,5 +1,5 @@
 import {secret} from "./secrets";
-import {allowedOrigins, apiDomain, authDomain, myRouter} from "./domain";
+import {allowedOrigins, apiDomain, authDomain, domain, myRouter} from "./domain";
 import {bcvBucket, receiptsBucket, webAssetsBucket} from "./storage";
 import {isLocal, isrPrefix} from "./util";
 import {Output} from "@pulumi/pulumi";
@@ -75,9 +75,15 @@ const api = new sst.aws.ApiGatewayV2("API", {
 
 const telegramWebhookFunction = new sst.aws.Function("TelegramWebhookFunction", {
   url: true,
-  link: [secret.telegramBotToken, secret.telegramBotApiKey, secret.secretTursoUrl],
+  link: [secret.telegramBotToken, secret.telegramBotApiKey, secret.secretTursoUrl, receiptsBucket, secret.htmlToPdfFunction],
   handler: "packages/backend/kyo-repo/cmd/telegram-webhook/telegram-webhook.go",
   runtime: "go",
+  permissions: [
+    {
+      actions: ["lambda:InvokeFunction"],
+      resources: [secret.htmlToPdfFunction.value]
+    },
+  ]
 })
 
 const verifyAccessFunction = new sst.aws.Function("VerifyAccess", {
@@ -129,8 +135,9 @@ receiptPdfQueue.subscribe({
 
 
 let authRedirectUrl: Output<string> = "";
-if (isLocal && false) {
-  authRedirectUrl = api.url.apply(v => `${v}`);
+if ($dev) {
+  // authRedirectUrl = api.url.apply(v => `${v}`);
+  authRedirectUrl = `https://${domain}`;
   console.log(`AuthRedirectUrl ${authRedirectUrl}`)
 }
 

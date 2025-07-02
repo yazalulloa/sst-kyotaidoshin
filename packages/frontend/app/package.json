@@ -11,14 +11,14 @@
     "@alpinejs/collapse": "^3.14.9",
     "@alpinejs/focus": "^3.14.9",
     "@alpinejs/mask": "^3.14.9",
-    "@tailwindcss/vite": "^4.1.10",
+    "@tailwindcss/vite": "^4.1.11",
     "alpinejs": "^3.14.9",
     "alpinejs-i18n": "^2.5.3",
     "external-svg-loader": "^1.7.1",
-    "htmx.org": "^2.0.5",
+    "htmx.org": "^2.0.6",
     "pinecone-router": "^7.2.0",
-    "posthog-js": "^1.255.1",
-    "tailwindcss": "^4.1.10",
+    "posthog-js": "^1.256.1",
+    "tailwindcss": "^4.1.11",
     "vite": "^6.3.5"
   },
   "devDependencies": {

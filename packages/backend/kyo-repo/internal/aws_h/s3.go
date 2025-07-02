@@ -3,11 +3,13 @@ package aws_h
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"io"
 	"log"
+	"os"
 	"strings"
 )
 
@@ -37,6 +39,47 @@ func FileExistsS3(ctx context.Context, bucketName string, objectKey string) (boo
 	return true, nil
 }
 
+func PutFile(ctx context.Context, bucketName, objectKey, contentType string, filePath string) (interface{}, error) {
+	s3Client, err := GetS3Client(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open file %s: %w", filePath, err)
+	}
+
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(file)
+
+	fileInfo, err := file.Stat()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get file info for %s: %w", filePath, err)
+	}
+
+	contentLength := fileInfo.Size()
+	_, err = s3Client.PutObject(ctx, &s3.PutObjectInput{
+		Bucket:            aws.String(bucketName),
+		Key:               aws.String(objectKey),
+		Body:              file,
+		ChecksumAlgorithm: types.ChecksumAlgorithmCrc64nvme,
+		//ChecksumCRC32:             nil,
+		//ChecksumCRC32C:            nil,
+		//ChecksumSHA1:              nil,
+		//ChecksumSHA256:            nil,
+		ContentLength: &contentLength,
+		ContentType:   aws.String(contentType),
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
 func PutBuffer(ctx context.Context, bucketName, objectKey, contentType string, buf *bytes.Buffer) (interface{}, error) {
 	s3Client, err := GetS3Client(ctx)
 	if err != nil {
@@ -64,7 +107,7 @@ func PutBuffer(ctx context.Context, bucketName, objectKey, contentType string, b
 	return nil, nil
 }
 
-func GetObject(ctx context.Context, bucketName, objectKey string) ([]byte, error) {
+func GetObjectBuffer(ctx context.Context, bucketName, objectKey string) ([]byte, error) {
 	s3Client, err := GetS3Client(ctx)
 	if err != nil {
 		return nil, err
@@ -89,4 +132,40 @@ func GetObject(ctx context.Context, bucketName, objectKey string) ([]byte, error
 	}
 
 	return data, nil
+}
+
+func WriteObjectToDisk(ctx context.Context, bucketName, objectKey, filePath string) error {
+	s3Client, err := GetS3Client(ctx)
+	if err != nil {
+		return err
+	}
+
+	res, err := s3Client.GetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(objectKey),
+	})
+
+	if err != nil {
+		return err
+	}
+
+	defer func(Body io.ReadCloser) {
+		_ = Body.Close()
+	}(res.Body)
+
+	file, err := os.Create(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to create file %s: %w", filePath, err)
+	}
+
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(file)
+
+	_, err = io.Copy(file, res.Body)
+	if err != nil {
+		return fmt.Errorf("failed to write to file %s: %w", filePath, err)
+	}
+
+	return nil
 }

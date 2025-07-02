@@ -3,6 +3,7 @@ package telegram
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/go-jet/jet/v2/sqlite"
@@ -10,6 +11,7 @@ import (
 	"github.com/go-telegram/bot/models"
 	"github.com/yaz/kyo-repo/internal/apartments"
 	"github.com/yaz/kyo-repo/internal/api"
+	"github.com/yaz/kyo-repo/internal/aws_h"
 	"github.com/yaz/kyo-repo/internal/backup"
 	"github.com/yaz/kyo-repo/internal/buildings"
 	"github.com/yaz/kyo-repo/internal/db"
@@ -115,7 +117,7 @@ func optionsHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 				{
 					{
 						Text:         "Recibos",
-						CallbackData: "receipts",
+						CallbackData: _RECEIPTS_CALLBACK,
 					},
 				},
 				{
@@ -148,13 +150,6 @@ func optionsHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 }
 
 func lastRateCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
-	//byteArray, err := json.MarshalIndent(update, "", "  ")
-	//if err != nil {
-	//	log.Printf("Error marshalling update: %s", err)
-	//	return
-	//}
-	//
-	//log.Printf("Update callback: %s", byteArray)
 
 	location, err := util.TzCss()
 	if err != nil {
@@ -217,6 +212,401 @@ func lastRateCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
 		log.Printf("Error: %v", err)
 		return
 	}
+}
+
+func receiptsCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
+
+	ids, err := buildings.NewRepository(ctx).SelectIds()
+	if err != nil {
+		log.Printf("Error getting buildings ids: %v", err)
+		return
+	}
+
+	options := make([][]models.InlineKeyboardButton, len(ids)+1)
+
+	for i, id := range ids {
+
+		options[i] = []models.InlineKeyboardButton{
+			{
+				Text:         fmt.Sprintf("Edificio %s", id),
+				CallbackData: _RECEIPTS_BUILDING_CALLBACK + id,
+			},
+		}
+	}
+
+	options[len(ids)] = []models.InlineKeyboardButton{
+		{
+			Text:         "Ultimos recibos",
+			CallbackData: "receipts_last",
+		},
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+	errorChan := make(chan error, 2)
+
+	go func() {
+		defer wg.Done()
+
+		_, err := b.EditMessageText(ctx, &bot.EditMessageTextParams{
+			ChatID:    update.CallbackQuery.From.ID,
+			MessageID: update.CallbackQuery.Message.Message.ID,
+			Text:      "Choose an option",
+			ReplyMarkup: models.InlineKeyboardMarkup{
+				InlineKeyboard: options,
+			},
+		})
+
+		if err != nil {
+			errorChan <- fmt.Errorf("error editing message text: %v", err)
+			return
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		_, err := b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+			CallbackQueryID: update.CallbackQuery.ID,
+			//Text:            msg,
+			//ShowAlert:       false, //show modal
+			//CacheTime:       0,
+		})
+
+		if err != nil {
+			errorChan <- fmt.Errorf("error answering callback query: %v", err)
+			return
+		}
+	}()
+
+	wg.Wait()
+	close(errorChan)
+
+	err = util.HasErrors(errorChan)
+	if err != nil {
+		log.Printf("Error: %v", err)
+		return
+	}
+
+}
+
+func receiptsBuildingCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
+
+	buildingId := strings.TrimPrefix(update.CallbackQuery.Data, _RECEIPTS_BUILDING_CALLBACK)
+	if buildingId == "" {
+		log.Printf("Building ID is empty in callback data: %s", update.CallbackQuery.Data)
+		return
+	}
+
+	res, err := receipts.NewService(ctx).GetTableResponse(receipts.RequestQuery{
+		Buildings: []string{buildingId},
+		SortOrder: util.SortOrderTypeDESC,
+		Limit:     11,
+	})
+
+	if err != nil {
+		log.Printf("Error getting receipts list: %v", err)
+		return
+	}
+
+	list := res.Results
+
+	options := make([][]models.InlineKeyboardButton, len(list)+1)
+
+	if len(list) == 0 {
+		options[0] = []models.InlineKeyboardButton{
+			{
+				Text:         "No hay recibos",
+				CallbackData: _RECEIPTS_CALLBACK,
+			},
+		}
+
+	} else {
+		for i := 0; i < len(list)-1; i++ {
+			receipt := list[i].Item
+
+			options[i] = []models.InlineKeyboardButton{
+				{
+					Text:         fmt.Sprintf("%s %d %s", util.FromInt16ToMonth(receipt.Month), receipt.Year, receipt.Date.Format(time.DateOnly)),
+					CallbackData: fmt.Sprintf("%s%s_%s", _RECEIPT_LIST_APT_CALLBACK, buildingId, receipt.ID),
+				},
+				{
+					Text:         "ZIP",
+					CallbackData: fmt.Sprintf("%s%s_%s", _RECEIPT_ZIP_CALLBACK, buildingId, receipt.ID),
+				},
+			}
+		}
+
+		options[len(list)-1] = []models.InlineKeyboardButton{
+			{
+				Text:         "Back",
+				CallbackData: _RECEIPTS_CALLBACK,
+			},
+		}
+
+		options[len(list)] = []models.InlineKeyboardButton{
+			{
+				Text:         "Next",
+				CallbackData: _RECEIPTS_BUILDING_CALLBACK + buildingId,
+			},
+		}
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+	errorChan := make(chan error, 2)
+
+	go func() {
+		defer wg.Done()
+
+		params := &bot.EditMessageTextParams{
+			ChatID:    update.CallbackQuery.From.ID,
+			MessageID: update.CallbackQuery.Message.Message.ID,
+			Text:      fmt.Sprintf("Receipts %s %d", buildingId, *res.Counters.QueryCount),
+			ReplyMarkup: models.InlineKeyboardMarkup{
+				InlineKeyboard: options,
+			},
+		}
+
+		_, err := b.EditMessageText(ctx, params)
+
+		if err != nil {
+			errorChan <- fmt.Errorf("error editing message text: %v", err)
+
+			byteArray, err := json.Marshal(params)
+			if err != nil {
+				log.Printf("error marshaling params: %v", err)
+			} else {
+				log.Printf("Error edit Params: %s", byteArray)
+			}
+
+			return
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		_, err := b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+			CallbackQueryID: update.CallbackQuery.ID,
+			//Text:            msg,
+			//ShowAlert:       false, //show modal
+			//CacheTime:       0,
+		})
+
+		if err != nil {
+			errorChan <- fmt.Errorf("error answering callback query: %v", err)
+			return
+		}
+	}()
+
+	wg.Wait()
+	close(errorChan)
+
+	err = util.HasErrors(errorChan)
+	if err != nil {
+		log.Printf("Error: %v", err)
+		return
+	}
+}
+
+func receiptZipCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
+
+	data := strings.TrimPrefix(update.CallbackQuery.Data, _RECEIPT_ZIP_CALLBACK)
+	parts := strings.Split(data, "_")
+	if len(parts) != 2 {
+		log.Printf("Invalid callback data: %s", update.CallbackQuery.Data)
+		return
+	}
+
+	buildingId := parts[0]
+	receiptId := parts[1]
+
+	zipInfo, err := receipts.GetZipObjectKey(ctx, buildingId, receiptId)
+	if err != nil {
+		log.Printf("Error getting receipt zip: %v", err)
+		return
+	}
+
+	fileName := zipInfo.ObjectKey[strings.LastIndex(zipInfo.ObjectKey, "/")+1:]
+	filePath := zipInfo.FilePath
+	if filePath == "" {
+
+		filePath = util.TmpFileName(util.UuidV7() + fileName)
+		err := aws_h.WriteObjectToDisk(ctx, zipInfo.BucketName, zipInfo.ObjectKey, filePath)
+		if err != nil {
+			log.Printf("Error getting receipt zip from S3: %v", err)
+			return
+		}
+	}
+
+	answerCallbackWithDocument(filePath, fileName, ctx, b, update)
+}
+
+func receiptListAptCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
+	data := strings.TrimPrefix(update.CallbackQuery.Data, _RECEIPT_LIST_APT_CALLBACK)
+	if data == "" {
+		log.Printf("Invalid callback data: %s", update.CallbackQuery.Data)
+		return
+	}
+
+	parts := strings.Split(data, "_")
+	if len(parts) != 2 {
+		log.Printf("Invalid callback data: %s", update.CallbackQuery.Data)
+		return
+	}
+
+	buildingId := parts[0]
+	receiptId := parts[1]
+
+	receipt, err := receipts.NewRepository(ctx).SelectById(receiptId)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			log.Printf("Receipt %s not found", receiptId)
+			return
+		}
+		log.Printf("Error getting receipt: %v", err)
+		return
+	}
+
+	apts, err := apartments.NewRepository(ctx).SelectByBuilding(buildingId)
+	if err != nil {
+		log.Printf("Error getting receipt apartments: %v", err)
+		return
+	}
+
+	options := make([][]models.InlineKeyboardButton, len(apts)+2)
+
+	options[0] = []models.InlineKeyboardButton{
+		{
+			Text:         "Back",
+			CallbackData: _RECEIPTS_BUILDING_CALLBACK + buildingId,
+		},
+	}
+
+	for i, apt := range apts {
+		options[i+1] = []models.InlineKeyboardButton{
+			{
+				Text:         fmt.Sprintf("%s\t%s", apt.Number, apt.Name),
+				CallbackData: fmt.Sprintf("%s%s_%s_%s", _RECEIPT_PDF_APT, buildingId, receiptId, apt.Number),
+			},
+		}
+	}
+
+	options[len(apts)+1] = []models.InlineKeyboardButton{
+		{
+			Text:         "ZIP",
+			CallbackData: fmt.Sprintf("%s%s_%s", _RECEIPT_ZIP_CALLBACK, buildingId, receiptId),
+		},
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+	errorChan := make(chan error, 2)
+
+	go func() {
+		defer wg.Done()
+
+		text := fmt.Sprintf("Receipt %s %s %d %s\nApts: %d", buildingId, util.FromInt16ToMonth(receipt.Month),
+			receipt.Year, receipt.Date.Format(time.DateOnly), len(apts))
+
+		params := &bot.EditMessageTextParams{
+			ChatID:    update.CallbackQuery.From.ID,
+			MessageID: update.CallbackQuery.Message.Message.ID,
+			Text:      text,
+			ReplyMarkup: &models.InlineKeyboardMarkup{
+				InlineKeyboard: options,
+			},
+		}
+
+		_, err := b.EditMessageText(ctx, params)
+
+		if err != nil {
+			errorChan <- fmt.Errorf("error editing message text: %v", err)
+			return
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		_, err := b.AnswerCallbackQuery(ctx, &bot.AnswerCallbackQueryParams{
+			CallbackQueryID: update.CallbackQuery.ID,
+			//Text:            msg,
+			//ShowAlert:       false, //show modal
+			//CacheTime:       0,
+		})
+
+		if err != nil {
+			errorChan <- fmt.Errorf("error answering callback query: %v", err)
+			return
+		}
+	}()
+
+	wg.Wait()
+	close(errorChan)
+
+	err = util.HasErrors(errorChan)
+	if err != nil {
+		log.Printf("Error: %v", err)
+		return
+	}
+}
+
+func receiptPdfAptCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
+
+	data := strings.TrimPrefix(update.CallbackQuery.Data, _RECEIPT_PDF_APT)
+	if data == "" {
+		log.Printf("Invalid callback data: %s", update.CallbackQuery.Data)
+		return
+	}
+
+	parts := strings.Split(data, "_")
+	if len(parts) != 3 {
+		log.Printf("Invalid callback data: %s", update.CallbackQuery.Data)
+		return
+	}
+
+	buildingId := parts[0]
+	receiptId := parts[1]
+	aptNumber := parts[2]
+
+	bucketName, err := util.GetReceiptsBucket()
+	if err != nil {
+		log.Printf("Error getting receipts bucket: %v", err)
+		return
+	}
+
+	receipt, err := receipts.CalculateReceipt(ctx, buildingId, receiptId)
+	if err != nil {
+		log.Printf("Error calculating receipt: %v", err)
+		return
+	}
+
+	keys := receipts.DownloadKeys{
+		BuildingId: buildingId,
+		Id:         receiptId,
+		Parts:      []string{aptNumber},
+	}
+
+	partsInfo, err := receipts.GetParts(receipt, ctx, true, &keys)
+	if err != nil {
+		log.Printf("Error getting receipt parts: %v", err)
+		return
+	}
+
+	objectKey := partsInfo[0].ObjectKey
+	fileName := fmt.Sprintf("%s_%d_%s_%s_%s.pdf", buildingId, receipt.Receipt.Year,
+		util.FromInt16ToMonth(receipt.Receipt.Month), aptNumber, receipt.Receipt.Date.Format(time.DateOnly))
+	filepath := util.TmpFileName(fmt.Sprintf("receipt_%s_%s", util.UuidV7(), fileName))
+	err = aws_h.WriteObjectToDisk(ctx, bucketName, objectKey, filepath)
+	if err != nil {
+		log.Printf("Error getting receipt pdf from S3: %v", err)
+		return
+	}
+
+	answerCallbackWithDocument(filepath, fileName, ctx, b, update)
+
 }
 
 func backupsCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -294,7 +684,7 @@ func backupsCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 }
 
-func sendBackup(filepath, filename string, ctx context.Context, b *bot.Bot, update *models.Update) {
+func answerCallbackWithDocument(filepath, filename string, ctx context.Context, b *bot.Bot, update *models.Update) {
 	file, err := os.Open(filepath)
 	if err != nil {
 		log.Printf("Error reading apartments backup file: %v", err)
@@ -371,7 +761,7 @@ func backupApartmentsCallBack(ctx context.Context, b *bot.Bot, update *models.Up
 		}
 	}()
 
-	sendBackup(filepath, api.BACKUP_APARTMENTS_FILE, ctx, b, update)
+	answerCallbackWithDocument(filepath, api.BACKUP_APARTMENTS_FILE, ctx, b, update)
 }
 
 func backupBuildingsCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -389,7 +779,7 @@ func backupBuildingsCallBack(ctx context.Context, b *bot.Bot, update *models.Upd
 		}
 	}()
 
-	sendBackup(filepath, api.BACKUP_BUILDINGS_FILE, ctx, b, update)
+	answerCallbackWithDocument(filepath, api.BACKUP_BUILDINGS_FILE, ctx, b, update)
 }
 
 func backupReceiptsCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -406,7 +796,7 @@ func backupReceiptsCallBack(ctx context.Context, b *bot.Bot, update *models.Upda
 		}
 	}()
 
-	sendBackup(filepath, api.BACKUP_RECEIPTS_FILE, ctx, b, update)
+	answerCallbackWithDocument(filepath, api.BACKUP_RECEIPTS_FILE, ctx, b, update)
 }
 
 func backupAllCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
@@ -424,5 +814,5 @@ func backupAllCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
 		}
 	}()
 
-	sendBackup(filepath, api.BACKUP_ALL_FILE, ctx, b, update)
+	answerCallbackWithDocument(filepath, api.BACKUP_ALL_FILE, ctx, b, update)
 }

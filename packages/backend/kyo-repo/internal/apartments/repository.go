@@ -222,5 +222,21 @@ func (repo Repository) insert(apartment model.Apartments) error {
 
 	_, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	return err
+}
 
+func (repo Repository) GetByReceipt(receiptId string) ([]model.Apartments, error) {
+
+	stmt := Apartments.SELECT(Apartments.AllColumns).
+		FROM(
+			Receipts.INNER_JOIN(Buildings, Receipts.BuildingID.EQ(Buildings.ID)).
+				INNER_JOIN(Apartments, Buildings.ID.EQ(Apartments.BuildingID))).
+		WHERE(Receipts.ID.EQ(sqlite.String(receiptId)))
+
+	var dest []model.Apartments
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
+	if err != nil {
+		return nil, err
+	}
+
+	return dest, nil
 }

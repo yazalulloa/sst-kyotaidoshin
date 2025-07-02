@@ -28,6 +28,11 @@ const _START_COMMAND = "/start"
 const _OPTIONS_COMMAND = "/options"
 const _LAST_RATE_CALLBACK = "last_rate_callback"
 const _BACKUPS_CALLBACK = "backups_callback"
+const _RECEIPTS_CALLBACK = "receipts_callback"
+const _RECEIPTS_BUILDING_CALLBACK = "rec_b_"
+const _RECEIPT_ZIP_CALLBACK = "rec_zip_"
+const _RECEIPT_LIST_APT_CALLBACK = "rec_list_apt_"
+const _RECEIPT_PDF_APT = "rec_pdf_apt_"
 
 const _BACKUP_APARTMENTS_CALLBACK = "backup_apartments_callback"
 const _BACKUP_BUILDINGS_CALLBACK = "backup_buildings_callback"
@@ -74,6 +79,11 @@ func GetTelegramBot() (*bot.Bot, error) {
 		_telegramBotInstance.RegisterHandler(bot.HandlerTypeMessageText, _OPTIONS_COMMAND, bot.MatchTypeExact, optionsHandler)
 		_telegramBotInstance.RegisterHandler(bot.HandlerTypeCallbackQueryData, _LAST_RATE_CALLBACK, bot.MatchTypeExact, lastRateCallBack)
 		_telegramBotInstance.RegisterHandler(bot.HandlerTypeCallbackQueryData, _BACKUPS_CALLBACK, bot.MatchTypeExact, backupsCallBack)
+		_telegramBotInstance.RegisterHandler(bot.HandlerTypeCallbackQueryData, _RECEIPTS_CALLBACK, bot.MatchTypeExact, receiptsCallBack)
+		_telegramBotInstance.RegisterHandler(bot.HandlerTypeCallbackQueryData, _RECEIPTS_BUILDING_CALLBACK, bot.MatchTypePrefix, receiptsBuildingCallBack)
+		_telegramBotInstance.RegisterHandler(bot.HandlerTypeCallbackQueryData, _RECEIPT_ZIP_CALLBACK, bot.MatchTypePrefix, receiptZipCallBack)
+		_telegramBotInstance.RegisterHandler(bot.HandlerTypeCallbackQueryData, _RECEIPT_LIST_APT_CALLBACK, bot.MatchTypePrefix, receiptListAptCallBack)
+		_telegramBotInstance.RegisterHandler(bot.HandlerTypeCallbackQueryData, _RECEIPT_PDF_APT, bot.MatchTypePrefix, receiptPdfAptCallBack)
 
 		_telegramBotInstance.RegisterHandler(bot.HandlerTypeCallbackQueryData, _BACKUP_APARTMENTS_CALLBACK, bot.MatchTypeExact, backupApartmentsCallBack)
 		_telegramBotInstance.RegisterHandler(bot.HandlerTypeCallbackQueryData, _BACKUP_BUILDINGS_CALLBACK, bot.MatchTypeExact, backupBuildingsCallBack)

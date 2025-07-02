@@ -279,10 +279,10 @@ func (service Service) insertRecord(records []ReceiptRecord, ratesHolder *RatesH
 	return counter, nil
 }
 
-func (service Service) getTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
+func (service Service) GetTableResponse(requestQuery RequestQuery) (*TableResponse, error) {
 
 	//start := time.Now()
-	//defer func() { log.Printf("Elapsed time getTableResponse receipts: %v\n", time.Since(start)) }()
+	//defer func() { log.Printf("Elapsed time GetTableResponse receipts: %v\n", time.Since(start)) }()
 
 	var tableResponse TableResponse
 
@@ -293,9 +293,9 @@ func (service Service) getTableResponse(requestQuery RequestQuery) (*TableRespon
 	go func() {
 		defer wg.Done()
 		//start := time.Now()
-		//defer func() { log.Printf("Elapsed time selectList: %v\n", time.Since(start)) }()
+		//defer func() { log.Printf("Elapsed time SelectList: %v\n", time.Since(start)) }()
 
-		array, err := service.repo.selectList(requestQuery)
+		array, err := service.repo.SelectList(requestQuery)
 		if err != nil {
 			errorChan <- err
 			return
@@ -399,7 +399,7 @@ func toItem(item *model.Receipts, oldCardId *string) (*Item, error) {
 }
 
 func (service Service) getItem(id string, oldCardId *string) (*Item, error) {
-	receipt, err := service.repo.selectById(id)
+	receipt, err := service.repo.SelectById(id)
 	if err != nil {
 		return nil, err
 	}
@@ -438,7 +438,7 @@ func (service Service) getFormDto(keys Keys) (*FormDto, error) {
 	go func() {
 		defer wg.Done()
 
-		receipt, err := service.repo.selectById(keys.Id)
+		receipt, err := service.repo.SelectById(keys.Id)
 		if err != nil {
 			errorChan <- err
 			return
@@ -735,7 +735,7 @@ func (service Service) duplicate(key Keys) (*string, error) {
 
 	go func() {
 		defer wg.Done()
-		rec, err := service.repo.selectById(key.Id)
+		rec, err := service.repo.SelectById(key.Id)
 		if err != nil {
 			errorChan <- err
 			return
@@ -871,7 +871,7 @@ func (service Service) Backup() (string, error) {
 		SortOrder: util.SortOrderTypeASC,
 	}
 	selectListDtos := func() ([]ReceiptBackup, error) {
-		list, err := service.repo.selectList(requestQuery)
+		list, err := service.repo.SelectList(requestQuery)
 		if err != nil {
 			return nil, err
 		}

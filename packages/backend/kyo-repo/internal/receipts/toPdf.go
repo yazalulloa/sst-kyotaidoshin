@@ -18,6 +18,7 @@ import (
 	"github.com/yaz/kyo-repo/internal/util"
 	"io"
 	"log"
+	"os"
 	"slices"
 	"strings"
 	"sync"
@@ -231,7 +232,7 @@ func GetParts(receipt *CalculatedReceipt, ctx context.Context, isPdf bool, keys 
 	if len(pdfItems) > 0 {
 		functionName, err := resource.Get("HtmlToPdfFunction", "value")
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("error getting HtmlToPdfFunction: %w", err)
 		}
 
 		jsonBytes, err := json.Marshal(pdfItems)
@@ -261,20 +262,21 @@ func GetParts(receipt *CalculatedReceipt, ctx context.Context, isPdf bool, keys 
 	return parts, nil
 }
 
-func toZip(receipt *CalculatedReceipt, ctx context.Context, isPdf bool) (*bytes.Buffer, error) {
+func toZip(receipt *CalculatedReceipt, ctx context.Context, isPdf bool) (string, error) {
+	//func toZip(receipt *CalculatedReceipt, ctx context.Context, isPdf bool) (*bytes.Buffer, error) {
 	bucketName, err := util.GetReceiptsBucket()
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	s3Client, err := aws_h.GetS3Client(ctx)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	parts, err := GetParts(receipt, ctx, isPdf, nil)
 	if err != nil {
-		return nil, err
+		return "", fmt.Errorf("error getting parts for receipt: %w", err)
 	}
 
 	numOfWorkers := len(parts)
@@ -292,7 +294,8 @@ func toZip(receipt *CalculatedReceipt, ctx context.Context, isPdf bool) (*bytes.
 				Key:    aws.String(part.ObjectKey),
 			})
 			if err != nil {
-				errorChan <- err
+
+				errorChan <- fmt.Errorf("error getting object %s from bucket %s: %w", part.ObjectKey, bucketName, err)
 				return
 			}
 
@@ -302,7 +305,7 @@ func toZip(receipt *CalculatedReceipt, ctx context.Context, isPdf bool) (*bytes.
 
 			byteArray, err := io.ReadAll(res.Body)
 			if err != nil {
-				errorChan <- err
+				errorChan <- fmt.Errorf("error reading object %s from bucket %s: %w", part.ObjectKey, bucketName, err)
 				return
 			}
 
@@ -316,11 +319,24 @@ func toZip(receipt *CalculatedReceipt, ctx context.Context, isPdf bool) (*bytes.
 
 	err = util.HasErrors(errorChan)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	var buf bytes.Buffer
-	zipWriter := zip.NewWriter(&buf)
+	fileName := util.TmpFileName(fmt.Sprintf("receipt_%s_%s_%s.zip", receipt.Building.ID, receipt.Receipt.ID, util.UuidV7()))
+	archive, err := os.Create(fileName)
+	if err != nil {
+		return "", fmt.Errorf("error creating archive file: %w", err)
+	}
+
+	defer func(archive *os.File) {
+		err := archive.Close()
+		if err != nil {
+			log.Printf("error closing archive file: %v", err)
+		}
+	}(archive)
+
+	zipWriter := zip.NewWriter(archive)
+
 	defer func(zipWriter *zip.Writer) {
 		_ = zipWriter.Close()
 	}(zipWriter)
@@ -328,14 +344,77 @@ func toZip(receipt *CalculatedReceipt, ctx context.Context, isPdf bool) (*bytes.
 	for i, part := range parts {
 		writer, err := zipWriter.Create(part.FileName)
 		if err != nil {
-			return nil, err
+			return "", fmt.Errorf("error creating zip writer for %s: %w", part.FileName, err)
 		}
 
 		_, err = writer.Write(mapByteArray[i])
 		if err != nil {
-			return nil, err
+			return "", fmt.Errorf("error writing to zip for %s: %w", part.FileName, err)
 		}
 	}
 
-	return &buf, nil
+	return fileName, nil
+}
+
+type ReceiptZipInfo struct {
+	BucketName string
+	ObjectKey  string
+	FilePath   string
+}
+
+func GetZipObjectKey(ctx context.Context, buildingId, receiptId string) (*ReceiptZipInfo, error) {
+
+	bucketName, err := util.GetReceiptsBucket()
+
+	if err != nil {
+		return nil, fmt.Errorf("error getting bucket name: %w", err)
+	}
+
+	rec, err := NewRepository(ctx).SelectById(receiptId)
+	if err != nil {
+		return nil, fmt.Errorf("error getting receipt from db: %w", err)
+	}
+
+	date := rec.Date.Format(time.DateOnly)
+	objectKey := fmt.Sprintf("RECEIPTS/%s/%s/%s_%d_%s_%s.zip", rec.BuildingID, rec.ID,
+		rec.BuildingID, rec.Year, util.FromInt16ToMonth(rec.Month), date)
+
+	exists, err := aws_h.FileExistsS3(ctx, bucketName, objectKey)
+	if err != nil {
+		return nil, fmt.Errorf("error checking if file exists: %w", err)
+	}
+
+	zipInfo := &ReceiptZipInfo{
+		BucketName: bucketName,
+		ObjectKey:  objectKey,
+	}
+
+	if !exists {
+
+		receipt, err := CalculateReceipt(ctx, buildingId, receiptId)
+		if err != nil {
+			return nil, fmt.Errorf("error calculating receipt: %w", err)
+		}
+
+		filePath, err := toZip(receipt, ctx, true)
+
+		if err != nil {
+			return nil, fmt.Errorf("error creating zip: %w", err)
+		}
+
+		_, err = aws_h.PutFile(ctx, bucketName, objectKey, "application/zip", filePath)
+
+		if err != nil {
+			return nil, fmt.Errorf("error uploading zip: %w", err)
+		}
+
+		zipInfo.FilePath = filePath
+	}
+
+	return zipInfo, nil
+}
+
+type ReceiptPdfInfo struct {
+	BucketName string
+	ObjectKey  string
 }

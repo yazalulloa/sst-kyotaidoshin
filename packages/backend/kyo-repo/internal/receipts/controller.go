@@ -151,7 +151,7 @@ func search(w http.ResponseWriter, r *http.Request) {
 		SortOrder: util.SortOrderTypeDESC,
 	}
 
-	response, err := NewService(r.Context()).getTableResponse(requestQuery)
+	response, err := NewService(r.Context()).GetTableResponse(requestQuery)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -678,43 +678,14 @@ func getZip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bucketName, err := util.GetReceiptsBucket()
+	zipInfo, err := GetZipObjectKey(r.Context(), keys.BuildingId, keys.Id)
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	receipt, err := CalculateReceipt(r.Context(), keys.BuildingId, keys.Id)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	date := receipt.Receipt.Date.Format(time.DateOnly)
-	objectKey := fmt.Sprintf("RECEIPTS/%s/%s/%s_%s_%s.zip", receipt.Building.ID, receipt.Receipt.ID,
-		receipt.Building.ID, strings.ToUpper(receipt.MonthStr), date)
-
-	exists, err := aws_h.FileExistsS3(r.Context(), bucketName, objectKey)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if !exists {
-		buf, err := toZip(receipt, r.Context(), true)
-
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		_, err = aws_h.PutBuffer(r.Context(), bucketName, objectKey, "application/zip", buf)
-
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-	}
+	defer util.DeleteFile(zipInfo.FilePath)
 
 	presignClient, err := aws_h.GetPresignClient(r.Context())
 	if err != nil {
@@ -723,8 +694,8 @@ func getZip(w http.ResponseWriter, r *http.Request) {
 	}
 
 	presignedHTTPRequest, err := presignClient.PresignGetObject(r.Context(), &s3.GetObjectInput{
-		Bucket: aws.String(bucketName),
-		Key:    aws.String(objectKey),
+		Bucket: aws.String(zipInfo.BucketName),
+		Key:    aws.String(zipInfo.ObjectKey),
 	}, func(options *s3.PresignOptions) {
 		options.Expires = time.Minute
 	})
@@ -734,6 +705,7 @@ func getZip(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Add("HX-Redirect", presignedHTTPRequest.URL)
 	w.WriteHeader(http.StatusOK)
+
 }
 
 func getPdf(w http.ResponseWriter, r *http.Request) {
@@ -830,14 +802,14 @@ func getHtml(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !exists {
-		buf, err := toZip(receipt, r.Context(), false)
+		filePath, err := toZip(receipt, r.Context(), false)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		_, err = aws_h.PutBuffer(r.Context(), bucketName, objectKey, "application/zip", buf)
+		_, err = aws_h.PutFile(r.Context(), bucketName, objectKey, "application/zip", filePath)
 
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
