@@ -620,9 +620,15 @@ func getReceiptView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	receiptDate := receipt.Receipt.Date.Format(time.DateOnly)
+
 	buildingDownloadKeys := util.Encode(DownloadKeys{
 		BuildingId: receipt.Building.ID,
 		Id:         receipt.Receipt.ID,
+		Date:       receiptDate,
+		Year:       receipt.Receipt.Year,
+		Month:      receipt.Receipt.Month,
+		Elem:       receipt.Building.ID,
 		Parts:      []string{receipt.Building.ID},
 	})
 
@@ -641,6 +647,10 @@ func getReceiptView(w http.ResponseWriter, r *http.Request) {
 		downloadKeys := util.Encode(DownloadKeys{
 			BuildingId: receipt.Building.ID,
 			Id:         receipt.Receipt.ID,
+			Date:       receiptDate,
+			Year:       receipt.Receipt.Year,
+			Month:      receipt.Receipt.Month,
+			Elem:       apt.Apartment.Number,
 			Parts:      []string{apt.Apartment.Number},
 			AllApt:     false,
 		})
@@ -730,18 +740,32 @@ func getPdf(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	receipt, err := CalculateReceipt(r.Context(), keys.BuildingId, keys.Id)
+	objectKey := GetElemObjectKey(keys.BuildingId, keys.Id, keys.Date, keys.Elem, "pdf", keys.Year, keys.Month)
+
+	exists, err := aws_h.FileExistsS3(r.Context(), bucketName, objectKey)
 	if err != nil {
+		log.Printf("Error checking if file exists: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	//log.Printf("Keys: %+v", keys)
+	if !exists {
 
-	parts, err := GetParts(receipt, r.Context(), true, &keys)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		receipt, err := CalculateReceipt(r.Context(), keys.BuildingId, keys.Id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		//log.Printf("Keys: %+v", keys)
+
+		parts, err := GetParts(receipt, r.Context(), true, &keys)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		objectKey = parts[0].ObjectKey
 	}
 
 	presignClient, err := aws_h.GetPresignClient(r.Context())
@@ -752,7 +776,7 @@ func getPdf(w http.ResponseWriter, r *http.Request) {
 
 	presignedHTTPRequest, err := presignClient.PresignGetObject(r.Context(), &s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
-		Key:    aws.String(parts[0].ObjectKey),
+		Key:    aws.String(objectKey),
 	}, func(options *s3.PresignOptions) {
 		options.Expires = time.Minute
 	})

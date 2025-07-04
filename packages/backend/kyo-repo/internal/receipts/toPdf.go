@@ -176,6 +176,16 @@ func checkOrBuild(ctx context.Context, parts []PartInfoUpload, isPdf bool) ([]Pd
 	return pdfItems, err
 }
 
+func GetElemObjectKey(buildingId, receiptId, date, elem, suffix string, year, month int16) string {
+	if elem != "" {
+		elem = fmt.Sprintf("_%s", elem)
+	}
+
+	objectKey := fmt.Sprintf("RECEIPTS/%s/%d/%s/%s_%d_%s_%s%s.%s", buildingId, year, receiptId,
+		buildingId, year, strings.ToUpper(util.FromInt16ToMonth(month)), date, elem, suffix)
+	return objectKey
+}
+
 func GetParts(receipt *CalculatedReceipt, ctx context.Context, isPdf bool, keys *DownloadKeys) ([]PartInfoUpload, error) {
 	//functionName, err := resource.Get("HtmlToPdf", "name")
 	//if err != nil {
@@ -192,11 +202,13 @@ func GetParts(receipt *CalculatedReceipt, ctx context.Context, isPdf bool, keys 
 		suffix = "html"
 	}
 
-	buildObjectKey := func(str string) string {
-		date := receipt.Receipt.Date.Format(time.DateOnly)
+	date := receipt.Receipt.Date.Format(time.DateOnly)
 
-		return fmt.Sprintf("RECEIPTS/%s/%s/%s_%s_%s_%s.%s", receipt.Building.ID, receipt.Receipt.ID,
-			receipt.Building.ID, strings.ToUpper(receipt.MonthStr), date, str, suffix)
+	buildObjectKey := func(str string) string {
+
+		return GetElemObjectKey(receipt.Building.ID, receipt.Receipt.ID, date, str, suffix, receipt.Receipt.Year, receipt.Receipt.Month)
+		//return fmt.Sprintf("RECEIPTS/%s/%s/%s_%s_%s_%s.%s", receipt.Building.ID, receipt.Receipt.ID,
+		//	receipt.Building.ID, strings.ToUpper(receipt.MonthStr), date, str, suffix)
 	}
 
 	parts := make([]PartInfoUpload, 0)
@@ -376,8 +388,10 @@ func GetZipObjectKey(ctx context.Context, buildingId, receiptId string) (*Receip
 	}
 
 	date := rec.Date.Format(time.DateOnly)
-	objectKey := fmt.Sprintf("RECEIPTS/%s/%s/%s_%d_%s_%s.zip", rec.BuildingID, rec.ID,
-		rec.BuildingID, rec.Year, util.FromInt16ToMonth(rec.Month), date)
+	//objectKey := fmt.Sprintf("RECEIPTS/%s/%s/%s_%d_%s_%s.zip", rec.BuildingID, rec.ID,
+	//	rec.BuildingID, rec.Year, util.FromInt16ToMonth(rec.Month), date)
+
+	objectKey := GetElemObjectKey(rec.BuildingID, rec.ID, date, "", "zip", rec.Year, rec.Month)
 
 	exists, err := aws_h.FileExistsS3(ctx, bucketName, objectKey)
 	if err != nil {

@@ -65,6 +65,10 @@ func keys(receipt model.Receipts, cardId string) Keys {
 type DownloadKeys struct {
 	BuildingId string
 	Id         string
+	Date       string
+	Year       int16
+	Month      int16
+	Elem       string
 	Parts      []string
 	AllApt     bool
 }
