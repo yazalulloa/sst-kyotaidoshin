@@ -62,7 +62,7 @@ func router() http.Handler {
 
 		accessTokenCookie.HttpOnly = true
 		accessTokenCookie.Secure = true
-		accessTokenCookie.SameSite = http.SameSiteNoneMode
+		accessTokenCookie.SameSite = http.SameSiteStrictMode
 		accessTokenCookie.Expires = time.Now().Add(-48 * time.Hour)
 		accessTokenCookie.Path = "/"
 		http.SetCookie(w, accessTokenCookie)

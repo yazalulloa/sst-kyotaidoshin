@@ -15,7 +15,7 @@ export const domain = $app.stage === PROD_STAGE
 
 console.log('Domain', domain);
 
-function subdomain(name: string) {
+export function subdomain(name: string) {
   if (isPermanentStage) return `${name}.${domain}`;
   return `${name}-${domain}`;
 }

@@ -13,7 +13,7 @@
     "@openauthjs/openauth": "^0.4.3",
     "hono": "4.7.11",
     "posthog-node": "^5.1.1",
-    "sst": "^3.17.8",
+    "sst": "^3.17.10",
     "uuid": "^11.1.0",
     "valibot": "^1.1.0"
   }

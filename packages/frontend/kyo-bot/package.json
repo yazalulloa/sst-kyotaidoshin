@@ -1,0 +1,21 @@
+{
+  "name": "@kyotaidoshin/kyo-bot",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build --emptyOutDir",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.16",
+    "sst": "^3.17.10",
+    "vite": "^7.0.2",
+    "vite-plugin-html": "^3.2.2"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.11",
+    "tailwindcss": "^4.1.11"
+  }
+}

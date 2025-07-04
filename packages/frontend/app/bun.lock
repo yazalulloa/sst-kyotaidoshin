@@ -6,14 +6,14 @@
         "@alpinejs/collapse": "^3.14.9",
         "@alpinejs/focus": "^3.14.9",
         "@alpinejs/mask": "^3.14.9",
-        "@tailwindcss/vite": "^4.1.10",
+        "@tailwindcss/vite": "^4.1.11",
         "alpinejs": "^3.14.9",
         "alpinejs-i18n": "^2.5.3",
         "external-svg-loader": "^1.7.1",
-        "htmx.org": "^2.0.5",
+        "htmx.org": "^2.0.6",
         "pinecone-router": "^7.2.0",
-        "posthog-js": "^1.255.1",
-        "tailwindcss": "^4.1.10",
+        "posthog-js": "^1.256.1",
+        "tailwindcss": "^4.1.11",
         "vite": "^6.3.5",
       },
       "devDependencies": {
@@ -548,7 +548,7 @@
 
     "postcss-selector-parser": ["postcss-selector-parser@6.0.10", "", { "dependencies": { "cssesc": "^3.0.0", "util-deprecate": "^1.0.2" } }, "sha512-IQ7TZdoaqbT+LCpShg46jnZVlhWD2w6iQYAcYXfHARZ7X1t/UGhhceQDs5X0cGqKvYlHNOuv7Oa1xmb0oQuA3w=="],
 
-    "posthog-js": ["posthog-js@1.256.1", "", { "dependencies": { "core-js": "^3.38.1", "fflate": "^0.4.8", "preact": "^10.19.3", "web-vitals": "^4.2.4" }, "peerDependencies": { "@rrweb/types": "2.0.0-alpha.17", "rrweb-snapshot": "2.0.0-alpha.17" }, "optionalPeers": ["@rrweb/types", "rrweb-snapshot"] }, "sha512-cBLc3W1BHHzxYlJc6kIDbbPVUFTRbsObG0Cn1CnEG7lcyWKbalmW1XvUw7+lu/yyHYfCf7hwTTBJF7GgGFFMmw=="],
+    "posthog-js": ["posthog-js@1.256.2", "", { "dependencies": { "core-js": "^3.38.1", "fflate": "^0.4.8", "preact": "^10.19.3", "web-vitals": "^4.2.4" }, "peerDependencies": { "@rrweb/types": "2.0.0-alpha.17", "rrweb-snapshot": "2.0.0-alpha.17" }, "optionalPeers": ["@rrweb/types", "rrweb-snapshot"] }, "sha512-ypepnUHr33i5a1Uk39mozZXXTENRPC17HCG3WHKK6aRcpNwNs8uEqXaIKICGNM+qre+totKeTgl0WoaUFYmyoQ=="],
 
     "preact": ["preact@10.26.9", "", {}, "sha512-SSjF9vcnF27mJK1XyFMNJzFd5u3pQiATFqoaDy03XuN00u4ziveVVEGt5RKJrDR8MHE/wJo9Nnad56RLzS2RMA=="],
 
@@ -606,23 +606,23 @@
 
     "source-map-support": ["source-map-support@0.5.21", "", { "dependencies": { "buffer-from": "^1.0.0", "source-map": "^0.6.0" } }, "sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w=="],
 
-    "sst": ["sst@3.17.8", "", { "dependencies": { "aws-sdk": "2.1692.0", "aws4fetch": "1.0.18", "jose": "5.2.3", "opencontrol": "0.0.6", "openid-client": "5.6.4" }, "optionalDependencies": { "sst-darwin-arm64": "3.17.8", "sst-darwin-x64": "3.17.8", "sst-linux-arm64": "3.17.8", "sst-linux-x64": "3.17.8", "sst-linux-x86": "3.17.8", "sst-win32-arm64": "3.17.8", "sst-win32-x64": "3.17.8", "sst-win32-x86": "3.17.8" }, "bin": { "sst": "bin/sst.mjs" } }, "sha512-P/a9/ZsjtQRrTBerBMO1ODaVa5HVTmNLrQNJiYvu2Bgd0ov+vefQeHv6oima8HLlPwpDIPS2gxJk8BZrTZMfCA=="],
+    "sst": ["sst@3.17.10", "", { "dependencies": { "aws-sdk": "2.1692.0", "aws4fetch": "1.0.18", "jose": "5.2.3", "opencontrol": "0.0.6", "openid-client": "5.6.4" }, "optionalDependencies": { "sst-darwin-arm64": "3.17.10", "sst-darwin-x64": "3.17.10", "sst-linux-arm64": "3.17.10", "sst-linux-x64": "3.17.10", "sst-linux-x86": "3.17.10", "sst-win32-arm64": "3.17.10", "sst-win32-x64": "3.17.10", "sst-win32-x86": "3.17.10" }, "bin": { "sst": "bin/sst.mjs" } }, "sha512-+GBQ/G+I/UdcGHk6hnhUMGywb1e0rPsGghwBY3Yy8WlWx7FCzLI2aVTgT0SdRwa93G2+jdnlbhXPBrTPQRqz9w=="],
 
-    "sst-darwin-arm64": ["sst-darwin-arm64@3.17.8", "", { "os": "darwin", "cpu": "arm64" }, "sha512-50P6YRMnZVItZUfB0+NzqMww2mmm4vB3zhTVtWUtGoXeiw78g1AEnVlmS28gYXPHM1P987jTvR7EON9u9ig/Dg=="],
+    "sst-darwin-arm64": ["sst-darwin-arm64@3.17.10", "", { "os": "darwin", "cpu": "arm64" }, "sha512-6yhDXvnN1CUR7Ygy9Y4AduXOgrcuUdvM5rLB/qJZN0yLTjx35PJH4pzKnvEro9iTifkzCs+1QJlVKPvdWAqm/g=="],
 
-    "sst-darwin-x64": ["sst-darwin-x64@3.17.8", "", { "os": "darwin", "cpu": "x64" }, "sha512-P0pnMHCmpkpcsxkWpilmeoD79LkbkoIcv6H0aeM9ArT/71/JBhvqH+HjMHSJCzni/9uR6er+nH5F+qol0UO6Bw=="],
+    "sst-darwin-x64": ["sst-darwin-x64@3.17.10", "", { "os": "darwin", "cpu": "x64" }, "sha512-UlmvWtQqEJe6yvoJtzu5fBzkAkofBfgElOB+hpviCzxmnZgznymJXZA94uRe7ruNeKQQs7eCUl0w4iuW7i+ZYA=="],
 
-    "sst-linux-arm64": ["sst-linux-arm64@3.17.8", "", { "os": "linux", "cpu": "arm64" }, "sha512-vun54YA/UzprCu9p8BC4rMwFU5Cj9xrHAHYLYUp/yq4H0pfmBIiQM62nsfIKizRThe/TkBFy60EEi9myf6raYA=="],
+    "sst-linux-arm64": ["sst-linux-arm64@3.17.10", "", { "os": "linux", "cpu": "arm64" }, "sha512-CIiQg9Zt2ACbl95aFKiVqgcm9c1tGHWltGk1RF21lSffNE5hGrP4ZJcB8y6ASbMsObTkB+ezbUBVrlnIOl93ww=="],
 
-    "sst-linux-x64": ["sst-linux-x64@3.17.8", "", { "os": "linux", "cpu": "x64" }, "sha512-HqByCaLE2gEJbM20P1QRd+GqDMAiieuU53FaZA1F+AGxQi+kR82NWjrPqFcMj4dMYg8w/TWXuV+G5+PwoUmpDw=="],
+    "sst-linux-x64": ["sst-linux-x64@3.17.10", "", { "os": "linux", "cpu": "x64" }, "sha512-e4qZ7kVi5ReEy62/uS6pOZgAx1Bj377SclvGRtCXJQutYf/8DG3USHATrsWNg15FemEi8zoW6qeQThxFTcO6yg=="],
 
-    "sst-linux-x86": ["sst-linux-x86@3.17.8", "", { "os": "linux", "cpu": "none" }, "sha512-bCd6QM3MejfSmdvg8I/k+aUJQIZEQJg023qmN78fv00vwlAtfECvY7tjT9E2m3LDp33pXrcRYbFOQzPu+tWFfA=="],
+    "sst-linux-x86": ["sst-linux-x86@3.17.10", "", { "os": "linux", "cpu": "none" }, "sha512-qd/CCaFt+9US9ZnCBFQe6DlJsvEZGlSq9C73hBPNkVNRIMqJ9lY9aXLDWMyaqEk9NpZHpyKvog01YkH5Y+k2KQ=="],
 
-    "sst-win32-arm64": ["sst-win32-arm64@3.17.8", "", { "os": "win32", "cpu": "arm64" }, "sha512-pilx0n8gm4aHJae/vNiqIwZkWF3tdwWzD/ON7hkytw+CVSZ0FXtyFW/yO/+2u3Yw0Kj0lSWPnUqYgm/eHPLwQA=="],
+    "sst-win32-arm64": ["sst-win32-arm64@3.17.10", "", { "os": "win32", "cpu": "arm64" }, "sha512-Dlvc1JbD/Y2ZEm+y9oukoXmskbPkll8lbwID32n8Jlyw8yOJYFEn/YghFm5L5lMgvWIeHU6X4YPW0zNGFd1H/w=="],
 
-    "sst-win32-x64": ["sst-win32-x64@3.17.8", "", { "os": "win32", "cpu": "x64" }, "sha512-Jb0FVRyiOtESudF1V8ucW65PuHrx/iOHUamIO0JnbujWNHZBTRPB2QHN1dbewgkueYDaCmyS8lvuIImLwYJnzQ=="],
+    "sst-win32-x64": ["sst-win32-x64@3.17.10", "", { "os": "win32", "cpu": "x64" }, "sha512-jguun7b96U7fp+X95QT6mz7Fvnca0vgIwj9J0k7aTj2DA/S4uvDNrJzarmlSg9Qs66wGvBXDmTrZrAnhlhkP2A=="],
 
-    "sst-win32-x86": ["sst-win32-x86@3.17.8", "", { "os": "win32", "cpu": "none" }, "sha512-oVmFa/PoElQmfnGJlB0w6rPXiYuldiagO6AbrLMT/6oAnWerLQ8Uhv9tJWfMh3xtPLImQLTjxDo1v0AIzEv9QA=="],
+    "sst-win32-x86": ["sst-win32-x86@3.17.10", "", { "os": "win32", "cpu": "none" }, "sha512-weTAKEnSKIWiidBxMamAJL+qPb/sfOdPSBIY77fzYBNWghSc1N3tttPzHg6LcMAjwCVmBYN7zJS4MDHooPTFIg=="],
 
     "statuses": ["statuses@2.0.1", "", {}, "sha512-RwNA9Z/7PrK06rYLIzFMlaF+l73iwpzsqRIFgbMLbTcLD6cOao82TaWefPXQvB2fOC4AjuYSEndS7N/mTCbkdQ=="],
 

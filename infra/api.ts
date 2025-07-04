@@ -1,5 +1,5 @@
 import {secret} from "./secrets";
-import {allowedOrigins, apiDomain, authDomain, domain, myRouter} from "./domain";
+import {allowedOrigins, apiDomain, authDomain, domain, myRouter, subdomain} from "./domain";
 import {bcvBucket, receiptsBucket, webAssetsBucket} from "./storage";
 import {isLocal, isrPrefix} from "./util";
 import {Output} from "@pulumi/pulumi";
@@ -238,6 +238,48 @@ export const site = new sst.aws.StaticSite("WebApp", {
       }
     }
   }
+});
+
+
+export const kyoBot = new sst.aws.StaticSite("KyoBotWebApp", {
+  path: "packages/frontend/kyo-bot",
+  router: {
+    instance: myRouter,
+    domain: subdomain("kyo-bot"),
+  },
+  environment: {
+    // Accessible in the browser
+    VITE_VAR_ENV: `https://${apiDomain}`,
+    VITE_IS_DEV: isLocal.toString(),
+  },
+  build: {
+    command: "bun run build",
+    output: "dist",
+  },
+  assets: {
+    fileOptions: [
+      {
+        files: "index.html",
+        cacheControl: "max-age=0,no-cache,must-revalidate,public"
+      },
+      {
+        files: ["**/*"],
+        ignore: ["index.html", "isr/**/*"],
+        cacheControl: "public,max-age=31536000,immutable",
+      },
+    ],
+  },
+  transform: {
+    cdn: (args) => {
+
+      args.transform = {
+        distribution: (disArgs) => {
+          disArgs.httpVersion = "http2and3";
+        }
+
+      }
+    }
+  },
 });
 
 console.log(`AuthServer URL: ${auth.url}`);

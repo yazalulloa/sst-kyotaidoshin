@@ -269,6 +269,10 @@ templ FormView(dto FormDto) {
 	@debts.FormView(dto.debtFormDto)
 	@expenses.ReserveFundExpensesView(dto.reserveFundExpenses)
 	@expenses.ExpenseTotalsView(dto.expenseTotals)
+
+		<div id="receipt-info" hx-swap-oob="true" class="flex gap-2">
+  		<span>{ dto.building.Name }</span>
+  	</div>
 }
 
 templ FormResponseView(res FormResponse) {
