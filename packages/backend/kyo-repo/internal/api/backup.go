@@ -17,8 +17,8 @@ const (
 	BACKUP_ALL_FILE        = "backup_all.tar.gz"
 )
 
-func Backup[T any](filename string, selectList func() ([]T, error)) (string, error) {
-	filePath := util.TmpFileName(filename)
+func Backup[T any](selectList func() ([]T, error)) (string, error) {
+	filePath := util.TmpFileName(fmt.Sprintf("backup_%s.json.gz", util.UuidV7()))
 	file, err := os.Create(filePath)
 	if err != nil {
 		return "", fmt.Errorf("error creating file %s", err)

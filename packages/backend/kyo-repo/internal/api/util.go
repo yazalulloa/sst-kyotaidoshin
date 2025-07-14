@@ -154,42 +154,74 @@ func (holder *RouterHolder) AddRoute(params RouteParams) {
 	holder.router.HandleFunc(params.Path, params.routeHandler()).Methods(params.Method.Name())
 }
 
-func (holder *RouterHolder) GET(path string, handler func(http.ResponseWriter, *http.Request), perms ...PERM) {
+func processApiChecks(providers []ApiCheckProvider) []ApiChecks {
+	checks := make([]ApiChecks, 0)
+	perms := make([]PERM, 0)
+
+	for _, provider := range providers {
+		permProvider, ok := provider.(PermApiCheckProvider)
+		if ok {
+			if len(permProvider.Perms) > 0 {
+				perms = append(perms, permProvider.Perms...)
+			}
+			continue
+		}
+
+		check := provider.ApiCheck()
+		if check != nil {
+			checks = append(checks, check)
+		}
+	}
+
+	if len(perms) > 0 {
+		checks = append(checks, apiCheckPerms(perms...))
+	}
+
+	return checks
+
+}
+
+func (holder *RouterHolder) GET(path string, handler func(http.ResponseWriter, *http.Request),
+	providers ...ApiCheckProvider) {
+
 	holder.AddRoute(RouteParams{
-		Method:  GET,
-		Path:    path,
-		Handler: handler,
-		Perms:   perms,
+		Method:    GET,
+		Path:      path,
+		Handler:   handler,
+		ApiChecks: processApiChecks(providers),
 	})
 }
 
-func (holder *RouterHolder) POST(path string, handler func(http.ResponseWriter, *http.Request), recaptchaAction RecaptchaAction, perms ...PERM) {
+func (holder *RouterHolder) POST(path string, handler func(http.ResponseWriter, *http.Request),
+	providers ...ApiCheckProvider) {
+
 	holder.AddRoute(RouteParams{
-		Method:          POST,
-		Path:            path,
-		Handler:         handler,
-		Perms:           perms,
-		RecaptchaAction: recaptchaAction,
+		Method:    POST,
+		Path:      path,
+		Handler:   handler,
+		ApiChecks: processApiChecks(providers),
 	})
 }
 
-func (holder *RouterHolder) PUT(path string, handler func(http.ResponseWriter, *http.Request), recaptchaAction RecaptchaAction, perms ...PERM) {
+func (holder *RouterHolder) PUT(path string, handler func(http.ResponseWriter, *http.Request),
+	providers ...ApiCheckProvider) {
+
 	holder.AddRoute(RouteParams{
-		Method:          PUT,
-		Path:            path,
-		Handler:         handler,
-		Perms:           perms,
-		RecaptchaAction: recaptchaAction,
+		Method:    PUT,
+		Path:      path,
+		Handler:   handler,
+		ApiChecks: processApiChecks(providers),
 	})
 }
 
-func (holder *RouterHolder) DELETE(path string, handler func(http.ResponseWriter, *http.Request), recaptchaAction RecaptchaAction, perms ...PERM) {
+func (holder *RouterHolder) DELETE(path string, handler func(http.ResponseWriter, *http.Request),
+	providers ...ApiCheckProvider) {
+
 	holder.AddRoute(RouteParams{
-		Method:          DELETE,
-		Path:            path,
-		Handler:         handler,
-		Perms:           perms,
-		RecaptchaAction: recaptchaAction,
+		Method:    DELETE,
+		Path:      path,
+		Handler:   handler,
+		ApiChecks: processApiChecks(providers),
 	})
 }
 
@@ -199,11 +231,128 @@ type RouteParams struct {
 	Handler         func(http.ResponseWriter, *http.Request)
 	Perms           []PERM
 	RecaptchaAction RecaptchaAction
+	ApiChecks       []ApiChecks
+}
+
+type ApiCheckProvider interface {
+	ApiCheck() ApiChecks
+}
+type ApiChecks func(r *http.Request) error
+
+type PermApiCheckProvider struct {
+	Perms []PERM
+}
+
+func PermsCheck(perms ...PERM) PermApiCheckProvider {
+	return PermApiCheckProvider{
+		Perms: perms,
+	}
+}
+
+func (provider PermApiCheckProvider) ApiCheck() ApiChecks {
+	return apiCheckPerms(provider.Perms...)
+}
+
+func apiCheckPerms(perms ...PERM) ApiChecks {
+	return func(r *http.Request) error {
+		//log.Printf("Checking permissions: %v", perms)
+		userPerms, err := checkPerms(r.Context(), perms)
+		if err != nil {
+			return fmt.Errorf("perms check failed: %w", err)
+		}
+
+		newCtx := r.Context()
+		for _, p := range userPerms {
+			newCtx = context.WithValue(newCtx, USER_PERM_PREFIX+p, p)
+		}
+		r = r.WithContext(newCtx)
+
+		return nil
+	}
+}
+
+func (receiver PERM) ApiCheck() ApiChecks {
+	return PermsCheck(receiver).ApiCheck()
+}
+
+func (receiver RecaptchaAction) ApiCheck() ApiChecks {
+
+	enableCaptcha, _ := resource.Get("EnableCaptcha", "value")
+	if enableCaptcha != nil && enableCaptcha.(string) == "false" {
+		//log.Println("Captcha is disabled, skipping recaptcha check")
+		return nil
+	}
+
+	return func(r *http.Request) error {
+
+		if receiver == "" {
+			return nil
+		}
+
+		//enableCaptcha, _ := resource.Get("EnableCaptcha", "value")
+		//if enableCaptcha != nil && enableCaptcha.(string) == "false" {
+		//	//log.Println("Captcha is disabled, skipping recaptcha check")
+		//	return nil
+		//}
+
+		timestamp := time.Now().UnixMilli()
+		defer func() { log.Printf("CheckRecaptcha took %d ms", time.Now().UnixMilli()-timestamp) }()
+
+		err := checkCaptcha(r, receiver)
+		if err != nil {
+			log.Printf("Error checking recaptcha: %s", err)
+			return fmt.Errorf("recaptcha check failed: %w", err)
+		}
+
+		return nil
+	}
 }
 
 func (rec RouteParams) routeHandler() func(http.ResponseWriter,
 	*http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+
+		if rec.ApiChecks != nil {
+
+			checks := len(rec.ApiChecks)
+
+			if checks > 0 {
+				if checks == 1 {
+					err := rec.ApiChecks[0](r)
+					if err != nil {
+						log.Printf("Error in API check: %s", err)
+						http.Error(w, "Unauthorized", http.StatusUnauthorized)
+						return
+					}
+				} else {
+					var wg sync.WaitGroup
+					wg.Add(checks)
+					errorChan := make(chan error, checks)
+
+					for _, check := range rec.ApiChecks {
+						go func(check ApiChecks) {
+							defer wg.Done()
+							err := check(r)
+							if err != nil {
+								errorChan <- err
+							}
+						}(check)
+					}
+
+					wg.Wait()
+					close(errorChan)
+
+					err := util.HasErrors(errorChan)
+					if err != nil {
+						log.Printf("Error in API checks: %s", err)
+						http.Error(w, "Unauthorized", http.StatusUnauthorized)
+						return
+					}
+				}
+
+			}
+
+		}
 
 		var wg sync.WaitGroup
 		wg.Add(2)
@@ -214,7 +363,7 @@ func (rec RouteParams) routeHandler() func(http.ResponseWriter,
 			//timestamp := time.Now().UnixMilli()
 			//defer func() { log.Printf("CheckPerms took %d ms", time.Now().UnixMilli()-timestamp) }()
 
-			userPerms, err := checkPerms(r, rec.Perms)
+			userPerms, err := checkPerms(r.Context(), rec.Perms)
 			if err != nil {
 				errorChan <- err
 				return
@@ -244,7 +393,7 @@ func (rec RouteParams) routeHandler() func(http.ResponseWriter,
 			timestamp := time.Now().UnixMilli()
 			defer func() { log.Printf("CheckRecaptcha took %d ms", time.Now().UnixMilli()-timestamp) }()
 
-			err := rec.checkCaptcha(r)
+			err := checkCaptcha(r, rec.RecaptchaAction)
 			if err != nil {
 				errorChan <- err
 				return
@@ -316,14 +465,14 @@ func GetPermsMap() *TTLMap {
 	return permsMap
 }
 
-func checkPerms(r *http.Request, perm []PERM) ([]string, error) {
+func checkPerms(ctx context.Context, perm []PERM) ([]string, error) {
 
-	userId := r.Context().Value(util.USER_ID)
+	userId := ctx.Value(util.USER_ID)
 	if userId == nil || userId.(string) == "" {
 		return nil, errors.New("invalid userId")
 	}
 
-	userPerms, err := getUserPermissions(r.Context(), userId.(string))
+	userPerms, err := getUserPermissions(ctx, userId.(string))
 	if err != nil {
 		return nil, fmt.Errorf("error getting user permissions: %s", err)
 	}
@@ -343,7 +492,7 @@ func checkPerms(r *http.Request, perm []PERM) ([]string, error) {
 	return userPerms, nil
 }
 
-func (rec RouteParams) checkCaptcha(r *http.Request) error {
+func checkCaptcha(r *http.Request, action RecaptchaAction) error {
 
 	token := r.Header.Get("X-Recaptcha-Token")
 
@@ -356,7 +505,7 @@ func (rec RouteParams) checkCaptcha(r *http.Request) error {
 		return fmt.Errorf("error getting secret from resource: %s", err)
 	}
 
-	err = CheckRecaptcha(rec.RecaptchaAction, secret.(string), token)
+	err = CheckRecaptcha(action, secret.(string), token)
 	if err != nil {
 		return fmt.Errorf("error checking recaptcha: %s", err)
 	}

@@ -59,7 +59,7 @@ func Routes(holder *api.RouterHolder) {
 	holder.GET(_DOWNLOAD_HTML_FILE+"/{key}", getHtml, api.RECEIPTS_READ)
 	holder.POST(_SEND_PDFS+"/{key}", sendPdfs, api.ReceiptsSendAptsRecaptchaAction, api.RECEIPTS_WRITE)
 	holder.GET(_SEND_PDFS_PROGRESS+"/{key}", sendPdfsProgress, api.RECEIPTS_WRITE)
-	holder.PUT(_CANCEL_SEND_PDFS+"/{key}", cancelSendPdfs, "", api.RECEIPTS_WRITE)
+	holder.PUT(_CANCEL_SEND_PDFS+"/{key}", cancelSendPdfs, api.RECEIPTS_WRITE)
 	holder.GET(_PATH+"/upload_form", getUploadForm, api.RECEIPTS_WRITE)
 	holder.POST(_PATH+"/new_from_file", newFromFile, api.ReceiptsParseFileRecaptchaAction, api.RECEIPTS_WRITE)
 	holder.POST(_DUPLICATE+"/{key}", duplicateReceipt, api.ReceiptsDuplicateRecaptchaAction, api.RECEIPTS_WRITE)

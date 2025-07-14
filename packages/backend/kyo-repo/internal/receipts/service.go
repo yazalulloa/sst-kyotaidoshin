@@ -1025,7 +1025,7 @@ func (service Service) Backup() (string, error) {
 		return dtos, nil
 	}
 
-	return api.Backup(api.BACKUP_RECEIPTS_FILE, selectListDtos)
+	return api.Backup(selectListDtos)
 }
 
 func (service Service) ProcessDecoder(decoder *json.Decoder) (int64, error) {

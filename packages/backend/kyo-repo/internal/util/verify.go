@@ -53,7 +53,7 @@ func Verify(ctx context.Context, accessToken, refreshToken string) (context.Cont
 		return nil, fmt.Errorf("function error: %s", payload)
 	}
 
-	log.Printf("User payload: %s", payload)
+	//log.Printf("User payload: %s", payload)
 
 	var userPayload UserPayload
 	err = json.Unmarshal(output.Payload, &userPayload)

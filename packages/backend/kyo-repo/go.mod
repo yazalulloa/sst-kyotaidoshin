@@ -18,18 +18,18 @@ require (
 	github.com/go-jet/jet/v2 v2.13.0
 	github.com/go-playground/form/v4 v4.2.1
 	github.com/go-playground/validator/v10 v10.27.0
-	github.com/go-telegram/bot v1.15.0
+	github.com/go-telegram/bot v1.16.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/shakinm/xlsReader v0.9.12
-	github.com/sst/sst/v3 v3.17.8
+	github.com/sst/sst/v3 v3.17.10
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240902231107-85af5b9d094d
 	github.com/wneessen/go-mail v0.6.2
 	github.com/xuri/excelize/v2 v2.9.1
 	golang.org/x/oauth2 v0.30.0
-	golang.org/x/sync v0.15.0
-	golang.org/x/text v0.26.0
-	google.golang.org/api v0.240.0
+	golang.org/x/sync v0.16.0
+	golang.org/x/text v0.27.0
+	google.golang.org/api v0.241.0
 )
 
 require (
@@ -83,10 +83,10 @@ require (
 	go.opentelemetry.io/otel v1.36.0 // indirect
 	go.opentelemetry.io/otel/metric v1.36.0 // indirect
 	go.opentelemetry.io/otel/trace v1.36.0 // indirect
-	golang.org/x/crypto v0.39.0 // indirect
+	golang.org/x/crypto v0.40.0 // indirect
 	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67 // indirect
-	golang.org/x/net v0.41.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/net v0.42.0 // indirect
+	golang.org/x/sys v0.34.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250603155806-513f23925822 // indirect
 	google.golang.org/grpc v1.73.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect

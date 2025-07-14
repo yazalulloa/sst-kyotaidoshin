@@ -697,6 +697,13 @@ func answerCallbackWithDocument(filepath, filename string, ctx context.Context, 
 			log.Printf("Error closing file: %s", err)
 			return
 		}
+
+		err = os.Remove(filepath)
+		if err != nil {
+			log.Printf("Error removing file: %s", err)
+			return
+		}
+
 	}(file)
 
 	var wg sync.WaitGroup
@@ -801,7 +808,7 @@ func backupReceiptsCallBack(ctx context.Context, b *bot.Bot, update *models.Upda
 
 func backupAllCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
 
-	filepath, err := backup.AllBackup(ctx, api.BACKUP_ALL_FILE)
+	filepath, err := backup.AllBackup(ctx)
 	if err != nil {
 		log.Printf("Error getting all backup: %v", err)
 		return

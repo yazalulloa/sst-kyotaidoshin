@@ -17,7 +17,7 @@
         "@aws-sdk/client-lambda": "^3.840.0",
         "@openauthjs/openauth": "^0.4.3",
         "hono": "4.7.11",
-        "posthog-node": "^5.1.1",
+        "posthog-node": "^5.3.1",
         "sst": "^3.17.10",
         "uuid": "^11.1.0",
         "valibot": "^1.1.0",
@@ -377,7 +377,7 @@
 
     "possible-typed-array-names": ["possible-typed-array-names@1.1.0", "", {}, "sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg=="],
 
-    "posthog-node": ["posthog-node@5.1.1", "", {}, "sha512-6VISkNdxO24ehXiDA4dugyCSIV7lpGVaEu5kn/dlAj+SJ1lgcDru9PQ8p/+GSXsXVxohd1t7kHL2JKc9NoGb0w=="],
+    "posthog-node": ["posthog-node@5.3.1", "", {}, "sha512-rCGf5Od7+lLHYLQvkBXrHt2Q8vuf0hzs95HLzDwqLQMltNxatqDxK1vPWbpa5YoEUxhiGoikTQ1cEbqCkEV+kA=="],
 
     "proxy-addr": ["proxy-addr@2.0.7", "", { "dependencies": { "forwarded": "0.2.0", "ipaddr.js": "1.9.1" } }, "sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg=="],
 

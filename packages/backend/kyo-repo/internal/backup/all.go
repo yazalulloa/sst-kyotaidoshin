@@ -14,7 +14,7 @@ import (
 	"sync"
 )
 
-func AllBackup(ctx context.Context, filename string) (string, error) {
+func AllBackup(ctx context.Context) (string, error) {
 
 	var wg sync.WaitGroup
 	wg.Add(3)
@@ -76,7 +76,7 @@ func AllBackup(ctx context.Context, filename string) (string, error) {
 		return "", err
 	}
 
-	path := util.TmpFileName(filename)
+	path := util.TmpFileName(fmt.Sprintf("backup_all_%s.tar.gz", util.UuidV7()))
 	out, err := os.Create(path)
 	if err != nil {
 		return "", fmt.Errorf("error creating file %s", err)
