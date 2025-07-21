@@ -6,7 +6,7 @@ import buildingsNewPartialUrl from './pages/buildings/new.html?url'
 import buildingsFormPartialUrl from './pages/buildings/form.html?url'
 import buildingsEditPartialUrl from './pages/buildings/edit.html?url'
 import bucketIndexPartialUrl from './pages/bcv-bucket/main.html?url'
-import apartmentsIndexPartialUrl from './pages/apartments/index.html?url'
+  import apartmentsIndexPartialUrl from './pages/apartments/index.html?url'
 import apartmentsBuildingSelectorPartialUrl
   from './pages/apartments/buildingSelector.html?url'
 import reserveFundFormPartialUrl from './pages/reserve-funds/form.html?url'
