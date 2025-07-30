@@ -1,4 +1,4 @@
-package file
+package bcv
 
 import (
 	"bytes"
@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/shakinm/xlsReader/xls"
 	"github.com/yaz/kyo-repo/internal/aws_h"
-	"github.com/yaz/kyo-repo/internal/bcv"
 	"github.com/yaz/kyo-repo/internal/db/gen/model"
 	"github.com/yaz/kyo-repo/internal/rates"
 	"github.com/yaz/kyo-repo/internal/util"
@@ -63,7 +62,7 @@ func fileParse(params ParsingParams) error {
 	if params.ProcessAll != nil {
 		processAll = *params.ProcessAll
 	} else {
-		processAll, _ = strconv.ParseBool(output.Metadata[bcv.MetadataProcessedKey])
+		processAll, _ = strconv.ParseBool(output.Metadata[MetadataProcessedKey])
 	}
 
 	info := ParsingInfo{
@@ -78,10 +77,10 @@ func fileParse(params ParsingParams) error {
 		return err
 	}
 
-	output.Metadata[bcv.MetadataProcessedKey] = "true"
-	output.Metadata[bcv.MetadataLastProcessedKey] = time.Now().Format(time.RFC3339)
-	output.Metadata[bcv.MetadataRatesParsedKey] = strconv.FormatInt(result.Parsed, 10)
-	output.Metadata[bcv.MetadataNumOfSheetsKey] = fmt.Sprint(result.NumOfSheets)
+	output.Metadata[MetadataProcessedKey] = "true"
+	output.Metadata[MetadataLastProcessedKey] = time.Now().Format(time.RFC3339)
+	output.Metadata[MetadataRatesParsedKey] = strconv.FormatInt(result.Parsed, 10)
+	output.Metadata[MetadataNumOfSheetsKey] = fmt.Sprint(result.NumOfSheets)
 
 	_, err = client.CopyObject(params.Ctx, &s3.CopyObjectInput{
 		Bucket:            &params.Bucket,

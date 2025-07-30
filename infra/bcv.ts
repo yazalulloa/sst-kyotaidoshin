@@ -20,6 +20,12 @@ export const bcvQueue = new sst.aws.Queue("BcvQueue", {
   //not supported for S3 notifications
   fifo: false,
   visibilityTimeout: "300 seconds",
+  transform: {
+    queue: args => {
+      args.receiveWaitTimeSeconds = 20; // Long polling to reduce empty responses
+    }
+
+  }
 });
 
 export const processBcvFileFunction = new sst.aws.Function("ProcessBcvFile", {
@@ -33,12 +39,20 @@ export const processBcvFileFunction = new sst.aws.Function("ProcessBcvFile", {
   // }
   // permissions: [
   //   {
-  //     actions: ["s3:*"],
-  //     resources: [bcvBucket.arn]
+  //     actions: ["s3:*"],c
   //   }
   // ]
 });
-bcvQueue.subscribe(processBcvFileFunction.arn);
+bcvQueue.subscribe(processBcvFileFunction.arn, {
+  batch: {
+    window: "20 seconds"
+  },
+  transform: {
+    eventSourceMapping: args => {
+      args.maximumBatchingWindowInSeconds = 20; // Reduce latency for processing
+    }
+  }
+});
 bcvBucket.notify({
   notifications: [
     {

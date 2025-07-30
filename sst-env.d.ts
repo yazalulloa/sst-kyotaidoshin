@@ -72,10 +72,6 @@ declare module "sst" {
       "type": "sst.aws.Function"
       "url": string
     }
-    "KyoBotWebApp": {
-      "type": "sst.aws.StaticSite"
-      "url": string
-    }
     "MailerConfigs": {
       "type": "sst.sst.Secret"
       "value": string

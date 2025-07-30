@@ -110,7 +110,13 @@ const receiptPdfQueue = new sst.aws.Queue("ReceiptPdfQueue", {
     contentBasedDeduplication: true,
   },
   visibilityTimeout: "310 seconds",
+  transform: {
+    queue: args => {
+      args.receiveWaitTimeSeconds = 20; // Long polling to reduce empty responses
+    }
+  }
 });
+
 receiptPdfQueue.subscribe({
   link: [
     secret.secretTursoUrl,
@@ -130,7 +136,7 @@ receiptPdfQueue.subscribe({
       actions: ["lambda:InvokeFunction"],
       resources: [secret.htmlToPdfFunction.value]
     },
-  ]
+  ],
 });
 
 
@@ -240,47 +246,47 @@ export const site = new sst.aws.StaticSite("WebApp", {
   }
 });
 
-
-export const kyoBot = new sst.aws.StaticSite("KyoBotWebApp", {
-  path: "packages/frontend/kyo-bot",
-  router: {
-    instance: myRouter,
-    domain: subdomain("kyo-bot"),
-  },
-  environment: {
-    // Accessible in the browser
-    VITE_VAR_ENV: `https://${apiDomain}`,
-    VITE_IS_DEV: isLocal.toString(),
-  },
-  build: {
-    command: "bun run build",
-    output: "dist",
-  },
-  assets: {
-    fileOptions: [
-      {
-        files: "index.html",
-        cacheControl: "max-age=0,no-cache,must-revalidate,public"
-      },
-      {
-        files: ["**/*"],
-        ignore: ["index.html", "isr/**/*"],
-        cacheControl: "public,max-age=31536000,immutable",
-      },
-    ],
-  },
-  transform: {
-    cdn: (args) => {
-
-      args.transform = {
-        distribution: (disArgs) => {
-          disArgs.httpVersion = "http2and3";
-        }
-
-      }
-    }
-  },
-});
+//
+// export const kyoBot = new sst.aws.StaticSite("KyoBotWebApp", {
+//   path: "packages/frontend/kyo-bot",
+//   router: {
+//     instance: myRouter,
+//     domain: subdomain("kyo-bot"),
+//   },
+//   environment: {
+//     // Accessible in the browser
+//     VITE_VAR_ENV: `https://${apiDomain}`,
+//     VITE_IS_DEV: isLocal.toString(),
+//   },
+//   build: {
+//     command: "bun run build",
+//     output: "dist",
+//   },
+//   assets: {
+//     fileOptions: [
+//       {
+//         files: "index.html",
+//         cacheControl: "max-age=0,no-cache,must-revalidate,public"
+//       },
+//       {
+//         files: ["**/*"],
+//         ignore: ["index.html", "isr/**/*"],
+//         cacheControl: "public,max-age=31536000,immutable",
+//       },
+//     ],
+//   },
+//   transform: {
+//     cdn: (args) => {
+//
+//       args.transform = {
+//         distribution: (disArgs) => {
+//           disArgs.httpVersion = "http2and3";
+//         }
+//
+//       }
+//     }
+//   },
+// });
 
 console.log(`AuthServer URL: ${auth.url}`);
 

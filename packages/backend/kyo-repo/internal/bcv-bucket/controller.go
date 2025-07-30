@@ -12,7 +12,6 @@ import (
 	"github.com/yaz/kyo-repo/internal/api"
 	"github.com/yaz/kyo-repo/internal/aws_h"
 	"github.com/yaz/kyo-repo/internal/bcv"
-	"github.com/yaz/kyo-repo/internal/file"
 	"github.com/yaz/kyo-repo/internal/util"
 	"log"
 	"net/http"
@@ -223,7 +222,7 @@ func process(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Handling PROCESS %s", str)
 
 	ProcessAll := true
-	err = file.ParseFile(file.ParsingParams{
+	err = bcv.ParseFile(bcv.ParsingParams{
 		Ctx:        r.Context(),
 		Bucket:     bucketName,
 		Key:        str,
@@ -299,7 +298,7 @@ func processAll(w http.ResponseWriter, r *http.Request) {
 			defer wg.Done()
 
 			ProcessAll := true
-			err := file.ParseFile(file.ParsingParams{
+			err := bcv.ParseFile(bcv.ParsingParams{
 				Ctx:        r.Context(),
 				Bucket:     bucketName,
 				Key:        *item.Key,

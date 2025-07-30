@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/yaz/kyo-repo/internal/file"
+	"github.com/yaz/kyo-repo/internal/bcv"
 	"log"
 	"strings"
 )
@@ -30,7 +30,7 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 				continue
 			}
 
-			err := file.ParseFile(file.ParsingParams{
+			err := bcv.ParseFile(bcv.ParsingParams{
 				Ctx:    ctx,
 				Bucket: s3Record.S3.Bucket.Name,
 				Key:    s3Record.S3.Object.Key,
