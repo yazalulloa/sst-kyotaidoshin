@@ -6,13 +6,13 @@
     "@types/bun": "latest"
   },
   "peerDependencies": {
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   },
   "dependencies": {
-    "@aws-sdk/client-lambda": "^3.844.0",
+    "@aws-sdk/client-lambda": "^3.865.0",
     "@openauthjs/openauth": "^0.4.3",
     "hono": "4.7.11",
-    "posthog-node": "^5.5.0",
+    "posthog-node": "^5.7.0",
     "sst": "^3.17.10",
     "uuid": "^11.1.0",
     "valibot": "^1.1.0"

@@ -2,10 +2,13 @@ package com.kyotaidoshin;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.openhtmltopdf.pdfboxout.PdfBoxRenderer;
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import io.reactivex.rxjava3.core.Single;
 import io.vertx.core.json.Json;
 import io.vertx.rxjava3.core.buffer.Buffer;
+import io.vertx.rxjava3.ext.web.client.WebClient;
 import jakarta.inject.Named;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -22,15 +25,13 @@ public class HtmlToPdfLambda implements RequestStreamHandler {
 
   private static final Logger logger = LoggerFactory.getLogger(HtmlToPdfLambda.class);
 
+  private final ObjectReader reader = Util.getObjectReader();
+  private final WebClient webClient = Util.getWebClient();
+  private final PdfRendererBuilder builder = Util.getPdfRendererBuilder();
 
   @Override
   public void handleRequest(InputStream inputStream, OutputStream outputStream, Context context) throws IOException {
 
-    final var builder = Util.getPdfRendererBuilder();
-    final var reader = Util.getObjectReader();
-    final var webClient = Util.getWebClient();
-
-    builder.withProducer("kyotaidoshin");
     final var singles = new ArrayList<Single<String>>();
 
     try (final var iterator = reader.<HtmlToPdfRequest>readValues(inputStream)) {
@@ -38,6 +39,12 @@ public class HtmlToPdfLambda implements RequestStreamHandler {
 
       logger.info("Pdf requests {}", list.size());
       for (var pdfRequest : list) {
+
+        if (pdfRequest.presignedUrl() == null) {
+          logger.warn("No presigned url for {}", pdfRequest.objectKey());
+          continue;
+        }
+
         byte[] decodedBytes = Base64.getUrlDecoder().decode(pdfRequest.html());
         final var html = new String(decodedBytes);
 
@@ -55,20 +62,16 @@ public class HtmlToPdfLambda implements RequestStreamHandler {
 
           logger.info("PDF size {}", byteArrayOutputStream.size());
 
-          if (pdfRequest.presignedUrl() != null) {
-            singles.add(webClient.putAbs(pdfRequest.presignedUrl())
-                .rxSendBuffer(Buffer.buffer(byteArrayOutputStream.toByteArray()))
-                .map(response -> {
+          singles.add(webClient.putAbs(pdfRequest.presignedUrl())
+              .rxSendBuffer(Buffer.buffer(byteArrayOutputStream.toByteArray()))
+              .map(response -> {
 
-                  if (response.statusCode() != 200 && response.statusCode() != 204) {
-                    throw new RuntimeException("Error uploading %s".formatted(response.statusCode()));
-                  }
+                if (response.statusCode() != 200 && response.statusCode() != 204) {
+                  throw new RuntimeException("Error uploading %s".formatted(response.statusCode()));
+                }
 
-                  return pdfRequest.objectKey();
-                }));
-          } else {
-            logger.info("No presigned url for {}", pdfRequest.objectKey());
-          }
+                return pdfRequest.objectKey();
+              }));
 
         }
       }

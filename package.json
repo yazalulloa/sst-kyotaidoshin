@@ -7,7 +7,7 @@
   "scripts": {},
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   },
   "dependencies": {
     "sst": "^3.17.10"

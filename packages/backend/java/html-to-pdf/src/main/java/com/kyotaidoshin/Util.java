@@ -84,6 +84,7 @@ public class Util {
         return pdfRendererBuilder;
       }
       pdfRendererBuilder = new PdfRendererBuilder();
+      pdfRendererBuilder.withProducer("kyotaidoshin");
     }
     return pdfRendererBuilder;
   }
