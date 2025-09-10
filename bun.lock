@@ -4,23 +4,23 @@
     "": {
       "name": "kyotaidoshin",
       "dependencies": {
-        "sst": "^3.17.10",
+        "sst": "3.17.12",
       },
       "devDependencies": {
-        "@tsconfig/node22": "^22.0.2",
-        "typescript": "^5.9.2",
+        "@tsconfig/node22": "22.0.2",
+        "typescript": "5.9.2",
       },
     },
     "packages/auth": {
       "name": "@kyotaidoshin/auth",
       "dependencies": {
-        "@aws-sdk/client-lambda": "^3.883.0",
-        "@openauthjs/openauth": "^0.4.3",
-        "hono": "4.7.11",
-        "posthog-node": "^5.8.2",
-        "sst": "^3.17.12",
-        "uuid": "^11.1.0",
-        "valibot": "^1.1.0",
+        "@aws-sdk/client-lambda": "3.883.0",
+        "@openauthjs/openauth": "0.4.3",
+        "hono": "4.9.6",
+        "posthog-node": "5.8.2",
+        "sst": "3.17.12",
+        "uuid": "11.1.0",
+        "valibot": "1.1.0",
       },
       "devDependencies": {
         "@types/bun": "latest",
@@ -309,7 +309,7 @@
 
     "hasown": ["hasown@2.0.2", "", { "dependencies": { "function-bind": "^1.1.2" } }, "sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ=="],
 
-    "hono": ["hono@4.7.11", "", {}, "sha512-rv0JMwC0KALbbmwJDEnxvQCeJh+xbS3KEWW5PC9cMJ08Ur9xgatI0HmtgYZfOdOSOeYsp5LO2cOhdI8cLEbDEQ=="],
+    "hono": ["hono@4.9.6", "", {}, "sha512-doVjXhSFvYZ7y0dNokjwwSahcrAfdz+/BCLvAMa/vHLzjj8+CFyV5xteThGUsKdkaasgN+gF2mUxao+SGLpUeA=="],
 
     "http-errors": ["http-errors@2.0.0", "", { "dependencies": { "depd": "2.0.0", "inherits": "2.0.4", "setprototypeof": "1.2.0", "statuses": "2.0.1", "toidentifier": "1.0.1" } }, "sha512-FtwrG/euBzaEjYeRqOgly7G0qviiXoJWnvEH2Z1plBdXgbyjv34pHTSb9zoeHMyDy33+DWy5Wt9Wo+TURtOYSQ=="],
 

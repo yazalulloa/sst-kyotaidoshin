@@ -4,7 +4,7 @@
     "": {
       "name": "@kyotaidoshin/openauthclient",
       "dependencies": {
-        "posthog-node": "^5.7.0",
+        "posthog-node": "^5.8.2",
       },
       "devDependencies": {
         "@types/aws-lambda": "^8.10.152",

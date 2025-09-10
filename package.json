@@ -6,10 +6,10 @@
   ],
   "scripts": {},
   "devDependencies": {
-    "@tsconfig/node22": "^22.0.2",
-    "typescript": "^5.9.2"
+    "@tsconfig/node22": "22.0.2",
+    "typescript": "5.9.2"
   },
   "dependencies": {
-    "sst": "^3.17.12"
+    "sst": "3.17.12"
   }
 }
