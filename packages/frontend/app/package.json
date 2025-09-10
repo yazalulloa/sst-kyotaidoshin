@@ -8,23 +8,23 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@alpinejs/collapse": "^3.14.9",
-    "@alpinejs/focus": "^3.14.9",
-    "@alpinejs/mask": "^3.14.9",
-    "@tailwindcss/vite": "^4.1.12",
-    "alpinejs": "^3.14.9",
+    "@alpinejs/collapse": "^3.15.0",
+    "@alpinejs/focus": "^3.15.0",
+    "@alpinejs/mask": "^3.15.0",
+    "@tailwindcss/vite": "^4.1.13",
+    "alpinejs": "^3.15.0",
     "alpinejs-i18n": "^2.5.3",
     "external-svg-loader": "^1.7.1",
-    "htmx.org": "^2.0.6",
+    "htmx.org": "^2.0.7",
     "pinecone-router": "^7.2.0",
-    "posthog-js": "^1.260.1",
-    "tailwindcss": "^4.1.12"
+    "posthog-js": "^1.262.0",
+    "tailwindcss": "^4.1.13"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.16",
-    "daisyui": "^5.0.50",
-    "sst": "^3.17.10",
-    "vite": "^7.1.2",
+    "daisyui": "^5.1.10",
+    "sst": "^3.17.12",
+    "vite": "^7.1.5",
     "vite-plugin-handlebars": "^2.0.0",
     "vite-plugin-html": "^3.2.2"
   }
