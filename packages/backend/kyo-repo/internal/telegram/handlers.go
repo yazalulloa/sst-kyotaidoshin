@@ -6,6 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
+	"os"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/go-jet/jet/v2/sqlite"
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
@@ -21,11 +27,6 @@ import (
 	"github.com/yaz/kyo-repo/internal/receipts"
 	"github.com/yaz/kyo-repo/internal/users"
 	"github.com/yaz/kyo-repo/internal/util"
-	"log"
-	"os"
-	"strings"
-	"sync"
-	"time"
 )
 
 func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {

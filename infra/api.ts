@@ -1,7 +1,7 @@
 import {secret} from "./secrets";
 import {allowedOrigins, apiDomain, authDomain, domain, myRouter, subdomain} from "./domain";
 import {bcvBucket, receiptsBucket, webAssetsBucket} from "./storage";
-import {isLocal, isrPrefix} from "./util";
+import {isLocal, isrPrefix, PROD_STAGE} from "./util";
 import {Output} from "@pulumi/pulumi";
 
 
@@ -208,23 +208,29 @@ export const site = new sst.aws.StaticSite("WebApp", {
     command: "bun run build",
     output: "dist",
   },
+  invalidation: {
+    paths: "all",
+    wait: $app.stage === PROD_STAGE,
+  },
   assets: {
     bucket: webAssetsBucket.name,
     routes: ["isr", "assets"],
     fileOptions: [
-      {
-        files: "index.html",
-        cacheControl: "max-age=0,no-cache,must-revalidate,public"
-        // cacheControl: "public,max-age=0,s-maxage=0,must-revalidate"
-        // cacheControl: "max-age=0,no-cache,no-store,must-revalidate",
-      },
+      // {
+      //   files: "index.html",
+      //   cacheControl: "max-age=0,no-cache,must-revalidate,public"
+      //   // cacheControl: "public,max-age=0,s-maxage=0,must-revalidate"
+      //   // cacheControl: "max-age=0,no-cache,no-store,must-revalidate",
+      // },
       {
         files: "isr/**/*",
         cacheControl: "max-age=0,no-cache,no-store,must-revalidate",
       },
       {
         files: ["**/*"],
-        ignore: ["index.html", "isr/**/*"],
+        ignore: [
+            // "index.html",
+          "isr/**/*"],
         cacheControl: "public,max-age=31536000,immutable",
       },
       // {
