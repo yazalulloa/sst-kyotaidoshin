@@ -6,6 +6,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/go-playground/form/v4"
@@ -23,12 +30,6 @@ import (
 	"github.com/yaz/kyo-repo/internal/rates"
 	"github.com/yaz/kyo-repo/internal/receiptPdf"
 	"github.com/yaz/kyo-repo/internal/util"
-	"io"
-	"log"
-	"net/http"
-	"strings"
-	"sync"
-	"time"
 )
 
 const _PATH = "/api/receipts"
@@ -859,11 +860,8 @@ func getHtml(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = api.AnchorClickInitView(presignedHTTPRequest.URL).Render(r.Context(), w)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	w.Header().Add("HX-Redirect", presignedHTTPRequest.URL)
+	w.WriteHeader(http.StatusOK)
 }
 
 func clearPdfs(w http.ResponseWriter, r *http.Request) {

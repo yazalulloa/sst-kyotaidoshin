@@ -2,6 +2,18 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"log"
+	"net"
+	"net/http"
+	"net/url"
+	"os"
+	"os/signal"
+	"strconv"
+	"syscall"
+	"time"
+	"unicode/utf8"
+
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/awslabs/aws-lambda-go-api-proxy/httpadapter"
 	"github.com/gorilla/handlers"
@@ -25,17 +37,6 @@ import (
 	"github.com/yaz/kyo-repo/internal/telegram_api"
 	"github.com/yaz/kyo-repo/internal/users"
 	"github.com/yaz/kyo-repo/internal/util"
-	"io"
-	"log"
-	"net"
-	"net/http"
-	"net/url"
-	"os"
-	"os/signal"
-	"strconv"
-	"syscall"
-	"time"
-	"unicode/utf8"
 )
 
 func router() http.Handler {
