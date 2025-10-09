@@ -4,22 +4,22 @@
     "": {
       "name": "@kyotaidoshin/openauthclient",
       "dependencies": {
-        "posthog-node": "^5.8.2",
+        "posthog-node": "5.9.5",
       },
       "devDependencies": {
-        "@types/aws-lambda": "^8.10.152",
+        "@types/aws-lambda": "8.10.155",
       },
       "peerDependencies": {
-        "typescript": "^5.7.3",
+        "typescript": "5.9.3",
       },
     },
   },
   "packages": {
-    "@posthog/core": ["@posthog/core@1.0.2", "", {}, "sha512-hWk3rUtJl2crQK0WNmwg13n82hnTwB99BT99/XI5gZSvIlYZ1TPmMZE8H2dhJJ98J/rm9vYJ/UXNzw3RV5HTpQ=="],
+    "@posthog/core": ["@posthog/core@1.2.4", "", {}, "sha512-o2TkycuV98PtAkcqE8B1DJv5LBvHEDTWirK5TlkQMeF2MJg0BYliY95CeRZFILNgZJCbI3k/fhahSMRQlpXOMg=="],
 
-    "@types/aws-lambda": ["@types/aws-lambda@8.10.152", "", {}, "sha512-soT/c2gYBnT5ygwiHPmd9a1bftj462NWVk2tKCc1PYHSIacB2UwbTS2zYG4jzag1mRDuzg/OjtxQjQ2NKRB6Rw=="],
+    "@types/aws-lambda": ["@types/aws-lambda@8.10.155", "", {}, "sha512-wd1XgoL0gy/ybo7WozUKQBd+IOgUkdfG6uUGI0fQOTEq06FBFdO7tmPDSxgjkFkl8GlfApvk5TvqZlAl0g+Lbg=="],
 
-    "posthog-node": ["posthog-node@5.8.2", "", { "dependencies": { "@posthog/core": "1.0.2" } }, "sha512-z3XRvYwnc3T/1999FKzv16YTpxERQqLunULl2vkOPfgbCXUGNyJWLgcbTcED2ZIDE11jjZhrSph4De6OSMLphw=="],
+    "posthog-node": ["posthog-node@5.9.5", "", { "dependencies": { "@posthog/core": "1.2.4" } }, "sha512-Rv82jMVhnxlBNf8wDbP+iAJdZrhU0aHul0LaFrQ/JGxxDiK3EkclIqr+QUwA9CulleTtXf6AIFz22tLvbVs/HA=="],
 
     "typescript": ["typescript@5.7.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-84MVSjMEHP+FQRPy3pX9sTVV/INIex71s9TL2Gm5FG/WG1SqXeKyZ0k7/blY/4FdOzI12CBy1vGc4og/eus0fw=="],
   }

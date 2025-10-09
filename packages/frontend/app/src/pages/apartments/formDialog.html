@@ -168,12 +168,11 @@
                  name="aliquot"
                  data-gt="0"
                  maxlength="16"
-                 step=".01"
+                 step="any"
                  x-model="aliquot"
                  x-init="
               trimInput($el);
               limitInputToMaxLength($el)
-              configureCurrencyInput($el)
               "
                  required/>
           <p class="fieldset-label"

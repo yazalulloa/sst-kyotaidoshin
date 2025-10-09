@@ -3,12 +3,12 @@
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
-    "@types/aws-lambda": "8.10.152"
+    "@types/aws-lambda": "8.10.155"
   },
   "peerDependencies": {
-    "typescript": "5.9.2"
+    "typescript": "5.9.3"
   },
   "dependencies": {
-    "posthog-node": "5.8.2"
+    "posthog-node": "5.9.5"
   }
 }

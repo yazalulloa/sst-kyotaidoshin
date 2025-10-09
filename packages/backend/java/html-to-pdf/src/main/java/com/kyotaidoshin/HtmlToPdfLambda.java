@@ -44,8 +44,6 @@ public class HtmlToPdfLambda implements RequestHandler<List<HtmlToPdfRequest>, S
         builder.toStream(byteArrayOutputStream);
         try (PdfBoxRenderer renderer = builder.buildPdfRenderer()) {
           renderer.createPDF();
-        } catch (IOException e) {
-          throw new RuntimeException(e);
         }
 
         byteArrayOutputStream.close();
