@@ -11,20 +11,20 @@
     "@alpinejs/collapse": "^3.15.0",
     "@alpinejs/focus": "^3.15.0",
     "@alpinejs/mask": "^3.15.0",
-    "@tailwindcss/vite": "^4.1.14",
+    "@tailwindcss/vite": "^4.1.16",
     "alpinejs": "^3.15.0",
     "alpinejs-i18n": "^2.5.3",
     "external-svg-loader": "^1.7.1",
     "htmx.org": "^2.0.7",
     "pinecone-router": "^7.2.0",
-    "posthog-js": "^1.274.1",
-    "tailwindcss": "^4.1.14"
+    "posthog-js": "^1.279.3",
+    "tailwindcss": "^4.1.16"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.19",
-    "daisyui": "^5.1.29",
-    "sst": "^3.17.14",
-    "vite": "^7.1.9",
+    "daisyui": "^5.3.8",
+    "sst": "^3.17.21",
+    "vite": "^7.1.12",
     "vite-plugin-handlebars": "^2.0.0",
     "vite-plugin-html": "^3.2.2"
   }

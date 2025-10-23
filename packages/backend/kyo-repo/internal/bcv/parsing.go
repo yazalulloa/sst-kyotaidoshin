@@ -4,6 +4,13 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
+	"log"
+	"strconv"
+	"strings"
+	"time"
+	"unicode"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
@@ -11,13 +18,8 @@ import (
 	"github.com/yaz/kyo-repo/internal/aws_h"
 	"github.com/yaz/kyo-repo/internal/db/gen/model"
 	"github.com/yaz/kyo-repo/internal/rates"
+	"github.com/yaz/kyo-repo/internal/telegram"
 	"github.com/yaz/kyo-repo/internal/util"
-	"io"
-	"log"
-	"strconv"
-	"strings"
-	"time"
-	"unicode"
 )
 
 type ParsingParams struct {
@@ -353,6 +355,14 @@ func (info ParsingInfo) parse() (*Result, error) {
 				return nil, parsingError.err(err)
 			}
 			result.Inserted += ratesInserted
+
+			if !info.ProcessAll && ratesInserted > 0 {
+				for _, rate := range rateArray {
+					if rate.FromCurrency == "USD" {
+						telegram.SendRate(info.Ctx, rate)
+					}
+				}
+			}
 		}
 	}
 

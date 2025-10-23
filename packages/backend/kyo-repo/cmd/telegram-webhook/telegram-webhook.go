@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"log"
+	"strings"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/go-telegram/bot/models"
 	"github.com/yaz/kyo-repo/internal/telegram"
-	"log"
-	"strings"
 )
 
 func handler(ctx context.Context, request events.APIGatewayProxyRequest) (string, error) {

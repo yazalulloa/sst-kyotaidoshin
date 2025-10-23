@@ -9,11 +9,11 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@aws-sdk/client-lambda": "3.906.0",
+    "@aws-sdk/client-lambda": "3.914.0",
     "@openauthjs/openauth": "0.4.3",
-    "hono": "4.9.10",
-    "posthog-node": "5.9.5",
-    "sst": "3.17.14",
+    "hono": "4.10.2",
+    "posthog-node": "5.10.3",
+    "sst": "3.17.21",
     "uuid": "13.0.0",
     "valibot": "1.1.0"
   }

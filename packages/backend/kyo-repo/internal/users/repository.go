@@ -2,6 +2,7 @@ package users
 
 import (
 	"context"
+
 	"github.com/go-jet/jet/v2/sqlite"
 	"github.com/yaz/kyo-repo/internal/db"
 	"github.com/yaz/kyo-repo/internal/db/gen/model"

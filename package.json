@@ -2,7 +2,7 @@
   "name": "kyotaidoshin",
   "version": "0.0.0",
   "workspaces": [
-    "packages/*"
+    "packages/**/*"
   ],
   "scripts": {},
   "devDependencies": {
@@ -10,6 +10,6 @@
     "typescript": "5.9.3"
   },
   "dependencies": {
-    "sst": "3.17.14"
+    "sst": "3.17.21"
   }
 }

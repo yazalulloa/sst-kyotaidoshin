@@ -3,12 +3,16 @@
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
-    "@types/aws-lambda": "8.10.155"
+    "@types/aws-lambda": "8.10.156"
   },
   "peerDependencies": {
     "typescript": "5.9.3"
   },
   "dependencies": {
-    "posthog-node": "5.9.5"
+    "posthog-node": "5.10.3",
+    "@openauthjs/openauth": "0.4.3",
+    "hono": "4.10.2",
+    "@kyotaidoshin/auth": "workspace:",
+    "sst": "3.17.21"
   }
 }

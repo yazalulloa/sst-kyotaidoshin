@@ -150,6 +150,57 @@ func optionsHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 }
 
+func SendRate(ctx context.Context, rate model.Rates) {
+
+	msg := fmt.Sprintf("NUEVA TASA: %s - %s", util.VED.Format(rate.Rate), rate.DateOfRate.Format(time.DateOnly))
+
+	list, err := users.NewRepository(ctx).GetTelegramIdsByNotificationEvent(users.NEW_RATE)
+	if err != nil {
+		log.Printf("Error getting telegram ids for new rate notification: %v", err)
+		return
+	}
+	length := len(list)
+	if length == 0 {
+		return
+	}
+
+	b, err := GetTelegramBot()
+	if err != nil {
+		log.Printf("Error getting telegram bot: %v", err)
+		return
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(length)
+	errorChan := make(chan error, length)
+
+	for _, chatId := range list {
+		go func() {
+			defer wg.Done()
+			msgParams := &bot.SendMessageParams{
+				ChatID: chatId,
+				Text:   msg,
+			}
+
+			_, err = b.SendMessage(ctx, msgParams)
+
+			if err != nil {
+				errorChan <- fmt.Errorf("error sending message: %v", err)
+				return
+			}
+		}()
+	}
+
+	wg.Wait()
+	close(errorChan)
+
+	err = util.HasErrors(errorChan)
+	if err != nil {
+		log.Printf("Error: %v", err)
+		return
+	}
+}
+
 func lastRateCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 	location, err := util.TzCss()
