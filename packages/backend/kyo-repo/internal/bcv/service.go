@@ -1,9 +1,19 @@
 package bcv
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"fmt"
+	"io"
+	"log"
+	"net"
+	"net/http"
+	"net/url"
+	"slices"
+	"strings"
+	"time"
+
 	"github.com/PuerkitoBio/goquery"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -11,13 +21,6 @@ import (
 	"github.com/cespare/xxhash"
 	"github.com/sst/sst/v3/sdk/golang/resource"
 	"github.com/yaz/kyo-repo/internal/aws_h"
-	"io"
-	"log"
-	"net"
-	"net/http"
-	"slices"
-	"strings"
-	"time"
 )
 
 const MetadataProcessedKey = "processed"
@@ -25,8 +28,38 @@ const MetadataLastProcessedKey = "lastprocessed"
 const MetadataRatesParsedKey = "ratesparsed"
 const MetadataNumOfSheetsKey = "numofsheets"
 
-var (
-	netTransport = &http.Transport{
+type Service struct {
+	ctx        context.Context
+	bucketName string
+	url        string
+	filePath   string
+	s3Client   *s3.Client
+	httpClient *http.Client
+}
+
+func NewService(ctx context.Context) (*Service, error) {
+	bucketName, err := GetBcvBucket()
+	if err != nil {
+		return nil, err
+	}
+
+	bcvUrlSecret, err := resource.Get("SecretBcvUrl", "value")
+	if err != nil {
+		log.Printf("Error getting bcv url: %s", err)
+		return nil, fmt.Errorf("error getting bcv url: %s", err)
+	}
+	filePath, err := resource.Get("SecretBcvFileStartPath", "value")
+	if err != nil {
+		log.Printf("Error getting bcv file start path: %s", err)
+		return nil, fmt.Errorf("error getting bcv file start path: %s", err)
+	}
+
+	client, err := aws_h.GetS3Client(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	netTransport := &http.Transport{
 		DialContext: (&net.Dialer{
 			Timeout: time.Second * 10,
 		}).DialContext,
@@ -34,11 +67,20 @@ var (
 		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
 	}
 
-	netClient = &http.Client{
+	netClient := &http.Client{
 		Timeout:   time.Second * 10,
 		Transport: netTransport,
 	}
-)
+
+	return &Service{
+		ctx:        ctx,
+		bucketName: bucketName,
+		url:        bcvUrlSecret.(string),
+		filePath:   filePath.(string),
+		s3Client:   client,
+		httpClient: netClient,
+	}, nil
+}
 
 type FileInfo struct {
 	Pos       int    `json:"pos"`
@@ -49,19 +91,9 @@ type FileInfo struct {
 	EtagWorks bool   `json:"etagWorks"`
 }
 
-func Check(ctx context.Context) error {
+func (service Service) Check() error {
 
-	bucketName, err := GetBcvBucket()
-	if err != nil {
-		return err
-	}
-
-	s3Client, err := aws_h.GetS3Client(ctx)
-	if err != nil {
-		return err
-	}
-
-	links, err := AllFileLinks()
+	links, err := service.allFileLinks()
 
 	if err != nil {
 		return err
@@ -72,8 +104,8 @@ func Check(ctx context.Context) error {
 		fileName := link[strings.LastIndex(link, "/")+1:]
 		objectKey := fmt.Sprintf("rates/bcv=%d=%s", pos, fileName)
 
-		headObj, err := s3Client.HeadObject(ctx, &s3.HeadObjectInput{
-			Bucket: aws.String(bucketName),
+		headObj, err := service.s3Client.HeadObject(service.ctx, &s3.HeadObjectInput{
+			Bucket: aws.String(service.bucketName),
 			Key:    aws.String(objectKey),
 		})
 
@@ -97,7 +129,7 @@ func Check(ctx context.Context) error {
 					return err
 				}
 				req.Header.Add("If-None-Match", oldEtag)
-				res, err := netClient.Do(req)
+				res, err := service.httpClient.Do(req)
 				if err != nil {
 					return err
 				}
@@ -118,7 +150,7 @@ func Check(ctx context.Context) error {
 
 		}
 
-		res, err := netClient.Get(link)
+		res, err := service.httpClient.Get(link)
 		//log.Errorf("Downloaded: %s %v", processor.Filepath, wgErr)
 		if err != nil {
 			return err
@@ -140,8 +172,8 @@ func Check(ctx context.Context) error {
 			metadata[MetadataProcessedKey] = "false"
 		}
 
-		_, err = s3Client.PutObject(ctx, &s3.PutObjectInput{
-			Bucket:            aws.String(bucketName),
+		_, err = service.s3Client.PutObject(service.ctx, &s3.PutObjectInput{
+			Bucket:            aws.String(service.bucketName),
 			Key:               aws.String(objectKey),
 			Body:              res.Body,
 			ChecksumAlgorithm: types.ChecksumAlgorithmCrc64nvme,
@@ -167,24 +199,13 @@ func Check(ctx context.Context) error {
 	return nil
 }
 
-func AllFileLinks() ([]string, error) {
+func (service Service) allFileLinks() ([]string, error) {
 
-	bcvUrlSecret, err := resource.Get("SecretBcvUrl", "value")
-	if err != nil {
-		log.Printf("Error getting bcv url: %s", err)
-		return nil, err
-	}
-	filePath, err := resource.Get("SecretBcvFileStartPath", "value")
-	if err != nil {
-		log.Printf("Error getting bcv file start path: %s", err)
-		return nil, err
-	}
-	bcvUrl := bcvUrlSecret.(string)
-	historicFilesUrl := bcvUrl + filePath.(string)
+	historicFilesUrl := service.url + service.filePath
 
 	var links []string
 	var pagelinks []string
-	err = historicLinks(&links, historicFilesUrl)
+	err := service.historicLinks(&links, historicFilesUrl)
 	pagelinks = append(pagelinks, historicFilesUrl)
 
 	if err != nil {
@@ -195,9 +216,9 @@ func AllFileLinks() ([]string, error) {
 		execute := false
 		for _, link := range links {
 			if !strings.HasSuffix(link, ".xls") {
-				nextUrl := bcvUrl + link
+				nextUrl := service.url + link
 				if !slices.Contains(pagelinks, nextUrl) {
-					err := historicLinks(&links, nextUrl)
+					err := service.historicLinks(&links, nextUrl)
 					execute = true
 					pagelinks = append(pagelinks, nextUrl)
 					if err != nil {
@@ -228,10 +249,44 @@ func AllFileLinks() ([]string, error) {
 	return links, nil
 }
 
-func historicLinks(links *[]string, url string) error {
+func (service Service) historicLinks(links *[]string, pageUrl string) error {
+	key := url.QueryEscape(pageUrl)
 
-	res, err := netClient.Get(url)
+	req, err := http.NewRequest("GET", pageUrl, nil)
+	if err != nil {
+		return err
+	}
 
+	getObjectOutput, err := service.s3Client.GetObject(service.ctx, &s3.GetObjectInput{
+		Bucket: aws.String(service.bucketName),
+		Key:    aws.String(key),
+	})
+
+	var pageToParse io.Reader
+
+	if err != nil {
+		//err.Error().contains("The specified key does not exist")
+		is404 := strings.Contains(err.Error(), "response error StatusCode: 404")
+
+		if !is404 {
+			return err
+		}
+
+	} else {
+		defer func(Body io.ReadCloser) {
+			err := Body.Close()
+			if err != nil {
+				log.Println("Error closing response body:", err)
+				return
+			}
+		}(getObjectOutput.Body)
+
+		oldEtag := getObjectOutput.Metadata["etag"]
+
+		req.Header.Add("If-None-Match", oldEtag)
+	}
+
+	res, err := service.httpClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -244,11 +299,34 @@ func historicLinks(links *[]string, url string) error {
 		}
 	}(res.Body)
 
-	if res.StatusCode != 200 {
-		return fmt.Errorf("error bcv res: %d", res.StatusCode)
+	if res.StatusCode == 304 {
+		pageToParse = getObjectOutput.Body
+	} else if res.StatusCode == 200 {
+		bodyBytes, err := io.ReadAll(res.Body)
+		if err != nil {
+			return err
+		}
+
+		_, err = service.s3Client.PutObject(service.ctx, &s3.PutObjectInput{
+			Bucket:        aws.String(service.bucketName),
+			Key:           aws.String(key),
+			Body:          bytes.NewBuffer(bodyBytes),
+			ContentLength: &res.ContentLength,
+			Metadata: map[string]string{
+				"etag": res.Header.Get("ETag"),
+			},
+		})
+
+		if err != nil {
+			return err
+		}
+
+		pageToParse = bytes.NewBuffer(bodyBytes)
+	} else {
+		return fmt.Errorf("error bcv page res: %d", res.StatusCode)
 	}
 
-	doc, err := goquery.NewDocumentFromReader(res.Body)
+	doc, err := goquery.NewDocumentFromReader(pageToParse)
 	if err != nil {
 		return err
 	}

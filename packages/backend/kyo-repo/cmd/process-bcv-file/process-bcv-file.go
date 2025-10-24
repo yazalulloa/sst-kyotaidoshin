@@ -26,7 +26,8 @@ func handler(ctx context.Context, sqsEvent events.SQSEvent) error {
 		for _, s3Record := range s3Event.Records {
 			log.Printf("S3 Event %s", s3Record.EventName)
 
-			if strings.Contains(s3Record.EventName, "ObjectCreated:Copy") {
+			if strings.Contains(s3Record.EventName, "ObjectCreated:Copy") ||
+				!strings.HasSuffix(s3Record.S3.Object.Key, ".xls") {
 				log.Printf("Skipping %s", s3Record.S3.Object.Key)
 				continue
 			}

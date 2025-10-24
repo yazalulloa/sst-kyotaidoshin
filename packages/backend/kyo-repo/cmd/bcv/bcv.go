@@ -9,7 +9,11 @@ import (
 )
 
 func handler(ctx context.Context, event interface{}) (string, error) {
-	err := bcv.Check(ctx)
+	service, err := bcv.NewService(ctx)
+	if err != nil {
+		return "", err
+	}
+	err = service.Check()
 	if err != nil {
 		return "", err
 	}

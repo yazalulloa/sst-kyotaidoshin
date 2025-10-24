@@ -3,6 +3,14 @@ package bcv_bucket
 import (
 	"context"
 	"fmt"
+	"log"
+	"net/http"
+	"sort"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -13,13 +21,6 @@ import (
 	"github.com/yaz/kyo-repo/internal/aws_h"
 	"github.com/yaz/kyo-repo/internal/bcv"
 	"github.com/yaz/kyo-repo/internal/util"
-	"log"
-	"net/http"
-	"sort"
-	"strconv"
-	"strings"
-	"sync"
-	"time"
 )
 
 const _PATH = "/api/bcv-bucket"
@@ -47,7 +48,11 @@ func search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s3List, err := s3Client.ListObjectsV2(r.Context(), &s3.ListObjectsV2Input{Bucket: aws.String(bucketName)})
+	s3List, err := s3Client.ListObjectsV2(r.Context(), &s3.ListObjectsV2Input{
+		Bucket: aws.String(bucketName),
+		Prefix: aws.String("rates/"),
+	})
+
 	if err != nil {
 		log.Printf("Error getting objects from bucket %s: %s", bucketName, err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -351,7 +356,13 @@ type TableResponse struct {
 }
 
 func lookUp(w http.ResponseWriter, r *http.Request) {
-	err := bcv.Check(r.Context())
+	service, err := bcv.NewService(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	err = service.Check()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
