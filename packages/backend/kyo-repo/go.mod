@@ -16,7 +16,7 @@ require (
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
 	github.com/cespare/xxhash v1.1.0
 	github.com/go-jet/jet/v2 v2.14.0
-	github.com/go-playground/form/v4 v4.2.1
+	github.com/go-playground/form/v4 v4.3.0
 	github.com/go-playground/validator/v10 v10.28.0
 	github.com/go-telegram/bot v1.17.0
 	github.com/google/uuid v1.6.0
