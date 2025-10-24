@@ -1,7 +1,6 @@
 package bcv
 
 import (
-	"bytes"
 	"context"
 	"crypto/tls"
 	"fmt"
@@ -9,9 +8,9 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"net/url"
 	"slices"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
@@ -21,6 +20,7 @@ import (
 	"github.com/cespare/xxhash"
 	"github.com/sst/sst/v3/sdk/golang/resource"
 	"github.com/yaz/kyo-repo/internal/aws_h"
+	"github.com/yaz/kyo-repo/internal/util"
 )
 
 const MetadataProcessedKey = "processed"
@@ -99,101 +99,119 @@ func (service Service) Check() error {
 		return err
 	}
 
+	length := len(links)
+	if length == 0 {
+		log.Println("No files to check")
+		return nil
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(length)
+	errorChan := make(chan error, length)
+
 	for pos, link := range links {
-
-		fileName := link[strings.LastIndex(link, "/")+1:]
-		objectKey := fmt.Sprintf("rates/bcv=%d=%s", pos, fileName)
-
-		headObj, err := service.s3Client.HeadObject(service.ctx, &s3.HeadObjectInput{
-			Bucket: aws.String(service.bucketName),
-			Key:    aws.String(objectKey),
-		})
-
-		if err != nil {
-			//err.Error().contains("The specified key does not exist")
-			is404 := strings.Contains(err.Error(), "response error StatusCode: 404")
-
-			if !is404 {
-				return err
+		go func() {
+			defer wg.Done()
+			linkErr := service.checkLink(pos, link)
+			if linkErr != nil {
+				errorChan <- fmt.Errorf("error checking file link %d - %s: %s", pos, link, linkErr)
 			}
+		}()
+	}
 
-		} else {
+	wg.Wait()
+	close(errorChan)
 
-			oldEtag := headObj.Metadata["etag"]
-			oldLastModified := headObj.Metadata["lastmodified"]
-			if oldEtag != "" && oldLastModified != "" {
-				//log.Printf("old metadata: %s %s", oldEtag, oldLastModified)
+	return util.HasErrors(errorChan)
+}
 
-				req, err := http.NewRequest("HEAD", link, nil)
-				if err != nil {
-					return err
-				}
-				req.Header.Add("If-None-Match", oldEtag)
-				res, err := service.httpClient.Do(req)
-				if err != nil {
-					return err
-				}
+func (service Service) checkLink(pos int, link string) error {
+	fileName := link[strings.LastIndex(link, "/")+1:]
+	objectKey := fmt.Sprintf("rates/bcv=%d=%s", pos, fileName)
 
-				if res.StatusCode == 304 {
-					//log.Printf("etag matches, skipping")
-					continue
-				}
+	req, err := http.NewRequest("GET", link, nil)
+	if err != nil {
+		return err
+	}
 
-				err = res.Body.Close()
-				if err != nil {
-					return err
-				}
-			}
+	headObj, err := service.s3Client.HeadObject(service.ctx, &s3.HeadObjectInput{
+		Bucket: aws.String(service.bucketName),
+		Key:    aws.String(objectKey),
+	})
 
-			//bs, _ := json.Marshal(headObj.Metadata)
-			//log.Printf("Metadata: %s", string(bs))
+	if err != nil {
+		//err.Error().contains("The specified key does not exist")
+		is404 := strings.Contains(err.Error(), "response error StatusCode: 404")
 
-		}
-
-		res, err := service.httpClient.Get(link)
-		//log.Errorf("Downloaded: %s %v", processor.Filepath, wgErr)
-		if err != nil {
+		if !is404 {
 			return err
 		}
 
-		//hash, err := FileHash(res.Body)
-		//if err != nil {
-		//	return err
-		//}
+	} else {
 
-		etag := res.Header.Get("ETag")
-
-		metadata := make(map[string]string)
-		metadata["etag"] = etag
-		metadata["lastmodified"] = res.Header.Get("Last-Modified")
-		metadata["url"] = link
-
-		if headObj == nil || headObj.Metadata[MetadataProcessedKey] == "" {
-			metadata[MetadataProcessedKey] = "false"
+		oldEtag := headObj.Metadata["etag"]
+		oldLastModified := headObj.Metadata["lastmodified"]
+		if oldEtag != "" && oldLastModified != "" {
+			req.Header.Add("If-None-Match", oldEtag)
+			req.Header.Add("If-Modified-Since", oldLastModified)
 		}
+	}
 
-		_, err = service.s3Client.PutObject(service.ctx, &s3.PutObjectInput{
-			Bucket:            aws.String(service.bucketName),
-			Key:               aws.String(objectKey),
-			Body:              res.Body,
-			ChecksumAlgorithm: types.ChecksumAlgorithmCrc64nvme,
-			//ChecksumCRC32:             nil,
-			//ChecksumCRC32C:            nil,
-			//ChecksumSHA1:              nil,
-			//ChecksumSHA256:            nil,
-			ContentLength: &res.ContentLength,
-			//ContentType:                 res.ty,
-			Metadata: metadata,
-		})
+	res, err := service.httpClient.Do(req)
+	//log.Errorf("Downloaded: %s %v", processor.Filepath, wgErr)
+	if err != nil {
+		return err
+	}
 
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
 		if err != nil {
-			return err
+			log.Println("Error closing response body:", err)
+			return
 		}
+	}(res.Body)
 
-		err = res.Body.Close()
-		if err != nil {
-			return err
-		}
+	if res.StatusCode == 304 {
+		log.Printf("File %s is up to date", objectKey)
+		return nil
+	}
+
+	if res.StatusCode != 200 {
+		return fmt.Errorf("error downloading file %s: status code %d", link, res.StatusCode)
+	}
+
+	//hash, err := FileHash(res.Body)
+	//if err != nil {
+	//	return err
+	//}
+
+	etag := res.Header.Get("ETag")
+
+	metadata := make(map[string]string)
+	metadata["etag"] = etag
+	metadata["lastmodified"] = res.Header.Get("Last-Modified")
+	metadata["url"] = link
+
+	if headObj == nil || headObj.Metadata[MetadataProcessedKey] == "" {
+		metadata[MetadataProcessedKey] = "false"
+	}
+
+	_, err = service.s3Client.PutObject(service.ctx, &s3.PutObjectInput{
+		Bucket:            aws.String(service.bucketName),
+		Key:               aws.String(objectKey),
+		Body:              res.Body,
+		ChecksumAlgorithm: types.ChecksumAlgorithmCrc64nvme,
+		//ChecksumCRC32:             nil,
+		//ChecksumCRC32C:            nil,
+		//ChecksumSHA1:              nil,
+		//ChecksumSHA256:            nil,
+		ContentLength: &res.ContentLength,
+		//ContentType:                 res.ty,
+		Metadata: metadata,
+	})
+
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -250,43 +268,8 @@ func (service Service) allFileLinks() ([]string, error) {
 }
 
 func (service Service) historicLinks(links *[]string, pageUrl string) error {
-	key := url.QueryEscape(pageUrl)
 
-	req, err := http.NewRequest("GET", pageUrl, nil)
-	if err != nil {
-		return err
-	}
-
-	getObjectOutput, err := service.s3Client.GetObject(service.ctx, &s3.GetObjectInput{
-		Bucket: aws.String(service.bucketName),
-		Key:    aws.String(key),
-	})
-
-	var pageToParse io.Reader
-
-	if err != nil {
-		//err.Error().contains("The specified key does not exist")
-		is404 := strings.Contains(err.Error(), "response error StatusCode: 404")
-
-		if !is404 {
-			return err
-		}
-
-	} else {
-		defer func(Body io.ReadCloser) {
-			err := Body.Close()
-			if err != nil {
-				log.Println("Error closing response body:", err)
-				return
-			}
-		}(getObjectOutput.Body)
-
-		oldEtag := getObjectOutput.Metadata["etag"]
-
-		req.Header.Add("If-None-Match", oldEtag)
-	}
-
-	res, err := service.httpClient.Do(req)
+	res, err := service.httpClient.Get(pageUrl)
 	if err != nil {
 		return err
 	}
@@ -299,34 +282,11 @@ func (service Service) historicLinks(links *[]string, pageUrl string) error {
 		}
 	}(res.Body)
 
-	if res.StatusCode == 304 {
-		pageToParse = getObjectOutput.Body
-	} else if res.StatusCode == 200 {
-		bodyBytes, err := io.ReadAll(res.Body)
-		if err != nil {
-			return err
-		}
-
-		_, err = service.s3Client.PutObject(service.ctx, &s3.PutObjectInput{
-			Bucket:        aws.String(service.bucketName),
-			Key:           aws.String(key),
-			Body:          bytes.NewBuffer(bodyBytes),
-			ContentLength: &res.ContentLength,
-			Metadata: map[string]string{
-				"etag": res.Header.Get("ETag"),
-			},
-		})
-
-		if err != nil {
-			return err
-		}
-
-		pageToParse = bytes.NewBuffer(bodyBytes)
-	} else {
+	if res.StatusCode != 200 {
 		return fmt.Errorf("error bcv page res: %d", res.StatusCode)
 	}
 
-	doc, err := goquery.NewDocumentFromReader(pageToParse)
+	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
 		return err
 	}
