@@ -7,10 +7,10 @@ require (
 	github.com/ROU-Technology/openauth-go v0.0.7
 	github.com/a-h/templ v0.3.960
 	github.com/andybalholm/brotli v1.2.0
-	github.com/aws/aws-lambda-go v1.49.0
+	github.com/aws/aws-lambda-go v1.50.0
 	github.com/aws/aws-sdk-go-v2 v1.39.4
 	github.com/aws/aws-sdk-go-v2/config v1.31.15
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.77.6
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.79.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.88.7
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.42.11
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
@@ -22,7 +22,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/handlers v1.5.2
 	github.com/gorilla/mux v1.8.1
-	github.com/posthog/posthog-go v1.5.16
+	github.com/posthog/posthog-go v1.6.12
 	github.com/shakinm/xlsReader v0.9.12
 	github.com/sst/sst/v3 v3.17.21
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240902231107-85af5b9d094d

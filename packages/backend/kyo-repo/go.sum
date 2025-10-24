@@ -55,6 +55,8 @@ github.com/aws/aws-lambda-go v1.48.0 h1:1aZUYsrJu0yo5fC4z+Rba1KhNImXcJcvHu763Bxo
 github.com/aws/aws-lambda-go v1.48.0/go.mod h1:dpMpZgvWx5vuQJfBt0zqBha60q7Dd7RfgJv23DymV8A=
 github.com/aws/aws-lambda-go v1.49.0 h1:z4VhTqkFZPM3xpEtTqWqRqsRH4TZBMJqTkRiBPYLqIQ=
 github.com/aws/aws-lambda-go v1.49.0/go.mod h1:dpMpZgvWx5vuQJfBt0zqBha60q7Dd7RfgJv23DymV8A=
+github.com/aws/aws-lambda-go v1.50.0 h1:0GzY18vT4EsCvIyk3kn3ZH5Jg30NRlgYaai1w0aGPMU=
+github.com/aws/aws-lambda-go v1.50.0/go.mod h1:dpMpZgvWx5vuQJfBt0zqBha60q7Dd7RfgJv23DymV8A=
 github.com/aws/aws-sdk-go-v2 v1.36.3 h1:mJoei2CxPutQVxaATCzDUjcZEjVRdpsiiXi2o38yqWM=
 github.com/aws/aws-sdk-go-v2 v1.36.3/go.mod h1:LLXuLpgzEbD766Z5ECcRmi8AzSwfZItDtmABVkRLGzg=
 github.com/aws/aws-sdk-go-v2 v1.36.4 h1:GySzjhVvx0ERP6eyfAbAuAXLtAda5TEy19E5q5W8I9E=
@@ -241,6 +243,8 @@ github.com/aws/aws-sdk-go-v2/service/lambda v1.77.4 h1:jUPCc+cetLIJK/YJnuLou24Ij
 github.com/aws/aws-sdk-go-v2/service/lambda v1.77.4/go.mod h1:uCclLX4a0dWB1ZToNE4ZhC9R1gQTWP+0uN6uxWftB1o=
 github.com/aws/aws-sdk-go-v2/service/lambda v1.77.6 h1:bU48NwA1e9jFkng1qYUVQjdJFEIv0oxhDO/Zz57M5IU=
 github.com/aws/aws-sdk-go-v2/service/lambda v1.77.6/go.mod h1:LFNm6TvaFI2Li7U18hJB++k+qH5nK3TveIFD7x9TFHc=
+github.com/aws/aws-sdk-go-v2/service/lambda v1.79.0 h1:VwFFT9OroV+HDsl39ZOpVMz5UKsBp7z6AkuocPVal3o=
+github.com/aws/aws-sdk-go-v2/service/lambda v1.79.0/go.mod h1:iPEivsdTSWfNjDdrerAdgPQ5lnzk3lod1s21V60oWVc=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.79.3 h1:BRXS0U76Z8wfF+bnkilA2QwpIch6URlm++yPUt9QPmQ=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.79.3/go.mod h1:bNXKFFyaiVvWuR6O16h/I1724+aXe/tAkA9/QS01t5k=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.79.4 h1:4yxno6bNHkekkfqG/a1nz/gC2gBwhJSojV1+oTE7K+4=
@@ -436,6 +440,8 @@ github.com/posthog/posthog-go v1.5.9 h1:ZtHUyabbtWTmLzC7qtkCm+ne8Byj8X2mtopEGgsI
 github.com/posthog/posthog-go v1.5.9/go.mod h1:ZPCind3bz8xDLK0Zhvpv1fQav6WfRcQDqTMfMXmna98=
 github.com/posthog/posthog-go v1.5.16 h1:avtBPGEjQ7NRB6/xY7iwNi92hiJGUcfIk0G6nrWTztI=
 github.com/posthog/posthog-go v1.5.16/go.mod h1:ZPCind3bz8xDLK0Zhvpv1fQav6WfRcQDqTMfMXmna98=
+github.com/posthog/posthog-go v1.6.12 h1:rsOBL/YdMfLJtOVjKJLgdzYmvaL3aIW6IVbAteSe+aI=
+github.com/posthog/posthog-go v1.6.12/go.mod h1:LcC1Nu4AgvV22EndTtrMXTy+7RGVC0MhChSw7Qk5XkY=
 github.com/richardlehane/mscfb v1.0.4 h1:WULscsljNPConisD5hR0+OyZjwK46Pfyr6mPu5ZawpM=
 github.com/richardlehane/mscfb v1.0.4/go.mod h1:YzVpcZg9czvAuhk9T+a3avCpcFPMUWm7gK3DypaEsUk=
 github.com/richardlehane/msoleps v1.0.1/go.mod h1:BWev5JBpU9Ko2WAgmZEuiz4/u3ZYTKbjLycmwiWUfWg=
