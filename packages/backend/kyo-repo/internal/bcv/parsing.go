@@ -36,8 +36,6 @@ func fileParse(params ParsingParams) error {
 
 	objKey := strings.ReplaceAll(params.Key, "%3D", "=")
 
-	log.Printf("Processing %s\n", objKey)
-
 	output, err := client.GetObject(params.Ctx, &s3.GetObjectInput{
 		Bucket: aws.String(params.Bucket),
 		Key:    aws.String(objKey),
@@ -349,16 +347,19 @@ func (info ParsingInfo) parse() (*Result, error) {
 
 		if info.ProcessAll || sheetIndex == 0 {
 
-			ratesInserted, err := processRates(info.Ctx, &rateArray)
+			ratesInserted, err := rates.NewRepository(info.Ctx).Insert(rateArray)
 			parsingError.Value = ""
 			if err != nil {
 				return nil, parsingError.err(err)
 			}
 			result.Inserted += ratesInserted
 
+			//log.Printf("Sheet: %s rates %d inserted: %d", sheet.GetName(), len(rateArray), ratesInserted)
+
 			if !info.ProcessAll && ratesInserted > 0 {
 				for _, rate := range rateArray {
 					if rate.FromCurrency == "USD" {
+						log.Printf("Sending USD rate: %f", rate.Rate)
 						telegram.SendRate(info.Ctx, rate)
 					}
 				}
@@ -367,16 +368,6 @@ func (info ParsingInfo) parse() (*Result, error) {
 	}
 
 	return &result, nil
-}
-
-func processRates(ctx context.Context, rateArray *[]model.Rates) (int64, error) {
-
-	rowsAffected, err := rates.NewRepository(ctx).Insert(*rateArray)
-	if err != nil {
-		return 0, err
-	}
-
-	return rowsAffected, nil
 }
 
 func toASCII(str string) string {

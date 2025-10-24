@@ -224,8 +224,6 @@ func process(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Handling PROCESS %s", str)
-
 	ProcessAll := true
 	err = bcv.ParseFile(bcv.ParsingParams{
 		Ctx:        r.Context(),

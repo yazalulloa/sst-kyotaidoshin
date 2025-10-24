@@ -2,12 +2,13 @@ package rates
 
 import (
 	"context"
+	"time"
+
 	"github.com/go-jet/jet/v2/sqlite"
 	"github.com/yaz/kyo-repo/internal/db"
 	"github.com/yaz/kyo-repo/internal/db/gen/model"
 	. "github.com/yaz/kyo-repo/internal/db/gen/table"
 	"github.com/yaz/kyo-repo/internal/util"
-	"time"
 )
 
 type Repository struct {
@@ -142,9 +143,9 @@ func (repo Repository) Insert(rates []model.Rates) (int64, error) {
 		return 0, err
 	}
 
-	//id, err := res.LastInsertId()
+	//lastInsertId, err := res.LastInsertId()
 	//if err != nil {
-	//	return 0, err
+	//	return 0, 0, err
 	//}
 
 	rowsAffected, err := res.RowsAffected()
