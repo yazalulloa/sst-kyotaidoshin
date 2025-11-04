@@ -289,6 +289,7 @@ func processAll(w http.ResponseWriter, r *http.Request) {
 	var wg sync.WaitGroup
 	wg.Add(len(s3List.Contents))
 	errorChan := make(chan error, len(s3List.Contents))
+	ProcessAll := true
 
 	for _, item := range s3List.Contents {
 
@@ -300,7 +301,6 @@ func processAll(w http.ResponseWriter, r *http.Request) {
 		go func(item types.Object) {
 			defer wg.Done()
 
-			ProcessAll := true
 			err := bcv.ParseFile(bcv.ParsingParams{
 				Ctx:        r.Context(),
 				Bucket:     bucketName,

@@ -17,7 +17,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
-	"github.com/cespare/xxhash"
 	"github.com/sst/sst/v3/sdk/golang/resource"
 	"github.com/yaz/kyo-repo/internal/aws_h"
 	"github.com/yaz/kyo-repo/internal/util"
@@ -93,7 +92,7 @@ type FileInfo struct {
 
 func (service Service) Check() error {
 
-	links, err := service.allFileLinks()
+	links, err := service.fileLinks()
 
 	if err != nil {
 		return err
@@ -217,61 +216,81 @@ func (service Service) checkLink(pos int, link string) error {
 	return nil
 }
 
-func (service Service) allFileLinks() ([]string, error) {
+func (service Service) fileLinks() ([]string, error) {
+	var visited []string
+	var fileLinks []string
+	var nextPages []string
 
-	historicFilesUrl := service.url + service.filePath
+	nextPages = append(nextPages, service.url+service.filePath)
 
-	var links []string
-	var pagelinks []string
-	err := service.historicLinks(&links, historicFilesUrl)
-	pagelinks = append(pagelinks, historicFilesUrl)
-
-	if err != nil {
-		return nil, err
-	}
-
-	checkLinks := func() (bool, error) {
-		execute := false
-		for _, link := range links {
-			if !strings.HasSuffix(link, ".xls") {
-				nextUrl := service.url + link
-				if !slices.Contains(pagelinks, nextUrl) {
-					err := service.historicLinks(&links, nextUrl)
-					execute = true
-					pagelinks = append(pagelinks, nextUrl)
-					if err != nil {
-						return execute, err
-					}
-				}
-			}
+	running := true
+	for running {
+		length := len(nextPages)
+		if length == 0 {
+			running = false
+			break
 		}
 
-		return execute, nil
-	}
+		var wg sync.WaitGroup
+		wg.Add(length)
+		linkChan := make(chan []string, length)
+		errorChan := make(chan error, length)
 
-	while := true
-	counter := 0
-	for while {
-		counter++
-		while, err = checkLinks()
+		for _, pageUrl := range nextPages {
+			go func() {
+				defer wg.Done()
+				links, err := service.links(pageUrl)
+				if err != nil {
+					errorChan <- err
+					return
+				}
+
+				//log.Printf("Found %d links on page %s", len(links), pageUrl)
+				linkChan <- links
+				//log.Printf("Processed page: %s", pageUrl)
+			}()
+
+			visited = append(visited, pageUrl)
+		}
+
+		wg.Wait()
+		close(linkChan)
+		close(errorChan)
+
+		err := util.HasErrors(errorChan)
 		if err != nil {
 			return nil, err
 		}
+
+		nextPages = nil
+
+		for links := range linkChan {
+			for _, link := range links {
+				pageLink := service.url + link
+				if strings.HasSuffix(link, ".xls") {
+					if !slices.Contains(fileLinks, link) {
+						fileLinks = append(fileLinks, link)
+					}
+				} else {
+					if !slices.Contains(visited, pageLink) && !slices.Contains(nextPages, pageLink) {
+						nextPages = append(nextPages, pageLink)
+					}
+				}
+
+			}
+		}
 	}
 
-	links = slices.DeleteFunc(links, func(link string) bool {
-		return !strings.HasSuffix(link, ".xls")
-	})
-	slices.Reverse(links)
-
-	return links, nil
+	return fileLinks, nil
 }
 
-func (service Service) historicLinks(links *[]string, pageUrl string) error {
+func (service Service) links(pageUrl string) ([]string, error) {
+
+	log.Printf("Fetching links from %s", pageUrl)
 
 	res, err := service.httpClient.Get(pageUrl)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	defer func(Body io.ReadCloser) {
@@ -283,43 +302,32 @@ func (service Service) historicLinks(links *[]string, pageUrl string) error {
 	}(res.Body)
 
 	if res.StatusCode != 200 {
-		return fmt.Errorf("error bcv page res: %d", res.StatusCode)
+		return nil, fmt.Errorf("error bcv page res: %d", res.StatusCode)
 	}
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	section := doc.Find("#block-system-main")
 
 	if section == nil {
 		log.Printf("#block-system-main Section not found")
-		return fmt.Errorf("error getting section")
+		return nil, fmt.Errorf("error getting section")
 	}
 
 	sel := section.Find("a")
+	var links []string
 	for i := range sel.Nodes {
 		single := sel.Eq(i)
 		href, b := single.Attr("href")
 		if b {
-			if !slices.Contains(*links, href) {
-				*links = append(*links, href)
+			if !slices.Contains(links, href) {
+				links = append(links, href)
 			}
 		}
 	}
 
-	return nil
-}
-
-func FileHash(body io.ReadCloser) (int64, error) {
-
-	buf := make([]byte, 1024*1024)
-	hash := xxhash.New()
-	if _, err := io.CopyBuffer(hash, body, buf); err != nil {
-		return 0, err
-	}
-	bytesSum := hash.Sum(nil)
-	fileHash := int64(xxhash.Sum64(bytesSum))
-	return fileHash, nil
+	return links, nil
 }

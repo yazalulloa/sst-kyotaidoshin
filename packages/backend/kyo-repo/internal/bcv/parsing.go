@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -163,11 +162,12 @@ func (info ParsingInfo) parse() (*Result, error) {
 
 	result.NumOfSheets = workbook.GetNumberSheets()
 
+	var rateArray []model.Rates
+
 	for sheetIndex, sheet := range workbook.GetSheets() {
 		parsingError.SheetName = sheet.GetName()
 		var dateOfFile *time.Time
 		var dateOfRate time.Time
-		var rateArray []model.Rates
 		for rowIndex, row := range sheet.GetRows() {
 			parsingError.RowIndex = rowIndex
 
@@ -207,7 +207,7 @@ func (info ParsingInfo) parse() (*Result, error) {
 						return nil, parsingError.err(err)
 					}
 
-					if len(split) > 2 && split[2] == "PM" {
+					if split[2] == "PM" {
 						hour += 12
 					}
 
@@ -219,6 +219,14 @@ func (info ParsingInfo) parse() (*Result, error) {
 
 					temp := time.Date(year, time.Month(month), day, hour, minute, 0, 0, location)
 					dateOfFile = &temp
+				} else {
+					fValue := col6.GetFloat64()
+					if fValue != 0 {
+						log.Printf("Excel date format detected: %s %s %f", info.BucketKey, sheet.GetName(), fValue)
+						temp := util.ParseExcelDate(fValue, location)
+						dateOfFile = &temp
+						log.Printf("Parsed excel dateOfFile: %s", dateOfFile)
+					}
 				}
 
 			}
@@ -254,6 +262,7 @@ func (info ParsingInfo) parse() (*Result, error) {
 
 					temp := time.Date(year, time.Month(month), day, 0, 0, 0, 0, location)
 					dateOfFile = &temp
+					log.Printf("ALT Parsed dateOfFile from row 4: %s", dateOfFile)
 				}
 
 				col3, err := row.GetCol(3)
@@ -342,40 +351,52 @@ func (info ParsingInfo) parse() (*Result, error) {
 
 		}
 
+		if !info.ProcessAll && sheetIndex == 0 {
+			break
+		}
+
 		//log.Printf("Sheet: %s rates: %d %s %s", sheet.GetName(), len(rateArray), dateOfRate, dateOfFile)
-		result.Parsed += int64(len(rateArray))
+		//result.Parsed += int64(len(rateArray))
+		//
+		//if info.ProcessAll || sheetIndex == 0 {
+		//
+		//	ratesInserted, err := rates.NewRepository(info.Ctx).Insert(rateArray)
+		//	parsingError.Value = ""
+		//	if err != nil {
+		//		return nil, parsingError.err(err)
+		//	}
+		//	result.Inserted += ratesInserted
+		//
+		//	//log.Printf("Sheet: %s rates %d inserted: %d", sheet.GetName(), len(rateArray), ratesInserted)
+		//
+		//	if !info.ProcessAll && ratesInserted > 0 {
+		//		for _, rate := range rateArray {
+		//			if rate.FromCurrency == "USD" {
+		//				log.Printf("Sending USD rate: %f", rate.Rate)
+		//				telegram.SendRate(info.Ctx, rate)
+		//			}
+		//		}
+		//	}
+		//}
+	}
 
-		if info.ProcessAll || sheetIndex == 0 {
+	ratesInserted, err := rates.NewRepository(info.Ctx).Insert(rateArray)
+	parsingError.Value = ""
+	if err != nil {
+		return nil, parsingError.err(err)
+	}
+	result.Inserted += ratesInserted
 
-			ratesInserted, err := rates.NewRepository(info.Ctx).Insert(rateArray)
-			parsingError.Value = ""
-			if err != nil {
-				return nil, parsingError.err(err)
-			}
-			result.Inserted += ratesInserted
+	//log.Printf("Sheet: %s rates %d inserted: %d", sheet.GetName(), len(rateArray), ratesInserted)
 
-			//log.Printf("Sheet: %s rates %d inserted: %d", sheet.GetName(), len(rateArray), ratesInserted)
-
-			if !info.ProcessAll && ratesInserted > 0 {
-				for _, rate := range rateArray {
-					if rate.FromCurrency == "USD" {
-						log.Printf("Sending USD rate: %f", rate.Rate)
-						telegram.SendRate(info.Ctx, rate)
-					}
-				}
+	if !info.ProcessAll && ratesInserted > 0 {
+		for _, rate := range rateArray {
+			if rate.FromCurrency == "USD" {
+				log.Printf("Sending USD rate: %f", rate.Rate)
+				telegram.SendRate(info.Ctx, rate)
 			}
 		}
 	}
 
 	return &result, nil
-}
-
-func toASCII(str string) string {
-	runes := []rune(str)
-	for i, r := range runes {
-		if r > unicode.MaxASCII {
-			runes[i] = unicode.ReplacementChar
-		}
-	}
-	return string(runes)
 }

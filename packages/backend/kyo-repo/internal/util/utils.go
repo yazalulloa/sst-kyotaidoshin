@@ -6,16 +6,18 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/google/uuid"
-	"github.com/yaz/kyo-repo/internal/aws_h"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/google/uuid"
+	"github.com/yaz/kyo-repo/internal/aws_h"
 )
 
 const CsrfKey = "csrf-key"
@@ -252,4 +254,22 @@ func DeleteFile(filename string) {
 	if err != nil {
 		log.Printf("Error deleting file %s: %s", filename, err)
 	}
+}
+
+const MsPerDay = 24 * 60 * 60 * 1000
+const excelEpochOffset = 25569
+
+func ParseExcelDate(excelDate float64, loc *time.Location) time.Time {
+	daysSinceEpoch := excelDate - excelEpochOffset
+	milliseconds := daysSinceEpoch * MsPerDay
+	milliseconds = math.Ceil(milliseconds)
+	milli := int64(milliseconds)
+
+	tInLocation := time.Now().In(loc)
+	_, offsetSeconds := tInLocation.Zone()
+	offsetMilli := int64(offsetSeconds * 1000)
+	offsetMilli = offsetMilli * -1
+	milli = milli + offsetMilli
+
+	return time.UnixMilli(milli)
 }

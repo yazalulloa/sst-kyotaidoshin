@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"log"
+	"slices"
+
 	"github.com/yaz/kyo-repo/internal/db"
 	"github.com/yaz/kyo-repo/internal/db/gen/model"
 	. "github.com/yaz/kyo-repo/internal/db/gen/table"
-	"log"
-	"slices"
 )
 
 type Repository struct {
