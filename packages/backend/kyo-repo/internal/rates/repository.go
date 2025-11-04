@@ -131,7 +131,7 @@ func (repo Repository) CheckRateExist(id int64) (bool, error) {
 func (repo Repository) Insert(rates []model.Rates) (int64, error) {
 
 	stmt := Rates.INSERT(Rates.ID, Rates.FromCurrency, Rates.ToCurrency, Rates.Rate, Rates.DateOfRate, Rates.Source,
-		Rates.DateOfFile, Rates.Etag, Rates.LastModified).
+		Rates.DateOfFile).
 		ON_CONFLICT().DO_UPDATE(
 		sqlite.SET(
 			Rates.FromCurrency.SET(Rates.EXCLUDED.FromCurrency),
@@ -140,13 +140,11 @@ func (repo Repository) Insert(rates []model.Rates) (int64, error) {
 			Rates.DateOfRate.SET(Rates.EXCLUDED.DateOfRate),
 			Rates.Source.SET(Rates.EXCLUDED.Source),
 			Rates.DateOfFile.SET(Rates.EXCLUDED.DateOfFile),
-			Rates.Etag.SET(Rates.EXCLUDED.Etag),
-			Rates.LastModified.SET(Rates.EXCLUDED.LastModified),
 		),
 	)
 	//.MODELS(rates)
 	for _, rate := range rates {
-		stmt = stmt.VALUES(rate.ID, rate.FromCurrency, rate.ToCurrency, rate.Rate, rate.DateOfRate.Format(time.DateOnly), rate.Source, rate.DateOfFile, rate.Etag, rate.LastModified)
+		stmt = stmt.VALUES(rate.ID, rate.FromCurrency, rate.ToCurrency, rate.Rate, rate.DateOfRate.Format(time.DateOnly), rate.Source, rate.DateOfFile)
 	}
 
 	res, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)

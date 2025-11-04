@@ -29,7 +29,14 @@ export const bcvQueue = new sst.aws.Queue("BcvQueue", {
 });
 
 export const processBcvFileFunction = new sst.aws.Function("ProcessBcvFile", {
-  link: [secret.secretTursoUrl, bcvBucket, bcvQueue, webAssetsBucket],
+  link: [
+    secret.secretTursoUrl,
+    bcvBucket,
+    bcvQueue,
+    webAssetsBucket,
+    secret.telegramBotToken,
+    secret.telegramBotApiKey,
+  ],
   runtime: "go",
   handler: "packages/backend/kyo-repo/cmd/process-bcv-file/process-bcv-file.go",
   timeout: "90 seconds",
