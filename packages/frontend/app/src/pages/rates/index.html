@@ -1,7 +1,7 @@
 <div id="header-container" hx-swap-oob="true"
      class="flex flex-col flex-wrap items-center text-center fade-me-out fade-me-in w-full">
 
-  <div class="flex flex-row flex-wrap w-full items-center justify-start gap-2 text-center">
+  <div class="flex flex-row flex-wrap w-full items-center justify-start gap-2 text-center px-4">
     <div class="flex flex-row gap-2 justify-center min-w-[7rem]"
          x-data="{
    total: null,
@@ -89,9 +89,8 @@
     </div>
   </div>
 
-  <div class="hidden md:grid w-full font-bold items-center text-center border-b pt-2"
-       x-bind:class="hasPerm('rates:write') ? 'md:grid-cols-[1fr_1fr_1fr_1fr_1fr_2fr_2fr_1fr]' : 'md:grid-cols-[1fr_1fr_1fr_1fr_1fr_2fr_2fr]'">
-    <span x-text="$t('main-title-id')"></span>
+  <div class="hidden md:grid w-full font-bold items-center text-center border-b pt-2 px-4"
+       x-bind:class="hasPerm('rates:write') ? 'md:grid-cols-[1fr_1fr_1fr_1fr_2fr_2fr_1fr]' : 'md:grid-cols-[1fr_1fr_1fr_1fr_2fr_2fr]'">
     <span x-text="$t('main-title-currency')"></span>
     <span x-text="$t('main-title-trend')"></span>
     <span x-text="$t('main-title-rate')"></span>
@@ -105,8 +104,8 @@
 
 <div id="container" hx-swap-oob="true" class="fade-me-out fade-me-in">
   <ul id="rates-table"
-      class="flex flex-col gap-1 p-1 *:md:grid *:flex *:flex-row *:flex-wrap *:gap-4 *:justify-between *:items-center"
-      x-bind:class="hasPerm('rates:write') ? '*:md:grid-cols-[1fr_1fr_1fr_1fr_1fr_2fr_2fr_1fr]' : '*:md:grid-cols-[1fr_1fr_1fr_1fr_1fr_2fr_2fr]'"
+      class="flex flex-col gap-1 px-4 *:md:grid *:flex *:flex-row *:flex-wrap *:gap-4 *:justify-between *:items-center *:border-b *:border-border *:hover:bg-muted/20 *:transition-colors"
+      x-bind:class="hasPerm('rates:write') ? '*:md:grid-cols-[1fr_1fr_1fr_1fr_2fr_2fr_1fr]' : '*:md:grid-cols-[1fr_1fr_1fr_1fr_2fr_2fr]'"
   >
 
   </ul>

@@ -297,7 +297,7 @@ func (service Service) checkLink(pos int, link string) error {
 	return nil
 }
 
-func (service Service) FileLinks() ([]string, error) {
+func (service Service) FileLinks(last bool) ([]string, error) {
 	var visited []string
 	var fileLinks []string
 	var nextPages []string
@@ -345,12 +345,17 @@ func (service Service) FileLinks() ([]string, error) {
 
 		nextPages = nil
 
+	ChanLoop:
 		for links := range linkChan {
 			for _, link := range links {
 				pageLink := service.url + link
 				if strings.HasSuffix(link, ".xls") {
 					if !slices.Contains(fileLinks, link) {
 						fileLinks = append(fileLinks, link)
+						if last {
+							running = false
+							break ChanLoop
+						}
 					}
 				} else {
 					if !slices.Contains(visited, pageLink) && !slices.Contains(nextPages, pageLink) {

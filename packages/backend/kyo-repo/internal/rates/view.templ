@@ -12,9 +12,8 @@ templ Search(res TableResponse) {
 	for _, item := range res.Results {
 		<li
 			id={ item.CardId }
-			class="fade-me-in fade-me-out"
+			class="fade-me-in fade-me-out *:px-6 *:py-1"
 		>
-			<span>{ fmt.Sprint(*item.Item.ID) }</span>
 			<div class="flex flex-row justify-center gap-2">
 				<div class="w-8 badge">{ item.Item.FromCurrency }</div>
 				<svg
@@ -24,7 +23,7 @@ templ Search(res TableResponse) {
 					class="h-6 w-8"
 				></svg>
 			</div>
-			<div class="flex flex-row justify-center gap-2 tooltip tooltip-bottom" data-tip={ util.FormatFloat64(item.Item.Diff) }>
+			<div class="flex flex-row justify-center gap-2 tooltip tooltip-bottom" data-tip={ util.FormatFloat(item.Item.Diff, 8) }>
 				switch item.Item.Trend {
         case "UP":
           <svg x-bind:data-src="trendUpIconUrl" data-cache="21600" class="h-4 w-4 text-green-600"></svg>
@@ -35,7 +34,7 @@ templ Search(res TableResponse) {
 				}
 				<span class="text-end">{ util.FormatFloat2(item.Item.DiffPercent) }</span>
 			</div>
-			<span class="text-end">{ util.FormatFloat64(item.Item.Rate) }</span>
+			<span class="font-mono text-sm">{ util.FormatFloat64(item.Item.Rate) }</span>
 			<span class="text-center">{ item.DateOfRate }</span>
 			@api.SpanFormatDate(fmt.Sprint(item.DateOfFile))
 			@api.SpanFormatDate(fmt.Sprint(item.CreatedAt))

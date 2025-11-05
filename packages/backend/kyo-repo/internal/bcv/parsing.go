@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -16,8 +15,6 @@ import (
 	"github.com/shakinm/xlsReader/xls"
 	"github.com/yaz/kyo-repo/internal/aws_h"
 	"github.com/yaz/kyo-repo/internal/db/gen/model"
-	"github.com/yaz/kyo-repo/internal/rates"
-	"github.com/yaz/kyo-repo/internal/telegram"
 	"github.com/yaz/kyo-repo/internal/util"
 )
 
@@ -132,6 +129,7 @@ type Result struct {
 	Parsed      int
 	NumOfSheets int
 	FileDate    time.Time
+	Rates       [][]*model.Rates
 }
 
 type ParsingInfo struct {
@@ -164,9 +162,11 @@ func (info ParsingInfo) Parse() (*Result, error) {
 
 	result.NumOfSheets = workbook.GetNumberSheets()
 
-	var rateArray []*model.Rates
+	var rateArray [][]*model.Rates
 
-	for sheetIndex, sheet := range workbook.GetSheets() {
+	for _, sheet := range workbook.GetSheets() {
+		var sheetArray []*model.Rates
+
 		parsingError.SheetName = sheet.GetName()
 		var dateOfFile *time.Time
 		var dateOfRate time.Time
@@ -343,7 +343,7 @@ func (info ParsingInfo) Parse() (*Result, error) {
 					DateOfFile:   *dateOfFile,
 				}
 
-				rateArray = append(rateArray, &modelRates)
+				sheetArray = append(sheetArray, &modelRates)
 			}
 
 		}
@@ -354,98 +354,98 @@ func (info ParsingInfo) Parse() (*Result, error) {
 
 		result.FileDate = *dateOfFile
 
-		if !info.ProcessAll && sheetIndex == 0 {
-			break
-		}
-
 		//log.Printf("Sheet: %s rates: %d %s %s", sheet.GetName(), len(rateArray), dateOfRate, dateOfFile)
 
 	}
 
-	result.Parsed += len(rateArray)
-
-	for i := 0; i < len(rateArray); i++ {
-		lhs := rateArray[i]
-		var rhs *model.Rates
-		for j := i + 1; j < len(rateArray); j++ {
-			v := rateArray[j]
-			if lhs.FromCurrency == v.FromCurrency {
-				rhs = v
-				break
-			}
-		}
-
-		diff := 0.00
-		diffPercent := 0.00
-		trend := rates.STABLE
-		if rhs != nil {
-			previousRate := lhs.Rate
-			nextRate := rhs.Rate
-
-			diff = previousRate - nextRate
-
-			if nextRate != 0 {
-				diffPercent = (math.Abs(diff) / nextRate) * 100
-				diffPercent = util.RoundFloat(diffPercent, 2)
-			}
-
-			if previousRate > nextRate {
-				trend = rates.UP
-			} else if previousRate < nextRate {
-				trend = rates.DOWN
-			}
-		}
-
-		lhs.ToCurrency = "VED"
-		lhs.Source = "BCV"
-		lhs.Trend = trend.Name()
-		lhs.Diff = diff
-		lhs.DiffPercent = diffPercent
-	}
-
-	log.Printf("Inserting %d rates from file %s", len(rateArray), info.BucketKey)
-
-	repo := rates.NewRepository(info.Ctx)
-
-	ratesInserted, err := repo.Insert(rateArray)
-	result.Inserted += ratesInserted
-
-	//array := util.SplitArray(rateArray, 300)
-	//
-	//length := len(array)
-	//var wg sync.WaitGroup
-	//wg.Add(length)
-	//errorChan := make(chan error, length)
-	//
-	//for _, chunk := range array {
-	//	go func() {
-	//		ratesInserted, err := repo.Insert(chunk)
-	//		if err != nil {
-	//			errorChan <- fmt.Errorf("error inserting %d rates:  %w", len(rateArray), err)
-	//			return
-	//		}
-	//		result.Inserted += ratesInserted
-	//	}()
-	//}
-	//
-	//wg.Wait()
-	//close(errorChan)
-	//
-	//err = util.HasErrors(errorChan)
-	if err != nil {
-		return nil, err
-	}
-
-	//log.Printf("Sheet: %s rates %d inserted: %d", sheet.GetName(), len(rateArray), ratesInserted)
-
-	if !info.ProcessAll && result.Inserted > 0 {
-		for _, rate := range rateArray {
-			if rate.FromCurrency == "USD" {
-				log.Printf("Sending USD rate: %f", rate.Rate)
-				telegram.SendRate(info.Ctx, *rate)
-			}
-		}
-	}
+	result.Rates = rateArray
 
 	return &result, nil
+
+	//for i := 0; i < len(rateArray); i++ {
+	//	lhs := rateArray[i]
+	//	var rhs *model.Rates
+	//	for j := i + 1; j < len(rateArray); j++ {
+	//		v := rateArray[j]
+	//		if lhs.FromCurrency == v.FromCurrency {
+	//			rhs = v
+	//			break
+	//		}
+	//	}
+	//
+	//	diff := 0.00
+	//	diffPercent := 0.00
+	//	trend := rates.STABLE
+	//	if rhs != nil {
+	//		previousRate := lhs.Rate
+	//		nextRate := rhs.Rate
+	//
+	//		diff = previousRate - nextRate
+	//
+	//		if nextRate != 0 {
+	//			diffPercent = (math.Abs(diff) / nextRate) * 100
+	//			diffPercent = util.RoundFloat(diffPercent, 2)
+	//		}
+	//
+	//		if previousRate > nextRate {
+	//			trend = rates.UP
+	//		} else if previousRate < nextRate {
+	//			trend = rates.DOWN
+	//		}
+	//	}
+	//
+	//	lhs.ToCurrency = "VED"
+	//	lhs.Source = "BCV"
+	//	lhs.Trend = trend.Name()
+	//	lhs.Diff = diff
+	//	lhs.DiffPercent = diffPercent
+	//}
+	//
+	//result.Parsed += len(rateArray)
+	//
+	//log.Printf("Inserting %d rates from file %s", len(rateArray), info.BucketKey)
+	//
+	//repo := rates.NewRepository(info.Ctx)
+	//
+	//ratesInserted, err := repo.Insert(rateArray)
+	//result.Inserted += ratesInserted
+	//
+	////array := util.SplitArray(rateArray, 300)
+	////
+	////length := len(array)
+	////var wg sync.WaitGroup
+	////wg.Add(length)
+	////errorChan := make(chan error, length)
+	////
+	////for _, chunk := range array {
+	////	go func() {
+	////		ratesInserted, err := repo.Insert(chunk)
+	////		if err != nil {
+	////			errorChan <- fmt.Errorf("error inserting %d rates:  %w", len(rateArray), err)
+	////			return
+	////		}
+	////		result.Inserted += ratesInserted
+	////	}()
+	////}
+	////
+	////wg.Wait()
+	////close(errorChan)
+	////
+	////err = util.HasErrors(errorChan)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	////log.Printf("Sheet: %s rates %d inserted: %d", sheet.GetName(), len(rateArray), ratesInserted)
+	//
+	//if !info.ProcessAll && result.Inserted > 0 {
+	//	for _, rate := range rateArray {
+	//		if rate.FromCurrency == "USD" {
+	//			log.Printf("Sending USD rate: %f", rate.Rate)
+	//			telegram.SendRate(info.Ctx, *rate)
+	//		}
+	//	}
+	//}
+	//
+	//return &result, nil
 }

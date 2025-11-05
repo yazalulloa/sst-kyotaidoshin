@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/yaz/kyo-repo/internal/api"
-	"github.com/yaz/kyo-repo/internal/bcv"
 	"github.com/yaz/kyo-repo/internal/db/gen/model"
 	"github.com/yaz/kyo-repo/internal/util"
 )
@@ -76,7 +75,7 @@ type TableResponse struct {
 
 func processAll(w http.ResponseWriter, r *http.Request) {
 
-	err := processAllFiles(r.Context())
+	err := NewService(r.Context()).processAllFiles()
 	if err != nil {
 		log.Printf("Error processing all files: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -99,13 +98,7 @@ func process(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	service, err := bcv.NewService(r.Context())
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	err = processBcvFile(r.Context(), service, str, true)
+	_, err = NewService(r.Context()).processBcvFile(str, true)
 	if err != nil {
 		log.Printf("Error processing file %s: %v", str, err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

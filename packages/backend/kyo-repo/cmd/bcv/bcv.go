@@ -5,15 +5,12 @@ import (
 	"log"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/yaz/kyo-repo/internal/bcv"
+	bcv_files "github.com/yaz/kyo-repo/internal/bcv-files"
 )
 
 func handler(ctx context.Context, event interface{}) (string, error) {
-	service, err := bcv.NewService(ctx)
-	if err != nil {
-		return "", err
-	}
-	err = service.Check()
+
+	err := bcv_files.NewService(ctx).BcvJob()
 	if err != nil {
 		return "", err
 	}

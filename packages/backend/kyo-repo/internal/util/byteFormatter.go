@@ -126,6 +126,10 @@ func FormatFloat64(number float64) string {
 	return strconv.FormatFloat(number, 'f', -1, 64)
 }
 
+func FormatFloat(number float64, precision int) string {
+	return strconv.FormatFloat(number, 'f', precision, 64)
+}
+
 func FormatFloat2(number float64) string {
 	return strconv.FormatFloat(number, 'f', 2, 64)
 }
