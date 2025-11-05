@@ -213,7 +213,7 @@ templ BadgeIndicatorWithTooltip(condition bool, tooltipId string, badge templ.Co
 templ SpanFormatDate(dataDate string) {
 	<span
 		data-date={ dataDate }
-		class="text-center"
+		class="text-center text-sm"
 		x-text="FormatDate($el.getAttribute('data-date'))"
 	></span>
 }

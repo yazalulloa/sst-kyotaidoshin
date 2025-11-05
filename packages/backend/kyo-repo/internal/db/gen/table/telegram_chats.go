@@ -25,6 +25,7 @@ type telegramChatsTable struct {
 
 	AllColumns     sqlite.ColumnList
 	MutableColumns sqlite.ColumnList
+	DefaultColumns sqlite.ColumnList
 }
 
 type TelegramChatsTable struct {
@@ -69,6 +70,7 @@ func newTelegramChatsTableImpl(schemaName, tableName, alias string) telegramChat
 		LastNameColumn  = sqlite.StringColumn("last_name")
 		allColumns      = sqlite.ColumnList{UserIDColumn, ChatIDColumn, UsernameColumn, FirstNameColumn, LastNameColumn}
 		mutableColumns  = sqlite.ColumnList{UsernameColumn, FirstNameColumn, LastNameColumn}
+		defaultColumns  = sqlite.ColumnList{}
 	)
 
 	return telegramChatsTable{
@@ -83,5 +85,6 @@ func newTelegramChatsTableImpl(schemaName, tableName, alias string) telegramChat
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,
+		DefaultColumns: defaultColumns,
 	}
 }

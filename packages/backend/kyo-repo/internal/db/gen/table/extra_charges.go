@@ -31,6 +31,7 @@ type extraChargesTable struct {
 
 	AllColumns     sqlite.ColumnList
 	MutableColumns sqlite.ColumnList
+	DefaultColumns sqlite.ColumnList
 }
 
 type ExtraChargesTable struct {
@@ -81,6 +82,7 @@ func newExtraChargesTableImpl(schemaName, tableName, alias string) extraChargesT
 		UpdatedAtColumn       = sqlite.TimestampColumn("updated_at")
 		allColumns            = sqlite.ColumnList{IDColumn, BuildingIDColumn, ParentReferenceColumn, TypeColumn, DescriptionColumn, AmountColumn, CurrencyColumn, ActiveColumn, ApartmentsColumn, CreatedAtColumn, UpdatedAtColumn}
 		mutableColumns        = sqlite.ColumnList{BuildingIDColumn, ParentReferenceColumn, TypeColumn, DescriptionColumn, AmountColumn, CurrencyColumn, ActiveColumn, ApartmentsColumn, CreatedAtColumn, UpdatedAtColumn}
+		defaultColumns        = sqlite.ColumnList{CreatedAtColumn}
 	)
 
 	return extraChargesTable{
@@ -101,5 +103,6 @@ func newExtraChargesTableImpl(schemaName, tableName, alias string) extraChargesT
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,
+		DefaultColumns: defaultColumns,
 	}
 }

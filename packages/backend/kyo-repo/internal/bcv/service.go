@@ -8,6 +8,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"slices"
 	"strings"
 	"sync"
@@ -19,6 +20,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/sst/sst/v3/sdk/golang/resource"
 	"github.com/yaz/kyo-repo/internal/aws_h"
+	"github.com/yaz/kyo-repo/internal/db/gen/model"
 	"github.com/yaz/kyo-repo/internal/util"
 )
 
@@ -92,36 +94,115 @@ type FileInfo struct {
 
 func (service Service) Check() error {
 
-	links, err := service.fileLinks()
+	return nil
 
+	//links, err := service.FileLinks()
+	//
+	//if err != nil {
+	//	return err
+	//}
+	//
+	//length := len(links)
+	//if length == 0 {
+	//	log.Println("No files to check")
+	//	return nil
+	//}
+	//
+	//var wg sync.WaitGroup
+	//wg.Add(length)
+	//errorChan := make(chan error, length)
+	//
+	//for pos, link := range links {
+	//	go func() {
+	//		defer wg.Done()
+	//		//linkErr := service.checkLink(pos, link)
+	//		//linkErr := service.processLink(link, true)
+	//		//if linkErr != nil {
+	//		//	errorChan <- fmt.Errorf("error checking file link %d - %s: %s", pos, link, linkErr)
+	//		//}
+	//	}()
+	//}
+	//
+	//wg.Wait()
+	//close(errorChan)
+	//
+	//return util.HasErrors(errorChan)
+}
+
+type DownloadResult struct {
+	Link         string
+	Etag         string
+	LastModified string
+	FilePath     string
+	FileSize     int64
+	Error        error
+}
+
+func (service Service) Download(bcvFile *model.BcvFiles, link string) DownloadResult {
+	fileName := link[strings.LastIndex(link, "/")+1:]
+	filePath := util.TmpFileName(util.UuidV7() + fileName)
+
+	result := DownloadResult{}
+
+	req, err := http.NewRequest("GET", link, nil)
 	if err != nil {
-		return err
+		result.Error = err
+		return result
 	}
 
-	length := len(links)
-	if length == 0 {
-		log.Println("No files to check")
-		return nil
+	if bcvFile != nil {
+		req.Header.Add("If-None-Match", bcvFile.Etag)
+		req.Header.Add("If-Modified-Since", bcvFile.LastModified)
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(length)
-	errorChan := make(chan error, length)
-
-	for pos, link := range links {
-		go func() {
-			defer wg.Done()
-			linkErr := service.checkLink(pos, link)
-			if linkErr != nil {
-				errorChan <- fmt.Errorf("error checking file link %d - %s: %s", pos, link, linkErr)
-			}
-		}()
+	res, err := service.httpClient.Do(req)
+	//log.Errorf("Downloaded: %s %v", processor.Filepath, wgErr)
+	if err != nil {
+		result.Error = err
+		return result
 	}
 
-	wg.Wait()
-	close(errorChan)
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			log.Println("error closing response body:", err)
+			return
+		}
+	}(res.Body)
 
-	return util.HasErrors(errorChan)
+	if res.StatusCode == 304 {
+		log.Printf("File %s is up to date", link)
+		return result
+	}
+
+	if res.StatusCode != 200 {
+		result.Error = fmt.Errorf("error downloading file %s - %s", link, res.Status)
+		return result
+	}
+
+	file, err := os.Create(filePath)
+	if err != nil {
+		result.Error = fmt.Errorf("error creating file %s - %s", filePath, err)
+		return result
+	}
+
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(file)
+
+	_, err = io.Copy(file, res.Body)
+	if err != nil {
+		result.Error = fmt.Errorf("error saving file %s: %s", filePath, err)
+		return result
+	}
+
+	result.Link = link
+	result.Etag = res.Header.Get("ETag")
+	result.LastModified = res.Header.Get("Last-Modified")
+	result.FilePath = filePath
+	result.FileSize = res.ContentLength
+
+	return result
 }
 
 func (service Service) checkLink(pos int, link string) error {
@@ -216,7 +297,7 @@ func (service Service) checkLink(pos int, link string) error {
 	return nil
 }
 
-func (service Service) fileLinks() ([]string, error) {
+func (service Service) FileLinks() ([]string, error) {
 	var visited []string
 	var fileLinks []string
 	var nextPages []string

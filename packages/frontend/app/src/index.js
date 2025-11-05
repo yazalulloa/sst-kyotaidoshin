@@ -532,6 +532,7 @@ window.NAV_TITLES = new Map([
   ['nav-rates', 'main-title-rates'],
   ['nav-users', 'main-title-users'],
   ['nav-bcv-files', 'main-title-bcv-files'],
+  ['nav-bcv-bucket', 'main-title-bcv-files'],
   ['nav-permissions', 'main-title-permissions'],
   ['nav-roles', 'main-title-roles'],
   ['nav-admin', 'main-title-admin'],

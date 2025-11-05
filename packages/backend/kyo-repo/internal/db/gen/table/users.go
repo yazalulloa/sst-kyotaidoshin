@@ -31,6 +31,7 @@ type usersTable struct {
 
 	AllColumns     sqlite.ColumnList
 	MutableColumns sqlite.ColumnList
+	DefaultColumns sqlite.ColumnList
 }
 
 type UsersTable struct {
@@ -81,6 +82,7 @@ func newUsersTableImpl(schemaName, tableName, alias string) usersTable {
 		LastLoginAtColumn        = sqlite.TimestampColumn("last_login_at")
 		allColumns               = sqlite.ColumnList{IDColumn, ProviderIDColumn, ProviderColumn, EmailColumn, UsernameColumn, NameColumn, PictureColumn, DataColumn, NotificationEventsColumn, CreatedAtColumn, LastLoginAtColumn}
 		mutableColumns           = sqlite.ColumnList{ProviderIDColumn, ProviderColumn, EmailColumn, UsernameColumn, NameColumn, PictureColumn, DataColumn, NotificationEventsColumn, CreatedAtColumn, LastLoginAtColumn}
+		defaultColumns           = sqlite.ColumnList{CreatedAtColumn, LastLoginAtColumn}
 	)
 
 	return usersTable{
@@ -101,5 +103,6 @@ func newUsersTableImpl(schemaName, tableName, alias string) usersTable {
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,
+		DefaultColumns: defaultColumns,
 	}
 }

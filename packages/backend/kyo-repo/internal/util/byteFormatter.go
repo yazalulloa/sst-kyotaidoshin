@@ -6,13 +6,14 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
-	"github.com/go-playground/validator/v10"
 	"log"
 	"math"
 	"reflect"
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/go-playground/validator/v10"
 )
 
 var ErrNoRows = errors.New("qrm: no rows in result set")
@@ -110,18 +111,6 @@ func GetValidator() (*validator.Validate, error) {
 	})
 
 	return validatorInstance, err
-}
-
-func SplitArray[T any](arr []T, chunkSize int) [][]T {
-	var chunks [][]T
-	for i := 0; i < len(arr); i += chunkSize {
-		end := i + chunkSize
-		if end > len(arr) {
-			end = len(arr)
-		}
-		chunks = append(chunks, arr[i:end])
-	}
-	return chunks
 }
 
 func StringToInt16(str string) int16 {

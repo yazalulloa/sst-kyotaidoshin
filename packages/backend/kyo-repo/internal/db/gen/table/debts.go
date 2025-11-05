@@ -28,6 +28,7 @@ type debtsTable struct {
 
 	AllColumns     sqlite.ColumnList
 	MutableColumns sqlite.ColumnList
+	DefaultColumns sqlite.ColumnList
 }
 
 type DebtsTable struct {
@@ -75,6 +76,7 @@ func newDebtsTableImpl(schemaName, tableName, alias string) debtsTable {
 		PreviousPaymentAmountCurrencyColumn = sqlite.StringColumn("previous_payment_amount_currency")
 		allColumns                          = sqlite.ColumnList{BuildingIDColumn, ReceiptIDColumn, AptNumberColumn, ReceiptsColumn, AmountColumn, MonthsColumn, PreviousPaymentAmountColumn, PreviousPaymentAmountCurrencyColumn}
 		mutableColumns                      = sqlite.ColumnList{ReceiptsColumn, AmountColumn, MonthsColumn, PreviousPaymentAmountColumn, PreviousPaymentAmountCurrencyColumn}
+		defaultColumns                      = sqlite.ColumnList{}
 	)
 
 	return debtsTable{
@@ -92,5 +94,6 @@ func newDebtsTableImpl(schemaName, tableName, alias string) debtsTable {
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,
+		DefaultColumns: defaultColumns,
 	}
 }

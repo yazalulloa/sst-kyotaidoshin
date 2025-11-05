@@ -2,6 +2,7 @@ package rates
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/go-jet/jet/v2/sqlite"
@@ -128,27 +129,35 @@ func (repo Repository) CheckRateExist(id int64) (bool, error) {
 	return len(dest) > 0, nil
 }
 
-func (repo Repository) Insert(rates []model.Rates) (int64, error) {
+func (repo Repository) Insert(rates []*model.Rates) (int64, error) {
 
-	stmt := Rates.INSERT(Rates.ID, Rates.FromCurrency, Rates.ToCurrency, Rates.Rate, Rates.DateOfRate, Rates.Source,
-		Rates.DateOfFile).
-		ON_CONFLICT().DO_UPDATE(
+	stmt := Rates.INSERT(Rates.ID, Rates.FromCurrency, Rates.ToCurrency, Rates.Rate, Rates.Source,
+		Rates.Trend, Rates.Diff, Rates.DiffPercent, Rates.DateOfRate, Rates.DateOfFile).
+		ON_CONFLICT(Rates.ID).DO_UPDATE(
 		sqlite.SET(
 			Rates.FromCurrency.SET(Rates.EXCLUDED.FromCurrency),
 			Rates.ToCurrency.SET(Rates.EXCLUDED.ToCurrency),
 			Rates.Rate.SET(Rates.EXCLUDED.Rate),
-			Rates.DateOfRate.SET(Rates.EXCLUDED.DateOfRate),
 			Rates.Source.SET(Rates.EXCLUDED.Source),
+			Rates.Trend.SET(Rates.EXCLUDED.Trend),
+			Rates.Diff.SET(Rates.EXCLUDED.Diff),
+			Rates.DiffPercent.SET(Rates.EXCLUDED.DiffPercent),
+			Rates.DateOfRate.SET(Rates.EXCLUDED.DateOfRate),
 			Rates.DateOfFile.SET(Rates.EXCLUDED.DateOfFile),
 		),
 	)
 	//.MODELS(rates)
-	for _, rate := range rates {
-		stmt = stmt.VALUES(rate.ID, rate.FromCurrency, rate.ToCurrency, rate.Rate, rate.DateOfRate.Format(time.DateOnly), rate.Source, rate.DateOfFile)
+	for _, v := range rates {
+		rate := *v
+		id := *rate.ID
+		stmt = stmt.VALUES(id, rate.FromCurrency, rate.ToCurrency, rate.Rate, rate.Source,
+			rate.Trend, rate.Diff, rate.DiffPercent, rate.DateOfRate.Format(time.DateOnly), rate.DateOfFile)
 	}
 
 	res, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	if err != nil {
+
+		log.Printf("Failed to execute insert rates %d: %v with query %s", len(rates), err, stmt.DebugSql())
 		return 0, err
 	}
 

@@ -3,6 +3,11 @@ package start
 import (
 	"database/sql"
 	"errors"
+	"log"
+	"net/http"
+	"slices"
+	"sync"
+
 	"github.com/go-jet/jet/v2/qrm"
 	"github.com/go-jet/jet/v2/sqlite"
 	"github.com/gorilla/mux"
@@ -12,10 +17,6 @@ import (
 	. "github.com/yaz/kyo-repo/internal/db/gen/table"
 	"github.com/yaz/kyo-repo/internal/users"
 	"github.com/yaz/kyo-repo/internal/util"
-	"log"
-	"net/http"
-	"slices"
-	"sync"
 )
 
 func Routes(server *mux.Router) {
@@ -173,6 +174,10 @@ func getInit(w http.ResponseWriter, r *http.Request) {
 			pages = append(pages, Page{
 				Id:   "nav-bcv-files",
 				Path: "/bcv-files",
+			})
+			pages = append(pages, Page{
+				Id:   "nav-bcv-bucket",
+				Path: "/bcv-bucket",
 			})
 			break
 		case api.USERS_READ.Name():

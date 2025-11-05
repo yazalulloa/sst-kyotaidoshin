@@ -19,15 +19,16 @@
 CREATE TABLE IF NOT EXISTS rates
 (
     id            BIGINT PRIMARY KEY,
-    from_currency TEXT                                           NOT NULL,
-    to_currency   TEXT                                           NOT NULL,
-    rate          DECIMAL(16, 12)                                NOT NULL,
-    source        TEXT                                           NOT NULL,
-    date_of_rate  DATE                                           NOT NULL,
-    date_of_file  DATE                                           NOT NULL,
-    created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
-    etag          varchar(20),
-    last_modified varchar(40)
+    from_currency TEXT                                             NOT NULL,
+    to_currency   TEXT                                             NOT NULL,
+    rate          DECIMAL(16, 12)                                  NOT NULL,
+    source        TEXT                                             NOT NULL,
+    trend         TEXT CHECK ( trend IN ('UP', 'DOWN', 'STABLE') ) NOT NULL,
+    diff          DECIMAL(16, 12)                                  NOT NULL,
+    diff_percent  DECIMAL(16, 2)                                   NOT NULL,
+    date_of_rate  DATE                                             NOT NULL,
+    date_of_file  DATE                                             NOT NULL,
+    created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX IF NOT EXISTS rates_from_currency_to_currency_rate_date_of_rate_idx
@@ -63,7 +64,7 @@ BEGIN
     UPDATE apartments SET updated_at = CURRENT_TIMESTAMP WHERE building_id = OLD.building_id AND number = OLD.number;
 END;
 
-ALTER TABLE buildings ADD COLUMN debts_currencies_to_show TEXT NOT NULL DEFAULT '';
+-- ALTER TABLE buildings ADD COLUMN debts_currencies_to_show TEXT NOT NULL DEFAULT '';
 
 -- DROP TABLE IF EXISTS buildings;
 CREATE TABLE IF NOT EXISTS buildings
@@ -279,3 +280,17 @@ CREATE TABLE IF NOT EXISTS telegram_chats (
     PRIMARY KEY (user_id, chat_id),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+CREATE TABLE IF NOT EXISTS bcv_files (
+    link TEXT PRIMARY KEY,
+    rate_count BIGINT NOT NULL,
+    sheet_count INTEGER NOT NULL,
+    file_size BIGINT NOT NULL,
+    fileDate DATETIME NOT NULL,
+    etag TEXT NOT NULL,
+    last_modified TEXT NOT NULL,
+    processed_at DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS bcv_files_created_at_idx ON bcv_files (created_at);

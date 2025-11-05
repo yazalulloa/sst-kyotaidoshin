@@ -26,6 +26,9 @@ import googleIconUrl from './assets/images/google.svg?no-inline'
 import githubIconUrl from './assets/images/github.svg?no-inline'
 import previousArrowIconUrl from './assets/images/previous-arrow.svg?no-inline'
 import nextArrowIconUrl from './assets/images/next-arrow.svg?no-inline'
+import trendUpIconUrl from './assets/images/trend-up.svg?no-inline'
+import trendDownIconUrl from './assets/images/trend-down.svg?no-inline'
+import equalsIconUrl from './assets/images/equals-solid.svg?no-inline'
 
 window.deleteIconUrl = deleteIconUrl;
 window.processIconUrl = processIconUrl;
@@ -59,6 +62,10 @@ window.menuVerticalIconUrl = menuVerticalIconUrl;
 window.previousArrowIconUrl = previousArrowIconUrl;
 window.nextArrowIconUrl = nextArrowIconUrl;
 
+window.trendUpIconUrl = trendUpIconUrl;
+window.trendDownIconUrl = trendDownIconUrl;
+window.equalsIconUrl = equalsIconUrl;
+
 window.NAV_ICONS = new Map([
   ['nav-apartments', apartmentsIconUrl],
   ['nav-buildings', buildingsIconUrl],
@@ -66,6 +73,7 @@ window.NAV_ICONS = new Map([
   ['nav-rates', ratesIconUrl],
   ['nav-users', usersIconUrl],
   ['nav-bcv-files', bucketIconUrl],
+  ['nav-bcv-bucket', bucketIconUrl],
   ['nav-permissions', permissionsIconUrl],
   ['nav-roles', permissionsIconUrl],
   ['nav-admin', permissionsIconUrl],
@@ -75,3 +83,16 @@ window.PROVIDER_ICONS = new Map([
   ['google', googleIconUrl],
   ['github', githubIconUrl],
 ]);
+
+window.GetTrendIcon = function(trend) {
+  if (trend === 'UP') {
+    return trendUpIconUrl;
+  }
+
+  if (trend === 'DOWN') {
+    return trendDownIconUrl;
+  }
+
+
+return equalsIconUrl
+}

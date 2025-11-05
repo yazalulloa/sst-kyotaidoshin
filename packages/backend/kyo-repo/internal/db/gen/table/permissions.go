@@ -22,6 +22,7 @@ type permissionsTable struct {
 
 	AllColumns     sqlite.ColumnList
 	MutableColumns sqlite.ColumnList
+	DefaultColumns sqlite.ColumnList
 }
 
 type PermissionsTable struct {
@@ -63,6 +64,7 @@ func newPermissionsTableImpl(schemaName, tableName, alias string) permissionsTab
 		NameColumn     = sqlite.StringColumn("name")
 		allColumns     = sqlite.ColumnList{IDColumn, NameColumn}
 		mutableColumns = sqlite.ColumnList{NameColumn}
+		defaultColumns = sqlite.ColumnList{}
 	)
 
 	return permissionsTable{
@@ -74,5 +76,6 @@ func newPermissionsTableImpl(schemaName, tableName, alias string) permissionsTab
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,
+		DefaultColumns: defaultColumns,
 	}
 }

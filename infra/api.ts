@@ -175,6 +175,7 @@ const mainApiFunction = new sst.aws.Function("MainApiFunction", {
     ISR_PREFIX: isrPrefix,
     AUTH_SERVER_URL: authRedirectUrl,
   },
+  memory: "2048 MB",
   timeout: "60 seconds",
   permissions: [
     {

@@ -3,7 +3,14 @@ import {bcvBucket, webAssetsBucket} from "./storage";
 
 export const bcvFunction = new sst.aws.Function("BcvFunction", {
   url: true,
-  link: [bcvBucket, secret.bcvUrl, secret.bcvFileStartPath],
+  link: [
+    bcvBucket,
+    secret.bcvUrl,
+    secret.bcvFileStartPath,
+    secret.secretTursoUrl,
+    secret.telegramBotToken,
+    secret.telegramBotApiKey,
+  ],
   runtime: "go",
   handler: "packages/backend/kyo-repo/cmd/bcv/bcv.go",
   timeout: "90 seconds",

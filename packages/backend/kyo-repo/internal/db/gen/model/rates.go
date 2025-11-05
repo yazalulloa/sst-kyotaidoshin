@@ -17,9 +17,10 @@ type Rates struct {
 	ToCurrency   string
 	Rate         float64
 	Source       string
+	Trend        string
+	Diff         float64
+	DiffPercent  float64
 	DateOfRate   time.Time
 	DateOfFile   time.Time
 	CreatedAt    *time.Time
-	Etag         *string
-	LastModified *string
 }

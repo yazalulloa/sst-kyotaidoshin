@@ -1,0 +1,68 @@
+package bcv_files
+
+import (
+	"fmt"
+	"github.com/yaz/kyo-repo/internal/api"
+	"strings"
+)
+
+templ Display(res TableResponse) {
+	{{ hasWritePerm := api.HasPerms(ctx, api.BCV_FILES_WRITE) }}
+	for _, item := range res.Results {
+		{{
+			link := *item.Item.Link
+			name := link[strings.LastIndex(link, "/")+1:]
+		}}
+		<li
+			id={ item.CardId }
+			class="fade-me-in fade-me-out"
+		>
+			<a
+				href={ templ.URL(link) }
+				target="_blank"
+				rel="noopener noreferrer"
+				class="text-start link link-hover font-mono text-sm"
+			>
+				{ name }
+			</a>
+			<span class="">{ fmt.Sprint(item.Item.RateCount) }</span>
+			<span class="">{ fmt.Sprint(item.Item.SheetCount) }</span>
+			<span class="">{ item.SizeFormatted }</span>
+			@api.SpanFormatDate(fmt.Sprint(item.FileDate))
+			<span class="font-mono text-xs">{ item.Item.Etag }</span>
+			<span class="font-mono text-xs">{ item.Item.LastModified }</span>
+			@api.SpanFormatDate(fmt.Sprint(item.ProcessedAt))
+			@api.SpanFormatDate(fmt.Sprint(item.CreatedAt))
+			if hasWritePerm {
+				<div class="flex flex-row gap-4 justify-center">
+					<button
+						type="button"
+						class="btn btn-sm btn-ghost btn-circle btn-outline"
+						hx-post={ fmt.Sprintf(_PATH+"/process/%s", link) }
+						hx-disabled-elt="this"
+						hx-indicator=".htmx-indicator"
+						hx-swap="none"
+						hx-trigger="mousedown"
+						data-recaptcha-action="bcv_bucket_process"
+					>
+						<svg x-bind:data-src="processIconUrl" data-cache="21600" class="h-6 w-6"></svg>
+					</button>
+					@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", link), item.CardId, templ.Attributes{"data-recaptcha-action": "bcv_bucket_delete"})
+				</div>
+			}
+		</li>
+	}
+	@CountersView(res.TotalCount)
+}
+
+templ CountersView(total int) {
+	<div
+		id="bcv-files-counters"
+		hidden="hidden"
+		hx-swap-oob="true"
+		data-total-count={ fmt.Sprint(total) }
+		x-init="
+	total = $el.getAttribute('data-total-count');
+	"
+	></div>
+}

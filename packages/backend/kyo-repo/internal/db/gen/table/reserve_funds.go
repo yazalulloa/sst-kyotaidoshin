@@ -32,6 +32,7 @@ type reserveFundsTable struct {
 
 	AllColumns     sqlite.ColumnList
 	MutableColumns sqlite.ColumnList
+	DefaultColumns sqlite.ColumnList
 }
 
 type ReserveFundsTable struct {
@@ -83,6 +84,7 @@ func newReserveFundsTableImpl(schemaName, tableName, alias string) reserveFundsT
 		UpdatedAtColumn     = sqlite.TimestampColumn("updated_at")
 		allColumns          = sqlite.ColumnList{IDColumn, BuildingIDColumn, NameColumn, FundColumn, ExpenseColumn, PayColumn, ActiveColumn, TypeColumn, ExpenseTypeColumn, AddToExpensesColumn, CreatedAtColumn, UpdatedAtColumn}
 		mutableColumns      = sqlite.ColumnList{BuildingIDColumn, NameColumn, FundColumn, ExpenseColumn, PayColumn, ActiveColumn, TypeColumn, ExpenseTypeColumn, AddToExpensesColumn, CreatedAtColumn, UpdatedAtColumn}
+		defaultColumns      = sqlite.ColumnList{CreatedAtColumn}
 	)
 
 	return reserveFundsTable{
@@ -104,5 +106,6 @@ func newReserveFundsTableImpl(schemaName, tableName, alias string) reserveFundsT
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,
+		DefaultColumns: defaultColumns,
 	}
 }

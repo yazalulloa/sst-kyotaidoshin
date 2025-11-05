@@ -22,14 +22,16 @@ type ratesTable struct {
 	ToCurrency   sqlite.ColumnString
 	Rate         sqlite.ColumnFloat
 	Source       sqlite.ColumnString
+	Trend        sqlite.ColumnString
+	Diff         sqlite.ColumnFloat
+	DiffPercent  sqlite.ColumnFloat
 	DateOfRate   sqlite.ColumnDate
 	DateOfFile   sqlite.ColumnDate
 	CreatedAt    sqlite.ColumnTimestamp
-	Etag         sqlite.ColumnString
-	LastModified sqlite.ColumnString
 
 	AllColumns     sqlite.ColumnList
 	MutableColumns sqlite.ColumnList
+	DefaultColumns sqlite.ColumnList
 }
 
 type RatesTable struct {
@@ -72,13 +74,15 @@ func newRatesTableImpl(schemaName, tableName, alias string) ratesTable {
 		ToCurrencyColumn   = sqlite.StringColumn("to_currency")
 		RateColumn         = sqlite.FloatColumn("rate")
 		SourceColumn       = sqlite.StringColumn("source")
+		TrendColumn        = sqlite.StringColumn("trend")
+		DiffColumn         = sqlite.FloatColumn("diff")
+		DiffPercentColumn  = sqlite.FloatColumn("diff_percent")
 		DateOfRateColumn   = sqlite.DateColumn("date_of_rate")
 		DateOfFileColumn   = sqlite.DateColumn("date_of_file")
 		CreatedAtColumn    = sqlite.TimestampColumn("created_at")
-		EtagColumn         = sqlite.StringColumn("etag")
-		LastModifiedColumn = sqlite.StringColumn("last_modified")
-		allColumns         = sqlite.ColumnList{IDColumn, FromCurrencyColumn, ToCurrencyColumn, RateColumn, SourceColumn, DateOfRateColumn, DateOfFileColumn, CreatedAtColumn, EtagColumn, LastModifiedColumn}
-		mutableColumns     = sqlite.ColumnList{FromCurrencyColumn, ToCurrencyColumn, RateColumn, SourceColumn, DateOfRateColumn, DateOfFileColumn, CreatedAtColumn, EtagColumn, LastModifiedColumn}
+		allColumns         = sqlite.ColumnList{IDColumn, FromCurrencyColumn, ToCurrencyColumn, RateColumn, SourceColumn, TrendColumn, DiffColumn, DiffPercentColumn, DateOfRateColumn, DateOfFileColumn, CreatedAtColumn}
+		mutableColumns     = sqlite.ColumnList{FromCurrencyColumn, ToCurrencyColumn, RateColumn, SourceColumn, TrendColumn, DiffColumn, DiffPercentColumn, DateOfRateColumn, DateOfFileColumn, CreatedAtColumn}
+		defaultColumns     = sqlite.ColumnList{CreatedAtColumn}
 	)
 
 	return ratesTable{
@@ -90,13 +94,15 @@ func newRatesTableImpl(schemaName, tableName, alias string) ratesTable {
 		ToCurrency:   ToCurrencyColumn,
 		Rate:         RateColumn,
 		Source:       SourceColumn,
+		Trend:        TrendColumn,
+		Diff:         DiffColumn,
+		DiffPercent:  DiffPercentColumn,
 		DateOfRate:   DateOfRateColumn,
 		DateOfFile:   DateOfFileColumn,
 		CreatedAt:    CreatedAtColumn,
-		Etag:         EtagColumn,
-		LastModified: LastModifiedColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,
+		DefaultColumns: defaultColumns,
 	}
 }

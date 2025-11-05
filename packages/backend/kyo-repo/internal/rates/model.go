@@ -1,10 +1,23 @@
 package rates
 
 import (
+	"time"
+
 	"github.com/yaz/kyo-repo/internal/db/gen/model"
 	"github.com/yaz/kyo-repo/internal/util"
-	"time"
 )
+
+type TrendType string
+
+const (
+	UP     TrendType = "UP"
+	DOWN   TrendType = "DOWN"
+	STABLE TrendType = "STABLE"
+)
+
+func (receiver TrendType) Name() string {
+	return string(receiver)
+}
 
 type RequestQuery struct {
 	LastId     int64

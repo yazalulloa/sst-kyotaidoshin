@@ -28,6 +28,7 @@ type apartmentsTable struct {
 
 	AllColumns     sqlite.ColumnList
 	MutableColumns sqlite.ColumnList
+	DefaultColumns sqlite.ColumnList
 }
 
 type ApartmentsTable struct {
@@ -75,6 +76,7 @@ func newApartmentsTableImpl(schemaName, tableName, alias string) apartmentsTable
 		UpdatedAtColumn  = sqlite.TimestampColumn("updated_at")
 		allColumns       = sqlite.ColumnList{BuildingIDColumn, NumberColumn, NameColumn, IDDocColumn, AliquotColumn, EmailsColumn, CreatedAtColumn, UpdatedAtColumn}
 		mutableColumns   = sqlite.ColumnList{NameColumn, IDDocColumn, AliquotColumn, EmailsColumn, CreatedAtColumn, UpdatedAtColumn}
+		defaultColumns   = sqlite.ColumnList{AliquotColumn, CreatedAtColumn}
 	)
 
 	return apartmentsTable{
@@ -92,5 +94,6 @@ func newApartmentsTableImpl(schemaName, tableName, alias string) apartmentsTable
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,
+		DefaultColumns: defaultColumns,
 	}
 }

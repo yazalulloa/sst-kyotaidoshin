@@ -22,6 +22,7 @@ type rolesTable struct {
 
 	AllColumns     sqlite.ColumnList
 	MutableColumns sqlite.ColumnList
+	DefaultColumns sqlite.ColumnList
 }
 
 type RolesTable struct {
@@ -63,6 +64,7 @@ func newRolesTableImpl(schemaName, tableName, alias string) rolesTable {
 		NameColumn     = sqlite.StringColumn("name")
 		allColumns     = sqlite.ColumnList{IDColumn, NameColumn}
 		mutableColumns = sqlite.ColumnList{NameColumn}
+		defaultColumns = sqlite.ColumnList{}
 	)
 
 	return rolesTable{
@@ -74,5 +76,6 @@ func newRolesTableImpl(schemaName, tableName, alias string) rolesTable {
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,
+		DefaultColumns: defaultColumns,
 	}
 }

@@ -152,7 +152,7 @@ func optionsHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 func SendRate(ctx context.Context, rate model.Rates) {
 
-	msg := fmt.Sprintf("NUEVA TASA: %s - %s", util.VED.Format(rate.Rate), rate.DateOfRate.Format(time.DateOnly))
+	msg := fmt.Sprintf("BCV USD: %s  %s", util.VED.Format(rate.Rate), rate.DateOfRate.Format(time.DateOnly))
 
 	list, err := users.NewRepository(ctx).GetTelegramIdsByNotificationEvent(users.NEW_RATE)
 	if err != nil {

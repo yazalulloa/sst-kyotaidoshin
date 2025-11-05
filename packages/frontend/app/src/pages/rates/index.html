@@ -90,11 +90,13 @@
   </div>
 
   <div class="hidden md:grid w-full font-bold items-center text-center border-b pt-2"
-       x-bind:class="hasPerm('rates:write') ? 'md:grid-cols-[3fr_1fr_1fr_1fr_3fr_1fr]' : 'md:grid-cols-[3fr_1fr_1fr_1fr_3fr]'">
+       x-bind:class="hasPerm('rates:write') ? 'md:grid-cols-[1fr_1fr_1fr_1fr_1fr_2fr_2fr_1fr]' : 'md:grid-cols-[1fr_1fr_1fr_1fr_1fr_2fr_2fr]'">
     <span x-text="$t('main-title-id')"></span>
     <span x-text="$t('main-title-currency')"></span>
+    <span x-text="$t('main-title-trend')"></span>
     <span x-text="$t('main-title-rate')"></span>
     <span x-text="$t('main-title-date')"></span>
+    <span x-text="$t('main-title-date-of-file')"></span>
     <span x-text="$t('main-title-creation-date')"></span>
     <span x-show="hasPerm('rates:write')" x-text="$t('main-title-actions')"></span>
   </div>
@@ -104,7 +106,7 @@
 <div id="container" hx-swap-oob="true" class="fade-me-out fade-me-in">
   <ul id="rates-table"
       class="flex flex-col gap-1 p-1 *:md:grid *:flex *:flex-row *:flex-wrap *:gap-4 *:justify-between *:items-center"
-      x-bind:class="hasPerm('rates:write') ? '*:md:grid-cols-[3fr_1fr_1fr_1fr_3fr_1fr]' : '*:md:grid-cols-[3fr_1fr_1fr_1fr_3fr]'"
+      x-bind:class="hasPerm('rates:write') ? '*:md:grid-cols-[1fr_1fr_1fr_1fr_1fr_2fr_2fr_1fr]' : '*:md:grid-cols-[1fr_1fr_1fr_1fr_1fr_2fr_2fr]'"
   >
 
   </ul>

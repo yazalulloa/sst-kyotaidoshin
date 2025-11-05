@@ -2,10 +2,11 @@ package db
 
 import (
 	"database/sql"
-	"github.com/sst/sst/v3/sdk/golang/resource"
-	_ "github.com/tursodatabase/libsql-client-go/libsql"
 	"log"
 	"sync"
+
+	"github.com/sst/sst/v3/sdk/golang/resource"
+	_ "github.com/tursodatabase/libsql-client-go/libsql"
 )
 
 type SqlDB struct {

@@ -27,6 +27,7 @@ type expensesTable struct {
 
 	AllColumns     sqlite.ColumnList
 	MutableColumns sqlite.ColumnList
+	DefaultColumns sqlite.ColumnList
 }
 
 type ExpensesTable struct {
@@ -73,6 +74,7 @@ func newExpensesTableImpl(schemaName, tableName, alias string) expensesTable {
 		TypeColumn        = sqlite.StringColumn("type")
 		allColumns        = sqlite.ColumnList{IDColumn, BuildingIDColumn, ReceiptIDColumn, DescriptionColumn, AmountColumn, CurrencyColumn, TypeColumn}
 		mutableColumns    = sqlite.ColumnList{BuildingIDColumn, ReceiptIDColumn, DescriptionColumn, AmountColumn, CurrencyColumn, TypeColumn}
+		defaultColumns    = sqlite.ColumnList{}
 	)
 
 	return expensesTable{
@@ -89,5 +91,6 @@ func newExpensesTableImpl(schemaName, tableName, alias string) expensesTable {
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,
+		DefaultColumns: defaultColumns,
 	}
 }

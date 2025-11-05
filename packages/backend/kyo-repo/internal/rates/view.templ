@@ -16,19 +16,31 @@ templ Search(res TableResponse) {
 		>
 			<span>{ fmt.Sprint(*item.Item.ID) }</span>
 			<div class="flex flex-row justify-center gap-2">
+				<div class="w-8 badge">{ item.Item.FromCurrency }</div>
 				<svg
 					data-flag={ strings.ToLower(item.Item.FromCurrency) }
 					x-bind:data-src="flags.get($el.getAttribute('data-flag'))"
 					data-cache="21600"
 					class="h-6 w-8"
 				></svg>
-				<div class="w-8">{ item.Item.FromCurrency }</div>
+			</div>
+			<div class="flex flex-row justify-center gap-2 tooltip tooltip-bottom" data-tip={ util.FormatFloat64(item.Item.Diff) }>
+				switch item.Item.Trend {
+        case "UP":
+          <svg x-bind:data-src="trendUpIconUrl" data-cache="21600" class="h-4 w-4 text-green-600"></svg>
+        case "DOWN":
+          <svg x-bind:data-src="trendDownIconUrl" data-cache="21600" class="h-4 w-4 text-red-600"></svg>
+        default:
+          <svg x-bind:data-src="equalsIconUrl" data-cache="21600" class="h-4 w-4 text-muted-foreground"></svg>
+				}
+				<span class="text-end">{ util.FormatFloat2(item.Item.DiffPercent) }</span>
 			</div>
 			<span class="text-end">{ util.FormatFloat64(item.Item.Rate) }</span>
 			<span class="text-center">{ item.DateOfRate }</span>
 			@api.SpanFormatDate(fmt.Sprint(item.DateOfFile))
+			@api.SpanFormatDate(fmt.Sprint(item.CreatedAt))
 			if hasWritePerm {
-				@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{"hx-include": "[name='currency_input'],[name='date_input']", "data-recaptcha-action" : "rates_delete"})
+				@api.DeleteBtn(fmt.Sprintf(_PATH+"/%s", item.Key), item.CardId, templ.Attributes{"hx-include": "[name='currency_input'],[name='date_input']", "data-recaptcha-action": "rates_delete"})
 			}
 		</li>
 	}

@@ -30,6 +30,7 @@ type receiptsTable struct {
 
 	AllColumns     sqlite.ColumnList
 	MutableColumns sqlite.ColumnList
+	DefaultColumns sqlite.ColumnList
 }
 
 type ReceiptsTable struct {
@@ -79,6 +80,7 @@ func newReceiptsTableImpl(schemaName, tableName, alias string) receiptsTable {
 		UpdatedAtColumn  = sqlite.TimestampColumn("updated_at")
 		allColumns       = sqlite.ColumnList{IDColumn, BuildingIDColumn, YearColumn, MonthColumn, DateColumn, RateIDColumn, SentColumn, LastSentColumn, CreatedAtColumn, UpdatedAtColumn}
 		mutableColumns   = sqlite.ColumnList{IDColumn, BuildingIDColumn, YearColumn, MonthColumn, DateColumn, RateIDColumn, SentColumn, LastSentColumn, CreatedAtColumn, UpdatedAtColumn}
+		defaultColumns   = sqlite.ColumnList{CreatedAtColumn}
 	)
 
 	return receiptsTable{
@@ -98,5 +100,6 @@ func newReceiptsTableImpl(schemaName, tableName, alias string) receiptsTable {
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,
+		DefaultColumns: defaultColumns,
 	}
 }

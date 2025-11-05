@@ -23,6 +23,7 @@ import (
 	"github.com/yaz/kyo-repo/internal/api"
 	"github.com/yaz/kyo-repo/internal/api/compress"
 	bcv_bucket "github.com/yaz/kyo-repo/internal/bcv-bucket"
+	bcv_files "github.com/yaz/kyo-repo/internal/bcv-files"
 	"github.com/yaz/kyo-repo/internal/buildings"
 	"github.com/yaz/kyo-repo/internal/debts"
 	"github.com/yaz/kyo-repo/internal/expenses_api"
@@ -84,6 +85,7 @@ func router() http.Handler {
 	start.Routes(newRouter)
 	rates.Routes(holder)
 	bcv_bucket.Routes(holder)
+	bcv_files.Routes(holder)
 	buildings.Routes(holder)
 	reserveFundsApi.Routes(holder)
 	apartments.Routes(holder)
