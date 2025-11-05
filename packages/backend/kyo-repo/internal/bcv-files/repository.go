@@ -49,7 +49,7 @@ func (repo Repository) Get(link string) (*model.BcvFiles, error) {
 }
 
 func (repo Repository) selectAll() ([]model.BcvFiles, error) {
-	stmt := BcvFiles.SELECT(BcvFiles.AllColumns).FROM(BcvFiles).ORDER_BY(BcvFiles.FileDate)
+	stmt := BcvFiles.SELECT(BcvFiles.AllColumns).FROM(BcvFiles).ORDER_BY(BcvFiles.FileDate.DESC())
 
 	var dest []model.BcvFiles
 	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)

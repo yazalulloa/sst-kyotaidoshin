@@ -37,6 +37,7 @@ CREATE INDEX IF NOT EXISTS rates_from_currency_to_currency_rate_date_of_rate_idx
 CREATE INDEX IF NOT EXISTS rates_from_currency_idx ON rates (from_currency);
 CREATE INDEX IF NOT EXISTS rates_date_of_rate_idx ON rates (date_of_rate);
 CREATE INDEX IF NOT EXISTS rates_from_currency_date_of_rate_idx ON rates (from_currency, date_of_rate);
+CREATE INDEX IF NOT EXISTS rates_trend_idx ON rates (trend);
 
 
 -- DROP TABLE IF EXISTS apartments;
