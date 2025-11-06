@@ -163,6 +163,7 @@ func (info ParsingInfo) Parse() (*Result, error) {
 	result.NumOfSheets = workbook.GetNumberSheets()
 
 	var rateArray [][]*model.Rates
+	parsed := 0
 
 	for _, sheet := range workbook.GetSheets() {
 		var sheetArray []*model.Rates
@@ -343,6 +344,7 @@ func (info ParsingInfo) Parse() (*Result, error) {
 					DateOfFile:   *dateOfFile,
 				}
 
+				parsed++
 				sheetArray = append(sheetArray, &modelRates)
 			}
 
@@ -354,11 +356,15 @@ func (info ParsingInfo) Parse() (*Result, error) {
 
 		result.FileDate = *dateOfFile
 
+		rateArray = append(rateArray, sheetArray)
 		//log.Printf("Sheet: %s rates: %d %s %s", sheet.GetName(), len(rateArray), dateOfRate, dateOfFile)
 
 	}
 
 	result.Rates = rateArray
+
+	log.Printf("Parsed %d rates from file %s", parsed, info.BucketKey)
+	result.Parsed = parsed
 
 	return &result, nil
 

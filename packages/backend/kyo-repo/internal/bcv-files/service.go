@@ -138,7 +138,9 @@ func (ser Service) processResult(downloadResult bcv.DownloadResult) (*bcv.Result
 		}
 	}
 
-	result.Parsed += len(toInsert)
+	if len(toInsert) == 0 {
+		return nil, fmt.Errorf("no rates to insert from file %s", info.BucketKey)
+	}
 
 	log.Printf("Inserting %d rates from file %s", len(toInsert), info.BucketKey)
 
