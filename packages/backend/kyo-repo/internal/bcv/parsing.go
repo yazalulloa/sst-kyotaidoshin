@@ -151,8 +151,6 @@ func (info ParsingInfo) Parse() (*Result, error) {
 		BucketKey: info.BucketKey,
 	}
 
-	//reader := bytes.NewReader(info.Data)
-
 	result := Result{}
 	workbook, err := xls.OpenFile(info.FilePath)
 
@@ -367,91 +365,4 @@ func (info ParsingInfo) Parse() (*Result, error) {
 	result.Parsed = parsed
 
 	return &result, nil
-
-	//for i := 0; i < len(rateArray); i++ {
-	//	lhs := rateArray[i]
-	//	var rhs *model.Rates
-	//	for j := i + 1; j < len(rateArray); j++ {
-	//		v := rateArray[j]
-	//		if lhs.FromCurrency == v.FromCurrency {
-	//			rhs = v
-	//			break
-	//		}
-	//	}
-	//
-	//	diff := 0.00
-	//	diffPercent := 0.00
-	//	trend := rates.STABLE
-	//	if rhs != nil {
-	//		previousRate := lhs.Rate
-	//		nextRate := rhs.Rate
-	//
-	//		diff = previousRate - nextRate
-	//
-	//		if nextRate != 0 {
-	//			diffPercent = (math.Abs(diff) / nextRate) * 100
-	//			diffPercent = util.RoundFloat(diffPercent, 2)
-	//		}
-	//
-	//		if previousRate > nextRate {
-	//			trend = rates.UP
-	//		} else if previousRate < nextRate {
-	//			trend = rates.DOWN
-	//		}
-	//	}
-	//
-	//	lhs.ToCurrency = "VED"
-	//	lhs.Source = "BCV"
-	//	lhs.Trend = trend.Name()
-	//	lhs.Diff = diff
-	//	lhs.DiffPercent = diffPercent
-	//}
-	//
-	//result.Parsed += len(rateArray)
-	//
-	//log.Printf("Inserting %d rates from file %s", len(rateArray), info.BucketKey)
-	//
-	//repo := rates.NewRepository(info.Ctx)
-	//
-	//ratesInserted, err := repo.Insert(rateArray)
-	//result.Inserted += ratesInserted
-	//
-	////array := util.SplitArray(rateArray, 300)
-	////
-	////length := len(array)
-	////var wg sync.WaitGroup
-	////wg.Add(length)
-	////errorChan := make(chan error, length)
-	////
-	////for _, chunk := range array {
-	////	go func() {
-	////		ratesInserted, err := repo.Insert(chunk)
-	////		if err != nil {
-	////			errorChan <- fmt.Errorf("error inserting %d rates:  %w", len(rateArray), err)
-	////			return
-	////		}
-	////		result.Inserted += ratesInserted
-	////	}()
-	////}
-	////
-	////wg.Wait()
-	////close(errorChan)
-	////
-	////err = util.HasErrors(errorChan)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	////log.Printf("Sheet: %s rates %d inserted: %d", sheet.GetName(), len(rateArray), ratesInserted)
-	//
-	//if !info.ProcessAll && result.Inserted > 0 {
-	//	for _, rate := range rateArray {
-	//		if rate.FromCurrency == "USD" {
-	//			log.Printf("Sending USD rate: %f", rate.Rate)
-	//			telegram.SendRate(info.Ctx, *rate)
-	//		}
-	//	}
-	//}
-	//
-	//return &result, nil
 }

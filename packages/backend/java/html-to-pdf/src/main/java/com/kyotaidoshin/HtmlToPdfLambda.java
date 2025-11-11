@@ -26,6 +26,8 @@ public class HtmlToPdfLambda implements RequestHandler<List<HtmlToPdfRequest>, S
   @Override
   public String handleRequest(List<HtmlToPdfRequest> input, Context context) {
 
+    final var timestamp = System.currentTimeMillis();
+
     final var singles = new ArrayList<Single<String>>();
 
     for (var pdfRequest : input) {
@@ -70,6 +72,9 @@ public class HtmlToPdfLambda implements RequestHandler<List<HtmlToPdfRequest>, S
     return Single.merge(singles)
         .toList()
         .map(Json::encode)
+        .doOnTerminate(() -> {
+          log.info("Total time ms: {}", System.currentTimeMillis() - timestamp);
+        })
         .blockingGet();
   }
 }
