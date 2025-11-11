@@ -14,7 +14,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.88.7
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.42.11
 	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
-	github.com/cespare/xxhash v1.1.0
 	github.com/go-jet/jet/v2 v2.14.0
 	github.com/go-playground/form/v4 v4.3.0
 	github.com/go-playground/validator/v10 v10.28.0
@@ -24,7 +23,7 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/posthog/posthog-go v1.6.12
 	github.com/shakinm/xlsReader v0.9.12
-	github.com/sst/sst/v3 v3.17.21
+	github.com/sst/sst/v3 v3.17.23
 	github.com/tursodatabase/libsql-client-go v0.0.0-20240902231107-85af5b9d094d
 	github.com/wneessen/go-mail v0.7.2
 	github.com/xuri/excelize/v2 v2.10.0
