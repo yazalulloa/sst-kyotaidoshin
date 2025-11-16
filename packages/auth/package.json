@@ -9,9 +9,9 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@aws-sdk/client-lambda": "3.929.0",
+    "@aws-sdk/client-lambda": "3.932.0",
     "@openauthjs/openauth": "0.4.3",
-    "hono": "4.10.5",
+    "hono": "4.10.6",
     "posthog-node": "5.11.2",
     "sst": "3.17.23",
     "uuid": "13.0.0",
