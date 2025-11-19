@@ -260,3 +260,16 @@ func (repo Repository) LastRate(fromCurrency string) (model.Rates, error) {
 
 	return dest[0], nil
 }
+
+func (repo Repository) byTrend(trend TrendType) ([]model.Rates, error) {
+	stmt := Rates.SELECT(Rates.AllColumns).FROM(Rates).
+		WHERE(Rates.Trend.EQ(sqlite.String(trend.Name())))
+
+	var dest []model.Rates
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
+	if err != nil {
+		return nil, err
+	}
+
+	return dest, nil
+}

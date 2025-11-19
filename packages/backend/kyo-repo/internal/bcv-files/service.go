@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math"
 	"sync"
 	"time"
 
@@ -19,7 +18,7 @@ type Service struct {
 	ctx          context.Context
 	bcvService   *bcv.Service
 	bcvFilesRepo Repository
-	ratesRepo    rates.Repository
+	ratesSer     rates.Service
 }
 
 func NewService(ctx context.Context) *Service {
@@ -32,7 +31,7 @@ func NewService(ctx context.Context) *Service {
 		ctx:          ctx,
 		bcvService:   bcvService,
 		bcvFilesRepo: NewRepository(ctx),
-		ratesRepo:    rates.NewRepository(ctx),
+		ratesSer:     rates.NewService(ctx),
 	}
 }
 
@@ -107,32 +106,7 @@ func (ser Service) processResult(downloadResult bcv.DownloadResult) (*bcv.Result
 				}
 			}
 
-			diff := 0.00
-			diffPercent := 0.00
-			trend := rates.STABLE
-			if rhs != nil {
-				previousRate := lhs.Rate
-				nextRate := rhs.Rate
-
-				diff = previousRate - nextRate
-
-				if nextRate != 0 {
-					diffPercent = (math.Abs(diff) / nextRate) * 100
-					diffPercent = util.RoundFloat(diffPercent, 2)
-				}
-
-				if previousRate > nextRate {
-					trend = rates.UP
-				} else if previousRate < nextRate {
-					trend = rates.DOWN
-				}
-			}
-
-			lhs.ToCurrency = "VED"
-			lhs.Source = "BCV"
-			lhs.Trend = trend.Name()
-			lhs.Diff = diff
-			lhs.DiffPercent = diffPercent
+			rates.CalculateTrend(lhs, rhs)
 
 			toInsert = append(toInsert, lhs)
 		}
@@ -220,13 +194,13 @@ func (ser Service) BcvJob() error {
 
 	if result.Inserted > 0 {
 		for _, rate := range result.Rates[0] {
-			if rate.FromCurrency == "USD" {
-				log.Printf("Sending USD rate: %f", rate.Rate)
+			if rate.FromCurrency == "USD" || rate.ToCurrency == "EUR" {
+				log.Printf("Sending %s rate: %f", rate.FromCurrency, rate.Rate)
 				telegram.SendRate(ser.ctx, *rate)
 			}
 		}
 
 	}
 
-	return nil
+	return ser.ratesSer.UpdateStableTrend()
 }

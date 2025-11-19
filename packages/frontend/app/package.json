@@ -17,7 +17,7 @@
     "external-svg-loader": "^1.7.1",
     "htmx.org": "^2.0.8",
     "pinecone-router": "^7.3.0",
-    "posthog-js": "^1.293.0",
+    "posthog-js": "^1.296.1",
     "tailwindcss": "^4.1.17"
   },
   "devDependencies": {

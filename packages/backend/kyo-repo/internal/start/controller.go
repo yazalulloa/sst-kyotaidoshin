@@ -175,10 +175,10 @@ func getInit(w http.ResponseWriter, r *http.Request) {
 				Id:   "nav-bcv-files",
 				Path: "/bcv-files",
 			})
-			pages = append(pages, Page{
-				Id:   "nav-bcv-bucket",
-				Path: "/bcv-bucket",
-			})
+			//pages = append(pages, Page{
+			//	Id:   "nav-bcv-bucket",
+			//	Path: "/bcv-bucket",
+			//})
 			break
 		case api.USERS_READ.Name():
 			pages = append(pages, Page{

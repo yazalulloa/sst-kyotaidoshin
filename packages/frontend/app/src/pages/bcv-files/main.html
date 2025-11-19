@@ -36,10 +36,21 @@
             class="btn btn-neutral"
             x-text="$t('main-action-bcv-files-look-up')">
     </button>
+
+    <button x-show="hasPerm('rates:write')"
+            hx-put="/api/rates/trend"
+            hx-trigger="mousedown"
+            hx-swap="none"
+            hx-disabled-elt="this"
+            hx-indicator=".htmx-indicator"
+            type="button"
+            class="btn btn-neutral"
+            x-text="$t('main-action-rates-change-trend')">
+    </button>
   </div>
 
   <div class="hidden md:grid w-full font-bold items-center text-center border-b pt-2"
-       x-bind:class="hasPerm('rates:write') ? 'md:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_2fr_2fr_1fr]' : 'md:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_2fr_2fr]'">
+       x-bind:class="hasPerm('bcv_files:write') ? 'md:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_2fr_2fr_1fr]' : 'md:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_2fr_2fr]'">
     <span x-text="$t('main-title-file')"></span>
     <span x-text="$t('main-title-rates')"></span>
     <span x-text="$t('main-title-sheets')"></span>
@@ -49,7 +60,7 @@
     <span x-text="$t('main-title-last-modified')"></span>
     <span x-text="$t('main-title-processed-at')"></span>
     <span x-text="$t('main-title-created-at')"></span>
-    <span x-show="hasPerm('rates:write')" x-text="$t('main-title-actions')"></span>
+    <span x-show="hasPerm('bcv_files:write')" x-text="$t('main-title-actions')"></span>
   </div>
 
 </div>

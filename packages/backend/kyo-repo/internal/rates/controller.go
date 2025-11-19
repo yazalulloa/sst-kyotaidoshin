@@ -2,13 +2,14 @@ package rates
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/yaz/kyo-repo/internal/api"
-	"github.com/yaz/kyo-repo/internal/util"
 	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/yaz/kyo-repo/internal/api"
+	"github.com/yaz/kyo-repo/internal/util"
 )
 
 const _PATH = "/api/rates"
@@ -18,6 +19,7 @@ func Routes(holder *api.RouterHolder) {
 
 	holder.GET(_SEARCH, search, api.RATES_READ)
 	holder.DELETE(_PATH+"/{id}", deleteRate, api.RatesDeleteRecaptchaAction, api.RATES_WRITE)
+	holder.PUT(_PATH+"/trend", updateTrend, api.RatesDeleteRecaptchaAction, api.RATES_WRITE)
 }
 
 func search(w http.ResponseWriter, r *http.Request) {
@@ -108,4 +110,15 @@ func deleteRate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func updateTrend(w http.ResponseWriter, r *http.Request) {
+
+	err := NewService(r.Context()).UpdateStableTrend()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
