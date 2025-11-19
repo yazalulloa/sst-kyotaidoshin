@@ -50,7 +50,7 @@
   </div>
 
   <div class="hidden md:grid w-full font-bold items-center text-center border-b pt-2"
-       x-bind:class="hasPerm('bcv_files:write') ? 'md:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_2fr_2fr_1fr]' : 'md:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_2fr_2fr]'">
+       x-bind:class="hasPerm('bcv_files:write') ? 'md:grid-cols-[2fr_1fr_1fr_1fr_2fr_1fr_1fr_2fr_2fr_1fr]' : 'md:grid-cols-[2fr_1fr_1fr_1fr_2fr_1fr_1fr_2fr_2fr]'">
     <span x-text="$t('main-title-file')"></span>
     <span x-text="$t('main-title-rates')"></span>
     <span x-text="$t('main-title-sheets')"></span>
@@ -67,7 +67,7 @@
 
 <div id="container" hx-swap-oob="true" class="fade-me-out fade-me-in pt-2">
   <ul class="flex flex-col gap-2 *:md:grid *:md:gap-2 *:flex *:flex-row *:flex-wrap *:justify-between *:gap-4 *:items-center *:text-center"
-      x-bind:class="hasPerm('bcv_files:write') ? '*:md:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_2fr_2fr_1fr]' : '*:md:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr_1fr_2fr_2fr]'">
+      x-bind:class="hasPerm('bcv_files:write') ? '*:md:grid-cols-[2fr_1fr_1fr_1fr_2fr_1fr_1fr_2fr_2fr_1fr]' : '*:md:grid-cols-[2fr_1fr_1fr_1fr_2fr_1fr_1fr_2fr_2fr]'">
     <li hidden="hidden"
         hx-get="/api/bcv-files"
         hx-trigger="load"
