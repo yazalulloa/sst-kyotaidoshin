@@ -150,9 +150,91 @@ func optionsHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 }
 
+func tasaHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+	repo := rates.NewRepository(ctx)
+
+	usdRate, err := repo.LastRate(util.USD.Name())
+	if err != nil {
+		log.Printf("Error getting last rate: %v", err)
+		return
+	}
+
+	eurRate, err := repo.LastRate("EUR")
+	if err != nil {
+		log.Printf("Error getting last rate: %v", err)
+		return
+	}
+
+	chat := update.Message.Chat
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+	errorChan := make(chan error, 2)
+
+	go func() {
+		defer wg.Done()
+
+		msgParams := &bot.SendMessageParams{
+			ChatID: chat.ID,
+			Text:   rateMsg(usdRate),
+			//ShowAlert:       false, //show modal
+			//CacheTime:       0,
+		}
+
+		_, err = b.SendMessage(ctx, msgParams)
+
+		if err != nil {
+			errorChan <- fmt.Errorf("error sending message: %v", err)
+			return
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+
+		msgParams := &bot.SendMessageParams{
+			ChatID: chat.ID,
+			Text:   rateMsg(eurRate),
+			//ShowAlert:       false, //show modal
+			//CacheTime:       0,
+		}
+
+		_, err = b.SendMessage(ctx, msgParams)
+
+		if err != nil {
+			errorChan <- fmt.Errorf("error sending message: %v", err)
+			return
+		}
+	}()
+
+	wg.Wait()
+	close(errorChan)
+
+	err = util.HasErrors(errorChan)
+	if err != nil {
+		log.Printf("Error: %v", err)
+		return
+	}
+}
+
+func flagEmoji(str string) string {
+	switch str {
+	case "USD":
+		return "🇺🇸"
+	case "EUR":
+		return "🇪🇺"
+	default:
+		return ""
+	}
+}
+
+func rateMsg(rate model.Rates) string {
+	return fmt.Sprintf("BCV %s  %s  %s", flagEmoji(rate.FromCurrency), util.VED.Format(rate.Rate), rate.DateOfRate.Format(time.DateOnly))
+}
+
 func SendRate(ctx context.Context, rate model.Rates) {
 
-	msg := fmt.Sprintf("BCV %s: %s  %s", rate.FromCurrency, util.VED.Format(rate.Rate), rate.DateOfRate.Format(time.DateOnly))
+	msg := rateMsg(rate)
 
 	list, err := users.NewRepository(ctx).GetTelegramIdsByNotificationEvent(users.NEW_RATE)
 	if err != nil {

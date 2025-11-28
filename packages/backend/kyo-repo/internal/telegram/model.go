@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"sync"
+	"time"
+
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	"github.com/sst/sst/v3/sdk/golang/resource"
 	"github.com/yaz/kyo-repo/internal/util"
-	"log"
-	"sync"
-	"time"
 )
 
 type Service struct {
@@ -26,6 +27,8 @@ var _telegramBotOnce sync.Once
 
 const _START_COMMAND = "/start"
 const _OPTIONS_COMMAND = "/options"
+const _TASA_COMMAND = "/tasa"
+
 const _LAST_RATE_CALLBACK = "last_rate_callback"
 const _BACKUPS_CALLBACK = "backups_callback"
 const _RECEIPTS_CALLBACK = "receipts_callback"
@@ -77,6 +80,7 @@ func GetTelegramBot() (*bot.Bot, error) {
 
 		_telegramBotInstance.RegisterHandler(bot.HandlerTypeMessageText, _START_COMMAND, bot.MatchTypePrefix, startHandler)
 		_telegramBotInstance.RegisterHandler(bot.HandlerTypeMessageText, _OPTIONS_COMMAND, bot.MatchTypeExact, optionsHandler)
+		_telegramBotInstance.RegisterHandler(bot.HandlerTypeMessageText, _TASA_COMMAND, bot.MatchTypeExact, tasaHandler)
 		_telegramBotInstance.RegisterHandler(bot.HandlerTypeCallbackQueryData, _LAST_RATE_CALLBACK, bot.MatchTypeExact, lastRateCallBack)
 		_telegramBotInstance.RegisterHandler(bot.HandlerTypeCallbackQueryData, _BACKUPS_CALLBACK, bot.MatchTypeExact, backupsCallBack)
 		_telegramBotInstance.RegisterHandler(bot.HandlerTypeCallbackQueryData, _RECEIPTS_CALLBACK, bot.MatchTypeExact, receiptsCallBack)
