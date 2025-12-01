@@ -151,15 +151,8 @@ func optionsHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 }
 
 func tasaHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	repo := rates.NewRepository(ctx)
 
-	usdRate, err := repo.LastRate(util.USD.Name())
-	if err != nil {
-		log.Printf("Error getting last rate: %v", err)
-		return
-	}
-
-	eurRate, err := repo.LastRate("EUR")
+	array, err := rates.NewRepository(ctx).LastRate(util.USD.Name(), "EUR")
 	if err != nil {
 		log.Printf("Error getting last rate: %v", err)
 		return
@@ -167,53 +160,25 @@ func tasaHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 	chat := update.Message.Chat
 
-	var wg sync.WaitGroup
-	wg.Add(2)
-	errorChan := make(chan error, 2)
+	var builder strings.Builder
 
-	go func() {
-		defer wg.Done()
-
-		msgParams := &bot.SendMessageParams{
-			ChatID: chat.ID,
-			Text:   rateMsg(usdRate),
-			//ShowAlert:       false, //show modal
-			//CacheTime:       0,
+	for i, rate := range array {
+		builder.WriteString(rateMsg(rate))
+		if i < len(array)-1 {
+			builder.WriteString("\n")
 		}
+	}
 
-		_, err = b.SendMessage(ctx, msgParams)
+	msgParams := &bot.SendMessageParams{
+		ChatID: chat.ID,
+		Text:   builder.String(),
+		//ShowAlert:       false, //show modal
+		//CacheTime:       0,
+	}
 
-		if err != nil {
-			errorChan <- fmt.Errorf("error sending message: %v", err)
-			return
-		}
-	}()
-
-	go func() {
-		defer wg.Done()
-
-		msgParams := &bot.SendMessageParams{
-			ChatID: chat.ID,
-			Text:   rateMsg(eurRate),
-			//ShowAlert:       false, //show modal
-			//CacheTime:       0,
-		}
-
-		_, err = b.SendMessage(ctx, msgParams)
-
-		if err != nil {
-			errorChan <- fmt.Errorf("error sending message: %v", err)
-			return
-		}
-	}()
-
-	wg.Wait()
-	close(errorChan)
-
-	err = util.HasErrors(errorChan)
+	_, err = b.SendMessage(ctx, msgParams)
 	if err != nil {
-		log.Printf("Error: %v", err)
-		return
+		log.Printf("Error sending message: %v", err)
 	}
 }
 
@@ -285,20 +250,20 @@ func SendRate(ctx context.Context, rate model.Rates) {
 
 func lastRateCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
 
-	location, err := util.TzCss()
-	if err != nil {
-		log.Printf("Error getting timezone: %v", err)
-		return
-	}
-
-	rate, err := rates.NewRepository(ctx).LastRate(util.USD.Name())
+	array, err := rates.NewRepository(ctx).LastRate(util.USD.Name(), "EUR")
 	if err != nil {
 		log.Printf("Error getting last rate: %v", err)
 		return
 	}
 
-	msg := fmt.Sprintf("TASA: %s\nFECHA: %s\nCREADO: %s", util.VED.Format(rate.Rate),
-		rate.DateOfRate.Format(time.DateOnly), rate.CreatedAt.In(location).Format(time.DateTime))
+	var builder strings.Builder
+
+	for i, rate := range array {
+		builder.WriteString(rateMsg(rate))
+		if i < len(array)-1 {
+			builder.WriteString("\n")
+		}
+	}
 
 	var wg sync.WaitGroup
 	wg.Add(2)
@@ -309,7 +274,7 @@ func lastRateCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 		msgParams := &bot.SendMessageParams{
 			ChatID: update.CallbackQuery.From.ID,
-			Text:   msg,
+			Text:   builder.String(),
 			//ShowAlert:       false, //show modal
 			//CacheTime:       0,
 		}

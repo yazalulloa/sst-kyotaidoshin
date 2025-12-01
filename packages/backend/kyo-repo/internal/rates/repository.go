@@ -243,22 +243,58 @@ func (repo Repository) GetFromDate(fromCurrency string, date time.Time, limit in
 
 }
 
-func (repo Repository) LastRate(fromCurrency string) (model.Rates, error) {
-	stmt := Rates.SELECT(Rates.AllColumns).FROM(Rates).
-		WHERE(Rates.FromCurrency.EQ(sqlite.String(fromCurrency))).
-		ORDER_BY(Rates.ID.DESC()).LIMIT(1)
+func (repo Repository) LastRate(fromCurrencies ...string) ([]model.Rates, error) {
+
+	currencies := make([]sqlite.Expression, len(fromCurrencies))
+
+	for i, currency := range fromCurrencies {
+		currencies[i] = sqlite.String(currency)
+	}
+
+	latestRates := sqlite.CTE("LatestRates")
+
+	var stmt sqlite.Statement
+
+	if false {
+		stmt = sqlite.WITH(
+			latestRates.AS(
+				sqlite.SELECT(
+					Rates.AllColumns,
+					sqlite.ROW_NUMBER().OVER(
+						sqlite.PARTITION_BY(Rates.FromCurrency).ORDER_BY(Rates.ID.DESC()),
+					).AS("rn"),
+				).FROM(Rates).
+					WHERE(Rates.FromCurrency.IN(currencies...)),
+			),
+		)(
+			sqlite.SELECT(latestRates.AllColumns()).FROM(latestRates).WHERE(sqlite.IntegerColumn("rn").EQ(sqlite.Int(1))),
+		)
+	}
+
+	if false {
+		stmt = Rates.SELECT(Rates.AllColumns).FROM(Rates).
+			WHERE(Rates.FromCurrency.IN(currencies...)).
+			ORDER_BY(Rates.ID.DESC()).LIMIT(1)
+	}
+
+	if true {
+		subQuery := sqlite.SELECT(Rates.ID).FROM(Rates).ORDER_BY(Rates.ID.DESC()).LIMIT(20).AsTable("lastRates")
+		lastIds := Rates.ID.From(subQuery)
+
+		stmt = sqlite.SELECT(Rates.AllColumns).
+			WHERE(Rates.FromCurrency.IN(currencies...).
+				AND(Rates.ID.IN(lastIds)),
+			).ORDER_BY(Rates.ID.DESC())
+	}
 
 	var dest []model.Rates
 	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
 	if err != nil {
-		return model.Rates{}, err
+		log.Printf("Error querying last rates:\n%s\n%v", stmt.DebugSql(), err)
+		return nil, err
 	}
 
-	if len(dest) == 0 {
-		return model.Rates{}, util.ErrNoRows
-	}
-
-	return dest[0], nil
+	return dest, nil
 }
 
 func (repo Repository) byTrend(trend TrendType) ([]model.Rates, error) {
