@@ -3,6 +3,7 @@ package login
 import (
 	"context"
 	"encoding/json"
+
 	"github.com/google/uuid"
 	"github.com/yaz/kyo-repo/internal/db/gen/model"
 	"github.com/yaz/kyo-repo/internal/users"

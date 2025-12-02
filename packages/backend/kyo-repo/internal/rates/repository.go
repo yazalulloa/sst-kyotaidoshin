@@ -251,11 +251,11 @@ func (repo Repository) LastRate(fromCurrencies ...string) ([]model.Rates, error)
 		currencies[i] = sqlite.String(currency)
 	}
 
-	latestRates := sqlite.CTE("LatestRates")
-
 	var stmt sqlite.Statement
 
 	if false {
+		latestRates := sqlite.CTE("LatestRates")
+
 		stmt = sqlite.WITH(
 			latestRates.AS(
 				sqlite.SELECT(
@@ -271,13 +271,13 @@ func (repo Repository) LastRate(fromCurrencies ...string) ([]model.Rates, error)
 		)
 	}
 
-	if false {
+	if true {
 		stmt = Rates.SELECT(Rates.AllColumns).FROM(Rates).
 			WHERE(Rates.FromCurrency.IN(currencies...)).
-			ORDER_BY(Rates.ID.DESC()).LIMIT(1)
+			ORDER_BY(Rates.ID.DESC()).LIMIT(int64(len(currencies)))
 	}
 
-	if true {
+	if false {
 		subQuery := sqlite.SELECT(Rates.ID).FROM(Rates).ORDER_BY(Rates.ID.DESC()).LIMIT(20).AsTable("lastRates")
 		lastIds := Rates.ID.From(subQuery)
 
