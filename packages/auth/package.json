@@ -12,7 +12,7 @@
     "@aws-sdk/client-lambda": "3.942.0",
     "@openauthjs/openauth": "0.4.3",
     "hono": "4.10.7",
-    "posthog-node": "5.14.1",
+    "posthog-node": "5.15.0",
     "sst": "3.17.24",
     "uuid": "13.0.0",
     "valibot": "1.2.0"

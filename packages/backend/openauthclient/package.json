@@ -1,15 +1,16 @@
 {
   "name": "@kyotaidoshin/openauthclient",
-  "module": "index.ts",
+  "version": "1.0.0",
   "type": "module",
+  "module": "index.ts",
   "devDependencies": {
-    "@types/aws-lambda": "8.10.158"
+    "@types/aws-lambda": "8.10.159"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "posthog-node": "5.14.1",
+    "posthog-node": "5.15.0",
     "@openauthjs/openauth": "0.4.3",
     "hono": "4.10.7",
     "@kyotaidoshin/auth": "workspace:",
