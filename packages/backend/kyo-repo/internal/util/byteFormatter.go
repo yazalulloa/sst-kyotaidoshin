@@ -113,15 +113,6 @@ func GetValidator() (*validator.Validate, error) {
 	return validatorInstance, err
 }
 
-func StringToInt16(str string) int16 {
-	num, err := strconv.ParseInt(str, 10, 16)
-	if err != nil {
-		return 0
-	}
-
-	return int16(num)
-}
-
 func FormatFloat64(number float64) string {
 	return strconv.FormatFloat(number, 'f', -1, 64)
 }

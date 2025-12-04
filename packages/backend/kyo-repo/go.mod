@@ -71,6 +71,7 @@ require (
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/metakeule/fmtdate v1.1.2 // indirect
+	github.com/pbnjay/grate v0.0.0-20231006022435-3f8e65d74a14 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.4 // indirect

@@ -140,6 +140,15 @@ func StrArrayToInt16Array(strArray []string) []int16 {
 	return int16Array
 }
 
+func StringToInt16(str string) int16 {
+	num, err := strconv.ParseInt(str, 10, 16)
+	if err != nil {
+		return 0
+	}
+
+	return int16(num)
+}
+
 func GetUploadFormParams(r *http.Request, filePrefix string) (*UploadBackupParams, error) {
 
 	filename := GetQueryParamAsString(r, "name")
