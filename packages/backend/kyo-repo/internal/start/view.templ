@@ -1,8 +1,10 @@
 package start
 
 import (
-	"github.com/yaz/kyo-repo/internal/db/gen/model"
 	"fmt"
+	"strings"
+
+	"github.com/yaz/kyo-repo/internal/db/gen/model"
 )
 
 templ Init(pages []Page, permStr, pagesStr string, user model.Users) {
@@ -25,7 +27,6 @@ templ Init(pages []Page, permStr, pagesStr string, user model.Users) {
 				x-bind:class={ fmt.Sprintf("!('%s' === selected) || 'active bg-primary/10 text-on-surface-strong pointer-events-none cursor-not-allowed'", page.Id) }
 				x-bind:aria-current={ fmt.Sprintf("selected === '%s' ? 'page' : ''", page.Id) }
 				x-bind:disabled={ fmt.Sprintf("'%s' === selected", page.Id) }
-
 				class="flex items-center rounded-(--radius-selector) gap-2 px-2 py-1.5 text-sm font-medium text-on-surface underline-offset-2 hover:bg-primary/5 hover:text-on-surface-strong focus-visible:underline focus:outline-hidden"
 			>
 				<template
@@ -45,7 +46,7 @@ templ Init(pages []Page, permStr, pagesStr string, user model.Users) {
 						x-bind:hx-get={ fmt.Sprintf("NAV_URLS.get('%s')", subRoute.Id) }
 						hx-indicator=".htmx-indicator"
 						hx-trigger="navigate"
-					  hx-swap="none"
+						hx-swap="none"
 						x-init="htmx.process($el)"
 					></template>
 				}
@@ -78,4 +79,96 @@ templ Avatar(user model.Users) {
 			<span class="sr-only">profile settings</span>
 		</div>
 	</div>
+}
+
+templ ProfileCard(user model.Users, chats []TelegramChat) {
+	{{
+		lastLogin := "Never signed in"
+		if user.LastLoginAt != nil {
+			lastLogin = user.LastLoginAt.Format("02 Jan 2006 15:04 MST")
+		}
+
+		provider := "Unknown provider"
+		if strings.TrimSpace(user.Provider) != "" {
+			provider = user.Provider
+		}
+
+		linkedChats := len(chats)
+	}}
+	<section class="card w-full bg-base-100 border border-base-200 shadow-xl">
+		<div class="card-body gap-6">
+			<div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+				<div class="avatar">
+					<div class="w-18 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+						<img src={ user.Picture } alt="Profile picture"/>
+					</div>
+				</div>
+				<div class="flex flex-1 flex-col gap-1 text-center sm:text-left">
+					<h2 class="card-title justify-center sm:justify-start">{ user.Name }</h2>
+					<p class="text-sm text-base-content/70 break-all">{ user.Email }</p>
+					<div class="flex flex-wrap items-center justify-center gap-2 text-xs uppercase tracking-wide text-base-content/70 sm:justify-start">
+						<span class="badge badge-outline">{ provider }</span>
+						<svg data-provider={ user.Provider } x-bind:data-src="PROVIDER_ICONS.get($el.dataset.provider.toLowerCase())" class="h-8 w-8 rounded-full p-1"></svg>
+						<span class="badge badge-ghost">Last login { lastLogin }</span>
+					</div>
+				</div>
+			</div>
+			<div class="space-y-3">
+				<div class="flex items-center justify-between">
+					<div class="flex gap-2 items-center">
+						<p class="text-sm font-semibold uppercase tracking-wide text-base-content/70">Telegram chats</p>
+						<svg x-bind:data-src="telegramIconUrl" class="h-6 w-6"></svg>
+					</div>
+					<span class="badge badge-outline">{ fmt.Sprintf("%d connected", linkedChats) }</span>
+				</div>
+				if linkedChats == 0 {
+					<div class="alert alert-info">
+						<span>No chats linked yet. Connect Telegram to start receiving alerts.</span>
+					</div>
+				} else {
+					<div class="space-y-3">
+						for _, tChat := range chats {
+							<div class="chat chat-start border border-base-200 rounded-2xl p-3">
+								if tChat.Pic != nil {
+									<div class="avatar">
+										<div class="w-12 rounded-xl">
+											<img src={ tChat.Pic.FileLink }/>
+										</div>
+									</div>
+								}
+								<div class="chat-header font-semibold text-base-content">
+									<span>{ fmt.Sprintf("@%s", *tChat.Chat.Username) }</span>
+									<span>{ *tChat.Chat.FirstName }</span>
+									<span>{ *tChat.Chat.LastName }</span>
+								</div>
+							</div>
+						}
+					</div>
+				}
+			</div>
+			<div class="space-y-3">
+				<p class="text-sm font-semibold uppercase tracking-wide text-base-content/70">Notificaciones</p>
+				<label
+					class="label text-base"
+					x-data="{ active: true }"
+					x-init="active = $el.dataset.newRateValue === 'true'"
+					data-new-rate-value={ strings.Contains(*user.NotificationEvents, "new_rate") }
+				>
+					<input
+						type="checkbox"
+						class="checkbox checkbox-neutral"
+						x-model="active"
+						x-init="
+              $watch('active', async (value) => {
+                $el.disabled = true;
+                await changeNewRate(active)
+                $el.disabled = false;
+              });
+              "
+					/>
+					<span x-bind:class="active ? 'font-semibold text-base-content' : ''">NUEVA TASA</span>
+				</label>
+			</div>
+		</div>
+	</section>
 }

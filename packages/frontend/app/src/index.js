@@ -153,11 +153,27 @@ document.body.addEventListener('htmx:configRequest', async (evt) => {
     evt.detail.withCredentials = true;
 
     if (isDev) {
-      evt.detail.path = import.meta.env.VITE_VAR_ENV.replaceAll("/api", "") + evt.detail.path;
+      evt.detail.path = import.meta.env.VITE_VAR_ENV.replaceAll("/api", "")
+          + evt.detail.path;
     }
   }
 
 });
+
+window.changeNewRate = async function (active) {
+
+  let path = "/api/profile/notifications/new_rate?active=" + active;
+  if (isDev) {
+    path = import.meta.env.VITE_VAR_ENV.replaceAll("/api", "") + path;
+  }
+
+  try {
+    await fetch(path, {method: "PUT", credentials: "include"});
+  } catch (error) {
+    console.error("Error changing new rate notification: ", error);
+  }
+
+}
 
 window.sendEvent = function (id, eventName) {
   let elem = document.getElementById(id);

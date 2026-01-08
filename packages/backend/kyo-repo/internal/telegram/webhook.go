@@ -2,6 +2,7 @@ package telegram
 
 import (
 	"fmt"
+
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 	"github.com/sst/sst/v3/sdk/golang/resource"
@@ -9,7 +10,7 @@ import (
 
 func (service Service) SetWebhook() error {
 
-	telegramBot, err := GetTelegramBot()
+	holder, err := GetTelegramBot()
 	if err != nil {
 		return err
 	}
@@ -25,7 +26,7 @@ func (service Service) SetWebhook() error {
 		return fmt.Errorf("GetWebhook TelegramWebhookFunction error: %w", err)
 	}
 
-	ok, err := telegramBot.SetWebhook(service.ctx, &bot.SetWebhookParams{
+	ok, err := holder.B.SetWebhook(service.ctx, &bot.SetWebhookParams{
 		URL:            functionUrl.(string),
 		MaxConnections: 1,
 		SecretToken:    apiKey,
@@ -43,12 +44,12 @@ func (service Service) SetWebhook() error {
 }
 
 func (service Service) DeleteWebhook() error {
-	telegramBot, err := GetTelegramBot()
+	holder, err := GetTelegramBot()
 	if err != nil {
 		return err
 	}
 
-	ok, err := telegramBot.DeleteWebhook(service.ctx, &bot.DeleteWebhookParams{
+	ok, err := holder.B.DeleteWebhook(service.ctx, &bot.DeleteWebhookParams{
 		DropPendingUpdates: true,
 	})
 
@@ -64,12 +65,12 @@ func (service Service) DeleteWebhook() error {
 }
 
 func (service Service) GetWebhook() (*models.WebhookInfo, error) {
-	telegramBot, err := GetTelegramBot()
+	holder, err := GetTelegramBot()
 	if err != nil {
 		return nil, err
 	}
 
-	webhook, err := telegramBot.GetWebhookInfo(service.ctx)
+	webhook, err := holder.B.GetWebhookInfo(service.ctx)
 	if err != nil {
 		return nil, fmt.Errorf("GetWebhook webhook error: %w", err)
 	}

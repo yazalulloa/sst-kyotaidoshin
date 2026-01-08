@@ -15,6 +15,7 @@ import (
 	"github.com/yaz/kyo-repo/internal/db"
 	"github.com/yaz/kyo-repo/internal/db/gen/model"
 	. "github.com/yaz/kyo-repo/internal/db/gen/table"
+	"github.com/yaz/kyo-repo/internal/telegram"
 	"github.com/yaz/kyo-repo/internal/users"
 	"github.com/yaz/kyo-repo/internal/util"
 )
@@ -22,6 +23,7 @@ import (
 func Routes(server *mux.Router) {
 
 	server.HandleFunc("/api/init", getInit).Methods("GET")
+	server.HandleFunc("/api/profile", getProfile).Methods("GET")
 }
 
 func getInit(w http.ResponseWriter, r *http.Request) {
@@ -227,6 +229,76 @@ func getInit(w http.ResponseWriter, r *http.Request) {
 	err = Init(pages, permStr, pagesStr, *user).Render(r.Context(), w)
 	if err != nil {
 		log.Printf("Error rendering init: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func getProfile(w http.ResponseWriter, r *http.Request) {
+	userId, ok := r.Context().Value(util.USER_ID).(string)
+	if !ok {
+		log.Println("getProfile: user id not found")
+		http.Error(w, "Unauthorized", http.StatusNotFound)
+		return
+	}
+
+	if userId == "" {
+		log.Println("getProfile: user id is empty")
+		http.Error(w, "Unauthorized", http.StatusNotFound)
+		return
+	}
+
+	repo := users.NewRepository(r.Context())
+
+	user, err := repo.GetByID(userId)
+
+	if errors.Is(err, sql.ErrNoRows) || errors.Is(err, qrm.ErrNoRows) {
+		log.Printf("user %s not found", userId)
+		http.Error(w, "Unauthorized", http.StatusNotFound)
+		return
+	}
+
+	if err != nil {
+		log.Printf("Error getting user: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	chats, err := repo.GetTelegramChatsByUserId(userId)
+	if err != nil {
+		log.Printf("Error getting telegram chats: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	telegramChats := make([]TelegramChat, len(chats))
+	for i, chat := range chats {
+		var data []telegram.ProfilePicture
+		err := util.JsonToObj(chat.Pictures, &data)
+		if err != nil {
+			log.Printf("Error unmarshalling telegram chat pictures: %v", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		var picture *telegram.ProfilePicture
+
+		for _, pic := range data {
+			if picture == nil || pic.FileSize < picture.FileSize {
+				picture = &pic
+			}
+		}
+
+		telegramChats[i] = TelegramChat{
+			Chat:     chat,
+			Pictures: data,
+			Pic:      picture,
+		}
+	}
+
+	err = ProfileCard(*user, telegramChats).Render(r.Context(), w)
+	if err != nil {
+		log.Printf("Error rendering profile: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

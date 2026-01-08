@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"github.com/yaz/kyo-repo/internal/db/gen/model"
-	"github.com/yaz/kyo-repo/internal/util"
 	"strings"
 	"sync"
+
+	"github.com/yaz/kyo-repo/internal/db/gen/model"
+	"github.com/yaz/kyo-repo/internal/util"
 )
 
 type Service struct {
@@ -239,7 +240,7 @@ func (service Service) updateUser(id string, roleId *int32, notificationEvents s
 
 	go func() {
 		defer wg.Done()
-		rowsAffected, err := service.repo.updateNotificationEvents(id, notificationEvents)
+		rowsAffected, err := service.repo.UpdateNotificationEvents(id, notificationEvents)
 		if err != nil {
 			errorChan <- err
 			return

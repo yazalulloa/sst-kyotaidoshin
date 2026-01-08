@@ -14,6 +14,6 @@
     "@openauthjs/openauth": "0.4.3",
     "hono": "4.10.7",
     "@kyotaidoshin/auth": "workspace:",
-    "sst": "3.17.24"
+    "sst": "3.17.25"
   }
 }

@@ -1,20 +1,22 @@
 package telegram
 
 import (
+	"context"
 	"fmt"
-	"github.com/go-telegram/bot"
-	"github.com/yaz/kyo-repo/internal/util"
 	"log"
 	"sync"
+
+	"github.com/go-telegram/bot"
+	"github.com/yaz/kyo-repo/internal/util"
 )
 
 func (service Service) StartUrl(userId string) (string, error) {
-	telegramBot, err := GetTelegramBot()
+	holder, err := GetTelegramBot()
 	if err != nil {
 		return "", err
 	}
 
-	user, err := telegramBot.GetMe(service.ctx)
+	user, err := holder.B.GetMe(service.ctx)
 	if err != nil {
 		return "", fmt.Errorf("GetWebhook me error: %w", err)
 	}
@@ -26,14 +28,14 @@ func (service Service) StartUrl(userId string) (string, error) {
 
 func (service Service) Info() (*Info, error) {
 
-	telegramBot, err := GetTelegramBot()
+	holder, err := GetTelegramBot()
 	if err != nil {
 		return nil, err
 	}
 
 	info := &Info{}
 
-	userBot, err := telegramBot.GetMe(service.ctx)
+	userBot, err := holder.B.GetMe(service.ctx)
 	if err != nil {
 		return nil, fmt.Errorf("GetWebhook me error: %w", err)
 	}
@@ -51,7 +53,7 @@ func (service Service) Info() (*Info, error) {
 }
 
 func (service Service) SendBulkMessage(msg string, chatIds []int64) error {
-	telegramBot, err := GetTelegramBot()
+	holder, err := GetTelegramBot()
 	if err != nil {
 		return err
 	}
@@ -66,7 +68,7 @@ func (service Service) SendBulkMessage(msg string, chatIds []int64) error {
 	for _, chatId := range chatIds {
 		go func() {
 			defer wg.Done()
-			_, err := telegramBot.SendMessage(service.ctx, &bot.SendMessageParams{
+			_, err := holder.B.SendMessage(service.ctx, &bot.SendMessageParams{
 				ChatID: chatId,
 				Text:   msg,
 			})
@@ -86,4 +88,68 @@ func (service Service) SendBulkMessage(msg string, chatIds []int64) error {
 	}
 
 	return nil
+}
+
+func (h Holder) GetProfilePictures(ctx context.Context, chatId int64) ([]ProfilePicture, error) {
+	array := make([]ProfilePicture, 0)
+
+	profilePhotos, err := h.B.GetUserProfilePhotos(ctx, &bot.GetUserProfilePhotosParams{UserID: chatId})
+	if err != nil {
+		return array, fmt.Errorf("GetUserProfilePhotos error: %w", err)
+	}
+
+	if profilePhotos.TotalCount > 0 {
+
+		length := 0
+		for _, photoSizes := range profilePhotos.Photos {
+			length += len(photoSizes)
+		}
+
+		var wg sync.WaitGroup
+		wg.Add(length)
+
+		pictureChan := make(chan ProfilePicture, length)
+		errorChan := make(chan error, length)
+
+		for _, photoSizes := range profilePhotos.Photos {
+			for _, photo := range photoSizes {
+				go func() {
+					defer wg.Done()
+					file, err := h.B.GetFile(ctx, &bot.GetFileParams{FileID: photo.FileID})
+					if err != nil {
+						log.Printf("Error getting telegram profile photo file: %v", err)
+						errorChan <- err
+						return
+
+					}
+					link := h.B.FileDownloadLink(file)
+					log.Printf("Profile photo link: %s", link)
+					pictureChan <- ProfilePicture{
+						FileID:       file.FileID,
+						FileUniqueID: file.FileUniqueID,
+						FileSize:     file.FileSize,
+						FilePath:     file.FilePath,
+						FileLink:     link,
+						Width:        photo.Width,
+						Height:       photo.Height,
+					}
+				}()
+			}
+		}
+
+		wg.Wait()
+		close(errorChan)
+		close(pictureChan)
+
+		err = util.HasErrors(errorChan)
+		if err != nil {
+			return nil, fmt.Errorf("GetProfilePictures error: %w", err)
+		}
+
+		for picture := range pictureChan {
+			array = append(array, picture)
+		}
+	}
+
+	return array, nil
 }

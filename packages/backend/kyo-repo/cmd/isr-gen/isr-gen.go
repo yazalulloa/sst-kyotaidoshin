@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
+	"log"
+
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/yaz/kyo-repo/internal/isr"
-	"log"
 )
 
 func handler(ctx context.Context, event interface{}) (string, error) {

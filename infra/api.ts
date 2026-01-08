@@ -1,5 +1,5 @@
 import {secret} from "./secrets";
-import {allowedOrigins, apiDomain, authDomain, domain, myRouter, subdomain} from "./domain";
+import {allowedOrigins, apiDomain, authDomain, domain, myRouter} from "./domain";
 import {bcvBucket, receiptsBucket, webAssetsBucket} from "./storage";
 import {isLocal, isrPrefix, PROD_STAGE} from "./util";
 import {Output} from "@pulumi/pulumi";
@@ -63,6 +63,7 @@ const api = new sst.aws.ApiGatewayV2("API", {
       "hx-current-url",
       "hx-request",
       "hx-trigger",
+      "hx-trigger-name",
       "hx-target",
       "Location",
       "X-Recaptcha-Token",
@@ -230,7 +231,7 @@ export const site = new sst.aws.StaticSite("WebApp", {
       {
         files: ["**/*"],
         ignore: [
-            // "index.html",
+          // "index.html",
           "isr/**/*"],
         cacheControl: "public,max-age=31536000,immutable",
       },

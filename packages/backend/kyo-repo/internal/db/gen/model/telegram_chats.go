@@ -13,4 +13,5 @@ type TelegramChats struct {
 	Username  *string
 	FirstName *string
 	LastName  *string
+	Pictures  *string
 }

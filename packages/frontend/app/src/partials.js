@@ -39,6 +39,7 @@ import rolesFormPartialUrl from './pages/roles/formDialog.html?url'
 import adminIndexPartialUrl from './pages/admin/index.html?url'
 import toastPartialUrl from './pages/partials/toast.html?url'
 import datePickerPartialUrl from './pages/partials/datepicker.html?url'
+import profileIndexPartialUrl from './pages/profile/index.html?url'
 
 window.backBtnPartialUrl = backBtnPartialUrl;
 window.currencyPickerPartialUrl = currencyPickerPartialUrl;
@@ -76,6 +77,7 @@ window.rolesFormPartialUrl = rolesFormPartialUrl;
 window.toastPartialUrl = toastPartialUrl;
 window.adminIndexPartialUrl = adminIndexPartialUrl;
 window.datePickerPartialUrl = datePickerPartialUrl;
+window.profileIndexPartialUrl = profileIndexPartialUrl;
 
 window.NAV_URLS = new Map([
   ['nav-apartments', apartmentsIndexPartialUrl],

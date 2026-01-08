@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS rates
     created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- ALTER TABLE rates ADD COLUMN trend TEXT NOT NULL DEFAULT 'STABLE';
+
 CREATE INDEX IF NOT EXISTS rates_from_currency_to_currency_rate_date_of_rate_idx
     ON rates (from_currency, to_currency, rate, date_of_rate);
 
@@ -278,9 +280,12 @@ CREATE TABLE IF NOT EXISTS telegram_chats (
     username VARCHAR(100),
     first_name VARCHAR(100),
     last_name VARCHAR(100),
+    pictures TEXT,
     PRIMARY KEY (user_id, chat_id),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+-- ALTER TABLE telegram_chats ADD COLUMN pictures TEXT;
 
 CREATE TABLE IF NOT EXISTS bcv_files (
     link TEXT PRIMARY KEY,

@@ -47,13 +47,13 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (string
 		return "", err
 	}
 
-	telegramBot, err := telegram.GetTelegramBot()
+	holder, err := telegram.GetTelegramBot()
 	if err != nil {
 		log.Printf("Error getting telegram bot: %s", err)
 		return "", err
 	}
 
-	telegramBot.ProcessUpdate(ctx, &update)
+	holder.B.ProcessUpdate(ctx, &update)
 
 	return "", nil
 }

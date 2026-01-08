@@ -31,6 +31,8 @@ import (
 
 func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 
+	//log.Printf("START %s", util.PrettyPrint(update))
+
 	userId := strings.TrimSpace(strings.ReplaceAll(update.Message.Text, _START_COMMAND, ""))
 	if userId == "" {
 		log.Printf("userId is empty")
@@ -38,7 +40,25 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 	}
 
 	chat := update.Message.Chat
-	rows, err := users.NewRepository(ctx).UpdateTelegramChat(userId, chat.ID, chat.Username, chat.FirstName, chat.LastName)
+
+	holder, err := GetTelegramBot()
+	if err != nil {
+		log.Printf("Error getting telegram bot: %v", err)
+		return
+	}
+
+	profilePictures, err := holder.GetProfilePictures(ctx, chat.ID)
+	if err != nil {
+		log.Printf("Error getting profile pictures: %v", err)
+		return
+	}
+
+	pictures, err := util.ObjToJson(profilePictures)
+	if err != nil {
+		log.Printf("Error marshalling profile pictures: %v", err)
+	}
+
+	rows, err := users.NewRepository(ctx).UpdateTelegramChat(userId, chat.ID, chat.Username, chat.FirstName, chat.LastName, pictures)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			log.Printf("user %s not found", userId)
@@ -160,18 +180,11 @@ func tasaHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 	chat := update.Message.Chat
 
-	var builder strings.Builder
-
-	for i, rate := range array {
-		builder.WriteString(rateMsg(rate))
-		if i < len(array)-1 {
-			builder.WriteString("\n")
-		}
-	}
+	msg := ratesMsg(array)
 
 	msgParams := &bot.SendMessageParams{
 		ChatID: chat.ID,
-		Text:   builder.String(),
+		Text:   msg,
 		//ShowAlert:       false, //show modal
 		//CacheTime:       0,
 	}
@@ -193,13 +206,29 @@ func flagEmoji(str string) string {
 	}
 }
 
-func rateMsg(rate model.Rates) string {
-	return fmt.Sprintf("BCV %s  %s  %s", flagEmoji(rate.FromCurrency), util.VED.Format(rate.Rate), rate.DateOfRate.Format(time.DateOnly))
+func ratesMsg(array []model.Rates) string {
+
+	if len(array) == 0 {
+		return "No rates available"
+	}
+	var builder strings.Builder
+	builder.WriteString("BCV ")
+	builder.WriteString(array[0].DateOfRate.Format(time.DateOnly))
+	builder.WriteString("\n")
+
+	for _, rate := range array {
+		builder.WriteString(fmt.Sprintf("%s  %s\n", flagEmoji(rate.FromCurrency), util.VED.Format(rate.Rate)))
+	}
+
+	return builder.String()
 }
 
-func SendRate(ctx context.Context, rate model.Rates) {
+func SendRate(ctx context.Context, array []model.Rates) {
+	if len(array) == 0 {
+		return
+	}
 
-	msg := rateMsg(rate)
+	msg := ratesMsg(array)
 
 	list, err := users.NewRepository(ctx).GetTelegramIdsByNotificationEvent(users.NEW_RATE)
 	if err != nil {
@@ -211,7 +240,7 @@ func SendRate(ctx context.Context, rate model.Rates) {
 		return
 	}
 
-	b, err := GetTelegramBot()
+	holder, err := GetTelegramBot()
 	if err != nil {
 		log.Printf("Error getting telegram bot: %v", err)
 		return
@@ -229,7 +258,7 @@ func SendRate(ctx context.Context, rate model.Rates) {
 				Text:   msg,
 			}
 
-			_, err = b.SendMessage(ctx, msgParams)
+			_, err = holder.B.SendMessage(ctx, msgParams)
 
 			if err != nil {
 				errorChan <- fmt.Errorf("error sending message: %v", err)
@@ -256,14 +285,7 @@ func lastRateCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
 		return
 	}
 
-	var builder strings.Builder
-
-	for i, rate := range array {
-		builder.WriteString(rateMsg(rate))
-		if i < len(array)-1 {
-			builder.WriteString("\n")
-		}
-	}
+	msg := ratesMsg(array)
 
 	var wg sync.WaitGroup
 	wg.Add(2)
@@ -274,7 +296,7 @@ func lastRateCallBack(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 		msgParams := &bot.SendMessageParams{
 			ChatID: update.CallbackQuery.From.ID,
-			Text:   builder.String(),
+			Text:   msg,
 			//ShowAlert:       false, //show modal
 			//CacheTime:       0,
 		}

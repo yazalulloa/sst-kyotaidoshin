@@ -1,0 +1,25 @@
+<div id="header-container" hx-swap-oob="true" class="fade-me-out fade-me-in flex gap-2">
+  <button hx-get="/api/telegram/start"
+          hx-trigger="mousedown"
+          hx-target="#default-anchor"
+          hx-swap="innerHTML"
+          hx-disabled-elt="this"
+          hx-indicator=".htmx-indicator"
+          type="button"
+          class="btn"
+  >
+    <svg x-bind:data-src="telegramIconUrl" class="h-6 w-6"></svg>
+    <span x-text="$t('main-action-link-telegram')"></span>
+  </button>
+</div>
+
+
+<div id="container" hx-swap-oob="true" class="fade-me-out fade-me-in">
+
+  <div hx-get="/api/profile"
+       hx-trigger="load"
+       hx-swap="outerHTML"
+       hx-indicator=".htmx-indicator">
+  </div>
+
+</div>

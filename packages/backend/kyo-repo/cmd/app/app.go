@@ -30,6 +30,7 @@ import (
 	"github.com/yaz/kyo-repo/internal/extraCharges"
 	"github.com/yaz/kyo-repo/internal/isr"
 	"github.com/yaz/kyo-repo/internal/permissions"
+	"github.com/yaz/kyo-repo/internal/profile"
 	"github.com/yaz/kyo-repo/internal/rates"
 	"github.com/yaz/kyo-repo/internal/receipts"
 	"github.com/yaz/kyo-repo/internal/reserveFundsApi"
@@ -98,6 +99,7 @@ func router() http.Handler {
 	roles.Routes(holder)
 	isr.Routes(holder)
 	telegram_api.Routes(holder)
+	profile.Routes(holder)
 
 	//return handlers.CombinedLoggingHandler(os.Stdout, newRouter)
 	return handlers.CustomLoggingHandler(os.Stdout, newRouter, writeCombinedLog)

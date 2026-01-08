@@ -17,13 +17,13 @@
     "external-svg-loader": "^1.7.1",
     "htmx.org": "^2.0.8",
     "pinecone-router": "^7.3.0",
-    "posthog-js": "^1.299.0",
+    "posthog-js": "^1.302.2",
     "tailwindcss": "^4.1.17"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.19",
-    "daisyui": "^5.5.5",
-    "sst": "^3.17.24",
+    "daisyui": "^5.5.8",
+    "sst": "^3.17.25",
     "vite": "^7.2.6",
     "vite-plugin-handlebars": "^2.0.0",
     "vite-plugin-html": "^3.2.2"

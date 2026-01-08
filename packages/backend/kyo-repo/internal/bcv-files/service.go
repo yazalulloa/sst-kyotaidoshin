@@ -193,12 +193,17 @@ func (ser Service) BcvJob() error {
 	}
 
 	if result.Inserted > 0 {
+
+		toSend := make([]model.Rates, 0)
+
 		for _, rate := range result.Rates[0] {
 			if rate.FromCurrency == "USD" || rate.FromCurrency == "EUR" {
 				log.Printf("Sending %s rate: %f", rate.FromCurrency, rate.Rate)
-				telegram.SendRate(ser.ctx, *rate)
+				toSend = append(toSend, *rate)
 			}
 		}
+
+		telegram.SendRate(ser.ctx, toSend)
 
 		return ser.ratesSer.UpdateStableTrend()
 	}

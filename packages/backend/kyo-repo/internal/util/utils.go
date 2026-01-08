@@ -87,6 +87,20 @@ func GetQueryParamAsSortOrderType(r *http.Request, paramName string) SortOrderTy
 	return SortOrderTypeDESC
 }
 
+func GetQueryParamAsBool(r *http.Request, paramName string) bool {
+	param := r.URL.Query().Get(paramName)
+	if param == "" {
+		return false
+	}
+
+	value, err := strconv.ParseBool(param)
+	if err != nil {
+		return false
+	}
+
+	return value
+}
+
 func UuidV7() string {
 	id, err := uuid.NewV7()
 	if err != nil {
@@ -234,6 +248,28 @@ func ObjToJsonBase64(obj any) (string, error) {
 	return base64.StdEncoding.EncodeToString(jsonBytes), nil
 }
 
+func ObjToJson(obj any) (string, error) {
+	jsonBytes, err := json.Marshal(obj)
+	if err != nil {
+		return "", err
+	}
+
+	return string(jsonBytes), nil
+}
+
+func JsonToObj[T any](data *string, p *T) error {
+	if data == nil || *data == "" {
+		return nil
+	}
+
+	err := json.Unmarshal([]byte(*data), p)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func TzCss() (*time.Location, error) {
 	return time.LoadLocation("America/Caracas")
 }
@@ -293,4 +329,9 @@ func SplitArray[T any](arr []T, chunkSize int) [][]T {
 		chunks = append(chunks, arr[i:end])
 	}
 	return chunks
+}
+
+func PrettyPrint(i any) string {
+	s, _ := json.MarshalIndent(i, "", "\t")
+	return string(s)
 }
