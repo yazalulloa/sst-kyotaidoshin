@@ -1,6 +1,6 @@
 import {secret} from "./secrets";
 import {allowedOrigins, apiDomain, authDomain, domain, myRouter} from "./domain";
-import {bcvBucket, receiptsBucket, webAssetsBucket} from "./storage";
+import {receiptsBucket, webAssetsBucket} from "./storage";
 import {isLocal, isrPrefix, PROD_STAGE} from "./util";
 import {Output} from "@pulumi/pulumi";
 
@@ -152,7 +152,6 @@ const mainApiFunction = new sst.aws.Function("MainApiFunction", {
   handler: "packages/backend/kyo-repo/cmd/app/app.go",
   runtime: "go",
   link: [
-    bcvBucket,
     secret.secretTursoUrl,
     secret.bcvUrl,
     secret.bcvFileStartPath,
@@ -296,7 +295,7 @@ export const site = new sst.aws.StaticSite("WebApp", {
 //   },
 // });
 
-console.log(`AuthServer URL: ${auth.url}`);
+// console.log(`AuthServer URL: ${auth.url}`);
 
 
 const authClientFunction = new sst.aws.Function("AuthClient", {

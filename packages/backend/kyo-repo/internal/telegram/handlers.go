@@ -41,24 +41,24 @@ func startHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
 
 	chat := update.Message.Chat
 
-	holder, err := GetTelegramBot()
-	if err != nil {
-		log.Printf("Error getting telegram bot: %v", err)
-		return
-	}
+	//holder, err := GetTelegramBot()
+	//if err != nil {
+	//	log.Printf("Error getting telegram bot: %v", err)
+	//	return
+	//}
+	//
+	//profilePictures, err := holder.GetProfilePictures(ctx, chat.ID)
+	//if err != nil {
+	//	log.Printf("Error getting profile pictures: %v", err)
+	//	return
+	//}
+	//
+	//pictures, err := util.ObjToJson(profilePictures)
+	//if err != nil {
+	//	log.Printf("Error marshalling profile pictures: %v", err)
+	//}
 
-	profilePictures, err := holder.GetProfilePictures(ctx, chat.ID)
-	if err != nil {
-		log.Printf("Error getting profile pictures: %v", err)
-		return
-	}
-
-	pictures, err := util.ObjToJson(profilePictures)
-	if err != nil {
-		log.Printf("Error marshalling profile pictures: %v", err)
-	}
-
-	rows, err := users.NewRepository(ctx).UpdateTelegramChat(userId, chat.ID, chat.Username, chat.FirstName, chat.LastName, pictures)
+	rows, err := users.NewRepository(ctx).UpdateTelegramChat(userId, chat.ID, chat.Username, chat.FirstName, chat.LastName)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			log.Printf("user %s not found", userId)

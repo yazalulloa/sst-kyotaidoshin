@@ -177,10 +177,6 @@ func getInit(w http.ResponseWriter, r *http.Request) {
 				Id:   "nav-bcv-files",
 				Path: "/bcv-files",
 			})
-			//pages = append(pages, Page{
-			//	Id:   "nav-bcv-bucket",
-			//	Path: "/bcv-bucket",
-			//})
 			break
 		case api.USERS_READ.Name():
 			pages = append(pages, Page{
@@ -248,9 +244,18 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	holder, err := telegram.GetTelegramBot()
+	if err != nil {
+		log.Printf("Error getting telegram bot: %v", err)
+		http.Error(w, "Error", http.StatusInternalServerError)
+		return
+	}
+
 	repo := users.NewRepository(r.Context())
 
-	user, err := repo.GetByID(userId)
+	user, err := repo.GetUserWithChats(userId)
+
+	//user, err := repo.GetByID(userId)
 
 	if errors.Is(err, sql.ErrNoRows) || errors.Is(err, qrm.ErrNoRows) {
 		log.Printf("user %s not found", userId)
@@ -264,19 +269,22 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	chats, err := repo.GetTelegramChatsByUserId(userId)
-	if err != nil {
-		log.Printf("Error getting telegram chats: %v", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	//chats, err := repo.GetTelegramChatsByUserId(userId)
+	//if err != nil {
+	//	log.Printf("Error getting telegram chats: %v", err)
+	//	http.Error(w, err.Error(), http.StatusInternalServerError)
+	//	return
+	//}
 
-	telegramChats := make([]TelegramChat, len(chats))
-	for i, chat := range chats {
-		var data []telegram.ProfilePicture
-		err := util.JsonToObj(chat.Pictures, &data)
+	telegramChats := make([]TelegramChat, len(user.Chats))
+	for i, chat := range user.Chats {
+
+		data, err := holder.GetProfilePictures(r.Context(), *chat.ChatID)
+
+		//var data []telegram.ProfilePicture
+		//err := util.JsonToObj(chat.Pictures, &data)
 		if err != nil {
-			log.Printf("Error unmarshalling telegram chat pictures: %v", err)
+			log.Printf("Error getting profile pictures: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -296,7 +304,7 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err = ProfileCard(*user, telegramChats).Render(r.Context(), w)
+	err = ProfileCard(user.Users, telegramChats).Render(r.Context(), w)
 	if err != nil {
 		log.Printf("Error rendering profile: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

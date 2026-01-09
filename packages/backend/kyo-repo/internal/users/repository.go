@@ -215,19 +215,18 @@ func (repo Repository) deleteUserRole(id string, roleId *int32) (int64, error) {
 
 }
 
-func (repo Repository) UpdateTelegramChat(id string, chatId int64, username, firstName, lastName, pictures string) (int64, error) {
+func (repo Repository) UpdateTelegramChat(id string, chatId int64, username, firstName, lastName string) (int64, error) {
 
 	stmt := TelegramChats.INSERT(TelegramChats.ChatID, TelegramChats.UserID, TelegramChats.Username,
-		TelegramChats.FirstName, TelegramChats.LastName, TelegramChats.Pictures).
+		TelegramChats.FirstName, TelegramChats.LastName).
 		ON_CONFLICT().
 		DO_UPDATE(
 			sqlite.SET(
 				TelegramChats.Username.SET(sqlite.String(username)),
 				TelegramChats.FirstName.SET(sqlite.String(firstName)),
 				TelegramChats.LastName.SET(sqlite.String(lastName)),
-				TelegramChats.Pictures.SET(sqlite.String(pictures)),
 			),
-		).VALUES(chatId, id, username, firstName, lastName, pictures)
+		).VALUES(chatId, id, username, firstName, lastName)
 
 	res, err := stmt.ExecContext(repo.ctx, db.GetDB().DB)
 	if err != nil {
@@ -260,6 +259,44 @@ func (repo Repository) GetTelegramChatsByUserId(id string) ([]model.TelegramChat
 	}
 
 	return dest, nil
+}
+
+func (repo Repository) GetUserWithChats(id string) (*struct {
+	model.Users
+	Chats []model.TelegramChats
+}, error) {
+	stmt := Users.SELECT(Users.AllColumns, TelegramChats.AllColumns).FROM(
+		Users.LEFT_JOIN(TelegramChats, Users.ID.EQ(TelegramChats.UserID)),
+	).WHERE(Users.ID.EQ(sqlite.String(id)))
+
+	var dest []struct {
+		model.Users
+		Chats model.TelegramChats
+	}
+	err := stmt.QueryContext(repo.ctx, db.GetDB().DB, &dest)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(dest) == 0 {
+		return nil, nil
+	}
+
+	result := &struct {
+		model.Users
+		Chats []model.TelegramChats
+	}{
+		Users: dest[0].Users,
+		Chats: make([]model.TelegramChats, 0),
+	}
+
+	for _, item := range dest {
+		if item.Chats.UserID != nil {
+			result.Chats = append(result.Chats, item.Chats)
+		}
+	}
+
+	return result, nil
 }
 
 func (repo Repository) GetTelegramIdsByNotificationEvent(event EventNotifications) ([]int64, error) {

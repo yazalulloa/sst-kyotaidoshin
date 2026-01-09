@@ -31,10 +31,6 @@ declare module "sst" {
       "type": "sst.aws.Function"
       "url": string
     }
-    "BcvQueue": {
-      "type": "sst.aws.Queue"
-      "url": string
-    }
     "CaptchaSecretKey": {
       "type": "sst.sst.Secret"
       "value": string
@@ -88,10 +84,6 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
-    "ProcessBcvFile": {
-      "name": string
-      "type": "sst.aws.Function"
-    }
     "ProcessUser": {
       "name": string
       "type": "sst.aws.Function"
@@ -138,10 +130,6 @@ declare module "sst" {
       "url": string
     }
     "WebAssetsBucket": {
-      "name": string
-      "type": "sst.aws.Bucket"
-    }
-    "bcv-bucket": {
       "name": string
       "type": "sst.aws.Bucket"
     }

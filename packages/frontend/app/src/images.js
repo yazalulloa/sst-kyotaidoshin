@@ -73,7 +73,6 @@ window.NAV_ICONS = new Map([
   ['nav-rates', ratesIconUrl],
   ['nav-users', usersIconUrl],
   ['nav-bcv-files', bucketIconUrl],
-  ['nav-bcv-bucket', bucketIconUrl],
   ['nav-permissions', permissionsIconUrl],
   ['nav-roles', permissionsIconUrl],
   ['nav-admin', permissionsIconUrl],

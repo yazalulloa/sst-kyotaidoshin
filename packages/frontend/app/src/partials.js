@@ -5,7 +5,6 @@ import buildingsIndexPartialUrl from './pages/buildings/index.html?url'
 import buildingsNewPartialUrl from './pages/buildings/new.html?url'
 import buildingsFormPartialUrl from './pages/buildings/form.html?url'
 import buildingsEditPartialUrl from './pages/buildings/edit.html?url'
-import bucketIndexPartialUrl from './pages/bcv-bucket/main.html?url'
 import bcvFilesIndexPartialUrl from './pages/bcv-files/main.html?url'
   import apartmentsIndexPartialUrl from './pages/apartments/index.html?url'
 import apartmentsBuildingSelectorPartialUrl
@@ -49,7 +48,6 @@ window.buildingsNewPartialUrl = buildingsNewPartialUrl;
 window.buildingsFormPartialUrl = buildingsFormPartialUrl;
 window.buildingsEditPartialUrl = buildingsEditPartialUrl;
 window.ratesIndexPartialUrl = ratesIndexPartialUrl;
-window.bucketIndexPartialUrl = bucketIndexPartialUrl;
 window.bcvFilesIndexPartialUrl = bcvFilesIndexPartialUrl;
 window.apartmentsBuildingSelectorPartialUrl = apartmentsBuildingSelectorPartialUrl;
 window.reserveFundFormPartialUrl = reserveFundFormPartialUrl;
@@ -89,7 +87,6 @@ window.NAV_URLS = new Map([
   ['nav-receipts-view', receiptsViewPartialUrl],
   ['nav-rates', ratesIndexPartialUrl],
   ['nav-bcv-files', bcvFilesIndexPartialUrl],
-  ['nav-bcv-bucket', bucketIndexPartialUrl],
   ['nav-users', usersIndexPartialUrl],
   ['nav-permissions', permissionsIndexPartialUrl],
   ['nav-roles', rolesIndexPartialUrl],

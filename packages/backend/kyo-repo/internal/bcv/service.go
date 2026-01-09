@@ -15,9 +15,7 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/sst/sst/v3/sdk/golang/resource"
 	"github.com/yaz/kyo-repo/internal/aws_h"
 	"github.com/yaz/kyo-repo/internal/db/gen/model"
@@ -31,7 +29,6 @@ const MetadataNumOfSheetsKey = "numofsheets"
 
 type Service struct {
 	ctx        context.Context
-	bucketName string
 	url        string
 	filePath   string
 	s3Client   *s3.Client
@@ -39,10 +36,6 @@ type Service struct {
 }
 
 func NewService(ctx context.Context) (*Service, error) {
-	bucketName, err := GetBcvBucket()
-	if err != nil {
-		return nil, err
-	}
 
 	bcvUrlSecret, err := resource.Get("SecretBcvUrl", "value")
 	if err != nil {
@@ -75,7 +68,6 @@ func NewService(ctx context.Context) (*Service, error) {
 
 	return &Service{
 		ctx:        ctx,
-		bucketName: bucketName,
 		url:        bcvUrlSecret.(string),
 		filePath:   filePath.(string),
 		s3Client:   client,
@@ -203,98 +195,6 @@ func (service Service) Download(bcvFile *model.BcvFiles, link string) DownloadRe
 	result.FileSize = res.ContentLength
 
 	return result
-}
-
-func (service Service) checkLink(pos int, link string) error {
-	fileName := link[strings.LastIndex(link, "/")+1:]
-	objectKey := fmt.Sprintf("rates/bcv=%d=%s", pos, fileName)
-
-	req, err := http.NewRequest("GET", link, nil)
-	if err != nil {
-		return err
-	}
-
-	headObj, err := service.s3Client.HeadObject(service.ctx, &s3.HeadObjectInput{
-		Bucket: aws.String(service.bucketName),
-		Key:    aws.String(objectKey),
-	})
-
-	if err != nil {
-		//err.Error().contains("The specified key does not exist")
-		is404 := strings.Contains(err.Error(), "response error StatusCode: 404")
-
-		if !is404 {
-			return err
-		}
-
-	} else {
-
-		oldEtag := headObj.Metadata["etag"]
-		oldLastModified := headObj.Metadata["lastmodified"]
-		if oldEtag != "" && oldLastModified != "" {
-			req.Header.Add("If-None-Match", oldEtag)
-			req.Header.Add("If-Modified-Since", oldLastModified)
-		}
-	}
-
-	res, err := service.httpClient.Do(req)
-	//log.Errorf("Downloaded: %s %v", processor.Filepath, wgErr)
-	if err != nil {
-		return err
-	}
-
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			log.Println("Error closing response body:", err)
-			return
-		}
-	}(res.Body)
-
-	if res.StatusCode == 304 {
-		log.Printf("File %s is up to date", objectKey)
-		return nil
-	}
-
-	if res.StatusCode != 200 {
-		return fmt.Errorf("error downloading file %s: status code %d", link, res.StatusCode)
-	}
-
-	//hash, err := FileHash(res.Body)
-	//if err != nil {
-	//	return err
-	//}
-
-	etag := res.Header.Get("ETag")
-
-	metadata := make(map[string]string)
-	metadata["etag"] = etag
-	metadata["lastmodified"] = res.Header.Get("Last-Modified")
-	metadata["url"] = link
-
-	if headObj == nil || headObj.Metadata[MetadataProcessedKey] == "" {
-		metadata[MetadataProcessedKey] = "false"
-	}
-
-	_, err = service.s3Client.PutObject(service.ctx, &s3.PutObjectInput{
-		Bucket:            aws.String(service.bucketName),
-		Key:               aws.String(objectKey),
-		Body:              res.Body,
-		ChecksumAlgorithm: types.ChecksumAlgorithmCrc64nvme,
-		//ChecksumCRC32:             nil,
-		//ChecksumCRC32C:            nil,
-		//ChecksumSHA1:              nil,
-		//ChecksumSHA256:            nil,
-		ContentLength: &res.ContentLength,
-		//ContentType:                 res.ty,
-		Metadata: metadata,
-	})
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (service Service) FileLinks(last bool) ([]string, error) {
