@@ -33,12 +33,16 @@ CREATE TABLE IF NOT EXISTS rates
 
 -- ALTER TABLE rates ADD COLUMN trend TEXT NOT NULL DEFAULT 'STABLE';
 
-CREATE INDEX IF NOT EXISTS rates_from_currency_to_currency_rate_date_of_rate_idx
-    ON rates (from_currency, to_currency, rate, date_of_rate);
+-- CREATE INDEX IF NOT EXISTS rates_from_currency_to_currency_rate_date_of_rate_idx
+--     ON rates (from_currency, to_currency, rate, date_of_rate);
 
-CREATE INDEX IF NOT EXISTS rates_from_currency_idx ON rates (from_currency);
+DROP INDEX rates_from_currency_id_desc_idx; -- Drop existing if you create this one
+DROP INDEX rates_from_currency_date_of_rate_idx;
+CREATE INDEX IF NOT EXISTS rates_id_desc_from_currency_idx ON rates (id DESC, from_currency);
+
+-- CREATE INDEX IF NOT EXISTS rates_from_currency_idx ON rates (from_currency);
 CREATE INDEX IF NOT EXISTS rates_date_of_rate_idx ON rates (date_of_rate);
-CREATE INDEX IF NOT EXISTS rates_from_currency_date_of_rate_idx ON rates (from_currency, date_of_rate);
+-- CREATE INDEX IF NOT EXISTS rates_from_currency_date_of_rate_idx ON rates (from_currency, date_of_rate);
 CREATE INDEX IF NOT EXISTS rates_trend_idx ON rates (trend);
 
 

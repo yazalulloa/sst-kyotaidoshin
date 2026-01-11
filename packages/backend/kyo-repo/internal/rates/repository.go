@@ -36,12 +36,18 @@ func queryCondition(rateQuery *RequestQuery) (sqlite.BoolExpression, bool) {
 	}
 
 	if len(rateQuery.Currencies) > 0 {
-		var sqlIDs []sqlite.Expression
-		for _, str := range rateQuery.Currencies {
-			sqlIDs = append(sqlIDs, sqlite.String(str))
+
+		if len(rateQuery.Currencies) == 1 {
+			condition = condition.AND(Rates.FromCurrency.EQ(sqlite.String(rateQuery.Currencies[0])))
+		} else {
+
+			var sqlIDs []sqlite.Expression
+			for _, str := range rateQuery.Currencies {
+				sqlIDs = append(sqlIDs, sqlite.String(str))
+			}
+			condition.AND(Rates.FromCurrency.IN(sqlIDs...))
 		}
 
-		condition = condition.AND(Rates.FromCurrency.IN(sqlIDs...))
 		justTrue = false
 	}
 

@@ -132,7 +132,8 @@ func parseNewReceipt(ctx context.Context, key string) (*ReceiptFileFormDto, erro
 		log.Printf("Parsing receipt: %s", fileName)
 
 		if strings.HasSuffix(fileName, ".xlsx") {
-			parsedReceipt, err = GrateParser{}.parseWorkbook(filePath)
+			parsedReceipt, err = ExcelizeParser{}.parseWorkbook(filePath)
+			//parsedReceipt, err = GrateParser{}.parseWorkbook(filePath)
 		} else {
 			parsedReceipt, err = ShakinmXlsParser{}.parseWorkbook(filePath)
 		}
