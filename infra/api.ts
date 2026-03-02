@@ -31,6 +31,7 @@ export const auth = new sst.aws.Auth("AuthServer", {
     environment: {
       API_URL: `https://${apiDomain}`,
     },
+    runtime: "nodejs24.x"
   },
 });
 
@@ -90,6 +91,7 @@ const telegramWebhookFunction = new sst.aws.Function("TelegramWebhookFunction", 
 const verifyAccessFunction = new sst.aws.Function("VerifyAccess", {
   link: [secret.appClientId, auth],
   handler: "packages/backend/openauthclient/verify.handler",
+  runtime: "nodejs24.x"
   // environment: {
   //   AUTH_SERVER_URL: `https://${authDomain}`,
   // },
@@ -307,6 +309,7 @@ const authClientFunction = new sst.aws.Function("AuthClient", {
     // AUTH_SERVER_URL: authRedirectUrl,
     API_URL: `https://${apiDomain}`,
   },
+  runtime: "nodejs24.x"
 });
 
 
