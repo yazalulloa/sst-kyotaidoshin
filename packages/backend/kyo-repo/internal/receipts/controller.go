@@ -1086,13 +1086,14 @@ func sendPdfsApt(w http.ResponseWriter, r *http.Request) {
 	}
 
 	clientId, err := receiptPdf.PublishSendPdfs(receiptPdf.PublishSendPdfsRequest{
-		Ctx:        r.Context(),
-		BuildingId: keys.BuildingId,
-		ReceiptId:  keys.Id,
-		CardId:     keys.CardId,
-		Apartments: request.Apartments,
-		Subject:    request.Subject,
-		Message:    request.Message,
+		Ctx:         r.Context(),
+		BuildingId:  keys.BuildingId,
+		ReceiptId:   keys.Id,
+		CardId:      keys.CardId,
+		Apartments:  request.Apartments,
+		Subject:     request.Subject,
+		Message:     request.Message,
+		Attachments: request.Attachments,
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

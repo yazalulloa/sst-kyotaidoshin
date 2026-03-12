@@ -3,15 +3,19 @@ package send_pdf
 import (
 	"context"
 	"fmt"
+	"log"
+	"path"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/google/uuid"
 	"github.com/sst/sst/v3/sdk/golang/resource"
+	"github.com/yaz/kyo-repo/internal/aws_h"
 	"github.com/yaz/kyo-repo/internal/email_h"
 	"github.com/yaz/kyo-repo/internal/receiptPdf"
 	"github.com/yaz/kyo-repo/internal/receipts"
 	"github.com/yaz/kyo-repo/internal/util"
-	"log"
-	"strings"
-	"sync"
-	"time"
 )
 
 type Holder struct {
@@ -101,6 +105,26 @@ func (holder *Holder) _sendPdfs() error {
 
 	log.Printf("Parts %d", len(parts))
 
+	// Download attachments from S3 to /tmp/ once, shared across all goroutines.
+	bucketName, err := util.GetReceiptsBucket()
+	if err != nil {
+		return err
+	}
+
+	attachments := make([]receiptPdf.Attachment, 0, len(holder.Event.Attachments))
+	for _, key := range holder.Event.Attachments {
+		name := path.Base(key)
+		filePath := util.TmpFileName(uuid.NewString() + "_" + name)
+		if err := aws_h.WriteObjectToDisk(holder.Ctx, bucketName, key, filePath); err != nil {
+			return fmt.Errorf("failed to download attachment %s: %w", key, err)
+		}
+		defer util.DeleteFile(filePath)
+		attachments = append(attachments, receiptPdf.Attachment{
+			FilePath: filePath,
+			Name:     name,
+		})
+	}
+
 	var wg sync.WaitGroup
 	messages := make([]*email_h.MsgWithCallBack, len(parts))
 	wg.Add(len(parts))
@@ -129,6 +153,7 @@ func (holder *Holder) _sendPdfs() error {
 				Text:          holder.Message,
 				ObjectKey:     part.ObjectKey,
 				EmailKey:      receipt.Building.EmailConfig,
+				Attachments:   attachments,
 			}
 
 			msg, err := receiptPdf.BuildMsg(holder.Ctx, req)

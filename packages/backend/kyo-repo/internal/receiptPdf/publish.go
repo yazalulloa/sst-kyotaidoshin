@@ -20,13 +20,14 @@ const (
 )
 
 type QueueEvent struct {
-	Type       Type     `json:"type"`
-	BuildingId string   `json:"buildingId"`
-	ReceiptId  string   `json:"receiptId"`
-	ProgressId string   `json:"progressId"`
-	Apartments []string `json:"apartments"`
-	Subject    string   `json:"subject"`
-	Message    string   `json:"message"`
+	Type        Type     `json:"type"`
+	BuildingId  string   `json:"buildingId"`
+	ReceiptId   string   `json:"receiptId"`
+	ProgressId  string   `json:"progressId"`
+	Apartments  []string `json:"apartments"`
+	Subject     string   `json:"subject"`
+	Message     string   `json:"message"`
+	Attachments []string `json:"attachments"`
 }
 
 func (receiver QueueEvent) IsChanges() bool {
@@ -94,25 +95,27 @@ func publishEvent(ctx context.Context, event QueueEvent, messageGroupId string, 
 }
 
 type PublishSendPdfsRequest struct {
-	Ctx        context.Context
-	BuildingId string
-	ReceiptId  string
-	CardId     string
-	Apartments []string
-	Subject    string
-	Message    string
+	Ctx         context.Context
+	BuildingId  string
+	ReceiptId   string
+	CardId      string
+	Apartments  []string
+	Subject     string
+	Message     string
+	Attachments []string
 }
 
 func PublishSendPdfs(req PublishSendPdfsRequest) (string, error) {
 	deduplicationId := uuid.NewString()
 	event := QueueEvent{
-		Type:       SendPdfs,
-		BuildingId: req.BuildingId,
-		ReceiptId:  req.ReceiptId,
-		ProgressId: deduplicationId,
-		Apartments: req.Apartments,
-		Subject:    req.Subject,
-		Message:    req.Message,
+		Type:        SendPdfs,
+		BuildingId:  req.BuildingId,
+		ReceiptId:   req.ReceiptId,
+		ProgressId:  deduplicationId,
+		Apartments:  req.Apartments,
+		Subject:     req.Subject,
+		Message:     req.Message,
+		Attachments: req.Attachments,
 	}
 
 	update := ProgressUpdate{ObjectKey: deduplicationId, CardId: "sent-" + req.CardId}

@@ -3,13 +3,20 @@ package receiptPdf
 import (
 	"context"
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/wneessen/go-mail"
 	"github.com/yaz/kyo-repo/internal/aws_h"
 	"github.com/yaz/kyo-repo/internal/util"
-	"strings"
 )
+
+type Attachment struct {
+	FilePath string
+	Name     string
+}
 
 type SendPdfRequest struct {
 	Emails        []string
@@ -21,6 +28,7 @@ type SendPdfRequest struct {
 	Text          string
 	ObjectKey     string
 	EmailKey      string
+	Attachments   []Attachment
 }
 
 func BuildMsg(ctx context.Context, req SendPdfRequest) (*mail.Msg, error) {
@@ -70,6 +78,20 @@ func BuildMsg(ctx context.Context, req SendPdfRequest) (*mail.Msg, error) {
 	)
 	if err != nil {
 		return nil, err
+	}
+
+	for _, attachment := range req.Attachments {
+		f, err := os.Open(attachment.FilePath)
+		if err != nil {
+			return nil, fmt.Errorf("failed to open attachment %s: %w", attachment.Name, err)
+		}
+		err = message.AttachReader(attachment.Name, f)
+		if err != nil {
+			_ = f.Close()
+			return nil, fmt.Errorf("failed to attach %s: %w", attachment.Name, err)
+		}
+		// f will be read during SendEmail; go-mail buffers internally so we can close after AttachReader
+		_ = f.Close()
 	}
 
 	return message, nil

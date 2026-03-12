@@ -232,8 +232,9 @@ type ReceiptFull struct {
 }
 
 type SendFormRequest struct {
-	Key        string   `form:"key" validate:"required,notblank,min=3,max=200"`
-	Subject    string   `form:"subject" validate:"required,min=3,max=200"`
-	Message    string   `form:"message" validate:"required,min=3,max=1000"`
-	Apartments []string `form:"apt_input" validate:"required,gte=1,lte=100,dive,notblank"`
+	Key         string   `form:"key" validate:"required,notblank,min=3,max=200"`
+	Subject     string   `form:"subject" validate:"required,min=3,max=200"`
+	Message     string   `form:"message" validate:"required,min=3,max=1000"`
+	Apartments  []string `form:"apt_input" validate:"required,gte=1,lte=100,dive,notblank"`
+	Attachments []string `form:"attachments" validate:"omitempty,lte=10,dive,notblank,min=3,max=500"`
 }

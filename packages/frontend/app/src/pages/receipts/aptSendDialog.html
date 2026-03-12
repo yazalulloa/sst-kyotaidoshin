@@ -10,6 +10,7 @@
 
        aptMap: null,
        apts: [],
+       attachments: [],
        errMsg: '',
      }"
      @event-update-apts="
@@ -29,9 +30,10 @@
      month = jsonObject.month;
      date = jsonObject.date;
 
-     apts = aptMap[building]
-     selected = []
-     $el.querySelector('dialog').showModal();
+      apts = aptMap[building]
+      selected = []
+      attachments = []
+      $el.querySelector('dialog').showModal();
      "
      @event-close-send-dialog="
       $el.querySelector('dialog').close();
@@ -105,6 +107,53 @@
                       placeholder="AVISO DE COBRO">
             </textarea>
             <div class="fieldset-label" hidden="hidden">Optional</div>
+          </fieldset>
+
+          <ol>
+            <template x-for="value in attachments">
+              <li class="grid items-center gap-1 p-1 text-center grid-cols-[3fr_1fr]">
+                <input type="text" name="attachments" hidden="hidden" x-bind:value="value"/>
+                <div class="truncate text-start" x-text="value"></div>
+                <div class="flex w-full justify-end">
+                  <button
+                      type="button"
+                      @click.prevent="attachments = attachments.filter(a => a !== value)"
+                      class="btn btn-sm btn-outline btn-error btn-circle"
+                  >
+                    <svg x-bind:data-src="deleteIconUrl" data-cache="21600" class="h-5 w-5"></svg>
+                  </button>
+                </div>
+              </li>
+            </template>
+          </ol>
+
+          <fieldset class="fieldset *:w-full">
+            <legend class="fieldset-legend" x-text="$t('main-title-attachments')"></legend>
+            <div class="join"
+                 x-data="{ attachment: '' }"
+            >
+              <input type="text"
+                     class="input join-item w-full"
+                     x-model="attachment"
+                     placeholder="FOLDER/FILE.pdf"
+                     @keyup.enter.prevent="
+                       if (attachment.trim() !== '') {
+                         attachments.push(attachment.trim());
+                         attachment = '';
+                       }
+                     "
+              />
+              <button type="button"
+                      class="btn btn-neutral join-item"
+                      x-text="$t('main-action-add')"
+                      @click.prevent="
+                        if (attachment.trim() !== '') {
+                          attachments.push(attachment.trim());
+                          attachment = '';
+                        }
+                      ">
+              </button>
+            </div>
           </fieldset>
 
           <div class="flex w-full justify-center items-center">
