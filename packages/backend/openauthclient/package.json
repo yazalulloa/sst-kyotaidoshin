@@ -9,10 +9,10 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "posthog-node": "5.26.1",
+    "posthog-node": "5.28.1",
     "@openauthjs/openauth": "0.4.3",
-    "hono": "4.12.3",
+    "hono": "4.12.7",
     "@kyotaidoshin/auth": "workspace:",
-    "sst": "4.1.4"
+    "sst": "4.2.7"
   }
 }
