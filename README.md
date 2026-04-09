@@ -33,3 +33,5 @@ TODOS:
 - [ ] Sessions
 - [x] Fix Z index of tooltips and dialogs (Receipts)
 - [x] Redirect after login
+
+bunx sst deploy --stage production
