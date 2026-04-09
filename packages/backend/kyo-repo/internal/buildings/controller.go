@@ -5,6 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
+	"maps"
+	"net/http"
+	"slices"
+	"strings"
+	"sync"
+
 	"github.com/go-playground/form/v4"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
@@ -17,12 +24,6 @@ import (
 	"github.com/yaz/kyo-repo/internal/receiptPdf"
 	"github.com/yaz/kyo-repo/internal/reserveFunds"
 	"github.com/yaz/kyo-repo/internal/util"
-	"log"
-	"maps"
-	"net/http"
-	"slices"
-	"strings"
-	"sync"
 )
 
 const _PATH = "/api/buildings"
@@ -422,6 +423,7 @@ type buildingDto struct {
 	MainCurrency                string   `json:"main_currency"`
 	DebtCurrency                string   `json:"debt_currency"`
 	CurrenciesToShowAmountToPay []string `json:"currencies_to_show_amount_to_pay"`
+	DebtsCurrenciesToShow       []string `json:"debts_currencies_to_show"`
 	FixedPay                    bool     `json:"fixed_pay"`
 	FixedPayAmount              float64  `json:"fixed_pay_amount"`
 	RoundUpPayments             bool     `json:"round_up_payments"`

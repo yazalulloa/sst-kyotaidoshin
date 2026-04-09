@@ -19,3 +19,4 @@ packages/backend/java/ext-html-to-pdf/deployment/target
 packages/backend/java/ext-html-to-pdf/integration-tests/target
 
 *.http
+dump.sql

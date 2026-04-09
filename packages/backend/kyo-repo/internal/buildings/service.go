@@ -3,6 +3,10 @@ package buildings
 import (
 	"context"
 	"encoding/json"
+	"log"
+	"strings"
+	"sync"
+
 	"github.com/google/uuid"
 	"github.com/yaz/kyo-repo/internal/api"
 	"github.com/yaz/kyo-repo/internal/db/gen/model"
@@ -10,9 +14,6 @@ import (
 	"github.com/yaz/kyo-repo/internal/extraCharges"
 	"github.com/yaz/kyo-repo/internal/reserveFunds"
 	"github.com/yaz/kyo-repo/internal/util"
-	"log"
-	"strings"
-	"sync"
 )
 
 type Service struct {
@@ -192,6 +193,7 @@ func (service Service) Backup() (string, error) {
 					MainCurrency:                item.Buildings.MainCurrency,
 					DebtCurrency:                item.Buildings.DebtCurrency,
 					CurrenciesToShowAmountToPay: strings.Split(item.Buildings.CurrenciesToShowAmountToPay, ","),
+					DebtsCurrenciesToShow:       strings.Split(item.Buildings.DebtsCurrenciesToShow, ","),
 					FixedPay:                    item.Buildings.FixedPay,
 					FixedPayAmount:              item.Buildings.FixedPayAmount,
 					RoundUpPayments:             item.Buildings.RoundUpPayments,
