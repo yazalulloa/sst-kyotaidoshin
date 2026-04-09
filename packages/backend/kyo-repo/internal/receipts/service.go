@@ -7,6 +7,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
+	"slices"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/yaz/kyo-repo/internal/apartments"
 	"github.com/yaz/kyo-repo/internal/api"
 	"github.com/yaz/kyo-repo/internal/buildings"
@@ -18,11 +24,6 @@ import (
 	"github.com/yaz/kyo-repo/internal/reserveFunds"
 	"github.com/yaz/kyo-repo/internal/util"
 	"golang.org/x/sync/syncmap"
-	"log"
-	"slices"
-	"strings"
-	"sync"
-	"time"
 )
 
 type Service struct {
@@ -1025,7 +1026,7 @@ func (service Service) Backup() (string, error) {
 		return dtos, nil
 	}
 
-	return api.Backup(selectListDtos)
+	return api.Backup("receipts", selectListDtos)
 }
 
 func (service Service) ProcessDecoder(decoder *json.Decoder) (int64, error) {

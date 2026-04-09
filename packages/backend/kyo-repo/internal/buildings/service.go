@@ -210,7 +210,7 @@ func (service Service) Backup() (string, error) {
 		return dtos, nil
 	}
 
-	return api.Backup(selectListDtos)
+	return api.Backup("buildings", selectListDtos)
 }
 
 func (service Service) ProcessDecoder(decoder *json.Decoder) (int64, error) {
